@@ -1,12 +1,14 @@
 ﻿using Common;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
 {
+    [Table(TableNameConstant.TABLE_SALE)]
     public class Sale
     {
-        public int Id { get; set; }
+        public int SaleId { get; set; }
 
         [Required]
         [RegularExpression(ValidationConstant.VALIDATE_NAME, ErrorMessage = ValidationConstant.ERROR_FORMAT)]
@@ -15,6 +17,6 @@ namespace Entities.Models
 
         [Range(0, 100, ErrorMessage = ValidationConstant.ERROR_DISCOUNT_RANGE)]
         public decimal Discount { get; set; } = 0;
-        public virtual IList<SaleProduct> SaleProducts { get; set; }
+        public virtual IList<SaleDetail> SaleDetails { get; set; }
     }
 }

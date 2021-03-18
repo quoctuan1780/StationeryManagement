@@ -1,18 +1,21 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
 {
-    public class SaleProduct
+    [Table(TableNameConstant.TABLE_SALE_PRODUCT)]
+    public class SaleDetail
     {
-        [Key]
-        [Column(Order = 1)]
         public int SaleId { get; set; }
-        [Key]
-        [Column(Order = 2)]
+        public virtual Sale Sale { get; set; }
+
         public int ProductId { get; set; }
+        public virtual Product Product { get; set; }
+
         public DateTime SaleStartDate { get; set; } = DateTime.Now;
+
         public DateTime SaleEndDate { get; set; }
     }
 }

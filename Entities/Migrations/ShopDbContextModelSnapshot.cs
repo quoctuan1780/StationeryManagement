@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopContextModelSnapshot : ModelSnapshot
+    partial class ShopDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -19,9 +19,44 @@ namespace Entities.Migrations
                 .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Entities.Models.Bill", b =>
+                {
+                    b.Property<int>("BillId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PurchaseTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SaleTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("BillId");
+
+                    b.HasIndex("BillId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Bill");
+                });
+
             modelBuilder.Entity("Entities.Models.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -31,14 +66,139 @@ namespace Entities.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("Id");
+                    b.HasKey("CategoryId");
 
-                    b.ToTable("Categories");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("Entities.Models.ExportWarehouse", b =>
+                {
+                    b.Property<int>("ExportWarehouseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ExportWarehouseId");
+
+                    b.HasIndex("ExportWarehouseId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("ExportWarehouse");
+                });
+
+            modelBuilder.Entity("Entities.Models.ImportWarehouse", b =>
+                {
+                    b.Property<int>("ImportWarehouseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ImportWarehouseId");
+
+                    b.HasIndex("ImportWarehouseId");
+
+                    b.ToTable("ImportWarehouse");
+                });
+
+            modelBuilder.Entity("Entities.Models.ImportWarehouseDetail", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ImportWarehouseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ImportPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "ImportWarehouseId", "ProviderId");
+
+                    b.HasIndex("ImportWarehouseId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("ImportWarehouseDetail");
+                });
+
+            modelBuilder.Entity("Entities.Models.Notification", b =>
+                {
+                    b.Property<int>("NotificationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("NotificationTypeId", "UserId");
+
+                    b.HasIndex("NotificationTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notification");
+                });
+
+            modelBuilder.Entity("Entities.Models.NotificationType", b =>
+                {
+                    b.Property<int>("NotificationTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("NotificationTypeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotificationTypeId");
+
+                    b.HasIndex("NotificationTypeId");
+
+                    b.ToTable("NotificationType");
                 });
 
             modelBuilder.Entity("Entities.Models.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -51,47 +211,56 @@ namespace Entities.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Price")
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Order");
                 });
 
             modelBuilder.Entity("Entities.Models.OrderDetail", b =>
                 {
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<decimal>("SalePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("OrderId", "ProductId");
+                    b.HasKey("ProductId", "OrderId");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetail");
                 });
 
             modelBuilder.Entity("Entities.Models.Product", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -103,14 +272,13 @@ namespace Entities.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ProductName")
@@ -118,31 +286,18 @@ namespace Entities.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
-                });
+                    b.HasIndex("ProductId");
 
-            modelBuilder.Entity("Entities.Models.ProductProvider", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductId", "ProviderId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("ProductProviders");
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Entities.Models.Provider", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ProviderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -152,32 +307,121 @@ namespace Entities.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProviderId");
 
-                    b.ToTable("Providers");
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Provider");
+                });
+
+            modelBuilder.Entity("Entities.Models.Rating", b =>
+                {
+                    b.Property<int>("RatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("RatingTypeName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("RatingId");
+
+                    b.HasIndex("RatingId");
+
+                    b.ToTable("Rating");
+                });
+
+            modelBuilder.Entity("Entities.Models.RatingDetail", b =>
+                {
+                    b.Property<int>("RatingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RatingDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RatingId", "UserId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("RatingId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RatingDetail");
+                });
+
+            modelBuilder.Entity("Entities.Models.Recommendation", b =>
+                {
+                    b.Property<int>("RecommendtionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RecommendtionId");
+
+                    b.HasIndex("RecommendtionId");
+
+                    b.ToTable("Recommendation");
+                });
+
+            modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecommendationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "RecommendationId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("RecommendationId");
+
+                    b.ToTable("RecommendationDetail");
                 });
 
             modelBuilder.Entity("Entities.Models.Sale", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("SaleId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("Discount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SaleName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("SaleId");
 
-                    b.ToTable("Sales");
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("Sale");
                 });
 
-            modelBuilder.Entity("Entities.Models.SaleProduct", b =>
+            modelBuilder.Entity("Entities.Models.SaleDetail", b =>
                 {
                     b.Property<int>("SaleId")
                         .HasColumnType("int");
@@ -195,7 +439,9 @@ namespace Entities.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("SaleProducts");
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SaleProduct");
                 });
 
             modelBuilder.Entity("Entities.Models.User", b =>
@@ -215,6 +461,9 @@ namespace Entities.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -227,10 +476,12 @@ namespace Entities.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Gender")
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
                     b.Property<string>("Image")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -266,6 +517,8 @@ namespace Entities.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -409,10 +662,78 @@ namespace Entities.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("Entities.Models.Bill", b =>
+                {
+                    b.HasOne("Entities.Models.Order", "Order")
+                        .WithOne("Bill")
+                        .HasForeignKey("Entities.Models.Bill", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Entities.Models.ExportWarehouse", b =>
+                {
+                    b.HasOne("Entities.Models.Order", "Order")
+                        .WithOne("ExportWarehouse")
+                        .HasForeignKey("Entities.Models.ExportWarehouse", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Entities.Models.ImportWarehouseDetail", b =>
+                {
+                    b.HasOne("Entities.Models.ImportWarehouse", "ImportWarehouse")
+                        .WithMany("ImportWarehouseDetails")
+                        .HasForeignKey("ImportWarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.Product", "Product")
+                        .WithMany("ImportWarehouseDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.Provider", "Provider")
+                        .WithMany("ImportWarehouseDetails")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ImportWarehouse");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("Entities.Models.Notification", b =>
+                {
+                    b.HasOne("Entities.Models.NotificationType", "NotificationType")
+                        .WithMany("Notifications")
+                        .HasForeignKey("NotificationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationType");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Entities.Models.Order", b =>
                 {
                     b.HasOne("Entities.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
@@ -426,19 +747,21 @@ namespace Entities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Models.Product", null)
+                    b.HasOne("Entities.Models.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Entities.Models.Product", b =>
                 {
                     b.HasOne("Entities.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -446,38 +769,69 @@ namespace Entities.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Entities.Models.ProductProvider", b =>
+            modelBuilder.Entity("Entities.Models.RatingDetail", b =>
                 {
                     b.HasOne("Entities.Models.Product", "Product")
-                        .WithMany("ProductProviders")
+                        .WithMany("RatingDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Models.Provider", "Provider")
-                        .WithMany("ProductProviders")
-                        .HasForeignKey("ProviderId")
+                    b.HasOne("Entities.Models.Rating", "Rating")
+                        .WithMany("RatingDetails")
+                        .HasForeignKey("RatingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.User", "User")
+                        .WithMany("RatingDetails")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
 
-                    b.Navigation("Provider");
+                    b.Navigation("Rating");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entities.Models.SaleProduct", b =>
+            modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.HasOne("Entities.Models.Product", null)
-                        .WithMany("SaleProducts")
+                    b.HasOne("Entities.Models.Product", "Product")
+                        .WithMany("RecommendationDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Models.Sale", null)
-                        .WithMany("SaleProducts")
+                    b.HasOne("Entities.Models.Recommendation", "Recommendation")
+                        .WithMany("RecommendationDetails")
+                        .HasForeignKey("RecommendationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Recommendation");
+                });
+
+            modelBuilder.Entity("Entities.Models.SaleDetail", b =>
+                {
+                    b.HasOne("Entities.Models.Product", "Product")
+                        .WithMany("SaleDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.Sale", "Sale")
+                        .WithMany("SaleDetails")
                         .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -531,28 +885,70 @@ namespace Entities.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Entities.Models.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Entities.Models.ImportWarehouse", b =>
+                {
+                    b.Navigation("ImportWarehouseDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.NotificationType", b =>
+                {
+                    b.Navigation("Notifications");
+                });
+
             modelBuilder.Entity("Entities.Models.Order", b =>
                 {
+                    b.Navigation("Bill");
+
+                    b.Navigation("ExportWarehouse");
+
                     b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Product", b =>
                 {
+                    b.Navigation("ImportWarehouseDetails");
+
                     b.Navigation("OrderDetails");
 
-                    b.Navigation("ProductProviders");
+                    b.Navigation("RatingDetails");
 
-                    b.Navigation("SaleProducts");
+                    b.Navigation("RecommendationDetails");
+
+                    b.Navigation("SaleDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Provider", b =>
                 {
-                    b.Navigation("ProductProviders");
+                    b.Navigation("ImportWarehouseDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.Rating", b =>
+                {
+                    b.Navigation("RatingDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.Recommendation", b =>
+                {
+                    b.Navigation("RecommendationDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Sale", b =>
                 {
-                    b.Navigation("SaleProducts");
+                    b.Navigation("SaleDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.User", b =>
+                {
+                    b.Navigation("Notifications");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("RatingDetails");
                 });
 #pragma warning restore 612, 618
         }

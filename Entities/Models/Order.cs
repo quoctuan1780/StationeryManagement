@@ -1,20 +1,33 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
 {
+    [Table(TableNameConstant.TABLE_ORDER)]
     public class Order
     {
-        public int Id { get; set; }
-        public decimal Price { get; set; }
+        public int OrderId { get; set; }
+
+        public decimal Total { get; set; }
+
         public DateTime OrderDate { get; set; } = DateTime.Now;
-        // dia chi giao hang
-        [Required, StringLength(200, MinimumLength = 10)]
+
+        public string Status { get; set; }
+
+        [Required]
+        [StringLength(200, MinimumLength = 10)]
         public string Address { get; set; }
-        public IList<OrderDetail> OrderDetails { get; set; }
-        [StringLength(450)]
+        
         public string UserId { get; set; }
         public virtual User User { get; set; }
+
+        public virtual Bill Bill { get; set; }
+
+        public virtual ExportWarehouse ExportWarehouse { get; set; }
+
+        public IList<OrderDetail> OrderDetails { get; set; }
     }
 }
