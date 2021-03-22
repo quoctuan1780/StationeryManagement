@@ -1,7 +1,6 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Entities.Data
 {
@@ -34,6 +33,7 @@ namespace Entities.Data
         public virtual DbSet<RatingDetail> RatingDetails { get; set; }
         public virtual DbSet<Recommendation> Recommendations { get; set; }
         public virtual DbSet<RecommendationDetail> RecommendationDetails { get; set; }
+        public virtual DbSet<ProductImage> ProductImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -284,6 +284,18 @@ namespace Entities.Data
                 e.HasOne(x => x.Recommendation)
                 .WithMany(x => x.RecommendationDetails)
                 .HasForeignKey(x => x.RecommendationId);
+            });
+
+            //Entity ProductImage
+            modelBuilder.Entity<ProductImage>(e =>
+            {
+                e.HasKey(x => x.ProductImageId);
+                e.HasIndex(x => x.ProductImageId);
+                e.HasIndex(x => x.ProductId);
+
+                e.HasOne(x => x.Product)
+                .WithMany(x => x.ProductImages)
+                .HasForeignKey(x => x.ProductId);
             });
         }
     }

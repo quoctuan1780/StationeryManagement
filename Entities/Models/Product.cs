@@ -22,8 +22,6 @@ namespace Entities.Models
 
         public DateTime DateCreate { get; set; } = DateTime.Now;
 
-        public string Image { get; set; }
-
         public string Description { get; set; }
 
         [Required]
@@ -39,5 +37,7 @@ namespace Entities.Models
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
 
         public virtual IList<RecommendationDetail> RecommendationDetails { get; set; }
+
+        public virtual IList<ProductImage> ProductImages { get; set; }
     }
 }
