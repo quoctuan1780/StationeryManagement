@@ -1,0 +1,94 @@
+.input-checkout{
+    width: 80%;
+    border-radius: 15px;
+    margin-bottom: 3%;
+    padding-left: 2%;
+    height: 3.5rem;
+}
+
+.hr-checkout{
+    width: 80%;
+    margin-left: 10%;
+    border: 0;   /* in order to override TWBS stylesheet */
+    height: 5px;
+    background: -moz-linear-gradient(left,  rgba(255,208,132,1) 25%, rgba(255,208,132,1) 37.5%, rgba(242,122,107,1) 37.5%, rgba(242,122,107,1) 50%, rgba(223,157,185,1) 50%, rgba(223,157,185,1) 62.5%, rgba(192,156,221,1) 62.5%, rgba(192,156,221,1) 75%, rgba(95,156,217,1) 75%, rgba(95,156,217,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 100%);  /* FF3.6+ */
+    background: -webkit-linear-gradient(left, rgba(255,208,132,1) 25%, rgba(255,208,132,1) 37.5%, rgba(242,122,107,1) 37.5%, rgba(242,122,107,1) 50%, rgba(223,157,185,1) 50%, rgba(223,157,185,1) 62.5%, rgba(192,156,221,1) 62.5%, rgba(192,156,221,1) 75%, rgba(95,156,217,1) 75%, rgba(95,156,217,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left, rgba(255,208,132,1) 25%, rgba(255,208,132,1) 37.5%, rgba(242,122,107,1) 37.5%, rgba(242,122,107,1) 50%, rgba(223,157,185,1) 50%, rgba(223,157,185,1) 62.5%, rgba(192,156,221,1) 62.5%, rgba(192,156,221,1) 75%, rgba(95,156,217,1) 75%, rgba(95,156,217,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left, rgba(255,208,132,1) 25%, rgba(255,208,132,1) 37.5%, rgba(242,122,107,1) 37.5%, rgba(242,122,107,1) 50%, rgba(223,157,185,1) 50%, rgba(223,157,185,1) 62.5%, rgba(192,156,221,1) 62.5%, rgba(192,156,221,1) 75%, rgba(95,156,217,1) 75%, rgba(95,156,217,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 100%); /* IE10+ */
+    background: linear-gradient(to right, rgba(255,208,132,1) 25%, rgba(255,208,132,1) 37.5%, rgba(242,122,107,1) 37.5%, rgba(242,122,107,1) 50%, rgba(223,157,185,1) 50%, rgba(223,157,185,1) 62.5%, rgba(192,156,221,1) 62.5%, rgba(192,156,221,1) 75%, rgba(95,156,217,1) 75%, rgba(95,156,217,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 87.5%, rgba(94,190,227,1) 100%); /* W3C */
+}
+
+.btn-checkout
+{
+    background-color: rgb(202, 5, 5);
+    color: white;
+    width: 125px;
+    height: 35px;
+}
+
+.total-price{
+    font-size: 15pt;
+    font-weight: bold;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.hr-list{
+    width: 60%;
+    margin-left: 20%;
+}
+.hr-end-list{
+    width: 80%;
+    margin-left: 10%;
+}
+
+.label-checkout{
+    margin-left: 20%;
+    margin-top: 2%;
+    text-align: right;
+}
+
+.header-checkout{
+    text-align: center;
+    font-weight: bold;
+    
+}
+.img-check-out{
+    width: 20%;
+    height: auto;
+}
+.header-list-products{
+    font-weight: bold;
+    text-align: left;
+    margin-top: 5%;
+    margin-bottom: 3%;
+}
+.quantity{
+    width: 50px;
+    height: 25px;
+    border-radius: 10%;
+    margin-left: 2%;
+}
+.content-checkout{
+    padding-left: 10%;
+}
+.text-content-checkout{
+    font-size: 14pt;
+    font-family: 'Times New Roman', Times, serif;
+}
+.container-list{
+    width: 80%;
+    margin-left: 10%;
+}
+
+.original-price{
+    font-size: 14pt;
+    font-family: 'Times New Roman', Times, serif;
+    -webkit-text-decoration-line: line-through; /* Safari */
+    text-decoration-line: line-through;
+    color: rgb(110, 106, 106);
+}
+.sell-price{
+    font-size: 14pt;
+    font-family: 'Times New Roman', Times, serif;
+    color: rgb(100, 2, 2);
+}
