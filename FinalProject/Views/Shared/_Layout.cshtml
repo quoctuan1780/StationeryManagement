@@ -10,20 +10,20 @@
 </head>
 
 <body class="home home-03">
-    <partial name="~/Views/Shared/_Header.cshtml" />
+    @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
     <div id="box-content">
         <div class="container">
             <div class="row">
                 <div class="row">
-                    <partial name="~/Views/Shared/_LeftNavigation.cshtml" />
-                    <partial name="~/Views/Shared/_Banner.cshtml" />
+                    @await Html.PartialAsync("~/Views/Shared/_LeftNavigation.cshtml")
+                    @await Html.PartialAsync("~/Views/Shared/_Banner.cshtml")
                 </div>
             </div>
         </div>
         @RenderBody()
     </div>
 
-    <partial name="~/Views/Shared/_Footer.cshtml" />
+    @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml") 
 
     <script type="text/javascript" src="~/js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="~/style/bootstrap/js/bootstrap.min.js"></script>
