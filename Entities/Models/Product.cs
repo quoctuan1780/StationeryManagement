@@ -22,6 +22,7 @@ namespace Entities.Models
 
         public DateTime DateCreate { get; set; } = DateTime.Now;
 
+        [Column(TypeName = "NTEXT")]
         public string Description { get; set; }
 
         [Required]

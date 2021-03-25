@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public class Constant
     {
         public const string CONNECTION_STRING = "DefaultConnection";
 
         public const string EMPTY = "";
+
+        public const string IMAGE_LINK = "wwwroot/images/product";
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public class ValidationConstant
     {
@@ -14,7 +8,14 @@ namespace Common
         public const string ERROR_ADDRESS_RANGE = "Địa chỉ không nhỏ hơn 6 và lớn hơn 300 ký tự";
         public const string ERROR_DISCOUNT_RANGE = "Phần trăm không bé hơn 0 và lớn hơn 100";
         public const string ERROR_FORMAT = "Bạn nhập sai định dạng";
-        
+
+        public const string ERROR_CATEGORY_NAME_EMPTY = "Tên loại sản phẩm không được để trống";
+        public const string ERROR_CATEGORY_NAME_RANGE = "Tên loại sản phẩm không được quá 30 ký tự";
+
+        public const string ERROR_PRODUCT_NAME_EMPTY = "Tên sản phẩm không được để trống";
+        public const string ERROR_PRODUCT_PRICE_EMPTY = "Giá sản phẩm không được để trống";
+        public const string ERROR_PRODUCT_PRICE_RANGE = "Khoảng giá bạn nhập không hợp lệ";
+        public const string ERROR_PRODUCT_CAREGORY_EMPTY = "Loại sản phẩm không được để trống";
 
         public const string VALIDATE_NAME = @"^[A-Z]+[a-zA-Z]*$";
     }

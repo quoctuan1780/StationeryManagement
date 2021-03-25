@@ -272,7 +272,7 @@ namespace Entities.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("NTEXT");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)

@@ -1,0 +1,92 @@
+﻿
+@model FinalProject.Areas.Admin.ViewModels.ProductViewModel
+@{
+    ViewData["Title"] = "Thay đổi thông tin sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var categories = ViewBag.Categories as IList<SelectListItem>;
+}
+
+
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Thay đổi thông tin sản phẩm</h1>
+    <hr class="hr-end-list" />
+    @if (!(ViewBag.MessageSuccess is null))
+    {
+        <div class="alert alert-success">@ViewBag.MessageSuccess</div>
+    }
+    @if (!(ViewBag.MessageExists is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageExists</div>
+    }
+    @if (!(ViewBag.MessageError is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageError</div>
+    }
+
+    @using (Html.BeginForm("EditProduct", "Product", FormMethod.Post, new
+    {
+        role = "form",
+        area = "Admin",
+        enctype = "multipart/form-data"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            @Html.LabelFor(m => m.ProductName)
+            @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control", @name = "name", @id = "name" })
+            @Html.ValidationMessageFor(m => m.ProductName, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Description)
+            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @name = "description", @id = "description" })
+            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Price)
+            @Html.TextBoxFor(m => m.Price, new
+            {
+                @class = "form-control",
+                @name = "price",
+                @id = "price",
+                                                    @type = "number"
+            })
+            @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.CategoryId)
+            @Html.DropDownListFor(m => m.CategoryId, categories, new
+            {
+                @class = "form-control",
+           @name = "category-id",
+                @id = "category-id",
+            })
+            @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Images)
+            @Html.TextBoxFor(m => m.Images, new
+            {
+                @class = "form-control",
+                @multiple = "true",
+                @type = "file",
+                        @id = "images",
+                @name = "images"
+            })
+            @Html.ValidationMessageFor(m => m.Images, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Thêm sản phẩm" class="btn btn-success" />
+        </div>
+    }
+</div>
+@section Scripts{
+    <script>
+        CKEDITOR.replace("description", { htmlEncodeOutput: true, enterMode: CKEDITOR.ENTER_DIV });
+    </script>
+}

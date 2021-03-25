@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +43,8 @@ namespace FinalProject
             .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductImageService, ProductImageService>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
@@ -92,13 +93,8 @@ namespace FinalProject
             {
                 endpoints.MapControllerRoute(
                   name: "areas",
-                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                  pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
                 );
-            });
-
-            app.UseEndpoints(endpoints =>
-            {
-                
 
                 endpoints.MapControllerRoute(
                     name: "default",
