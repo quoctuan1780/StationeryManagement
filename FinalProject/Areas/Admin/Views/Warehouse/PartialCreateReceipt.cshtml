@@ -1,0 +1,62 @@
+﻿@model IEnumerable<Entities.Models.ImportWarehouseDetail>
+
+<p>
+    <a href="javascript:AddDetail()">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImportPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImportWarehouse)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Provider)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="details">
+@*@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ImportPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ImportWarehouse.ImportWarehouseId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Provider.ProviderName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Product.ProductName)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}*@
+    </tbody>
+</table>
+
+<script>
+    function AddDetail() {
+        //document.getElementById("details").appendChild('<tr><td><input type="text">' +
+        //    '</td ><td> <input type="number">'
+        //document.getElementById("details").appendChild('<tr><td><input type="text">' +
+        //        + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ')
+    }
+</script>
