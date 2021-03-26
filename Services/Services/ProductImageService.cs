@@ -1,7 +1,10 @@
-﻿using Entities.Data;
+﻿using Common;
+using Entities.Data;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -16,7 +19,31 @@ namespace Services.Services
         }
         public async Task<int> AddListImagesAsync(IList<ProductImage> productImages)
         {
+            if (productImages is null) return 1;
+
             await _context.AddRangeAsync(productImages);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> DeleteListImagesOfProductByNameAsync(IList<string> images, int id)
+        {
+            if (images.FirstOrDefault() is null) return 1;
+
+            var imagesRemove = images.FirstOrDefault().Split(Constant.COMMA);
+
+            var productImages = await _context.ProductImages.Where(x => x.ProductId == id).ToListAsync();
+
+            var productRemove = new List<ProductImage>();
+
+            foreach(var item in imagesRemove)
+            {
+                productRemove.Add(
+                    productImages.Where(x => x.Image == item).FirstOrDefault()
+                );
+            }
+
+            _context.ProductImages.RemoveRange(productRemove);
 
             return await _context.SaveChangesAsync();
         }

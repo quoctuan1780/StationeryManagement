@@ -5,7 +5,10 @@ using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -16,7 +19,7 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly IProductImageService _productImageService;
 
-        public ProductController(ICategoryService categoryService, IProductService productService, 
+        public ProductController(ICategoryService categoryService, IProductService productService,
             IProductImageService productImageService)
         {
             _categoryService = categoryService;
@@ -49,7 +52,7 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 try
                 {
-                    await ProductHelper.SaveImageAsync(model.Images);
+                    await ProductHelper.SaveImageAsync(model.Images, 400, 400);
 
                     var product = new Product()
                     {
@@ -90,10 +93,96 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public async Task<IActionResult> EditProduct(int id)
+        public async Task<IActionResult> EditProduct(int id, string urlCallback)
         {
+            var product = await _productService.GetProductByIdAsync(id);
 
-            return View();
+            var categories = await _categoryService.GetAllCategoriesAsync();
+
+            ViewBag.Categories = ProductHelper.ConvertCategoriesToSelectListItem(categories);
+
+            if (product is null)
+            {
+                return Redirect(urlCallback);
+            }
+
+            ProductViewModel model = ProductHelper.ConvertProductToProductViewModel(product);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProduct(ProductViewModel model, IList<string> imageRemove)
+        {
+            var categories = await _categoryService.GetAllCategoriesAsync();
+
+            ViewBag.Categories = ProductHelper.ConvertCategoriesToSelectListItem(categories);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    ProductHelper.RemoveFile(imageRemove);
+
+                    var result = await _productImageService.DeleteListImagesOfProductByNameAsync(
+                        imageRemove, 
+                        model.ProductId);
+
+                    if (result > 0)
+                    {
+                        var product = new Product()
+                        {
+                            ProductName = model.ProductName,
+                            DateCreate = model.CreateDate,
+                            Description = model.Description,
+                            Price = model.Price,
+                            CategoryId = model.CategoryId,
+                            ProductId = model.ProductId
+                        };
+
+                        product = await _productService.UpdateProductAsync(product);
+
+                        if (!(product is null))
+                        {
+                            if (!(model.Images is null))
+                            {
+                                await ProductHelper.SaveImageAsync(model.Images, 400, 400);
+
+                                await _productImageService.AddListImagesAsync(
+                                    ProductHelper.CreateProductImages(model.Images, product.ProductId));
+
+                                if (result > 0)
+                                {
+                                    ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_PRODUCT;
+                                }
+                                else
+                                {
+                                    throw new Exception();
+                                }
+                            }
+                            else
+                            {
+                                ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_PRODUCT;
+                            }
+                        }
+                    }
+                    
+                }
+                catch
+                {
+                    ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_UPDATE_PRODUCT;
+                }
+            }
+
+            var productAfterUpdate = await _productService.GetProductByIdAsync(model.ProductId);
+
+            model.ImagesString =
+                productAfterUpdate.ProductImages.Select(x => x.Image).ToList();
+
+            model.Description = HttpUtility.HtmlDecode(model.Description);
+
+            return View(model);
         }
     }
 }
