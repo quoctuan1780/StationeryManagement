@@ -10,6 +10,8 @@ namespace Services.Interfacies
 
         Task<Product> AddProductAsync(Product product);
 
+        Task<Product> UpdateProductAsync(Product product);
+
         Task<bool> IsExistsProduct(Product product);
 
         Task<Product> GetProductByIdAsync(int id);

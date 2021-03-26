@@ -8,6 +8,8 @@ namespace FinalProject.Areas.Admin.ViewModels
 {
     public class ProductViewModel
     {
+        public int ProductId { get; set; }
+
         [Required(ErrorMessage = ValidationConstant.ERROR_PRODUCT_NAME_EMPTY)]
         [StringLength(200)]
         [Display(Name = DisplayNameConstant.DISPLAY_PRODUCT_NAME)]
@@ -30,5 +32,7 @@ namespace FinalProject.Areas.Admin.ViewModels
 
         [Display(Name = DisplayNameConstant.DISPLAY_PRODUCT_IMAGE)]
         public IList<IFormFile> Images { get; set; }
+
+        public IList<string> ImagesString { get; set; }
     }
 }

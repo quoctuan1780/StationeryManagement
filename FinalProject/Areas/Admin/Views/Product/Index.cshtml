@@ -3,6 +3,7 @@
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var products = ViewBag.Products as IList<Entities.Models.Product>;
+    var urlCallback = Context.Request.Path;
 }
 
 
@@ -38,10 +39,16 @@
                                 <td>@item.ProductName</td>
                                 <td>@item.Category.CategoryName</td>
                                 <td>
+                                    @if (!(item.ProductImages.FirstOrDefault() is null))
+                                    {
                                     <img src="~/images/product/@item.ProductImages.FirstOrDefault().Image" width="80" height="80" />
+                                    }
                                 </td>
                                 <td>@item.Price</td>
-                                <td><a href="#">Xóa</a> <a href="#">Sửa</a></td>
+                                <td><a href="#">Xóa</a> <a asp-action="EditProduct" 
+                                                           asp-area="Admin" asp-controller="Product"
+                                                           asp-route-id="@item.ProductId"
+                                                           asp-route-urlCallback="@urlCallback">Sửa</a></td>
                             </tr>
                         }
                     </tbody>
