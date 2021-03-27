@@ -22,6 +22,8 @@ namespace Entities.Models
 
         public DateTime DateCreate { get; set; } = DateTime.Now;
 
+        public int Total { get; set; }
+
         [Column(TypeName = "NTEXT")]
         public string Description { get; set; }
 
@@ -29,16 +31,14 @@ namespace Entities.Models
         public int CategoryId { get; set; }
         public virtual Category Category { get; set; }
 
-        public virtual IList<OrderDetail> OrderDetails { get; set; }
-
         public virtual IList<SaleDetail> SaleDetails { get; set; }
 
         public virtual IList<RatingDetail> RatingDetails { get; set; }
 
-        public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
-
         public virtual IList<RecommendationDetail> RecommendationDetails { get; set; }
 
         public virtual IList<ProductImage> ProductImages { get; set; }
+
+        public virtual IList<ProductDetail> ProductDetails { get; set; }
     }
 }

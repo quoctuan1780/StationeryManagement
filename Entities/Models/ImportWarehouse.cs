@@ -1,11 +1,7 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entities.Models
 {
@@ -16,7 +12,13 @@ namespace Entities.Models
 
         public DateTime CreateDate { get; set; }
 
+        public DateTime ImportDate { get; set; }
+
         public decimal Total { get; set; }
+
+        public string UserId { get; set; }
+
+        public string Status { get; set; }
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
     }

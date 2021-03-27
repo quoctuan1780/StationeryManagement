@@ -15,6 +15,8 @@ namespace Entities.Models
         [StringLength(30)]
         public string CategoryName { get; set; }
 
+        public bool status { get; set; }
+
         public virtual IList<Product> Products { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Entities.Data
 {
@@ -34,6 +35,7 @@ namespace Entities.Data
         public virtual DbSet<Recommendation> Recommendations { get; set; }
         public virtual DbSet<RecommendationDetail> RecommendationDetails { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<ProductDetail> ProductDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -104,18 +106,18 @@ namespace Entities.Data
             // Entity OrderDetil
             modelBuilder.Entity<OrderDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductId , x.OrderId});
+                e.HasKey(x => new { x.ProductDetailId , x.OrderId});
 
-                e.HasIndex(x => x.ProductId);
+                e.HasIndex(x => x.ProductDetailId);
                 e.HasIndex(x => x.OrderId);
 
                 e.HasOne(x => x.Order)
                 .WithMany(x => x.OrderDetails)
                 .HasForeignKey(x => x.OrderId);
 
-                e.HasOne(x => x.Product)
+                e.HasOne(x => x.ProductDetail)
                 .WithMany(x => x.OrderDetails)
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductDetailId);
 
                 e.Property(x => x.SalePrice).HasPrecision(18, 2);
                 e.Property(x => x.Price).HasPrecision(18, 2);
@@ -241,15 +243,15 @@ namespace Entities.Data
             //Entity ImportWarehouseDetail
             modelBuilder.Entity<ImportWarehouseDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductId, x.ImportWarehouseId, x.ProviderId });
+                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId, x.ProviderId });
 
-                e.HasIndex(x => x.ProductId);
+                e.HasIndex(x => x.ProductDetailId);
                 e.HasIndex(x => x.ProviderId);
                 e.HasIndex(x => x.ImportWarehouseId);
 
-                e.HasOne(d => d.Product)
+                e.HasOne(d => d.ProductDetail)
                 .WithMany(p => p.ImportWarehouseDetails)
-                .HasForeignKey(d => d.ProductId);
+                .HasForeignKey(d => d.ProductDetailId);
 
                 e.HasOne(d => d.Provider)
                 .WithMany(p => p.ImportWarehouseDetails)
@@ -295,6 +297,19 @@ namespace Entities.Data
 
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.ProductImages)
+                .HasForeignKey(x => x.ProductId);
+            });
+
+            // Entity ProductDetail
+            modelBuilder.Entity<ProductDetail>(e =>
+            {
+                e.HasKey(x => x.ProductDetailId);
+
+                e.HasIndex(x => x.ProductId);
+                e.HasIndex(x => x.ProductDetailId);
+
+                e.HasOne(x => x.Product)
+                .WithMany(x => x.ProductDetails)
                 .HasForeignKey(x => x.ProductId);
             });
         }

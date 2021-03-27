@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="~/style/css/style-main-home-03.css" />
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" media="all" />
+    <link rel="stylesheet" type="text/css" href="~/style/css/image.css">
+    <link rel="stylesheet" type="text/css" href="~/style/css/checkout.css">
     <title>@ViewData["Title"]</title>
 </head>
 
@@ -15,8 +17,13 @@
         <div class="container">
             <div class="row">
                 <div class="row">
-                    @await Html.PartialAsync("~/Views/Shared/_LeftNavigation.cshtml")
-                    @await Html.PartialAsync("~/Views/Shared/_Banner.cshtml")
+                    <div id="left-nav">
+                        @await Html.PartialAsync("~/Views/Shared/_LeftNavigation.cshtml")
+                    </div>
+                    
+                    <div id="banner">
+                        @await Html.PartialAsync("~/Views/Shared/_Banner.cshtml")
+                    </div>
                 </div>
             </div>
         </div>
