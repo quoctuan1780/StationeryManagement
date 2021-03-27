@@ -9,5 +9,6 @@
         public const string DISPLAY_PRODUCT_DESCRIPTION = "Mô tả";
         public const string DISPLAY_PRODUCT_CATEGORY = "Loại sản phẩm";
         public const string DISPLAY_PRODUCT_IMAGE = "Hình ảnh";
+        public const string DISPLAY_PRODUCT_QUANTITY = "Số lượng";
     }
 }
