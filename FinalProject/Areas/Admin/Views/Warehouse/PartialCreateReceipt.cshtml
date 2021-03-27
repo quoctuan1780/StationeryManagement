@@ -1,5 +1,7 @@
 ﻿@model IEnumerable<Entities.Models.ImportWarehouseDetail>
-
+@{ 
+    var products = ViewBag.Products as IList<SelectListItem>;
+}
 <p>
     <a href="javascript:AddDetail()">Create New</a>
 </p>
@@ -25,38 +27,33 @@
         </tr>
     </thead>
     <tbody id="details">
-@*@foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImportPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImportWarehouse.ImportWarehouseId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Provider.ProviderName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductName)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                <div class="form-group">
+                    @foreach (var item in Model)
+                    {
+                        @*@Html.Label(item.ProductId)
+                        @Html.DropDownListFor(m => m., products, new
+                        {
+                            @class = "form-control",
+                       @name = "product-id",
+                            @id = "product-id",
+                        })
+                        @Html.ValidationMessageFor(m => m.ProductId, "", new { @class = "text-danger" })*@
+
+                         
+                    }
+                </div>
             </td>
         </tr>
-}*@
     </tbody>
 </table>
 
 <script>
     function AddDetail() {
-        //document.getElementById("details").appendChild('<tr><td><input type="text">' +
-        //    '</td ><td> <input type="number">'
-        //document.getElementById("details").appendChild('<tr><td><input type="text">' +
-        //        + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ')
+     
+        document.getElementById("details").appendChild('<tr><td><input type="text">' +
+            + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ');
     }
 </script>
+

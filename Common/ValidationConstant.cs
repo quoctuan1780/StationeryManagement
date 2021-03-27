@@ -16,6 +16,7 @@
         public const string ERROR_PRODUCT_PRICE_EMPTY = "Giá sản phẩm không được để trống";
         public const string ERROR_PRODUCT_PRICE_RANGE = "Khoảng giá bạn nhập không hợp lệ";
         public const string ERROR_PRODUCT_CAREGORY_EMPTY = "Loại sản phẩm không được để trống";
+        public const string ERROR_PRODUCT_QUANTITY = "Số lượng sản phẩm không hợp lệ";
 
         public const string VALIDATE_NAME = @"^[A-Z]+[a-zA-Z]*$";
     }
