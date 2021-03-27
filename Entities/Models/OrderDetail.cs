@@ -1,5 +1,4 @@
 ﻿using Common;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
@@ -10,8 +9,8 @@ namespace Entities.Models
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }
 
-        public int ProductId { get; set; }
-        public virtual Product Product { get; set; }
+        public int ProductDetailId { get; set; }
+        public virtual ProductDetail ProductDetail { get; set; }
 
         public int Quantity { get; set; } = 0;
 

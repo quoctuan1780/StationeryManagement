@@ -1,0 +1,603 @@
+﻿@using System.Web 
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var product = ViewBag.Product as Entities.Models.Product;
+}
+
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>@product.Category.CategoryName</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div id="main" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-main">
+            <div class="product-essential">
+                <div class="wrap">
+                    <form action="#" method="post" id="product_addtocart_form">
+                        <div class="product-name">
+                            <h1>@product.ProductName</h1>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="col-lg-4">
+                                <div class="product-img-box">
+                                    <div class="image-main" onclick="showImage()">
+                                        @if (!(product.ProductImages is null))
+                                        {
+                                            <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image" 
+                                                 class="img-full-100" style="cursor:pointer" onclick="onClick(this)">
+                                        }
+                                    </div>
+                                    <div id="modal01" class="w3-modal" onclick="this.style.display='none'">
+                                        <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
+                                        <div class="w3-modal-content w3-animate-zoom">
+                                            <img id="img01">
+                                        </div>
+                                    </div>
+
+                                    <div id="galary-image" class="carousel slide" data-ride="carousel">
+                                        <!-- Wrapper for slides -->
+                                        <div class="carousel-inner" role="listbox">
+                                            @if (!(product.ProductImages is null))
+                                            {
+                                                if (product.ProductImages.Count == 1)
+                                                {
+                                                    <div class="item active">
+                                                        <div class="flex-row">
+                                                            <div class="sub-item">
+                                                                <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image"
+                                                                     class="img-full" alt="Chania">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="item active">
+                                                        <div class="flex-row">
+                                                            <div class="sub-item">
+                                                                <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image" 
+                                                                      class="img-full" alt="Chania">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    for (int i = 1; i < product.ProductImages.Count; i++)
+                                                    {
+                                                        <div class="item">
+                                                            <div class="flex-row">
+                                                                <div class="sub-item">
+                                                                    <img src="~/images/product/@product.ProductImages[i].Image" 
+                                                                          class="img-full" alt="Chania">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                }
+
+                                            }
+                                        </div>
+
+                                        <!-- Left and right controls -->
+                                        <a class="left carousel-control" href="#galary-image" role="button" data-slide="prev">
+                                            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                        <a class="right carousel-control" href="#galary-image" role="button" data-slide="next">
+                                            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8">
+                                <h5>@product.ProductName</h5>
+                                <p class="mb-2 text-muted text-uppercase small">@product.Category.CategoryName</p>
+                                <ul class="rating">
+                                    <li>
+                                        <i class="fa fa-star fa-sm text-primary"></i>
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-star fa-sm text-primary"></i>
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-star fa-sm text-primary"></i>
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-star fa-sm text-primary"></i>
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-star fa-sm text-primary"></i>
+                                    </li>
+                                </ul>
+                                <p><span class="mr-1"><strong>@product.Price</strong></span></p>
+                                <p class="pt-1">
+                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam, sapiente illo. Sit error voluptas repellat rerum quidem, soluta enim perferendis voluptates laboriosam. Distinctio, officia quis dolore quos sapiente
+                                    tempore alias.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th class="pl-0 w-25" scope="row"><strong>Model</strong></th>
+                                                <td>Shirt 5407X</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-25" scope="row"><strong>Color</strong></th>
+                                                <td>Black</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-25" scope="row"><strong>Delivery</strong></th>
+                                                <td>USA, Europe</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <hr>
+                                <div class="table-responsive mb-2">
+                                    <table class="table table-sm table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <td class="pl-0 pb-0 w-25">Quantity</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pl-0">
+                                                    <div class="def-number-input number-input safari_only mb-0">
+                                                        <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus"></button>
+                                                        <input class="quantity form-control" min="0" name="quantity" value="1" type="number">
+                                                        <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <a type="button" href="./CheckOut.html" class="btn btn-primary btn-md mr-1 mb-2">Buy now</a>
+                                <button type="button" class="btn btn-light btn-md mr-1 mb-2">
+                                    <i class="fas fa-shopping-cart pr-2"></i>Add to cart
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!--Tab detail-->
+                    <div class="tab-detail">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Mô tả chi tiết</a></li>
+                            <li><a data-toggle="tab" href="#menu1">Additional Info</a></li>
+                            <li><a data-toggle="tab" href="#menu2">Review</a></li>
+                            <li><a data-toggle="tab" href="#menu3">Tags</a></li>
+                            <li><a data-toggle="tab" href="#menu4">Đánh giá</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                @Html.Raw(HttpUtility.HtmlDecode(product.Description))
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <h3>Additional Information</h3>
+                                <p>Color</p>
+                                <p>Size</p>
+                            </div>
+                            <div id="menu2" class="tab-pane fade">
+                                <h3>Customer Reviews 1 item(s)</h3>
+                                <p><span tyle="float:left;">1 Item(s)</span> <span style="float:right;">Show <select><option>6</option><option selected>10</option><option>12</option><option>15</option><option>20</option></select>per page</span></p>
+                                <br />
+                                <p><a href="#>">7uptheme</a></p>
+                                <p>At verov eos et accusamus et iusto ods un dignissimos ducimus qui blan ditiis prasixer esentium</p>
+                                <table class="ratings-table">
+                                    <colgroup>
+                                        <col class="review-label" />
+                                        <col class="review-value" />
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <th>Quality</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:80%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Price</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:80%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Value</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:100%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p>Review by 7uptheme / (Posted on 4/14/2015)</p>
+                                <div class="form-add">
+                                    <h2>Write Your Own Review</h2>
+                                    <form action="" method="post" id="review-form">
+                                        <input name="form_key" type="hidden" value="JbT1G5uAkBcFDot6" />
+                                        <h3>
+                                            You're reviewing: <span>Ipad Air and iOS7</span>
+                                        </h3>
+                                        <div class="fieldset">
+                                            <h4>How do you rate this product? <em class="required">*</em></h4>
+                                            <span id="input-message-box"></span>
+                                            <table class="data-table review-summary-table ratings" id="product-review-table">
+                                                <col width="1" />
+                                                <col />
+                                                <col />
+                                                <col />
+                                                <col />
+                                                <col />
+                                                <thead>
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:20%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:40%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:60%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:80%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:100%;"></span>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Price</th>
+                                                        <td class="value"><label for="Price_1"><input type="radio" name="ratings[3]" id="Price_1" value="11" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_2"><input type="radio" name="ratings[3]" id="Price_2" value="12" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_3"><input type="radio" name="ratings[3]" id="Price_3" value="13" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_4"><input type="radio" name="ratings[3]" id="Price_4" value="14" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_5"><input type="radio" name="ratings[3]" id="Price_5" value="15" class="radio" /></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Value</th>
+                                                        <td class="value"><label for="Value_1"><input type="radio" name="ratings[2]" id="Value_1" value="6" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_2"><input type="radio" name="ratings[2]" id="Value_2" value="7" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_3"><input type="radio" name="ratings[2]" id="Value_3" value="8" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_4"><input type="radio" name="ratings[2]" id="Value_4" value="9" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_5"><input type="radio" name="ratings[2]" id="Value_5" value="10" class="radio" /></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Quality</th>
+                                                        <td class="value"><label for="Quality_1"><input type="radio" name="ratings[1]" id="Quality_1" value="1" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_2"><input type="radio" name="ratings[1]" id="Quality_2" value="2" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_3"><input type="radio" name="ratings[1]" id="Quality_3" value="3" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_4"><input type="radio" name="ratings[1]" id="Quality_4" value="4" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_5"><input type="radio" name="ratings[1]" id="Quality_5" value="5" class="radio" /></label></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <input type="hidden" name="validate_rating" class="validate-rating" value="" />
+                                            <ul class="form-list">
+                                                <li>
+                                                    <label for="review_field" class="required"><em>*</em>Let us know your thoughts</label>
+                                                    <div class="input-box">
+                                                        <textarea name="detail" id="review_field" cols="5" rows="3" class="required-entry"></textarea>
+                                                    </div>
+                                                </li>
+                                                <li class="inline-label">
+                                                    <label for="summary_field" class="required"><em>*</em>Summary of Your Review</label>
+                                                    <div class="input-box">
+                                                        <input type="text" name="title" id="summary_field" class="input-text required-entry" value="" />
+                                                    </div>
+                                                </li>
+                                                <li class="inline-label">
+                                                    <label for="nickname_field" class="required"><em>*</em>What's your nickname?</label>
+                                                    <div class="input-box">
+                                                        <input type="text" name="nickname" id="nickname_field" class="input-text required-entry" value="" />
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="buttons-set">
+                                            <button type="submit" title="Submit Review" class="button"><span><span>Submit Review</span></span></button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                            <div id="menu3" class="tab-pane fade">
+                                <h3>Product Tags</h3>
+                                <p>Add Your Tags:</p>
+                                <form action="" menthod="get">
+                                    <input type="text" nam="tags" />
+                                    <button><span>Add tags</span></button>
+                                </form>
+                            </div>
+                            <div id="menu4" class="tab-pane fade ">
+                                <div class="row">
+
+                                    <div class="col-lg-2">
+                                        <img src="./images/product/small/truyen-co-hai-con-meo-ngoi-ben-cua-so.jpg" alt="co hai con meo" class="img-responsive">
+                                    </div>
+                                    <div class="col-lg-9 ">
+                                        <div class="row">
+                                            <p class="text-content-checkout">Nguyễn Văn A </p>
+                                        </div>
+                                        <p>Nội dung đánh giá</p>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--End Tab detail-->
+                    <!--Upselt product-->
+                    <div id="upsell_pro " class="products-grid ">
+                        <div class="inner ">
+                            <div class="title ">
+                                <span>Upsell Products</span>
+                            </div>
+                            <div class="block vt-slider vt-slider5 row ">
+                                <div class="slider-inner ">
+                                    <div class="container-slider ">
+                                        <div class="products-grid ">
+                                            <div class="item ">
+                                                <div class="item-wrap ">
+                                                    <div class="item-image ">
+                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
+                                                            <img class="first_image " src="images/product/larg/demo6.jpg " alt="Product demo " />
+                                                        </a>
+                                                        <div class="item-btn ">
+                                                            <div class="box-inner ">
+                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
+                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
+                                                                <span class="qview ">
+                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
+                                                    </div>
+                                                    <div class="pro-info ">
+                                                        <div class="pro-inner ">
+                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
+                                                            <div class="pro-content ">
+                                                                <div class="wrap-price ">
+                                                                    <div class="price-box ">
+                                                                        <span class="regular-price ">
+                                                                            <span class="price ">$800.00</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ratings ">
+                                                                    <div class="rating-box ">
+                                                                        <div class="rating " style="width:80% "></div>
+                                                                    </div>
+                                                                    <span class="amount "><a href="# ">1(s)</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--end item wrap -->
+                                            </div>
+                                            <div class="item ">
+                                                <div class="item-wrap ">
+                                                    <div class="item-image ">
+                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
+                                                            <img class="first_image " src="images/product/larg/demo7.jpg " alt="Product demo " />
+                                                        </a>
+                                                        <div class="item-btn ">
+                                                            <div class="box-inner ">
+                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
+                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
+                                                                <span class="qview ">
+                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
+                                                    </div>
+                                                    <div class="pro-info ">
+                                                        <div class="pro-inner ">
+                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
+                                                            <div class="pro-content ">
+                                                                <div class="wrap-price ">
+                                                                    <div class="price-box ">
+                                                                        <span class="regular-price ">
+                                                                            <span class="price ">$800.00</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ratings ">
+                                                                    <div class="rating-box ">
+                                                                        <div class="rating " style="width:80% "></div>
+                                                                    </div>
+                                                                    <span class="amount "><a href="# ">1(s)</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--end item wrap -->
+                                            </div>
+                                            <div class="item ">
+                                                <div class="item-wrap ">
+                                                    <div class="item-image ">
+                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
+                                                            <img class="first_image " src="images/product/larg/demo8.jpg " alt="Product demo " />
+                                                        </a>
+                                                        <div class="item-btn ">
+                                                            <div class="box-inner ">
+                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
+                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
+                                                                <span class="qview ">
+                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
+                                                    </div>
+                                                    <div class="pro-info ">
+                                                        <div class="pro-inner ">
+                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
+                                                            <div class="pro-content ">
+                                                                <div class="wrap-price ">
+                                                                    <div class="price-box ">
+                                                                        <span class="regular-price ">
+                                                                            <span class="price ">$800.00</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ratings ">
+                                                                    <div class="rating-box ">
+                                                                        <div class="rating " style="width:80% "></div>
+                                                                    </div>
+                                                                    <span class="amount "><a href="# ">1(s)</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--end item wrap -->
+                                            </div>
+                                            <div class="item ">
+                                                <div class="item-wrap ">
+                                                    <div class="item-image ">
+                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
+                                                            <img class="first_image " src="images/product/larg/demo9.jpg " alt="Product demo " />
+                                                        </a>
+                                                        <div class="item-btn ">
+                                                            <div class="box-inner ">
+                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
+                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
+                                                                <span class="qview ">
+                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
+                                                    </div>
+                                                    <div class="pro-info ">
+                                                        <div class="pro-inner ">
+                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
+                                                            <div class="pro-content ">
+                                                                <div class="wrap-price ">
+                                                                    <div class="price-box ">
+                                                                        <span class="regular-price ">
+                                                                            <span class="price ">$800.00</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ratings ">
+                                                                    <div class="rating-box ">
+                                                                        <div class="rating " style="width:80% "></div>
+                                                                    </div>
+                                                                    <span class="amount "><a href="# ">1(s)</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--end item wrap -->
+                                            </div>
+                                            <div class="item ">
+                                                <div class="item-wrap ">
+                                                    <div class="item-image ">
+                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
+                                                            <img class="first_image " src="images/product/larg/demo10.jpg " alt="Product demo " />
+                                                        </a>
+                                                        <div class="item-btn ">
+                                                            <div class="box-inner ">
+                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
+                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
+                                                                <span class="qview ">
+                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
+                                                    </div>
+                                                    <div class="pro-info ">
+                                                        <div class="pro-inner ">
+                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
+                                                            <div class="pro-content ">
+                                                                <div class="wrap-price ">
+                                                                    <div class="price-box ">
+                                                                        <span class="regular-price ">
+                                                                            <span class="price ">$800.00</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ratings ">
+                                                                    <div class="rating-box ">
+                                                                        <div class="rating " style="width:80% "></div>
+                                                                    </div>
+                                                                    <span class="amount "><a href="# ">1(s)</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--end item wrap -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="navslider ">
+                                        <a class="prev " href="# ">Prev</a>
+                                        <a class="next " href="# ">Next</a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--End Upselt product-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End detail product-->
+</div>
+@section Scripts{ 
+<script>
+    $(document).ready(function () {
+        $('#left-nav').remove();
+        $('#banner').remove();
+    });
+
+    function onClick(element) {
+        document.getElementById("img01").src = element.src;
+        document.getElementById("modal01").style.display = "block";
+    }
+</script>
+}

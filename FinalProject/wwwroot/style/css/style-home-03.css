@@ -3387,16 +3387,20 @@ textarea.validation-failed {
 }
 
 .img-full {
+    width: 50%;
+    height: auto;
+}
+.img-full-100 {
     width: 100%;
     height: auto;
 }
 
+.flex-row .sub-item {
+    text-align: center;
+}
 
 /*End flex*/
-
-
 /*Image*/
-
 .circular-portrait {
     position: relative;
     overflow: hidden;

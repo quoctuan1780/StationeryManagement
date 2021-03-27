@@ -11,14 +11,16 @@ namespace Entities.Models
 
         public int ProviderId { get; set; }
 
-        public int ProductId { get; set; }
+        public int ProductDetailId { get; set; }
 
         public int Quantity { get; set; } = 0;
+
+        public int ActualQuantity { get; set; } = 0;
 
         public decimal ImportPrice { get; set; }
 
         public virtual ImportWarehouse ImportWarehouse { get; set; }
         public virtual Provider Provider { get; set; }
-        public virtual Product Product { get; set; }
+        public virtual ProductDetail ProductDetail { get; set; }
     }
 }

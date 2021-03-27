@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Trang chủ";
+
+    var products = ViewBag.Products as IList<Entities.Models.Product>;
 }
 
 <div class="position-01">
@@ -756,56 +758,84 @@
         </div>
     </div>
 </div>
-<div class="position-03">
+<div class="positive-02">
     <div class="container">
-        <div class="row">
-            <div class="blog-home">
-                <div class="item item-1">
-                    <div class="box-1">
-                        <a href="#"><img src="images/position-03/home03/image1.png" alt="" /></a>
-                    </div>
-                    <div class="box-2">
-                        <span class="title">LOREM IPSUM DOLOR SIT AMET CONSE</span>
-                        <span class="std">Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</span>
-                        <span class="date">10 Dec 2015</span>
-                        <span class="cmt">9 Comments</span>
-                    </div>
+        <div class="other-pro">
+            @if(products is null)
+            {
+                <div>
+                    Không có sản phẩm nào
                 </div>
-                <div class="item item-2">
-                    <div class="box-1">
-                        <a href="#"><img src="images/position-03/home03/image2.png" alt="" /></a>
-                    </div>
-                    <div class="box-2">
-                        <span class="title">LOREM IPSUM DOLOR SIT AMET CONSE</span>
-                        <span class="std">Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</span>
-                        <span class="date">10 Dec 2015</span>
-                        <span class="cmt">9 Comments</span>
-                    </div>
-                </div>
-                <div class="item item-3">
-                    <div class="box-1">
-                        <a href="#"><img src="images/position-03/home03/image3.png" alt="" /></a>
-                    </div>
-                    <div class="box-2">
-                        <span class="title">LOREM IPSUM DOLOR SIT AMET CONSE</span>
-                        <span class="std">Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</span>
-                        <span class="date">10 Dec 2015</span>
-                        <span class="cmt">9 Comments</span>
-                    </div>
-                </div>
-                <div class="item item-4">
-                    <div class="box-1">
-                        <a href="#"><img src="images/position-03/home03/image4.png" alt="" /></a>
-                    </div>
-                    <div class="box-2">
-                        <span class="title">LOREM IPSUM DOLOR SIT AMET CONSE</span>
-                        <span class="std">Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</span>
-                        <span class="date">10 Dec 2015</span>
-                        <span class="cmt">9 Comments</span>
-                    </div>
-                </div>
-            </div>
+            }
+            else
+            foreach(var item in products)
+            {
+                <div class="col-lg-3">
+                    <div class="products-grid">
+                        <div class="item">
+                            <div class="item-wrap">
+                                <div class="item-image">
+                                    <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image" 
+                                             alt="Product demo" width="228" height="228" style="width: 100%; height: auto;" />
+                                    </a>
+                                    <div class="item-btn">
+                                        <div class="box-inner">
+                                            <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
+                                            <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                            <span class="qview">
+                                                <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                   data-placement="left" data-toggle="tooltip" 
+                                                   asp-controller="Product" asp-action="Detail"
+                                                   asp-route-id="@item.ProductId">
+                                                    <span>
+                                                        Quick
+                                                        View
+                                                    </span>
+                                                </a>
+                                            </span>
+                                        </div>
+                                    </div>
 
+                                </div>
+                                <div class="pro-info">
+                                    <div class="pro-inner">
+                                        <div class="pro-title product-name">
+                                            <a href="detail.html">
+                                                @item.ProductName
+                                            </a>
+                                        </div>
+                                        <div class="pro-content">
+                                            <div class="wrap-price">
+                                                <div class="price-box">
+                                                    <span class="regular-price">
+                                                        <span class="price">@item.Price VNĐ</span>
+                                                    </span>
+                                                    @*<p class="special-price">
+                                                        <span class="price">@item.Price VNĐ</span>
+                                                    </p>*@
+                                                </div>
+                                            </div>
+                                            <div class="ratings" style="margin-bottom: .5rem;">
+                                                <div class="rating-box">
+                                                    <p>Chưa có đánh giá</p>
+                                                    @*<div class="rating" style="width:80%">
+                                                    </div>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a title="Add to cart" class="add-to-cart" href="#">
+                                    Thêm vào giỏ hàng <i class="icon-shopping-cart" style="padding-left: 1rem;"></i>
+                                </a>
+                            </div>
+                            <!--end item wrap -->
+                        </div>
+                    </div>
+                </div>
+            }
+            
         </div>
     </div>
 </div>
