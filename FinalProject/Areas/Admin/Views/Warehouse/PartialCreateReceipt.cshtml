@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Entities.Models.ImportWarehouseDetail>
+@{ 
+    var products = ViewBag.Products as IList<SelectListItem>;
+}
+<p>
+    <a href="javascript:AddDetail()">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImportPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImportWarehouse)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Provider)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="details">
+        <tr>
+            <td>
+                <div class="form-group">
+                    @foreach (var item in Model)
+                    {
+                        @*@Html.Label(item.ProductId)
+                        @Html.DropDownListFor(m => m., products, new
+                        {
+                            @class = "form-control",
+                       @name = "product-id",
+                            @id = "product-id",
+                        })
+                        @Html.ValidationMessageFor(m => m.ProductId, "", new { @class = "text-danger" })*@
+
+                         
+                    }
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    function AddDetail() {
+     
+        document.getElementById("details").appendChild('<tr><td><input type="text">' +
+            + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ');
+    }
+</script>
+

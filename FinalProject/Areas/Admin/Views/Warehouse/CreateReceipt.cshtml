@@ -1,0 +1,74 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.ReceiptViewModel;
+
+@{
+    ViewData["Title"] = "Thêm phiếu nhập kho";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+
+}
+<link href="~/style/css/checkout.css" type="text/css" rel="stylesheet">
+<h1>Thêm phiếu nhập kho</h1>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreateReceipt" class="margin-left">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <p>
+                <a href="javascript:AddDetail()">Create New</a>
+            </p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ProductId)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ProviderId)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ImportPrice)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Quantity)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="details">
+                    <tr>
+                        <td>
+                            <select name="productId" id="productId">
+                                <option value=""></option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Total" class="control-label"></label>
+                <input asp-for="Total" class="form-control" />
+                <span asp-validation-for="Total" class="text-danger"></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+    function AddDetail() {
+
+        document.getElementById("details").appendChild('<tr><td><input type="text">' +
+            + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ');
+    }
+</script>
