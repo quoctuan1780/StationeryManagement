@@ -39,6 +39,7 @@ namespace Services.Services
             return await _context.Products.Where(x => x.ProductId == id)
                             .Include(x => x.Category)
                             .Include(x => x.ProductImages)
+                            .Include(x => x.ProductDetails)
                             .FirstOrDefaultAsync();
         }
 

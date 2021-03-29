@@ -11,7 +11,7 @@
 
 <div class="container-fluid">
 
-    <h1 class="h3 mb-2 text-gray-800">Thay đổi thông tin sản phẩm</h1>
+    <h1 class="h3 mb-2 text-gray-800">Cập nhật sản phẩm</h1>
     <hr class="hr-end-list" />
     @if (!(ViewBag.MessageSuccess is null))
     {
@@ -26,20 +26,15 @@
         <div class="alert alert-danger">@ViewBag.MessageError</div>
     }
 
-    @using (Html.BeginForm("EditProduct", "Product", FormMethod.Post, new
+    @using (Html.BeginForm("AddProduct", "Product", FormMethod.Post, new
     {
         role = "form",
         area = "Admin",
         enctype = "multipart/form-data",
-        id = "form"
+        id = "form-product"
     }))
     {
         @Html.AntiForgeryToken()
-
-        <input type="hidden" id="images" name="imageRemove" />
-
-        @Html.TextBoxFor(m => m.ProductId, new { @class = "form-control", @name = "id", @id = "id", @type = "hidden" })
-
         <div class="form-group">
             @Html.LabelFor(m => m.ProductName)
             @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control", @name = "name", @id = "name" })
@@ -48,7 +43,7 @@
 
         <div class="form-group">
             @Html.LabelFor(m => m.Description)
-            <textarea id="description" name = "description">@Html.Raw(Model.Description)</textarea>
+            <textarea id="description" name="description">@Html.Raw(Model.Description)</textarea>
             @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
         </div>
 
@@ -89,7 +84,7 @@
             @Html.LabelFor(m => m.Images)
             @Html.TextBoxFor(m => m.Images, new
             {
-                @class = "form-control",
+                @class = "form-control-file",
                 @multiple = "true",
                 @type = "file",
                         @id = "images",
@@ -97,9 +92,96 @@
             })
             @Html.ValidationMessageFor(m => m.Images, "", new { @class = "text-danger" })
         </div>
+
+        <h3>Chi tiết sản phẩm</h3>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-lg-2 text-center">
+                    <span>Xuất xứ</span>
+                </div>
+                <div class="col-lg-2 text-center">
+                    <span>Trọng lượng</span>
+                </div>
+                <div class="col-lg-3 text-center">
+                    <span>Kích thước</span>
+                </div>
+                <div class="col-lg-2 text-center">
+                    <span>Màu sắc</span>
+                </div>
+                <div class="col-lg-1 text-center">
+                    <span>Chức năng</span>
+                </div>
+            </div>
+            <div id="product-detail" class="col-lg-12">
+                @if (!(Model is null))
+                {
+                    if (Model.Origins != null)
+
+                        for (int i = 0; i < Model.Origins.Count; i++)
+                        {
+                            <div class="row" style="padding-top: .5rem;">
+                                <div class="col-lg-2">
+                                    <input type="text" name="Origins" value="@Model.Origins[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="number" name="Weights" placeholder="KG" value="@Model.Weights[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-3">
+                                    <div style="display: flex; align-items:center;">
+                                        <input type="number" style="width: 32.33%" min="1" name="Widths" value="@Model.Widths[i]" class="form-control" placeholder="Dài(mm)" />
+                                        x
+                                        <input type="number" style="width: 32.33%" min="1" name="Lengths" value="@Model.Lengths[i]" class="form-control" placeholder="Rộng(mm)" />
+                                        x
+                                        <input type="number" style="width: 32.33%" min="1" name="Heights" value="value=" @Model.Heights[i] class="form-control" placeholder="Cao(mm)" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="text" name="Colors" value="@Model.Colors[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-1 text-center align-items-center">
+                                    <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
+                                </div>
+                            </div>
+                        }
+                }
+                else
+                {
+                    <div class="row" style="padding-top: .5rem;">
+                        <div class="col-lg-2">
+                            <input type="text" name="Origins" class="form-control" />
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="number" placeholder="KG" name="Weights" class="form-control" />
+                        </div>
+                        <div class="col-lg-3">
+                            <div style="display: flex; align-items:center;">
+                                <input type="number" style="width: 32.33%" min="1" name="Widths" class="form-control" placeholder="Dài(mm)" />
+                                x
+                                <input type="number" style="width: 32.33%" min="1" name="Lengths" class="form-control" placeholder="Rộng(mm)" />
+                                x
+                                <input type="number" style="width: 32.33%" min="1" name="Heights" class="form-control" placeholder="Cao(mm)" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="text" name="Colors" class="form-control" />
+                        </div>
+                        <div class="col-lg-1 text-center align-items-center">
+                            <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <button type="button" class="btn btn-primary" style="margin-left: auto;" onclick="addProductDetail()"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
     }
+
     <div class="form-group">
-        <button type="button" onclick="submit()" class="btn btn-success">Cập nhật sản phẩm</button>
+        <input type="button" value="Cập nhật sản phẩm" class="btn btn-success" onclick="submit()" />
     </div>
 </div>
 @section Scripts{
@@ -107,6 +189,7 @@
         CKEDITOR.replace("description", { htmlEncodeOutput: true, enterMode: CKEDITOR.ENTER_DIV });
 
         var imageRemove = [];
+        var productDetail = [];
 
         function confirmDeleteImage(image, id) {
             Swal.fire({
@@ -132,6 +215,20 @@
             })
         }
 
+        function removeProductDetail(e) {
+            var arr = [];
+            var node = $(e).parent().parent();
+            for (let i of node.children()) {
+                arr.push($(i).children())
+            };
+
+            console.log(arr[0].val());
+            console.log(arr[1].val());
+            console.log(arr[2].children()[0].value)
+            console.log(arr[2].children()[1].value)
+            console.log(arr[2].children()[2].value)
+        }
+
         function submit() {
             Swal.fire({
                 title: 'Cập nhật thông tin ?',
@@ -144,7 +241,15 @@
                 cancelButtonText: `Hủy`,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById("form").submit();
+                    var countErrorValidate = validateProductDetail();
+
+                    if (Origins.length === 0) {
+                        alert('Bạn phải có chi tiết sản phẩm');
+                    }
+                    else
+                        if (countErrorValidate === 0) {
+                            $('#form-product').submit();
+                        }
                 }
             })
         }

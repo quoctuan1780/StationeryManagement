@@ -12,7 +12,9 @@ namespace Entities.Models
 
         public double Weight { get; set; }
 
-        public string Size { get; set; }
+        public int Width { get; set; }
+        public int Length { get; set; }
+        public int Height { get; set; }
 
         public string  Color { get; set; }
 

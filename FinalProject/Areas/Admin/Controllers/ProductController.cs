@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web;
 
 namespace FinalProject.Areas.Admin.Controllers
@@ -18,13 +19,15 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IProductService _productService;
         private readonly IProductImageService _productImageService;
+        private readonly IProductDetailService _productDetailService;
 
         public ProductController(ICategoryService categoryService, IProductService productService,
-            IProductImageService productImageService)
+            IProductImageService productImageService, IProductDetailService productDetailService)
         {
             _categoryService = categoryService;
             _productService = productService;
             _productImageService = productImageService;
+            _productDetailService = productDetailService;
         }
         public async Task<IActionResult> Index()
         {
@@ -50,47 +53,60 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    await ProductHelper.SaveImageAsync(model.Images, 400, 400);
-
-                    var product = new Product()
+                    try
                     {
-                        ProductName = model.ProductName,
-                        DateCreate = DateTime.Now,
-                        Description = model.Description,
-                        Price = model.Price,
-                        CategoryId = model.CategoryId
-                    };
+                        await ProductHelper.SaveImageAsync(model.Images, 400, 400);
 
-                    if (!(await _productService.IsExistsProduct(product)))
-                    {
-
-                        product = await _productService.AddProductAsync(product);
-
-                        if (!(product is null))
+                        var product = new Product()
                         {
-                            var result = await _productImageService.AddListImagesAsync(
-                                ProductHelper.CreateProductImages(model.Images, product.ProductId));
+                            ProductName = model.ProductName,
+                            DateCreate = DateTime.Now,
+                            Description = model.Description,
+                            Price = model.Price,
+                            CategoryId = model.CategoryId
+                        };
 
-                            if (result > 0)
+                        if (!(await _productService.IsExistsProduct(product)))
+                        {
+
+                            product = await _productService.AddProductAsync(product);
+
+                            if (!(product is null))
                             {
-                                ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_ADD_PRODUCT;
+                                var result = await _productImageService.AddListImagesAsync(
+                                    ProductHelper.CreateProductImages(model.Images, product.ProductId));
+
+                                if (result > 0)
+                                {
+                                    var productsDetail = 
+                                        ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId);
+
+                                    result = await _productDetailService.AddProductsDetailAsync(productsDetail);
+
+                                    if (result > 0)
+                                    {
+                                        ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_ADD_PRODUCT;
+
+                                        transaction.Complete();
+                                    }
+                                }
                             }
                         }
+                        else
+                        {
+                            ViewBag.MessageExists = MessageConstant.MESSAGE_EXISTS_ADD_PRODUCT;
+                        }
                     }
-                    else
+                    catch
                     {
-                        ViewBag.MessageExists = MessageConstant.MESSAGE_EXISTS_ADD_PRODUCT;
+                        ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_PRODUCT;
                     }
-                }
-                catch
-                {
-                    ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_PRODUCT;
                 }
             }
 
-            return View();
+            return View(model);
         }
 
         public async Task<IActionResult> EditProduct(int id, string urlCallback)
@@ -155,10 +171,6 @@ namespace FinalProject.Areas.Admin.Controllers
                                 if (result > 0)
                                 {
                                     ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_PRODUCT;
-                                }
-                                else
-                                {
-                                    throw new Exception();
                                 }
                             }
                             else

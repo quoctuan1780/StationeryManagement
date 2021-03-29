@@ -15,6 +15,34 @@ namespace FinalProject.Areas.Admin.Helpers
 {
     public class ProductHelper
     {
+        public static IList<ProductDetail> ConvertModelPrductToProductsDetail(ProductViewModel model, int productId)
+        {
+            var productsDetail = new List<ProductDetail>();
+
+            try
+            {
+                for(int i = 0; i < model.Origins.Count; i++)
+                {
+                    productsDetail.Add(new ProductDetail()
+                    {
+                        Color = model.Colors[i],
+                        Height = model.Heights[i],
+                        Length = model.Lengths[i],
+                        Weight = model.Weights[i],
+                        Origin = model.Origins[i],
+                        Quantity = 0,
+                        Width = model.Widths[i],
+                        ProductId = productId
+                    });
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return productsDetail;
+        }
         public static IList<SelectListItem> ConvertCategoriesToSelectListItem(IList<Category> categories)
         {
             var categoriesSelectList = new List<SelectListItem>();
@@ -90,13 +118,35 @@ namespace FinalProject.Areas.Admin.Helpers
             };
 
             var images = new List<string>();
+            var origins = new List<string>();
+            var weights = new List<double>();
+            var widths = new List<int>();
+            var lengths = new List<int>();
+            var heights = new List<int>();
+            var color = new List<string>();
 
-            foreach(var item in product.ProductImages)
+            foreach (var item in product.ProductImages)
             {
                 images.Add(item.Image);
             }
 
+            for(int i = 0; i < product.ProductDetails.Count; i++)
+            {
+                origins.Add(product.ProductDetails[i].Origin);
+                weights.Add(product.ProductDetails[i].Weight);
+                widths.Add(product.ProductDetails[i].Width);
+                lengths.Add(product.ProductDetails[i].Length);
+                heights.Add(product.ProductDetails[i].Height);
+                color.Add(product.ProductDetails[i].Color);
+            }
+
             model.ImagesString = images;
+            model.Origins = origins;
+            model.Weights = weights;
+            model.Widths = widths;
+            model.Heights = heights;
+            model.Lengths = lengths;
+            model.Colors = color;
 
             return model;
         }
