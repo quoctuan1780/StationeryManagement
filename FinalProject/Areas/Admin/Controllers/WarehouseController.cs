@@ -1,16 +1,21 @@
 ﻿using Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Services.Interfacies;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(RoleConstant.ROLE_ADMIN)]
     public class WarehouseController : Controller
     {
+        private readonly IProductService _productService;
+        private readonly IProviderService _providerService;
+
+        public WarehouseController(IProductService productService, IProviderService providerService)
+        {
+            _productService = productService;
+            _providerService = providerService;
+        }
         // GET: WarehouseController
         public ActionResult Index()
         {
@@ -23,15 +28,17 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public ActionResult PartialCreateReceipt()
-        {
-            return View();
-        }
-
         // GET: WarehouseController/Create
         public ActionResult CreateReceipt()
         {
+            ViewBag.Products = _productService.GetAllProductsAsync();
             return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetProvider(int productId)
+        {
+            return Json(_providerService.GetProvidersByProduct(productId));
         }
 
         // POST: WarehouseController/Create

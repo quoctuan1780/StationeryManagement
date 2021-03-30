@@ -3,7 +3,8 @@
 @{
     ViewData["Title"] = "Thêm phiếu nhập kho";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-
+    var listProducts = ViewBag.Products as IList<Entities.Models.Product>;
+    var x = 0;
 
 }
 <link href="~/style/css/checkout.css" type="text/css" rel="stylesheet">
@@ -13,7 +14,7 @@
         <form asp-action="CreateReceipt" class="margin-left">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <p>
-                <a href="javascript:AddDetail()">Create New</a>
+                <a href="javascript:AddDetail()">Thêm</a>
             </p>
             <table class="table">
                 <thead>
@@ -30,24 +31,47 @@
                         <th>
                             @Html.DisplayNameFor(model => model.Quantity)
                         </th>
+                        <th>
+                            Total
+                        </th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="details">
                     <tr>
                         <td>
-                            <select name="productId" id="productId">
-                                <option value=""></option>
+                            <select name="productId" id="productId0">
+                                <option value="">Chọn sản phẩm</option>
+                                @foreach (var item in listProducts)
+                                {
+                                    <option value="@item.ProductId">@item.ProductName</option>
+                                }
                             </select>
+                        </td>
+                        <td>
+                            <select name="providerId" id="productId0">
+                                <option>Chọn nhà cung cấp</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" name="price" id="price0" onchange="Total(x)"/>
+                        </td>
+                        <td>
+                            <input type="number" name="quantity" id="quantity0" onchange="Total(x)"/>
+                        </td>
+                        <td>
+                            <input type="number" name="totalPrice" id="totalPrice0" readonly/>
+                        </td>
+                        <td>
+                            <a href="javascript:Remove(x)">Xóa</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
 
-
-
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary" onclick="AddReceipt()" />
             </div>
             <div class="form-group">
                 <label asp-for="Total" class="control-label"></label>
@@ -64,11 +88,109 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+
+
+    <script type="text/javascript">
+
+    $(function () {
+        $("#productId" + x).change(function () {
+            var product = $("#productId" + x).val();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Warehouse","GetProvider")',
+                data: { productId: product },
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {                   
+                    var items = '';
+                    $.each(data, function (i, item) {
+                        var rows = "<option value= '" + item.ProviderId + "'>" + item.ProviderName + " </option>";
+                           
+                        $('#providerId'+x).append(rows);
+                    });
+                },
+                error: function () {
+                    alert("Không lấy được dữ liệu!");
+                }
+            });
+            return false;
+        });
+    });
+
+    
+    </script>
 }
 <script>
-    function AddDetail() {
 
-        document.getElementById("details").appendChild('<tr><td><input type="text">' +
-            + '</td><td><input type="text">' + '</td><td><input type="text"></td><td></td></tr > ');
+    function AddDetail() {
+        x++;
+        var rows = "<tr>"+
+                        '<td>'+
+                            '<select name="productId" id="productId'+x+'">'+
+                                '<option value="">Chọn sản phẩm</option>'+
+                                    '@foreach (var item in listProducts)
+                                    {
+                                        <option value="@item.ProductId">@item.ProductName</option>
+                                    }' +
+                            '</select>' +
+                        '</td>' +
+                        '<td>'+
+                            '<select name="providerId" id="productId0">'+
+                                '<option>Chọn nhà cung cấp</option>'+
+                            '</select>'+
+                        '</td>'+
+                        '<td>'+
+                            '<input type="number" name="price" id="price"'+x+' />'
+                        '</td>'
+                        '<td>'
+                            '<input type="number" name="quantity" id="quantity"'+x+'/>'+
+                        '</td>' +
+                        '<td>'+
+                            '<input type="number" name="totalPrice" id="totalPrice"'+x+' readonly />'+
+                        '</td>' +
+                        '<td><a href="javascript:Remove(x)">Xóa</a></td>'
+                    '</tr>'
+        $('#details').append(rows);
     }
+
+
+    function Total(index) {
+        var price = document.getElementById("price" + x).val();
+        var quantity = document.getElementById("quantity" + x).val();
+        var total = price * quantity;
+        document.getElementById("totalPrice" + x).value = total;
+    }
+
+    function Validate() {
+        var ImportPrices = document.getElementsByName('ImportPrice');
+        var Quantities = document.getElementsByName('Quantity');
+
+        for (var i = 0; i < ImportPrices.length; i++) {          
+            if (ImportPrices[i] === '' || Quantities[i] === '' || ImportPrices[i] <= 0 || Quantities[i] < 1) {
+                Swal.fire ({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Dữ liệu dòng thứ '+(i+1)+'không hợp lệ!'
+                })
+                break;
+            }
+        }
+    }
+
+    function Remove(index) {
+        if (document.getElementById("details").rows.length < 1) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Phiếu nhập phải có ít nhất 1 dòng sản phẩm'
+            })
+        }
+        else {
+            document.getElementById("details").remove(x);
+            TotalReceipt();
+        }
+        
+    }
+
 </script>
