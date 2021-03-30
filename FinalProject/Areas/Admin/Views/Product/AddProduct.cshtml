@@ -109,6 +109,7 @@
 
                     for (int i = 0; i < Model.Origins.Count; i++)
                     {
+                        <input type="hidden" name="Quantities" value="0"/>
                         <div class="row" style="padding-top: .5rem;">
                             <div class="col-lg-2">
                                 <input type="text" name="Origins" value="@Model.Origins[i]" class="form-control" />
@@ -122,7 +123,7 @@
                                     x
                                     <input type="number" style="width: 32.33%" min="1" name="Lengths" value="@Model.Lengths[i]" class="form-control" placeholder="Rộng(mm)" />
                                     x
-                                    <input type="number" style="width: 32.33%" min="1" name="Heights" value="value=" @Model.Heights[i] class="form-control" placeholder="Cao(mm)" />
+                                    <input type="number" style="width: 32.33%" min="1" name="Heights" value="@Model.Heights[i]" class="form-control" placeholder="Cao(mm)" />
                                 </div>
                             </div>
                             <div class="col-lg-2">
@@ -156,6 +157,7 @@
                             <input type="text" name="Colors" class="form-control" />
                         </div>
                         <div class="col-lg-1 text-center align-items-center">
+                            <input type="hidden" name="Quantities" value="0" />
                             <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
                         </div>
                     </div>
@@ -175,20 +177,32 @@
         </div>
     </div>
 @section Scripts{
-    <script>
-        CKEDITOR.replace("description", { htmlEncodeOutput: true, enterMode: CKEDITOR.ENTER_DIV });
+    <div>
+        <script>
+            CKEDITOR.replace("description", { htmlEncodeOutput: true, enterMode: CKEDITOR.ENTER_DIV });
 
-        function submit() {
-
-            var countErrorValidate = validateProductDetail();
-
-            if (Origins.length === 0) {
-                alert('Bạn phải có chi tiết sản phẩm');
+            function removeProductDetail(e) {
+                $(e).parent().parent().remove();
             }
-            else
-            if (countErrorValidate === 0) {
-                $('#form-product').submit();
+
+            function submit() {
+
+                var countErrorValidate = validateProductDetail();
+
+                if (Origins.length === 0) {
+                    Swal.fire({
+                        title: 'Thông báo',
+                        text: "Bạn phải có chi tiết sản phẩm",
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: `Ok`,
+                    });
+                }
+                else
+                if (countErrorValidate === 0) {
+                    $('#form-product').submit();
+                }
             }
-        }
-    </script>
+        </script>
+    </div>
 }

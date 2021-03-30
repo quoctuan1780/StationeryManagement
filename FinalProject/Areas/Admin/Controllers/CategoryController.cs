@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(RoleConstant.ROLE_ADMIN)]
+    [Area(Constant.AREA_ADMIN)]
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;

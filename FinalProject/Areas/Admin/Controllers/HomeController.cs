@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(RoleConstant.ROLE_ADMIN)]
+    [Area(Constant.AREA_ADMIN)]
     public class HomeController : Controller
     {
         public IActionResult Dashboard()

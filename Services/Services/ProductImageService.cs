@@ -34,6 +34,9 @@ namespace Services.Services
 
             var productImages = await _context.ProductImages.Where(x => x.ProductId == id).ToListAsync();
 
+            // can not find images of product by id product
+            if (productImages is null) return Constant.ERROR_CODE_CANNOT_FIND_INFOR_BY_ID;
+
             var productRemove = new List<ProductImage>();
 
             foreach(var item in imagesRemove)

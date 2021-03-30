@@ -57,6 +57,8 @@ namespace Services.Services
 
         public async Task<Product> UpdateProductAsync(Product product)
         {
+            if (product is null) return null;
+
             _context.Products.Update(product);
 
             await _context.SaveChangesAsync();

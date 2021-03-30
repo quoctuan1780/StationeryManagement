@@ -1,14 +1,10 @@
 ﻿using Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(RoleConstant.ROLE_ADMIN)]
+    [Area(Constant.AREA_ADMIN)]
     public class WarehouseController : Controller
     {
         // GET: WarehouseController

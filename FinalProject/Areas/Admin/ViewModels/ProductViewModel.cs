@@ -35,7 +35,8 @@ namespace FinalProject.Areas.Admin.ViewModels
 
         public IList<string> ImagesString { get; set; }
 
-        // Product detail 
+        // Product detail
+        public IList<int> ProductsDetailId { get; set; }
         public IList<string> Origins { get; set; }
         public IList<double> Weights { get; set; }
         public IList<int> Widths { get; set; }

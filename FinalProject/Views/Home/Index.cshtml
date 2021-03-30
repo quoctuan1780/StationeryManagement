@@ -776,8 +776,11 @@
                             <div class="item-wrap">
                                 <div class="item-image">
                                     <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                        @if (!(item.ProductImages.FirstOrDefault() is null))
+                                        {
                                         <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image" 
                                              alt="Product demo" width="228" height="228" style="width: 100%; height: auto;" />
+                                        }
                                     </a>
                                     <div class="item-btn">
                                         <div class="box-inner">
