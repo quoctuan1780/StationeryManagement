@@ -26,7 +26,7 @@
         <div class="alert alert-danger">@ViewBag.MessageError</div>
     }
 
-    @using (Html.BeginForm("AddProduct", "Product", FormMethod.Post, new
+    @using (Html.BeginForm("EditProduct", "Product", FormMethod.Post, new
     {
         role = "form",
         area = "Admin",
@@ -35,6 +35,11 @@
     }))
     {
         @Html.AntiForgeryToken()
+        <input type="hidden" id="productsDetailsId" name="productsDetailsId" />
+        <input type="hidden" name="productId" value="@Model.ProductId" />
+        <input type="hidden" name="CreateDate" value="@Model.CreateDate" />
+        <input type="hidden" name="imageRemove" id="imageRemove" />
+
         <div class="form-group">
             @Html.LabelFor(m => m.ProductName)
             @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control", @name = "name", @id = "name" })
@@ -87,7 +92,7 @@
                 @class = "form-control-file",
                 @multiple = "true",
                 @type = "file",
-                        @id = "images",
+                @id = "images",
                 @name = "images"
             })
             @Html.ValidationMessageFor(m => m.Images, "", new { @class = "text-danger" })
@@ -132,13 +137,15 @@
                                         x
                                         <input type="number" style="width: 32.33%" min="1" name="Lengths" value="@Model.Lengths[i]" class="form-control" placeholder="Rộng(mm)" />
                                         x
-                                        <input type="number" style="width: 32.33%" min="1" name="Heights" value="value=" @Model.Heights[i] class="form-control" placeholder="Cao(mm)" />
+                                        <input type="number" style="width: 32.33%" min="1" name="Heights" value="@Model.Heights[i]" class="form-control" placeholder="Cao(mm)" />
                                     </div>
                                 </div>
                                 <div class="col-lg-2">
                                     <input type="text" name="Colors" value="@Model.Colors[i]" class="form-control" />
                                 </div>
                                 <div class="col-lg-1 text-center align-items-center">
+                                    <input type="hidden" name="productsDetailId" value="@Model.ProductsDetailId[i]" />
+                                    <input type="hidden" name="Quantities" value="@Model.Quantities[i]" />
                                     <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
                                 </div>
                             </div>
@@ -166,6 +173,7 @@
                             <input type="text" name="Colors" class="form-control" />
                         </div>
                         <div class="col-lg-1 text-center align-items-center">
+                            <input type="hidden" name="Quantities" value="0" />
                             <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
                         </div>
                     </div>
@@ -210,23 +218,19 @@
                         document.getElementById(id).remove();
                     }
 
-                    document.getElementById("images").value = imageRemove;
+                    document.getElementById("imageRemove").value = imageRemove;
                 } 
             })
         }
 
         function removeProductDetail(e) {
-            var arr = [];
-            var node = $(e).parent().parent();
-            for (let i of node.children()) {
-                arr.push($(i).children())
-            };
+            var node = $(e).parent();
 
-            console.log(arr[0].val());
-            console.log(arr[1].val());
-            console.log(arr[2].children()[0].value)
-            console.log(arr[2].children()[1].value)
-            console.log(arr[2].children()[2].value)
+            productDetail.push($(node.children("input[name=productsDetailId]")).val());
+
+            $(e).parent().parent().remove();
+
+            $('#productsDetailsId').val(productDetail);  
         }
 
         function submit() {
@@ -241,7 +245,11 @@
                 cancelButtonText: `Hủy`,
             }).then((result) => {
                 if (result.isConfirmed) {
+
+                    
                     var countErrorValidate = validateProductDetail();
+
+                    var Origins = $('input[name=Origins]');
 
                     if (Origins.length === 0) {
                         alert('Bạn phải có chi tiết sản phẩm');

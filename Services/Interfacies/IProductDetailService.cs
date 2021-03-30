@@ -11,5 +11,7 @@ namespace Services.Interfacies
         Task<IList<ProductDetail>> GetProductsDetailByProductIdAsync(int productId);
 
         Task<int> UpdateProductsDetailAsync(IList<ProductDetail> productDetails);
+
+        Task<int> DeleteProductsDetailAsync(IList<string> productsDetailId, int productId);
     }
 }
