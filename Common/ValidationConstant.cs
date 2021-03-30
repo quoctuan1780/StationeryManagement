@@ -19,5 +19,7 @@
         public const string ERROR_PRODUCT_QUANTITY = "Số lượng sản phẩm không hợp lệ";
 
         public const string VALIDATE_NAME = @"^[A-Z]+[a-zA-Z]*$";
+
+        public const string VALIDATION_NON_ANPHABETIC = "[^a-zA-Z0-9_. -]";
     }
 }

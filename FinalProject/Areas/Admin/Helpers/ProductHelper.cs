@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -142,13 +143,12 @@ namespace FinalProject.Areas.Admin.Helpers
             Buffer.BlockCopy(salt, 0, dst, 1, 0x10);
             Buffer.BlockCopy(buffer, 0, dst, 0x11, 0x20);
 
-            string resultHash = Convert.ToBase64String(dst).ToString();
+            string resultHash = Convert.ToBase64String(dst).ToString() + name;
 
-            resultHash = resultHash.Replace("/", "");
-            resultHash = resultHash.Replace("+", "");
-            resultHash = resultHash.Replace("==", "");
+            var rgx = new Regex(ValidationConstant.VALIDATION_NON_ANPHABETIC);
 
-            resultHash += name;
+            resultHash = rgx.Replace(resultHash, Constant.EMPTY);
+
 
             return resultHash;
         }
