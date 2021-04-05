@@ -19,6 +19,32 @@ namespace Entities.Migrations
                 .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Entities.Models.Banner", b =>
+                {
+                    b.Property<int>("BannerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BannerId");
+
+                    b.HasIndex("BannerId");
+
+                    b.ToTable("Banners");
+                });
+
             modelBuilder.Entity("Entities.Models.Bill", b =>
                 {
                     b.Property<int>("BillId")
@@ -54,6 +80,33 @@ namespace Entities.Migrations
                     b.ToTable("Bill");
                 });
 
+            modelBuilder.Entity("Entities.Models.CartItem", b =>
+                {
+                    b.Property<int>("ProductDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductDetailId", "UserId");
+
+                    b.HasIndex("ProductDetailId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("Entities.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
@@ -74,6 +127,32 @@ namespace Entities.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("Entities.Models.District", b =>
+                {
+                    b.Property<int>("DistrictID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DistrictName")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("ProvinceID")
+                        .HasColumnType("int");
+
+                    b.HasKey("DistrictID");
+
+                    b.HasIndex("DistrictID");
+
+                    b.HasIndex("ProvinceID");
+
+                    b.ToTable("Districts");
                 });
 
             modelBuilder.Entity("Entities.Models.ExportWarehouse", b =>
@@ -116,6 +195,9 @@ namespace Entities.Migrations
                     b.Property<DateTime>("ImportDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ReceiptRequestId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
@@ -130,6 +212,9 @@ namespace Entities.Migrations
 
                     b.HasIndex("ImportWarehouseId");
 
+                    b.HasIndex("ReceiptRequestId")
+                        .IsUnique();
+
                     b.ToTable("ImportWarehouse");
                 });
 
@@ -138,7 +223,7 @@ namespace Entities.Migrations
                     b.Property<int>("ProductDetailId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ImportWarehouseId")
+                    b.Property<int>("ImportWarehouseDetailId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProviderId")
@@ -154,9 +239,12 @@ namespace Entities.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductDetailId", "ImportWarehouseId", "ProviderId");
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("ImportWarehouseId");
+                    b.HasKey("ProductDetailId", "ImportWarehouseDetailId", "ProviderId");
+
+                    b.HasIndex("ImportWarehouseDetailId");
 
                     b.HasIndex("ProductDetailId");
 
@@ -394,6 +482,29 @@ namespace Entities.Migrations
                     b.ToTable("Provider");
                 });
 
+            modelBuilder.Entity("Entities.Models.Province", b =>
+                {
+                    b.Property<int>("ProvinceID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProvinceName")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("ProvinceID");
+
+                    b.HasIndex("Code");
+
+                    b.HasIndex("ProvinceID");
+
+                    b.ToTable("Provinces");
+                });
+
             modelBuilder.Entity("Entities.Models.Rating", b =>
                 {
                     b.Property<int>("RatingId")
@@ -442,6 +553,52 @@ namespace Entities.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RatingDetail");
+                });
+
+            modelBuilder.Entity("Entities.Models.ReceiptRequest", b =>
+                {
+                    b.Property<int>("ReceiptRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReceiptRequestId");
+
+                    b.HasIndex("ReceiptRequestId");
+
+                    b.ToTable("ReceiptRequest");
+                });
+
+            modelBuilder.Entity("Entities.Models.ReceiptRequestDetail", b =>
+                {
+                    b.Property<int>("ProductDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiptRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductDetailId", "ReceiptRequestId");
+
+                    b.HasIndex("ProductDetailId");
+
+                    b.HasIndex("ReceiptRequestId");
+
+                    b.ToTable("ReceiptRequestDetail");
                 });
 
             modelBuilder.Entity("Entities.Models.Recommendation", b =>
@@ -532,11 +689,6 @@ namespace Entities.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -596,6 +748,9 @@ namespace Entities.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("WardCode")
+                        .HasColumnType("nvarchar(10)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Id");
@@ -608,7 +763,33 @@ namespace Entities.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("WardCode")
+                        .IsUnique()
+                        .HasFilter("[WardCode] IS NOT NULL");
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Entities.Models.Ward", b =>
+                {
+                    b.Property<string>("WardCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("DistrictID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WardName")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("WardCode");
+
+                    b.HasIndex("DistrictID");
+
+                    b.HasIndex("WardCode");
+
+                    b.ToTable("Wards");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -753,6 +934,36 @@ namespace Entities.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Entities.Models.CartItem", b =>
+                {
+                    b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.User", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductDetail");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entities.Models.District", b =>
+                {
+                    b.HasOne("Entities.Models.Province", "Province")
+                        .WithMany("Districts")
+                        .HasForeignKey("ProvinceID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
+                });
+
             modelBuilder.Entity("Entities.Models.ExportWarehouse", b =>
                 {
                     b.HasOne("Entities.Models.Order", "Order")
@@ -764,11 +975,22 @@ namespace Entities.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Entities.Models.ImportWarehouse", b =>
+                {
+                    b.HasOne("Entities.Models.ReceiptRequest", "ReceiptRequest")
+                        .WithOne("ImportWarehouse")
+                        .HasForeignKey("Entities.Models.ImportWarehouse", "ReceiptRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReceiptRequest");
+                });
+
             modelBuilder.Entity("Entities.Models.ImportWarehouseDetail", b =>
                 {
                     b.HasOne("Entities.Models.ImportWarehouse", "ImportWarehouse")
                         .WithMany("ImportWarehouseDetails")
-                        .HasForeignKey("ImportWarehouseId")
+                        .HasForeignKey("ImportWarehouseDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -898,6 +1120,25 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Entities.Models.ReceiptRequestDetail", b =>
+                {
+                    b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
+                        .WithMany("ReceiptRequestDetails")
+                        .HasForeignKey("ProductDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.ReceiptRequest", "ReceiptRequest")
+                        .WithMany("ReceiptRequestDetails")
+                        .HasForeignKey("ReceiptRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductDetail");
+
+                    b.Navigation("ReceiptRequest");
+                });
+
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
                     b.HasOne("Entities.Models.Product", "Product")
@@ -934,6 +1175,26 @@ namespace Entities.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("Entities.Models.User", b =>
+                {
+                    b.HasOne("Entities.Models.Ward", "Ward")
+                        .WithOne("User")
+                        .HasForeignKey("Entities.Models.User", "WardCode");
+
+                    b.Navigation("Ward");
+                });
+
+            modelBuilder.Entity("Entities.Models.Ward", b =>
+                {
+                    b.HasOne("Entities.Models.District", "District")
+                        .WithMany("Wards")
+                        .HasForeignKey("DistrictID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("District");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -992,6 +1253,11 @@ namespace Entities.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Entities.Models.District", b =>
+                {
+                    b.Navigation("Wards");
+                });
+
             modelBuilder.Entity("Entities.Models.ImportWarehouse", b =>
                 {
                     b.Navigation("ImportWarehouseDetails");
@@ -1026,9 +1292,13 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.ProductDetail", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("ImportWarehouseDetails");
 
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("ReceiptRequestDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Provider", b =>
@@ -1036,9 +1306,21 @@ namespace Entities.Migrations
                     b.Navigation("ImportWarehouseDetails");
                 });
 
+            modelBuilder.Entity("Entities.Models.Province", b =>
+                {
+                    b.Navigation("Districts");
+                });
+
             modelBuilder.Entity("Entities.Models.Rating", b =>
                 {
                     b.Navigation("RatingDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.ReceiptRequest", b =>
+                {
+                    b.Navigation("ImportWarehouse");
+
+                    b.Navigation("ReceiptRequestDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Recommendation", b =>
@@ -1053,11 +1335,18 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.User", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("Notifications");
 
                     b.Navigation("Orders");
 
                     b.Navigation("RatingDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.Ward", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

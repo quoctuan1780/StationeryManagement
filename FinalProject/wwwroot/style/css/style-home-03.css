@@ -3457,5 +3457,14 @@ textarea.validation-failed {
     clear: both
 }
 
+.input-quantity {
+    width: 100px;
+    border: 1px solid #ccc;
+    height: 30px;
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 14px;
+    text-align: center;
+}
 
 /*End image*/

@@ -20,5 +20,7 @@
         public const string TABLE_RATING_DETAIL = "RatingDetail";
         public const string TABLE_SALE = "Sale";
         public const string TABLE_SALE_PRODUCT = "SaleProduct";
+        public const string TABLE_RECEIPT_REQUEST = "ReceiptRequest";
+        public const string TABLE_RECEIPT_REQUEST_DETAIL = "ReceiptRequestDetail";
     }
 }

@@ -784,7 +784,7 @@
                                     </a>
                                     <div class="item-btn">
                                         <div class="box-inner">
-                                            <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
+                                            <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
                                             <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
                                             <span class="qview">
                                                 <a class="vt_quickview_handler" data-original-title="Quick View"
@@ -829,7 +829,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <a title="Add to cart" class="add-to-cart" href="#">
+                                <a title="Add to cart" class="add-to-cart" href="javascript:void(0)" onclick="verticalTextColor()">
                                     Thêm vào giỏ hàng <i class="icon-shopping-cart" style="padding-left: 1rem;"></i>
                                 </a>
                             </div>
@@ -842,3 +842,25 @@
         </div>
     </div>
 </div>
+@section Scripts{ 
+    <script>
+        function loadingOut(loading) {
+            setTimeout(() => loading.out(), 3000);
+        }
+
+        function verticalTextColor() {
+            var loading = new Loading({
+                title: 'Xin hãy đợi',
+                titleColor: 'rgb(217, 83, 79)',
+                discription: 'Loading...',
+                discriptionColor: 'rgb(77, 150, 223)',
+                animationOriginColor: 'rgb(33, 179, 132)',
+                mask: true,
+                loadingPadding: '20px 50px',
+                defaultApply: true,
+            });
+
+            loadingOut(loading);
+        }
+    </script>
+}

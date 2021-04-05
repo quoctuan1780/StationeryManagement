@@ -1,4 +1,7 @@
-﻿<div id="box-header">
+﻿@{ 
+    var urlBack = Context.Request.Path;
+}
+<div id="box-header">
     <div class="header-container">
         <div class="header">
             <div class="box-header-01">
@@ -14,7 +17,8 @@
                                         <li><a class="top-link-myaccount" href="./information.html">My Account</a></li>
                                         <li><a class="top-link-wishlist" href="#">My Wishlist</a></li>
                                         <li><a class="top-link-checkout" href="#">Checkout</a></li>
-                                        <li><a class="top-link-login" href="#">Log In</a></li>
+                                        <li><a class="top-link-login" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

@@ -27,5 +27,13 @@ namespace Common
         public const int ERROR_CODE_CONVERT_TO_INT = -3;
 
         public const string AREA_ADMIN = "Admin";
+
+        public const byte CODE_SUCCESS = 1;
+
+        public const byte CODE_LOOK_ACCOUNT = 2;
+
+        public const byte CODE_FAIL = 3;
+
+        public const byte CODE_NOT_EXISTS_ACCOUNT = 4;
     }
 }

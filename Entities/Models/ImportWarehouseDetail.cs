@@ -7,7 +7,7 @@ namespace Entities.Models
     [Table(TableNameConstant.TABLE_IMPORT_WAREHOUSE_DETAIL)]
     public class ImportWarehouseDetail
     {
-        public int ImportWarehouseId { get; set; }
+        public int ImportWarehouseDetailId { get; set; }
 
         public int ProviderId { get; set; }
 
@@ -18,6 +18,8 @@ namespace Entities.Models
         public int ActualQuantity { get; set; } = 0;
 
         public decimal ImportPrice { get; set; }
+
+        public string Status { get; set; }
 
         public virtual ImportWarehouse ImportWarehouse { get; set; }
         public virtual Provider Provider { get; set; }

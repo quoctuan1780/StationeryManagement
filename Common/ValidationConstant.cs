@@ -2,6 +2,10 @@
 {
     public class ValidationConstant
     {
+        public const string ERROR_EMAIL_EMPTY = "Email không được để trống";
+        public const string ERROR_EMAIL_TYPE = "Định dạng phải là một email";
+        public const string ERROR_PASSWORD_ENPTY = "Mật khẩu không được để trống";
+
         public const string ERROR_FULLNAME_EMPTY = "Họ và tên không được để trống";
         public const string ERROR_ADDRESS_EMPTY = "Địa chỉ không được để trống";
         public const string ERROR_FULLNAME_RANGE = "Họ và tên không nhỏ hơn 3 và lớn hơn 200 ký tự";
