@@ -11,7 +11,7 @@
 <h1>Thêm phiếu nhập kho</h1>
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="CreateReceipt" class="margin-left">
+        <form asp-action="CreateReceipt" class="margin-left" id="form-receipt">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <p>
                 <a href="javascript:AddDetail()">Thêm</a>
@@ -165,6 +165,7 @@
     function Validate() {
         var ImportPrices = document.getElementsByName('ImportPrice');
         var Quantities = document.getElementsByName('Quantity');
+        var countErrors = 0;
 
         for (var i = 0; i < ImportPrices.length; i++) {          
             if (ImportPrices[i] === '' || Quantities[i] === '' || ImportPrices[i] <= 0 || Quantities[i] < 1) {
@@ -173,8 +174,24 @@
                     title: 'Oops...',
                     text: 'Dữ liệu dòng thứ '+(i+1)+'không hợp lệ!'
                 })
+                countErrors++;
                 break;
             }
+        }
+        return countErrors;
+    }
+
+    function Submit() {
+        var errors = Validate();
+        if (errors > 0 || document.getElementById("details").rows.length < 1) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Dữ liệu không hợp lệ!'
+            })
+        }
+        else {
+            document.getElementById("form-receipt").Submit();
         }
     }
 
