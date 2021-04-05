@@ -1,6 +1,7 @@
 ﻿using Common;
 using FinalProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Services.Interfacies;
 using System.Threading.Tasks;
 
@@ -9,10 +10,12 @@ namespace FinalProject.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
+        private readonly IAddressService _addressService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IAddressService addressService)
         {
             _accountService = accountService;
+            _addressService = addressService;
         }
         public IActionResult Login(string urlBack)
         {
@@ -46,6 +49,39 @@ namespace FinalProject.Controllers
             }
 
             return View(model);
+        }
+
+        public async Task<IActionResult> Register(string urlBack)
+        {
+            ViewBag.UrlBack = urlBack;
+
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model, string urlBack)
+        {
+            if(!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            return View();
+        }
+
+        public async Task<string> District(int? provinceId)
+        {
+            if(provinceId is null)
+            {
+                return null;
+            }
+
+            var result = await _addressService.GetDistrictsByProvinceIdAsync(provinceId.Value);
+
+            return JsonConvert.SerializeObject(result); ;
         }
     }
 }

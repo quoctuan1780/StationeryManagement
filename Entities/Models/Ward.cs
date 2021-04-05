@@ -6,7 +6,7 @@ namespace Entities.Models
     {
         [StringLength(10)]
         public string WardCode { get; set; }
-        public int DistrictID { get; set; }
+        public int DistrictId { get; set; }
         public virtual District District { get; set; }
 
         [StringLength(80)]

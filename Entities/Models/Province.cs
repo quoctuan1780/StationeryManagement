@@ -5,7 +5,7 @@ namespace Entities.Models
 {
     public class Province
     {
-        public int ProvinceID { get; set; }
+        public int ProvinceId { get; set; }
 
         [StringLength(40)]
         public string ProvinceName { get; set; }

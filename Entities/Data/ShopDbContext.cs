@@ -354,21 +354,21 @@ namespace Entities.Data
             // Entity Province
             modelBuilder.Entity<Province>(e =>
             {
-                e.HasKey(x => x.ProvinceID);
-                e.HasIndex(x => x.ProvinceID);
+                e.HasKey(x => x.ProvinceId);
+                e.HasIndex(x => x.ProvinceId);
                 e.HasIndex(x => x.Code);
             });
 
             // Entity District
             modelBuilder.Entity<District>(e =>
             {
-                e.HasKey(x => x.DistrictID);
-                e.HasIndex(x => x.DistrictID);
-                e.HasIndex(x => x.ProvinceID);
+                e.HasKey(x => x.DistrictId);
+                e.HasIndex(x => x.DistrictId);
+                e.HasIndex(x => x.ProvinceId);
 
                 e.HasOne(x => x.Province)
                 .WithMany(x => x.Districts)
-                .HasForeignKey(x => x.ProvinceID);
+                .HasForeignKey(x => x.ProvinceId);
             });
 
             // Entity Ward
@@ -376,11 +376,11 @@ namespace Entities.Data
             {
                 e.HasKey(x => x.WardCode);
                 e.HasIndex(x => x.WardCode);
-                e.HasIndex(x => x.DistrictID);
+                e.HasIndex(x => x.DistrictId);
 
                 e.HasOne(x => x.District)
                 .WithMany(x => x.Wards)
-                .HasForeignKey(x => x.DistrictID);
+                .HasForeignKey(x => x.DistrictId);
             });
 
             // Entity Receipt Request
