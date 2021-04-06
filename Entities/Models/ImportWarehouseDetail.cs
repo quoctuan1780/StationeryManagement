@@ -7,7 +7,7 @@ namespace Entities.Models
     [Table(TableNameConstant.TABLE_IMPORT_WAREHOUSE_DETAIL)]
     public class ImportWarehouseDetail
     {
-        public int ImportWarehouseDetailId { get; set; }
+        public int ImportWarehouseId { get; set; }
 
         public int ProviderId { get; set; }
 

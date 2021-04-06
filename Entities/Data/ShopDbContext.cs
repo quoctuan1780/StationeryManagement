@@ -256,11 +256,11 @@ namespace Entities.Data
             //Entity ImportWarehouseDetail
             modelBuilder.Entity<ImportWarehouseDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseDetailId, x.ProviderId });
+                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId, x.ProviderId });
 
                 e.HasIndex(x => x.ProductDetailId);
                 e.HasIndex(x => x.ProviderId);
-                e.HasIndex(x => x.ImportWarehouseDetailId);
+                e.HasIndex(x => x.ImportWarehouseId);
 
                 e.HasOne(d => d.ProductDetail)
                 .WithMany(p => p.ImportWarehouseDetails)
@@ -272,7 +272,7 @@ namespace Entities.Data
 
                 e.HasOne(d => d.ImportWarehouse)
                 .WithMany(p => p.ImportWarehouseDetails)
-                .HasForeignKey(d => d.ImportWarehouseDetailId);
+                .HasForeignKey(d => d.ImportWarehouseId);
 
                 e.Property(x => x.ImportPrice).HasPrecision(18, 2);
             });
