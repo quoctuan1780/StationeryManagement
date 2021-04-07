@@ -1,4 +1,5 @@
 ﻿@model FinalProject.ViewModels.RegisterViewModel
+
 @{
     ViewData["Title"] = "Đăng ký";
     Layout = null;
@@ -44,13 +45,20 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Tạo tài khoản mới!</h1>
                             </div>
+                            @if (!(ViewBag.Message is null))
+                            {
+                                <div class="alert alert-danger">@ViewBag.Message</div>
+                            }
                             @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "form", role = "form" }))
                             {
                                 @Html.AntiForgeryToken()
                                 <div class="form-group">
                                     <label for="fullname">Họ tên</label>
-                                    @Html.TextBoxFor(m => m.FullName, new {@class = "form-control form-control-user",
-                                                       @placeholder = "Họ và tên"})
+                                    @Html.TextBoxFor(m => m.FullName, new
+                                    {
+                                        @class = "form-control form-control-user",
+                                                       @placeholder = "Họ và tên"
+                                    })
                                     @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
                                 </div>
                                 <div class="form-group">
@@ -86,10 +94,10 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="phone-number">Số điện thoại</label>
-                                    @Html.TextBoxFor(m => m.PhoneNumber, new 
-                                    { 
-                                        @class = "form-control form-control-user", 
-                                        @placeholder = "Số điện thoại" 
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new
+                                    {
+                                        @class = "form-control form-control-user",
+                                        @placeholder = "Số điện thoại"
                                     })
                                     @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
                                 </div>
@@ -97,26 +105,28 @@
                                     <label for="address">Địa chỉ</label>
                                     <div class="col-sm-12 row">
                                         <div class="col-sm-4 mb-3 mb-sm-0">
-                                            <select class="selectpicker show-tick form-control" 
+                                            <select class="selectpicker show-tick form-control" name="ProvinceId"
                                                     onchange="getDistricts()" id="province" data-live-search="true">
-                                                <option>Tỉnh/Thành phố</option>
-                                                @if(!(provinces is null))
+                                                <option value="null">Tỉnh/Thành phố</option>
+                                                @if (!(provinces is null))
                                                 {
-                                                    foreach(var item in provinces)
+                                                    foreach (var item in provinces)
                                                     {
                                                         <option value="@item.ProvinceId">@item.ProvinceName</option>
                                                     }
                                                 }
                                             </select>
                                         </div>
-                                        <div class="col-sm-4">
-                                            <select class="selectpicker show-tick form-control" id="district" 
+                                        <div class="col-sm-4" id="district">
+                                            <select class="selectpicker show-tick form-control"
+                                                    name="DistrictId"
+                                                    id="district-id" onchange="getWards()"
                                                     data-live-search="true">
-                                                
+                                                <option>Quận/Huyện</option>
                                             </select>
                                         </div>
-                                        <div class="col-sm-4">
-                                            <select name="WardCode" 
+                                        <div class="col-sm-4" id="ward">
+                                            <select name="WardCode" id="ward-id"
                                                     class="selectpicker show-tick form-control" data-live-search="true">
                                                 <option>Phường/Xã</option>
 
@@ -163,7 +173,7 @@
                                 <a class="small" href="#">Quên mật khẩu?</a>
                             </div>
                             <div class="text-center">
-                                <a class="small" href="#">Bạn đã có tài khoản? Đăng nhập ngay!</a>
+                                <a class="small" asp-action="Login" asp-controller="Account">Bạn đã có tài khoản? Đăng nhập ngay!</a>
                             </div>
                         </div>
                     </div>
@@ -184,20 +194,103 @@
     <!-- Custom scripts for all pages-->
     <script src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script>
+
+        async function getWards() {
+            var districtId = $("#district-id").val();
+
+            var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
+                + 'data-live-search="true"><option>Phường/Xã</option>';
+
+            if (districtId === 'null') {
+                node += '</select>';
+                $('#ward').children().remove();
+                $('#ward').append(node);
+
+                $('#ward').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
+
+            await $.ajax({
+                url: '/Account/Ward',
+                method: 'GET',
+                async: true,
+                data: { districtId: districtId },
+                success: async function (data) {
+                    for (let i of JSON.parse(data)) {
+                        node += '<option value="' + i.WardCode + '">' + i.WardName + '</option>'
+                    }
+                    node += '</select>';
+
+                    $('#ward').children().remove();
+                    $('#ward').append(node);
+
+                    $('#ward').children().selectpicker({
+                        liveSearch: true,
+                        showSubtext: true,
+                        Size: 10
+                    });
+                }
+            })
+        }
+            
         async function getDistricts() {
             var provinceId = $('#province').val();
 
-            var node = '<option>Phường/Xã</option>';
+            var node = '<select class="selectpicker show-tick form-control" name="DistrictId" id="district-id"' + 'onchange="getWards()"'
+                + 'data-live-search="true"><option>Quận/Huyện</option>';
 
+            var nodeWard = '<select name="WardCode" id="ward-id"' +
+                'class="selectpicker show-tick form-control" data - live - search="true" >' +
+                '<option>Phường/Xã</option</select>';
+
+
+            if (provinceId === 'null') {
+                node += '</select>';
+
+                $('#district').children().remove();
+                $('#district').append(node);
+
+                $('#ward').children().remove();
+                $('#ward').append(nodeWard);
+
+
+                $('#district').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+
+                $('#ward').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
             await $.ajax({
                 url: '/Account/District',
                 method: 'GET',
+                async: true,
                 data: { provinceId: provinceId },
                 success: async function (data) {
                     for (let i of JSON.parse(data)) {
                         node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
                     }
-                    console.log(node);
+
+                    node += '</select>';
+
+                    $('#district').children().remove();
+                    $('#district').append(node);
+
+                    $('#district').children().selectpicker({
+                        liveSearch: true,
+                        showSubtext: true,
+                        Size: 10
+                    });
                 }
             });
         }

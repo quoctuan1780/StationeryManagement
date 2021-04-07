@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Models
 {
@@ -12,6 +13,6 @@ namespace Entities.Models
         [StringLength(80)]
         public string WardName { get; set; }
 
-        public virtual User User { get; set; }
+        public virtual IList<User> Users { get; set; }
     }
 }

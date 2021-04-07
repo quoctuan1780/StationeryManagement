@@ -9,5 +9,7 @@ namespace Services.Interfacies
         Task<IList<Province>> GetProvincesAsync();
 
         Task<IList<District>> GetDistrictsByProvinceIdAsync(int provinceId);
+
+        Task<IList<Ward>> GetWardsByDistrictIdAsync(int districtId);
     }
 }

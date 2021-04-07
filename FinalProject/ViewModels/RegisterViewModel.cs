@@ -25,6 +25,9 @@ namespace FinalProject.ViewModels
         [Required(ErrorMessage = ValidationConstant.ERROR_GENDER_EMPTY)]
         public string Gender { get; set; }
 
+        public int ProvinceId { get; set; }
+        public int DistrictId { get; set; }
+
         [Required(ErrorMessage = ValidationConstant.ERROR_ADDRESS_EMPTY)]
         public string WardCode { get; set; }
 

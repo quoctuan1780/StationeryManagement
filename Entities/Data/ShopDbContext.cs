@@ -108,8 +108,8 @@ namespace Entities.Data
                 e.HasIndex(x => x.Id);
 
                 e.HasOne(x => x.Ward)
-                .WithOne(x => x.User)
-                .HasForeignKey<User>(x => x.WardCode);
+                .WithMany(x => x.Users)
+                .HasForeignKey(x => x.WardCode);  
             });
 
             // Entity OrderDetil

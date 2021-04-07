@@ -1,4 +1,5 @@
 ﻿@model FinalProject.ViewModels.LoginViewModel
+@using Common
 @{
     ViewData["Title"] = "Đăng nhập";
     Layout = null;
@@ -43,14 +44,32 @@
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                        <h1 class="h4 text-gray-900 mb-4">Chào mừng bạn!</h1>
                                     </div>
-                                    <form class="user">
+                                    @if (!(ViewBag.Message is null))
+                                    {
+                                        <div class="alert alert-danger">@ViewBag.Message</div>
+                                    }
+                                    @if (!(TempData[Constant.KEY_CONFIRM_EMAIL] is null))
+                                    {
+                                        <div class="alert alert-success">@TempData[Constant.KEY_CONFIRM_EMAIL]</div>
+                                    }
+                                    @if (!(TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS] is null))
+                                    {
+                                        <div class="alert alert-success">@TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS]</div>
+                                    }
+                                    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "user" }))
+                                    {
+                                        @Html.AntiForgeryToken()
                                         <div class="form-group">
-                                            <input type="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address...">
+                                            <label for="email">Email</label>
+                                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-user", @id = "exampleInputEmail", @placeholder = "Nhập địa chỉ email" })
+                                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "Text-danger" })
                                         </div>
                                         <div class="form-group">
-                                            <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
+                                            <label for="password">Mật khẩu</label>
+                                            @Html.PasswordFor(m => m.Password, new { @class = "form-control form-control-user", @id = "exampleInputPassword", @placeholder = "Mật khẩu" })
+                                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
@@ -58,23 +77,23 @@
                                                 <label class="custom-control-label" for="customCheck">Remember Me</label>
                                             </div>
                                         </div>
-                                        <a href="index.html" class="btn btn-primary btn-user btn-block">
-                                            Login
-                                        </a>
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            Đăng nhập
+                                        </button>
                                         <hr>
                                         <a href="index.html" class="btn btn-google btn-user btn-block">
-                                            <i class="fab fa-google fa-fw"></i> Login with Google
+                                            <i class="fab fa-google fa-fw"></i> Đăng nhập Google
                                         </a>
                                         <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                            <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
+                                            <i class="fab fa-facebook-f fa-fw"></i> Đăng nhập Facebook
                                         </a>
-                                    </form>
+                                    }
                                     <hr>
                                     <div class="text-center">
-                                        <a class="small" href="forgot-password.html">Forgot Password?</a>
+                                        <a class="small" href="forgot-password.html">Quên mật khẩu?</a>
                                     </div>
                                     <div class="text-center">
-                                        <a class="small" href="register.html">Create an Account!</a>
+                                        <a class="small" asp-action="Register" asp-controller="Account">Tạo một tài khoản mới!</a>
                                     </div>
                                 </div>
                             </div>

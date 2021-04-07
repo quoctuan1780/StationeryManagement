@@ -26,5 +26,10 @@ namespace Services.Services
         {
             return await _context.Provinces.ToListAsync();
         }
+
+        public async Task<IList<Ward>> GetWardsByDistrictIdAsync(int districtId)
+        {
+            return await _context.Wards.Where(x => x.DistrictId == districtId).ToListAsync();
+        }
     }
 }
