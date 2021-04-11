@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,11 @@ namespace FinalProject
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
             services.AddScoped<IProductDetailService, ProductDetailService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IEmailSender, EmailSender>();
+            services.AddSingleton<IConfiguration>(Configuration);
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

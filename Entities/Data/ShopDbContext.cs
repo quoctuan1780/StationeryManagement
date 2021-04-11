@@ -36,6 +36,11 @@ namespace Entities.Data
         public virtual DbSet<RecommendationDetail> RecommendationDetails { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<ProductDetail> ProductDetails { get; set; }
+        public virtual DbSet<Banner> Banners { get; set; }
+        public virtual DbSet<CartItem> CartItems { get; set; }
+        public virtual DbSet<Province> Provinces { get; set; }
+        public virtual DbSet<District> Districts { get; set; }
+        public virtual DbSet<Ward> Wards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -101,6 +106,10 @@ namespace Entities.Data
             {
                 e.HasKey(x => x.Id);
                 e.HasIndex(x => x.Id);
+
+                e.HasOne(x => x.Ward)
+                .WithMany(x => x.Users)
+                .HasForeignKey(x => x.WardCode);  
             });
 
             // Entity OrderDetil
@@ -238,6 +247,10 @@ namespace Entities.Data
                 e.HasIndex(x => x.ImportWarehouseId);
 
                 e.Property(x => x.Total).HasPrecision(18, 2);
+
+                e.HasOne(x => x.ReceiptRequest)
+                .WithOne(x => x.ImportWarehouse)
+                .HasForeignKey<ImportWarehouse>(x => x.ReceiptRequestId);
             });
 
             //Entity ImportWarehouseDetail
@@ -311,6 +324,86 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.ProductDetails)
                 .HasForeignKey(x => x.ProductId);
+            });
+
+            // Entity Banner
+            modelBuilder.Entity<Banner>(e =>
+            {
+                e.HasKey(x => x.BannerId);
+                e.HasIndex(x => x.BannerId);
+            });
+
+            // Entity CartItem
+            modelBuilder.Entity<CartItem>(e =>
+            {
+                e.HasKey(x => new { x.ProductDetailId, x.UserId });
+                e.HasIndex(x => x.UserId);
+                e.HasIndex(x => x.ProductDetailId);
+
+                e.HasOne(x => x.ProductDetail)
+                .WithMany(x => x.CartItems)
+                .HasForeignKey(x => x.ProductDetailId);
+
+                e.HasOne(x => x.User)
+                .WithMany(x => x.CartItems)
+                .HasForeignKey(x => x.UserId);
+
+                e.Property(x => x.Price).HasPrecision(18, 2);
+            });
+
+            // Entity Province
+            modelBuilder.Entity<Province>(e =>
+            {
+                e.HasKey(x => x.ProvinceId);
+                e.HasIndex(x => x.ProvinceId);
+                e.HasIndex(x => x.Code);
+            });
+
+            // Entity District
+            modelBuilder.Entity<District>(e =>
+            {
+                e.HasKey(x => x.DistrictId);
+                e.HasIndex(x => x.DistrictId);
+                e.HasIndex(x => x.ProvinceId);
+
+                e.HasOne(x => x.Province)
+                .WithMany(x => x.Districts)
+                .HasForeignKey(x => x.ProvinceId);
+            });
+
+            // Entity Ward
+            modelBuilder.Entity<Ward>(e =>
+            {
+                e.HasKey(x => x.WardCode);
+                e.HasIndex(x => x.WardCode);
+                e.HasIndex(x => x.DistrictId);
+
+                e.HasOne(x => x.District)
+                .WithMany(x => x.Wards)
+                .HasForeignKey(x => x.DistrictId);
+            });
+
+            // Entity Receipt Request
+            modelBuilder.Entity<ReceiptRequest>(e =>
+            {
+                e.HasKey(x => x.ReceiptRequestId);
+                e.HasIndex(x => x.ReceiptRequestId);
+            });
+
+            //Entity Receipt Request Detail
+            modelBuilder.Entity<ReceiptRequestDetail>(e =>
+            {
+                e.HasKey(x => new { x.ProductDetailId, x.ReceiptRequestId });
+                e.HasIndex(x => x.ReceiptRequestId);
+                e.HasIndex(x => x.ProductDetailId);
+
+                e.HasOne(x => x.ReceiptRequest)
+                .WithMany(x => x.ReceiptRequestDetails)
+                .HasForeignKey(x => x.ReceiptRequestId);
+
+                e.HasOne(x => x.ProductDetail)
+                .WithMany(x => x.ReceiptRequestDetails)
+                .HasForeignKey(x => x.ProductDetailId);
             });
         }
     }

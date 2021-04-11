@@ -19,6 +19,8 @@ namespace Entities.Models
 
         public decimal ImportPrice { get; set; }
 
+        public string Status { get; set; }
+
         public virtual ImportWarehouse ImportWarehouse { get; set; }
         public virtual Provider Provider { get; set; }
         public virtual ProductDetail ProductDetail { get; set; }

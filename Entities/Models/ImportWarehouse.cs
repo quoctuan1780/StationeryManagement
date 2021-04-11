@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Permissions;
 
 namespace Entities.Models
 {
@@ -21,5 +22,8 @@ namespace Entities.Models
         public string Status { get; set; }
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
+
+        public int ReceiptRequestId { get; set; }
+        public virtual ReceiptRequest ReceiptRequest { get; set; }
     }
 }

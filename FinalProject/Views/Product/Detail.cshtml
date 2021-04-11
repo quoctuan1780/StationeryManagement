@@ -1,8 +1,17 @@
-﻿@using System.Web 
+﻿@using System.Web
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var product = ViewBag.Product as Entities.Models.Product;
+
+
+    int? productDetailId = null;
+
+    string image = null;
+
+    decimal? price = null;
+
+    var isLogin = User.Identity.IsAuthenticated;
 }
 
 <div class="breadcrumbs">
@@ -26,85 +35,39 @@
         <div id="main" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-main">
             <div class="product-essential">
                 <div class="wrap">
-                    <form action="#" method="post" id="product_addtocart_form">
+                    <form action="/Cart/AddToCart" method="post" id="product-addtocart-form">
                         <div class="product-name">
                             <h1>@product.ProductName</h1>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="col-lg-4">
-                                <div class="product-img-box">
-                                    <div class="image-main" onclick="showImage()">
-                                        @if (!(product.ProductImages is null))
-                                        {
-                                            <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image" 
-                                                 class="img-full-100" style="cursor:pointer" onclick="onClick(this)">
-                                        }
-                                    </div>
-                                    <div id="modal01" class="w3-modal" onclick="this.style.display='none'">
-                                        <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
-                                        <div class="w3-modal-content w3-animate-zoom">
-                                            <img id="img01">
-                                        </div>
-                                    </div>
+                                <div class="image-load">
+                                    <div class="exzoom hidden-exzoom" id="exzoom">
+                                        <div class="exzoom_img_box">
+                                            <ul class='exzoom_img_ul'>
+                                                @if (!(product.ProductImages is null))
+                                                {
+                                                    image = product.ProductImages.FirstOrDefault().Image;
 
-                                    <div id="galary-image" class="carousel slide" data-ride="carousel">
-                                        <!-- Wrapper for slides -->
-                                        <div class="carousel-inner" role="listbox">
-                                            @if (!(product.ProductImages is null))
-                                            {
-                                                if (product.ProductImages.Count == 1)
-                                                {
-                                                    <div class="item active">
-                                                        <div class="flex-row">
-                                                            <div class="sub-item">
-                                                                <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image"
-                                                                     class="img-full" alt="Chania">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <div class="item active">
-                                                        <div class="flex-row">
-                                                            <div class="sub-item">
-                                                                <img src="~/images/product/@product.ProductImages.FirstOrDefault().Image" 
-                                                                      class="img-full" alt="Chania">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    for (int i = 1; i < product.ProductImages.Count; i++)
+                                                    foreach (var item in product.ProductImages)
                                                     {
-                                                        <div class="item">
-                                                            <div class="flex-row">
-                                                                <div class="sub-item">
-                                                                    <img src="~/images/product/@product.ProductImages[i].Image" 
-                                                                          class="img-full" alt="Chania">
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                        <li><img src="~/images/product/@item.Image" class="img-full-100" style="cursor:pointer"></li>
                                                     }
                                                 }
-
-                                            }
+                                            </ul>
                                         </div>
-
-                                        <!-- Left and right controls -->
-                                        <a class="left carousel-control" href="#galary-image" role="button" data-slide="prev">
-                                            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                                            <span class="sr-only">Previous</span>
-                                        </a>
-                                        <a class="right carousel-control" href="#galary-image" role="button" data-slide="next">
-                                            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-                                            <span class="sr-only">Next</span>
-                                        </a>
+                                        <div class="exzoom_nav"></div>
+                                        <p class="exzoom_btn">
+                                            <a href="javascript:void(0);" class="exzoom_prev_btn"> < </a>
+                                            <a href="javascript:void(0);" class="exzoom_next_btn"> > </a>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-lg-8">
-                                <h5>@product.ProductName</h5>
-                                <p class="mb-2 text-muted text-uppercase small">@product.Category.CategoryName</p>
+                                <h2>@product.ProductName</h2>
+                                <h3 class="mb-2 text-muted text-uppercase small">Loại sản phẩm: @product.Category.CategoryName</h3>
                                 <ul class="rating">
                                     <li>
                                         <i class="fa fa-star fa-sm text-primary"></i>
@@ -122,465 +85,91 @@
                                         <i class="fa fa-star fa-sm text-primary"></i>
                                     </li>
                                 </ul>
-                                <p><span class="mr-1"><strong>@product.Price</strong></span></p>
-                                <p class="pt-1">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam, sapiente illo. Sit error voluptas repellat rerum quidem, soluta enim perferendis voluptates laboriosam. Distinctio, officia quis dolore quos sapiente
-                                    tempore alias.
-                                </p>
+                                <p><h3 class="mr-1">Giá bán: <strong style="color: #ee4d2d">@product.Price</strong></h3></p>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless mb-0">
                                         <tbody>
-                                            <tr>
-                                                <th class="pl-0 w-25" scope="row"><strong>Model</strong></th>
-                                                <td>Shirt 5407X</td>
-                                            </tr>
-                                            <tr>
-                                                <th class="pl-0 w-25" scope="row"><strong>Color</strong></th>
-                                                <td>Black</td>
-                                            </tr>
-                                            <tr>
-                                                <th class="pl-0 w-25" scope="row"><strong>Delivery</strong></th>
-                                                <td>USA, Europe</td>
-                                            </tr>
+                                            @if (!(product.ProductDetails is null))
+                                            {
+                                                <tr>
+                                                    <th class="pl-0 w-25" scope="row">
+                                                        <strong>Loại</strong> (chọn một loại)
+                                                        <br />
+                                                        <strong>Đã chọn: <span id="type-choose"></span></strong>
+                                                    </th>
+                                                    <td>
+                                                    @foreach (var item in product.ProductDetails)
+                                                    {
+                                                        if (item.Quantity > 0)
+                                                        {
+                                                            <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId" 
+                                                                onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">@item.Color</button>
+
+                                                            productDetailId = item.ProductDetailId;
+
+                                                            price = product.Price;
+                                                        }
+                                                    }
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="pl-0 w-25" scope="row"><strong>Kích thước (mm)</strong></th>
+                                                    <td>
+                                                        <div id="product-detail-size" style="padding-left: 2px; display: inline-block;">
+                                                            @foreach (var item in product.ProductDetails)
+                                                            {
+                                                                @string.Concat(item.Length, "x", item.Width, "x", item.Height, " ")
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="pl-0 w-25" scope="row"><strong>Xuất xứ</strong></th>
+                                                    <td>
+                                                        <div id="product-detail-origin" style="padding-left: 2px; display: inline-block;">
+                                                            @foreach (var item in product.ProductDetails)
+                                                            {
+                                                                @string.Concat(item.Origin, " ")
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
                                         </tbody>
                                     </table>
                                 </div>
                                 <hr>
-                                <div class="table-responsive mb-2">
-                                    <table class="table table-sm table-borderless">
-                                        <tbody>
-                                            <tr>
-                                                <td class="pl-0 pb-0 w-25">Quantity</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-0">
-                                                    <div class="def-number-input number-input safari_only mb-0">
-                                                        <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus"></button>
-                                                        <input class="quantity form-control" min="0" name="quantity" value="1" type="number">
-                                                        <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div style="display: flex; flex-wrap: nowrap; justify-content: flex-start" class="mx-2">
+                                    <strong style="padding-right: 2rem">Quantity</strong>
+                                    <div style="display: flex; align-items: center; height: 30px;">
+                                        <button class="btn btn-danger" style="height: 30px;" type="button" onclick="decrease()">
+                                            -
+                                        </button>
+                                        <input type="text" id="Quantity" name="Quantity" min="1" value="1" 
+                                               class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
+                                        <button class="btn btn-danger" style="height: 30px" type="button" onclick="ascending()">
+                                            +
+                                        </button>
+
+                                        <span id="detail-quantity" style="padding-left: 2rem;">@product.Total sản phẩm sẵn có</span>
+                                    </div>
+
                                 </div>
-                                <a type="button" href="./CheckOut.html" class="btn btn-primary btn-md mr-1 mb-2">Buy now</a>
-                                <button type="button" class="btn btn-light btn-md mr-1 mb-2">
-                                    <i class="fas fa-shopping-cart pr-2"></i>Add to cart
-                                </button>
+                                <hr />
                             </div>
                         </div>
                     </form>
-
+                    <div class="col-lg-12">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-8">
+                            <button type="button" class="btn btn-cart btn-md mr-1 mb-2 btn-danger"
+                                    onclick="submit(@price, '@image', '@product.ProductName', '@isLogin')">
+                                <i class="icon-shopping-cart" style="padding-right: 1rem;"></i>Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                    </div>
                     <!--Tab detail-->
-                    <div class="tab-detail">
-                        <ul class="nav nav-tabs">
-                            <li class="active"><a data-toggle="tab" href="#home">Mô tả chi tiết</a></li>
-                            <li><a data-toggle="tab" href="#menu1">Additional Info</a></li>
-                            <li><a data-toggle="tab" href="#menu2">Review</a></li>
-                            <li><a data-toggle="tab" href="#menu3">Tags</a></li>
-                            <li><a data-toggle="tab" href="#menu4">Đánh giá</a></li>
-                        </ul>
 
-                        <div class="tab-content">
-                            <div id="home" class="tab-pane fade in active">
-                                @Html.Raw(HttpUtility.HtmlDecode(product.Description))
-                            </div>
-                            <div id="menu1" class="tab-pane fade">
-                                <h3>Additional Information</h3>
-                                <p>Color</p>
-                                <p>Size</p>
-                            </div>
-                            <div id="menu2" class="tab-pane fade">
-                                <h3>Customer Reviews 1 item(s)</h3>
-                                <p><span tyle="float:left;">1 Item(s)</span> <span style="float:right;">Show <select><option>6</option><option selected>10</option><option>12</option><option>15</option><option>20</option></select>per page</span></p>
-                                <br />
-                                <p><a href="#>">7uptheme</a></p>
-                                <p>At verov eos et accusamus et iusto ods un dignissimos ducimus qui blan ditiis prasixer esentium</p>
-                                <table class="ratings-table">
-                                    <colgroup>
-                                        <col class="review-label" />
-                                        <col class="review-value" />
-                                    </colgroup>
-                                    <tbody>
-                                        <tr>
-                                            <th>Quality</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:80%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Price</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:80%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Value</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:100%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p>Review by 7uptheme / (Posted on 4/14/2015)</p>
-                                <div class="form-add">
-                                    <h2>Write Your Own Review</h2>
-                                    <form action="" method="post" id="review-form">
-                                        <input name="form_key" type="hidden" value="JbT1G5uAkBcFDot6" />
-                                        <h3>
-                                            You're reviewing: <span>Ipad Air and iOS7</span>
-                                        </h3>
-                                        <div class="fieldset">
-                                            <h4>How do you rate this product? <em class="required">*</em></h4>
-                                            <span id="input-message-box"></span>
-                                            <table class="data-table review-summary-table ratings" id="product-review-table">
-                                                <col width="1" />
-                                                <col />
-                                                <col />
-                                                <col />
-                                                <col />
-                                                <col />
-                                                <thead>
-                                                    <tr>
-                                                        <th>&nbsp;</th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:20%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:40%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:60%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:80%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:100%;"></span>
-                                                            </div>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <th>Price</th>
-                                                        <td class="value"><label for="Price_1"><input type="radio" name="ratings[3]" id="Price_1" value="11" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_2"><input type="radio" name="ratings[3]" id="Price_2" value="12" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_3"><input type="radio" name="ratings[3]" id="Price_3" value="13" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_4"><input type="radio" name="ratings[3]" id="Price_4" value="14" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_5"><input type="radio" name="ratings[3]" id="Price_5" value="15" class="radio" /></label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Value</th>
-                                                        <td class="value"><label for="Value_1"><input type="radio" name="ratings[2]" id="Value_1" value="6" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_2"><input type="radio" name="ratings[2]" id="Value_2" value="7" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_3"><input type="radio" name="ratings[2]" id="Value_3" value="8" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_4"><input type="radio" name="ratings[2]" id="Value_4" value="9" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_5"><input type="radio" name="ratings[2]" id="Value_5" value="10" class="radio" /></label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Quality</th>
-                                                        <td class="value"><label for="Quality_1"><input type="radio" name="ratings[1]" id="Quality_1" value="1" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_2"><input type="radio" name="ratings[1]" id="Quality_2" value="2" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_3"><input type="radio" name="ratings[1]" id="Quality_3" value="3" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_4"><input type="radio" name="ratings[1]" id="Quality_4" value="4" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_5"><input type="radio" name="ratings[1]" id="Quality_5" value="5" class="radio" /></label></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <input type="hidden" name="validate_rating" class="validate-rating" value="" />
-                                            <ul class="form-list">
-                                                <li>
-                                                    <label for="review_field" class="required"><em>*</em>Let us know your thoughts</label>
-                                                    <div class="input-box">
-                                                        <textarea name="detail" id="review_field" cols="5" rows="3" class="required-entry"></textarea>
-                                                    </div>
-                                                </li>
-                                                <li class="inline-label">
-                                                    <label for="summary_field" class="required"><em>*</em>Summary of Your Review</label>
-                                                    <div class="input-box">
-                                                        <input type="text" name="title" id="summary_field" class="input-text required-entry" value="" />
-                                                    </div>
-                                                </li>
-                                                <li class="inline-label">
-                                                    <label for="nickname_field" class="required"><em>*</em>What's your nickname?</label>
-                                                    <div class="input-box">
-                                                        <input type="text" name="nickname" id="nickname_field" class="input-text required-entry" value="" />
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="buttons-set">
-                                            <button type="submit" title="Submit Review" class="button"><span><span>Submit Review</span></span></button>
-                                        </div>
-                                    </form>
-
-                                </div>
-                            </div>
-                            <div id="menu3" class="tab-pane fade">
-                                <h3>Product Tags</h3>
-                                <p>Add Your Tags:</p>
-                                <form action="" menthod="get">
-                                    <input type="text" nam="tags" />
-                                    <button><span>Add tags</span></button>
-                                </form>
-                            </div>
-                            <div id="menu4" class="tab-pane fade ">
-                                <div class="row">
-
-                                    <div class="col-lg-2">
-                                        <img src="./images/product/small/truyen-co-hai-con-meo-ngoi-ben-cua-so.jpg" alt="co hai con meo" class="img-responsive">
-                                    </div>
-                                    <div class="col-lg-9 ">
-                                        <div class="row">
-                                            <p class="text-content-checkout">Nguyễn Văn A </p>
-                                        </div>
-                                        <p>Nội dung đánh giá</p>
-
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--End Tab detail-->
-                    <!--Upselt product-->
-                    <div id="upsell_pro " class="products-grid ">
-                        <div class="inner ">
-                            <div class="title ">
-                                <span>Upsell Products</span>
-                            </div>
-                            <div class="block vt-slider vt-slider5 row ">
-                                <div class="slider-inner ">
-                                    <div class="container-slider ">
-                                        <div class="products-grid ">
-                                            <div class="item ">
-                                                <div class="item-wrap ">
-                                                    <div class="item-image ">
-                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
-                                                            <img class="first_image " src="images/product/larg/demo6.jpg " alt="Product demo " />
-                                                        </a>
-                                                        <div class="item-btn ">
-                                                            <div class="box-inner ">
-                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
-                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
-                                                                <span class="qview ">
-                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
-                                                    </div>
-                                                    <div class="pro-info ">
-                                                        <div class="pro-inner ">
-                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content ">
-                                                                <div class="wrap-price ">
-                                                                    <div class="price-box ">
-                                                                        <span class="regular-price ">
-                                                                            <span class="price ">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings ">
-                                                                    <div class="rating-box ">
-                                                                        <div class="rating " style="width:80% "></div>
-                                                                    </div>
-                                                                    <span class="amount "><a href="# ">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item ">
-                                                <div class="item-wrap ">
-                                                    <div class="item-image ">
-                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
-                                                            <img class="first_image " src="images/product/larg/demo7.jpg " alt="Product demo " />
-                                                        </a>
-                                                        <div class="item-btn ">
-                                                            <div class="box-inner ">
-                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
-                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
-                                                                <span class="qview ">
-                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
-                                                    </div>
-                                                    <div class="pro-info ">
-                                                        <div class="pro-inner ">
-                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content ">
-                                                                <div class="wrap-price ">
-                                                                    <div class="price-box ">
-                                                                        <span class="regular-price ">
-                                                                            <span class="price ">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings ">
-                                                                    <div class="rating-box ">
-                                                                        <div class="rating " style="width:80% "></div>
-                                                                    </div>
-                                                                    <span class="amount "><a href="# ">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item ">
-                                                <div class="item-wrap ">
-                                                    <div class="item-image ">
-                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
-                                                            <img class="first_image " src="images/product/larg/demo8.jpg " alt="Product demo " />
-                                                        </a>
-                                                        <div class="item-btn ">
-                                                            <div class="box-inner ">
-                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
-                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
-                                                                <span class="qview ">
-                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
-                                                    </div>
-                                                    <div class="pro-info ">
-                                                        <div class="pro-inner ">
-                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content ">
-                                                                <div class="wrap-price ">
-                                                                    <div class="price-box ">
-                                                                        <span class="regular-price ">
-                                                                            <span class="price ">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings ">
-                                                                    <div class="rating-box ">
-                                                                        <div class="rating " style="width:80% "></div>
-                                                                    </div>
-                                                                    <span class="amount "><a href="# ">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item ">
-                                                <div class="item-wrap ">
-                                                    <div class="item-image ">
-                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
-                                                            <img class="first_image " src="images/product/larg/demo9.jpg " alt="Product demo " />
-                                                        </a>
-                                                        <div class="item-btn ">
-                                                            <div class="box-inner ">
-                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
-                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
-                                                                <span class="qview ">
-                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
-                                                    </div>
-                                                    <div class="pro-info ">
-                                                        <div class="pro-inner ">
-                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content ">
-                                                                <div class="wrap-price ">
-                                                                    <div class="price-box ">
-                                                                        <span class="regular-price ">
-                                                                            <span class="price ">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings ">
-                                                                    <div class="rating-box ">
-                                                                        <div class="rating " style="width:80% "></div>
-                                                                    </div>
-                                                                    <span class="amount "><a href="# ">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item ">
-                                                <div class="item-wrap ">
-                                                    <div class="item-image ">
-                                                        <a class="product-image no-touch " href="# " title="Ipad Air and iOS7 ">
-                                                            <img class="first_image " src="images/product/larg/demo10.jpg " alt="Product demo " />
-                                                        </a>
-                                                        <div class="item-btn ">
-                                                            <div class="box-inner ">
-                                                                <a title="Add to wishlist " href="# " class="link-wishlist ">&nbsp;</a>
-                                                                <a title="Add to compare " href="# " class="link-compare ">&nbsp;</a>
-                                                                <span class="qview ">
-                                                                    <a class="vt_quickview_handler " data-original-title="Quick View " data-placement="left " data-toggle="tooltip " href="# "><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <a title="Add to cart " class="btn-cart " href="# ">&nbsp;</a>
-                                                    </div>
-                                                    <div class="pro-info ">
-                                                        <div class="pro-inner ">
-                                                            <div class="pro-title product-name "><a href="# ">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content ">
-                                                                <div class="wrap-price ">
-                                                                    <div class="price-box ">
-                                                                        <span class="regular-price ">
-                                                                            <span class="price ">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings ">
-                                                                    <div class="rating-box ">
-                                                                        <div class="rating " style="width:80% "></div>
-                                                                    </div>
-                                                                    <span class="amount "><a href="# ">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="navslider ">
-                                        <a class="prev " href="# ">Prev</a>
-                                        <a class="next " href="# ">Next</a>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <!--End Upselt product-->
                 </div>
             </div>
@@ -588,16 +177,220 @@
     </div>
     <!--End detail product-->
 </div>
-@section Scripts{ 
-<script>
-    $(document).ready(function () {
-        $('#left-nav').remove();
-        $('#banner').remove();
-    });
+@section Scripts{
+    <script>
+        var productIdOrder = -1;
+        var quantity = $('#Quantity').val();
+        var origin = null;
+        var color = null;
 
-    function onClick(element) {
-        document.getElementById("img01").src = element.src;
-        document.getElementById("modal01").style.display = "block";
-    }
-</script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+
+            $('.image-load').imagesLoaded(function () {
+                $("#exzoom").exzoom({
+                    autoPlay: false,
+                });
+                $("#exzoom").removeClass('hidden-exzoom')
+            });
+
+            setInputFilter(document.getElementById("Quantity"), function (value) {
+                return /^\d*$/.test(value) && ((value === "" || parseInt(value) > 0) && parseInt(value) <= parseInt($('#Quantity').attr('max')));
+            });
+        });
+
+        function checkValue() {
+            if ($("#Quantity").val() <= 0)
+                $("#Quantity").val(1);
+        }
+
+        function setSizeQuantity(max, productId, color, origin, size) {
+            $("#Quantity").attr({
+                "max": max,
+                "min": 1
+            });
+
+            productIdOrder = productId;
+
+            $('#detail-quantity').text(max + " sản phẩm sẵn có");
+
+            $('#type-choose').text(color);
+
+            document.getElementById('product-detail-size').textContent = size;
+
+            document.getElementById('product-detail-origin').textContent = origin;
+
+            this.color = color;
+            this.origin = origin;
+        }
+
+        function loadingOut(loading) {
+            setTimeout(() => loading.out(), 3000);
+        }
+
+        function decrease() {
+            var value = parseInt($('#Quantity').val());
+
+            if (value > 1) {
+                value -= 1;
+                document.getElementById("Quantity").value = value;
+            }
+        }
+
+        function ascending() {
+            var quantity = $('#Quantity');
+            var value = parseInt(quantity.val());
+            var max = parseInt(quantity.attr('max'))
+            if (value < max)
+                value += 1;
+            document.getElementById("Quantity").value = value;
+        }
+
+        function setQuantity() {
+            quantity = parseInt($('#Quantity').val());
+        }
+
+        function verticalTextColor() {
+            var loading = new Loading({
+                title: 'Xin hãy đợi',
+                titleColor: 'rgb(217, 83, 79)',
+                discription: 'Loading...',
+                discriptionColor: 'rgb(77, 150, 223)',
+                animationOriginColor: 'rgb(33, 179, 132)',
+                mask: true,
+                loadingPadding: '20px 50px',
+                defaultApply: true,
+            });
+
+            return loading;
+        }
+
+        function submit(price, image, productName, isLogin) {
+
+            if (isLogin !== 'True') {
+                $.notiny({
+                    position: 'right-top',
+                    theme: 'danger',
+                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                    text: 'Bạn chưa đăng nhập vào hệ thống',
+                });
+            }
+            else {
+                var loading = verticalTextColor();
+
+                loading;
+
+                if (productIdOrder === -1) {
+                    loading.out();
+
+                    $.notiny({
+                        position: 'right-top',
+                        width: '380px',
+                        theme: 'danger',
+                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                        text: 'Bạn chưa chọn loại sản phẩm muốn đặt',
+                    });
+                }
+
+                else {
+                    var quantity = $("#Quantity").val();
+
+                    if (quantity > 0) {
+                        $.ajax({
+                            url: '/Cart/AddToCart',
+                            method: 'GET',
+                            async: true,
+                            data: { productDetailId: productIdOrder, quantity: quantity, price: price },
+                            success: function (data) {
+                                switch (data) {
+                                    case "Miss":
+                                        alert("Hệ thống xảy ra lỗi, vui lòng thử lại sau");
+                                        break;
+                                    case "Updated":
+                                        $.ajax({
+                                            url: "/Cart/GetCartTotal",
+                                            method: "GET",
+                                            async: false,
+                                            data: {},
+                                            success: function (data) {
+                                                $("#total-price").text(data + " VNĐ");
+                                            },
+                                            error: function (jqXHR, exception) {
+                                                $.notiny({
+                                                    position: 'right-top',
+                                                    width: '480px',
+                                                    theme: 'danger',
+                                                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                                    text: 'Lỗi hệ thống không cập nhật được tổng tiền, vui lòng tải lại trang',
+                                                });
+                                            }
+                                        });
+
+                                        var productInCart = 'quantityProductDetail' + productIdOrder;
+
+                                        document.getElementById(productInCart).textContent = 'Số lượng: ' + quantity;
+
+                                        $("#total-item").text($("#cart-sidebar").children().length + " items");
+
+                                        loading.out();
+
+                                        $.notiny({
+                                            position: 'right-top',
+                                            theme: 'success',
+                                            template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                            text: 'Cập nhật sản phẩm thành công',
+                                        });
+
+                                        break;
+
+                                    default:
+                                        $.ajax({
+                                            url: "/Cart/GetCartTotal",
+                                            method: "GET",
+                                            async: false,
+                                            data: {},
+                                            success: function (data) {
+                                                $("#total-price").text(data + " VNĐ");
+                                            }
+                                        });
+                                        var cartItem = JSON.parse(data);
+
+                                        $("#nullItem").remove();
+
+                                        var cartItemPostive = 'quantityProductDetail' + cartItem.ProductDetailId;
+
+                                        var node = '<li class="item"><input type="hidden" class="cart" value="' + cartItem.ProductDetailId + '"/>' +
+                                            '<a href="/Product/Detail/' + cartItem.ProductDetailId + '" class="product-image">' +
+                                            '<img src="/images/product/' + image + '" width="70" height = "70"/></a>' +
+                                            '<a href="javascript:void(0)" onclick="removeItem(this)" class="btn-remove">Remove This Item</a>' +
+                                            '<div class="product-details">' +
+                                            '<p class="product-name"><a href="/Product/Detail/' + cartItem.ProductDetailId + '">' + productName +
+                                            '</a><div class="d-block">Phân loại hàng: ' + color + '</div>' +
+                                            '<div class="d-block">Xuất xứ: ' + origin + '</div>' +
+                                            '<div id="' + cartItemPostive + '" class="d-block">' +
+                                            'Số lượng: ' + quantity + '</div><div class="d-block">Giá: ' + price + ' VNĐ</div></p>' +
+                                            '</div></li>';
+
+                                        $("#cart-sidebar").append(node);
+
+                                        loading.out();
+
+                                        $.notiny({
+                                            position: 'right-top',
+                                            theme: 'success',
+                                            template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                            text: 'Thêm sản phẩm thành công',
+                                        });
+
+                                        $("#total-item").text($("#cart-sidebar").children().length + " items");
+                                        break;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
 }

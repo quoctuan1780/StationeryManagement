@@ -46,7 +46,9 @@ namespace FinalProject
                     var adminUser = new User
                     {
                         UserName = AdminAccountDefaultConstant.USERNAME,
-                        Email = AdminAccountDefaultConstant.EMAIL
+                        Email = AdminAccountDefaultConstant.EMAIL,
+                        FullName = AdminAccountDefaultConstant.FULLNAME,
+                        DateOfBirth = AdminAccountDefaultConstant.DATEOFBIRTH
                     };
 
                     var result = userManager.

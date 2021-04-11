@@ -8,11 +8,18 @@
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" media="all" />
     <link rel="stylesheet" type="text/css" href="~/style/css/image.css">
     <link rel="stylesheet" type="text/css" href="~/style/css/checkout.css">
+    <link rel="stylesheet" type="text/css" href="~/style/css/jquery.exzoom.css" />
+    <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading.css" />
+    <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading-animate.css" />
+    <link rel="stylesheet" type="text/css" href="~/style/sweetalert2/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/style/css/snackbar/notiny.css" />
     <title>@ViewData["Title"]</title>
 </head>
 
 <body class="home home-03">
-    @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
+    <div id="header">
+        @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
+    </div>
     <div id="box-content">
         <div class="container">
             <div class="row">
@@ -20,7 +27,7 @@
                     <div id="left-nav">
                         @await Html.PartialAsync("~/Views/Shared/_LeftNavigation.cshtml")
                     </div>
-                    
+
                     <div id="banner">
                         @await Html.PartialAsync("~/Views/Shared/_Banner.cshtml")
                     </div>
@@ -30,7 +37,7 @@
         @RenderBody()
     </div>
 
-    @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml") 
+    @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml")
 
     <script type="text/javascript" src="~/js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="~/style/bootstrap/js/bootstrap.min.js"></script>
@@ -40,6 +47,13 @@
     <script type="text/javascript" src="~/js/slideshow/jquery.themepunch.revolution.js"></script>
     <script type="text/javascript" src="~/js/slideshow/jquery.themepunch.plugins.min.js"></script>
     <script type="text/javascript" src="~/js/theme-home-03.js"></script>
+    <script type="text/javascript" src="~/js/images-show/images-loader.js"></script>
+    <script type="text/javascript" src="~/js/images-show/jquery.exzoom.js"></script>
+    <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
+    <script type="text/javascript" src="~/js/ProductDetailHelper.js"></script>
+    <script type="text/javascript" src="~/style/sweetalert2/dist/sweetalert2.min.js"></script>
+    <script type="text/javascript" src="~/js/snackbar/notiny.js"></script>
+    <script type="text/javascript" src="~/js/cart/cart.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

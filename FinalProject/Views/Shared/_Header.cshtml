@@ -1,4 +1,17 @@
-﻿<div id="box-header">
+﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> _userManager
+@inject Services.Interfacies.ICartService _cartService
+@{ 
+    IList<Entities.Models.CartItem> carts = null;
+    string userId = null;
+
+    var urlBack = Context.Request.Path;
+
+    if (!(User is null) && User.Identity.IsAuthenticated) {
+        userId = _userManager.GetUserId(User);
+        carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
+    }
+}
+<div id="box-header">
     <div class="header-container">
         <div class="header">
             <div class="box-header-01">
@@ -14,45 +27,99 @@
                                         <li><a class="top-link-myaccount" href="./information.html">My Account</a></li>
                                         <li><a class="top-link-wishlist" href="#">My Wishlist</a></li>
                                         <li><a class="top-link-checkout" href="#">Checkout</a></li>
-                                        <li><a class="top-link-login" href="#">Log In</a></li>
+                                        <li>
+                                            @if (User.Identity.IsAuthenticated)
+                                            {
+                                                <a class="top-link-login" href="javascript:void(0)">
+                                                    @{ 
+                                                        var user = await _userManager.GetUserAsync(User);
+                                                    }
+                                                    @user.FullName
+                                                </a>
+                                                <a class="top-link-login" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="top-link-login" asp-controller="Account" asp-action="Login" asp-route-urlBack="@urlBack">Đăng nhập</a>
+                                            }
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="box-cart">
                                 <div class="cart-mini">
                                     <div class="title">
-                                        <span class="item">0 Item</span>
+
+                                        @if (carts is null)
+                                        {
+                                            <span class="item" id="total-item">0 Items</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="item" id="total-item">@carts.Count items</span>
+                                        }
+
                                     </div>
                                     <div class="block-content">
                                         <div class="inner">
-                                            <p class="block-subtitle">Recently added item(s)</p>
+                                            <p class="block-subtitle">Giỏ hàng</p>
                                             <ol id="cart-sidebar" class="mini-products-list">
-                                                <li class="item">
-                                                    <a href="#" title="Fashion Product 09" class="product-image">
-                                                        <img src="images/product/small/image-demo-1.jpg" alt="Fashion Product 09" />
-                                                    </a>
-                                                    <a href="#" class="btn-remove">Remove This Item</a>
-                                                    <a href="#" title="Edit item" class="btn-edit">Edit item</a>
-                                                    <div class="product-details">
-                                                        <p class="product-name"><a title="Fashion Product 09" href="#">Fashion Product 09</a></p>
-                                                        <span class="price">$200.00</span>
-                                                        <div class="qty-abc">
-                                                            <a title="Decrement" class="qty-change-left" href="#">down</a>
-                                                            <input class="input-text qty" type="text" value="1" />
-                                                            <a title="Increment" class="qty-change-right" href="#">up</a>
-                                                        </div>
-                                                    </div>
-                                                </li>
+                                                @if (!(userId is null))
+                                                {
+                                                    if (carts is null || carts.FirstOrDefault() is null)
+                                                    {
+                                                        <li class="item" id="nullItem">
+                                                            <h3>Không có sản phẩm nào</h3>
+                                                        </li>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var cartItem in carts)
+                                                        {
+                                                            <li class="item">
+                                                                <input type="hidden" class="cart" value="@cartItem.ProductDetailId" />
+                                                                <a href="#" class="product-image">
+                                                                    <img src="~/images/product/@cartItem.ProductDetail.Product.ProductImages.FirstOrDefault().Image"
+                                                                         width="70" height="70" />
+                                                                </a>
+                                                                <a href="javascript:void(0)" onclick="removeItem(this)" class="btn-remove">Remove This Item</a>
+                                                                <div class="product-details">
+                                                                    <p class="product-name">
+                                                                        <a asp-controller="Product" asp-action="Detail"
+                                                                           asp-route-id="@cartItem.ProductDetail.Product.ProductId">
+                                                                            @cartItem.ProductDetail.Product.ProductName
+                                                                        </a>
+                                                                        <div class="d-block">
+                                                                            Phân loại hàng: @cartItem.ProductDetail.Color
+                                                                        </div>
+                                                                        <div class="d-block">
+                                                                            Xuất xứ: @cartItem.ProductDetail.Origin
+                                                                        </div>
+                                                                        <div id="@string.Concat("quantityProductDetail", cartItem.ProductDetailId)" class="d-block">
+                                                                            Số lượng: @cartItem.Quantity
+                                                                        </div>
+                                                                        <div class="d-block">Giá: @cartItem.Price VNĐ</div>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <li class="item" id="nullItem">
+                                                        <h3>Không có sản phẩm nào</h3>
+                                                    </li>
+                                                }
                                             </ol>
                                             <div class="summary">
                                                 <p class="subtotal">
-                                                    <span class="label">Subtotal:</span> <span class="price">$200.00</span>
+                                                    <span class="label">Tổng tiền:</span> <span id="total-price" class="price">0 VNĐ</span>
                                                 </p>
                                             </div>
                                             <div class="actions">
                                                 <div class="a-inner">
-                                                    <a class="btn-mycart" href="#" title="View my cart">view my cart</a>
-                                                    <a href="" title="Checkout" class="btn-checkout">Checkout</a>
+                                                    <a href="#" title="Checkout" class="btn btn-success">Xem giỏ hàng</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -60,23 +127,27 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="box-search">
-                            <form action="./search.html" method="POST">
-                                <button><span>search</span></button>
-                                <ul class="drop-search">
-                                    <li>
-                                        <span class="selected">All Categories </span>
-                                        <ul>
-                                            <li>All Categories </li>
-                                            <li>Cate 1</li>
-                                            <li>Cate 2</li>
-                                            <li>Cate 3</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                                <input name="search" type="text" value="" placeholder="search this site..." />
-                            </form>
-                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-8"></div>
+                    <div class="col-lg-4" style="text-align: end; margin-bottom: 5px;">
+                        <form asp-action="Search" asp-controller="Search" method="post">
+                            <div class="row">
+                                <div class="col-xs-8 col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search" id="txtSearch" />
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-primary" type="submit">
+                                                <span class="glyphicon glyphicon-search"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

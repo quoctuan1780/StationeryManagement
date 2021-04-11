@@ -13,7 +13,9 @@ namespace Entities.Models
         public double Weight { get; set; }
 
         public int Width { get; set; }
+
         public int Length { get; set; }
+
         public int Height { get; set; }
 
         public string  Color { get; set; }
@@ -23,7 +25,9 @@ namespace Entities.Models
         public virtual IList<OrderDetail> OrderDetails { get; set; }
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
-
         public virtual Product Product { get; set; }
+        public virtual IList<CartItem> CartItems { get; set; }
+
+        public virtual IList<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
     }
 }
