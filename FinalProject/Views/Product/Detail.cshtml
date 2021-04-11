@@ -98,18 +98,20 @@
                                                         <strong>Đã chọn: <span id="type-choose"></span></strong>
                                                     </th>
                                                     <td>
-                                                    @foreach (var item in product.ProductDetails)
-                                                    {
-                                                        if (item.Quantity > 0)
+                                                        @foreach (var item in product.ProductDetails)
                                                         {
-                                                            <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId" 
-                                                                onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">@item.Color</button>
+                                                            if (item.Quantity > 0)
+                                                            {
+                                                                <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
+                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">
+                                                                    @item.Color
+                                                                    </button>
 
-                                                            productDetailId = item.ProductDetailId;
+                                                                    productDetailId = item.ProductDetailId;
 
-                                                            price = product.Price;
-                                                        }
-                                                    }
+                                                                    price = product.Price;
+                                                                }
+                                                            }
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -145,7 +147,7 @@
                                         <button class="btn btn-danger" style="height: 30px;" type="button" onclick="decrease()">
                                             -
                                         </button>
-                                        <input type="text" id="Quantity" name="Quantity" min="1" value="1" 
+                                        <input type="text" id="Quantity" name="Quantity" min="1" value="1"
                                                class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
                                         <button class="btn btn-danger" style="height: 30px" type="button" onclick="ascending()">
                                             +
@@ -169,7 +171,6 @@
                         </div>
                     </div>
                     <!--Tab detail-->
-
                     <!--End Upselt product-->
                 </div>
             </div>

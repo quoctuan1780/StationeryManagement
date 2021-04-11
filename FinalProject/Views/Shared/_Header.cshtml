@@ -1,12 +1,13 @@
-﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> _userManager
+@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> _userManager
 @inject Services.Interfacies.ICartService _cartService
-@{ 
+@{
     IList<Entities.Models.CartItem> carts = null;
     string userId = null;
 
     var urlBack = Context.Request.Path;
 
-    if (!(User is null) && User.Identity.IsAuthenticated) {
+    if (!(User is null) && User.Identity.IsAuthenticated)
+    {
         userId = _userManager.GetUserId(User);
         carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
     }
@@ -31,7 +32,7 @@
                                             @if (User.Identity.IsAuthenticated)
                                             {
                                                 <a class="top-link-login" href="javascript:void(0)">
-                                                    @{ 
+                                                    @{
                                                         var user = await _userManager.GetUserAsync(User);
                                                     }
                                                     @user.FullName

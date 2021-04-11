@@ -53,6 +53,8 @@ namespace FinalProject
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddSingleton<IConfiguration>(Configuration);
+            services.AddScoped<IProviderService, ProviderService>();
+            services.AddScoped<IReceiptService, ReceiptService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

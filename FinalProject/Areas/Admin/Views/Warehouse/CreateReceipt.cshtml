@@ -1,4 +1,4 @@
-﻿@model FinalProject.Areas.Admin.ViewModels.ReceiptViewModel;
+﻿@*@model FinalProject.Areas.Admin.ViewModels.ReceiptViewModel;
 
 @{
     ViewData["Title"] = "Thêm phiếu nhập kho";
@@ -9,76 +9,175 @@
 }
 <link href="~/style/css/checkout.css" type="text/css" rel="stylesheet">
 <h1>Thêm phiếu nhập kho</h1>
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="CreateReceipt" class="margin-left" id="form-receipt">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <p>
-                <a href="javascript:AddDetail()">Thêm</a>
-            </p>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ProductId)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ProviderId)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ImportPrice)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.Quantity)
-                        </th>
-                        <th>
-                            Total
-                        </th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="details">
-                    <tr>
-                        <td>
-                            <select name="productId" id="productId0">
-                                <option value="">Chọn sản phẩm</option>
-                                @foreach (var item in listProducts)
-                                {
-                                    <option value="@item.ProductId">@item.ProductName</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select name="providerId" id="productId0">
-                                <option>Chọn nhà cung cấp</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" name="price" id="price0" onchange="Total(x)"/>
-                        </td>
-                        <td>
-                            <input type="number" name="quantity" id="quantity0" onchange="Total(x)"/>
-                        </td>
-                        <td>
-                            <input type="number" name="totalPrice" id="totalPrice0" readonly/>
-                        </td>
-                        <td>
-                            <a href="javascript:Remove(x)">Xóa</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+<div class="container-fluid">
+    <hr class="hr-end-list" />
+    @if (!(ViewBag.MessageSuccess is null))
+    {
+        <div class="alert alert-success">@ViewBag.MessageSuccess</div>
+    }
+    @if (!(ViewBag.MessageExists is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageExists</div>
+    }
+    @if (!(ViewBag.MessageError is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageError</div>
+    }
+
+    @using (Html.BeginForm("CreateReceipt", "Warehouse", FormMethod.Post, new
+    {
+        role = "form",
+        area = "Admin",
+        enctype = "multipart/form-data",
+        id = "form-receipt"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="productsDetailsId" name="productsDetailsId" />
+        <input type="hidden" name="productId" value="@Model.ProductId" />
+        <input type="hidden" name="CreateDate" value="@Model.CreateDate" />
+        <input type="hidden" name="imageRemove" id="imageRemove" />
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.CreateDate)
+            @Html.TextBoxFor(m => m.CreateDate, new { @class = "form-control", @name = "name", @id = "name" })
+            @Html.ValidationMessageFor(m => m.CreateDate, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ImportDate)
+            <textarea id="description" name="description">@Html.Raw(Model.Description)</textarea>
+            @Html.ValidationMessageFor(m => m.ImportDate, "", new { @class = "text-danger" })
+        </div>
 
 
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" onclick="AddReceipt()" />
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ProductId)
+            @Html.DropDownListFor(m => m.ProductId, listProducts, new
+            {
+                @class = "form-control",
+           @name = "category-id",
+                @id = "category-id",
+            })
+            @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group form-flex">
+            @foreach (var item in Model.ImagesString)
+            {
+                <div class="show-image" id="@item.Trim()">
+                    <img src="~/images/product/@item" class="image-product" width="150" height="150" />
+                    <i class="delete fa fa-times" onclick="confirmDeleteImage('@item', '@item.Trim()')"></i>
+                </div>
+            }
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Images)
+            @Html.TextBoxFor(m => m.Images, new
+            {
+                @class = "form-control-file",
+                @multiple = "true",
+                @type = "file",
+                @id = "images",
+                @name = "images"
+            })
+            @Html.ValidationMessageFor(m => m.Images, "", new { @class = "text-danger" })
+        </div>
+
+        <h3>Chi tiết sản phẩm</h3>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-lg-2 text-center">
+                    <span>Xuất xứ</span>
+                </div>
+                <div class="col-lg-2 text-center">
+                    <span>Trọng lượng</span>
+                </div>
+                <div class="col-lg-3 text-center">
+                    <span>Kích thước</span>
+                </div>
+                <div class="col-lg-2 text-center">
+                    <span>Màu sắc</span>
+                </div>
+                <div class="col-lg-1 text-center">
+                    <span>Chức năng</span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Total" class="control-label"></label>
-                <input asp-for="Total" class="form-control" />
-                <span asp-validation-for="Total" class="text-danger"></span>
+            <div id="product-detail" class="col-lg-12">
+                @if (!(Model is null))
+                {
+                    if (Model.Origins != null)
+
+                        for (int i = 0; i < Model.Origins.Count; i++)
+                        {
+                            <div class="row" style="padding-top: .5rem;">
+                                <div class="col-lg-2">
+                                    <input type="text" name="Origins" value="@Model.Origins[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="number" name="Weights" placeholder="KG" value="@Model.Weights[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-3">
+                                    <div style="display: flex; align-items:center;">
+                                        <input type="number" style="width: 32.33%" min="1" name="Widths" value="@Model.Widths[i]" class="form-control" placeholder="Dài(mm)" />
+                                        x
+                                        <input type="number" style="width: 32.33%" min="1" name="Lengths" value="@Model.Lengths[i]" class="form-control" placeholder="Rộng(mm)" />
+                                        x
+                                        <input type="number" style="width: 32.33%" min="1" name="Heights" value="@Model.Heights[i]" class="form-control" placeholder="Cao(mm)" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="text" name="Colors" value="@Model.Colors[i]" class="form-control" />
+                                </div>
+                                <div class="col-lg-1 text-center align-items-center">
+                                    <input type="hidden" name="productsDetailId" value="@Model.ProductsDetailId[i]" />
+                                    <input type="hidden" name="Quantities" value="@Model.Quantities[i]" />
+                                    <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
+                                </div>
+                            </div>
+                        }
+                }
+                else
+                {
+                    <div class="row" style="padding-top: .5rem;">
+                        <div class="col-lg-2">
+                            <input type="text" name="Origins" class="form-control" />
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="number" placeholder="KG" name="Weights" class="form-control" />
+                        </div>
+                        <div class="col-lg-3">
+                            <div style="display: flex; align-items:center;">
+                                <input type="number" style="width: 32.33%" min="1" name="Widths" class="form-control" placeholder="Dài(mm)" />
+                                x
+                                <input type="number" style="width: 32.33%" min="1" name="Lengths" class="form-control" placeholder="Rộng(mm)" />
+                                x
+                                <input type="number" style="width: 32.33%" min="1" name="Heights" class="form-control" placeholder="Cao(mm)" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="text" name="Colors" class="form-control" />
+                        </div>
+                        <div class="col-lg-1 text-center align-items-center">
+                            <input type="hidden" name="Quantities" value="0" />
+                            <button type="button" class="btn btn-danger" onclick="removeProductDetail(this)"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                }
             </div>
-        </form>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <button type="button" class="btn btn-primary" style="margin-left: auto;" onclick="addProductDetail()"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+    }
+
+    <div class="form-group">
+        <input type="button" value="Cập nhật sản phẩm" class="btn btn-success" onclick="submit()" />
     </div>
 </div>
 
@@ -165,17 +264,31 @@
     function Validate() {
         var ImportPrices = document.getElementsByName('ImportPrice');
         var Quantities = document.getElementsByName('Quantity');
+        var Products = document.getElementsByName('productId');
+        var Providers = document.getElementsByName('providerId');
         var countErrors = 0;
+        var node;
 
-        for (var i = 0; i < ImportPrices.length; i++) {          
-            if (ImportPrices[i] === '' || Quantities[i] === '' || ImportPrices[i] <= 0 || Quantities[i] < 1) {
-                Swal.fire ({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Dữ liệu dòng thứ '+(i+1)+'không hợp lệ!'
-                })
+        for (var i = 0; i < ImportPrices.length; i++) {
+            if (Products[i] === '') {
+                node = Products[i];
+                $(node).parent().append("Vui lòng chọn sản phẩm!");
                 countErrors++;
-                break;
+            }
+            if (Providers[i] === '') {
+                node = Providers[i];
+                $(node).parent().append("Vui lòng chọn nhà cung cấp!");
+                countErrors++;
+            }
+            if (ImportPrices[i] === '' || ImportPrices[i] <= 0) {
+                node = ImportPrices[i];
+                $(node).parent().append("Giá nhập vào không được nhỏ hơn hoặc bằng 0!");
+                countErrors++;
+            }
+            if (Quantities[i] === '' || Quantities[i] < 1) {
+                node = Quantities[i];
+                $(node).parent().append("Số lượng không được nhỏ hơn hoặc bằng 0!");
+                countErrors++;
             }
         }
         return countErrors;
@@ -210,4 +323,4 @@
         
     }
 
-</script>
+</script>*@

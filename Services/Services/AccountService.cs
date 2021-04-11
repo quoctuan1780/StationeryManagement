@@ -58,9 +58,11 @@ namespace Services.Services
 
             if (emailFinded is null) return Constant.CODE_NOT_EXISTS_ACCOUNT;
 
+
             var emailConfirmed = await _userManager.IsEmailConfirmedAsync(emailFinded);
 
             if (!emailConfirmed) return Constant.ERROR_CODE_DO_NOT_CONFIRM_EMAIL;
+
 
             var result = await _signInManager.PasswordSignInAsync(email, password, true, true);
 
@@ -76,6 +78,7 @@ namespace Services.Services
 
             return Constant.CODE_FAIL;
         }
+
 
         public async Task LogoutAsync()
         {

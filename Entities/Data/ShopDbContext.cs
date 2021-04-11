@@ -41,6 +41,8 @@ namespace Entities.Data
         public virtual DbSet<Province> Provinces { get; set; }
         public virtual DbSet<District> Districts { get; set; }
         public virtual DbSet<Ward> Wards { get; set; }
+        public virtual DbSet<ReceiptRequest> ReceiptRequests { get; set; }
+        public virtual DbSet<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,13 +111,13 @@ namespace Entities.Data
 
                 e.HasOne(x => x.Ward)
                 .WithMany(x => x.Users)
-                .HasForeignKey(x => x.WardCode);  
+                .HasForeignKey(x => x.WardCode);
             });
 
             // Entity OrderDetil
             modelBuilder.Entity<OrderDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId , x.OrderId});
+                e.HasKey(x => new { x.ProductDetailId, x.OrderId });
 
                 e.HasIndex(x => x.ProductDetailId);
                 e.HasIndex(x => x.OrderId);
@@ -219,7 +221,7 @@ namespace Entities.Data
             //Entity SaleDetail
             modelBuilder.Entity<SaleDetail>(e =>
             {
-                e.HasKey(x => new { x.SaleId, x.ProductId});
+                e.HasKey(x => new { x.SaleId, x.ProductId });
 
                 e.HasIndex(x => x.SaleId);
                 e.HasIndex(x => x.ProductId);
@@ -287,7 +289,7 @@ namespace Entities.Data
             //Entity RecommendationDetail
             modelBuilder.Entity<RecommendationDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductId , x.RecommendationId});
+                e.HasKey(x => new { x.ProductId, x.RecommendationId });
 
                 e.HasIndex(x => x.ProductId);
                 e.HasIndex(x => x.RecommendationId);

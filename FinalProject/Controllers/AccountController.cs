@@ -20,6 +20,7 @@ namespace FinalProject.Controllers
             _accountService = accountService;
             _addressService = addressService;
             _emailSender = emailSender;
+
         }
         public IActionResult Login(string urlBack)
         {
@@ -33,6 +34,7 @@ namespace FinalProject.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
         {
             urlBack ??= Url.Content(Constant.ROUTE_HOME_INDEX_CLIENT);
+
 
             if (ModelState.IsValid)
             {
@@ -57,6 +59,7 @@ namespace FinalProject.Controllers
 
                     case Constant.ERROR_CODE_DO_NOT_CONFIRM_EMAIL:
                         ViewBag.Message = MessageConstant.MESSAGE_ERROR_CONFIRM_EMAIL;
+
                         break;
                 }
             }
@@ -173,6 +176,7 @@ namespace FinalProject.Controllers
 
             return JsonConvert.SerializeObject(result); ;
         }
+
 
         public async Task<string> Ward(int? districtId)
         {

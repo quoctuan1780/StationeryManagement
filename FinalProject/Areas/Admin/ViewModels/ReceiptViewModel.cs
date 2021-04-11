@@ -1,4 +1,5 @@
 ﻿using Common;
+using Entities.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +16,12 @@ namespace FinalProject.Areas.Admin.ViewModels
         public string UserId { get; set; }
 
         public string Status { get; set; }
+
+
+        [Required]
+        [Display(Name = DisplayNameConstant.DISPLAY_RECEIPT_REQUEST)]
+        public int ReceiptRequestId  { get; set; }
+
 
         [Required(ErrorMessage = ValidationConstant.ERROR_CATEGORY_NAME_EMPTY)]
         [StringLength(30, ErrorMessage = ValidationConstant.ERROR_CATEGORY_NAME_RANGE)]

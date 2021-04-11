@@ -3,7 +3,7 @@ using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Services.Interfacies;
-using System; 
+using System;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -76,16 +76,16 @@ namespace FinalProject.Controllers
         {
             var userId = _accountService.GetUserId(User);
 
-            if(productDetailId is null || userId is null)
+            if (productDetailId is null || userId is null)
             {
                 return Constant.MISS_VALUE;
             }
 
-            using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var result = await _cartService.DeleteCartItemAsync(productDetailId.Value, userId);
 
-                if(result > 0)
+                if (result > 0)
                 {
                     transaction.Complete();
 

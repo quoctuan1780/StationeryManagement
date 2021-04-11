@@ -1,6 +1,5 @@
-﻿using Entities.Models;
+using Entities.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 

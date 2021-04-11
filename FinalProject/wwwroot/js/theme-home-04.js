@@ -1,7 +1,7 @@
 (function($){
     "use strict"; // Start of use strict
 jQuery(document).ready(function($){  
-		<!-- goto top -->
+		//// goto top -->
 		$("#gototop").hide();
 		$(function () {
 			var wh = $(window).height();
@@ -20,7 +20,7 @@ jQuery(document).ready(function($){
 				return false;
 			});
 		});
-		<!-- menu -->
+		//// menu -->
 				$('.vt-slider67 div.products-grid').owlCarousel({
 					items: 4,
 					itemsCustom: [ 
@@ -34,7 +34,7 @@ jQuery(document).ready(function($){
 					slideSpeed : 800,
 					addClassActive: true,
 				});
-	<!-- scroll top	 -->
+	//// scroll top	 -->
 	$(window).scroll(function () {		
 		if($(window).width()>768)
 		{
@@ -51,7 +51,7 @@ jQuery(document).ready(function($){
 			$('.bgr-menu').css('display','none');
 	}); 
 	
-	<!-- search advan -->
+	//// search advan -->
 	jQuery('.drop-search span.selected').click(function(){
 	jQuery('.drop-search ul').toggleClass('show');
 	});
@@ -70,20 +70,20 @@ jQuery(document).ready(function($){
 		jQuery(".vertical-menu ul").slideToggle();
 	});
 	
-	<!-- slide  show -->
+	//// slide  show -->
 	$('.vt-slideshow').revolution({
 	 startwidth:1170,
 	 startheight:400,			 
   });
 	
-	<!-- position 03 -->
+	//// position 03 -->
 	jQuery('.box-1 .control li').click(function(){
 	jQuery('.box-2 .slide').animate({left: jQuery(this).attr('data-rel')});
 	jQuery('.box-1 .control li').removeClass('active');
 	jQuery(this).addClass('active');
 	});
 	
-	<!-- position 02 -->
+	//// position 02 -->
 	$('.vt-slider3 div.products-grid').owlCarousel({
 		items: 4,
 		itemsCustom: [ 
@@ -113,7 +113,7 @@ jQuery(document).ready(function($){
 		e.preventDefault();
 		$('.vt-slider3 div.products-grid').trigger('owl.next');
 	});
-	<!-- position 04 -->
+	//// position 04 -->
 	$('.vt-slider4 div.products-grid').owlCarousel({
 		items: 1,
 		itemsCustom: [ 
@@ -144,8 +144,8 @@ jQuery(document).ready(function($){
 		$('.vt-slider4 div.products-grid').trigger('owl.next');
 	});
 	
-	<!-- position 08 -->
-	<!-- position 08 1 -->
+	//// position 08 -->
+	//// position 08 1 -->
 		$('.vt-slider7 div.products-grid').owlCarousel({
 			items: 4,
 			itemsCustom: [ 
@@ -204,7 +204,7 @@ jQuery(document).ready(function($){
 			e.preventDefault();
 			$('.vt-slider8 div.products-grid').trigger('owl.next');
 		});
-		<!-- position 08 2 -->
+		// position 08 2 -->
 		$('.vt-slider5 div.products-grid').owlCarousel({
 			items: 4,
 			itemsCustom: [ 
@@ -234,7 +234,7 @@ jQuery(document).ready(function($){
 			e.preventDefault();
 			$('.vt-slider5 div.products-grid').trigger('owl.next');
 		});
-		<!-- position 08 3 -->
+		// position 08 3 -->
 		$('.vt-slider6 div.products-grid').owlCarousel({
 		items: 4,
 		itemsCustom: [ 
@@ -301,7 +301,7 @@ jQuery(document).ready(function($){
 	});
 	
 	/* grid,list */
-		<!-- left 1 -->
+		// left 1 -->
 				$('#tab1').click(function(){
 					if($(this).hasClass('accordion-open')){
 						$(this).removeClass('accordion-open');
@@ -312,7 +312,7 @@ jQuery(document).ready(function($){
 					}                            
 					$('.tabcontent1').slideToggle();
 				});
-				<!-- left 2 -->
+				// left 2 -->
 				$('#tab11').click(function(){
 					if($(this).hasClass('accordion-open')){
 						$(this).removeClass('accordion-open');
@@ -323,7 +323,7 @@ jQuery(document).ready(function($){
 					}                            
 					$('.tabcontent11').slideToggle();
 				});
-				<!-- left 3 -->
+				// left 3 -->
 				$('#tab12').click(function(){
 					if($(this).hasClass('accordion-open')){
 						$(this).removeClass('accordion-open');
@@ -334,7 +334,7 @@ jQuery(document).ready(function($){
 					}                            
 					$('.tabcontent12').slideToggle();
 				});
-				<!-- left 4 -->
+				// left 4 -->
 				$('#tab13').click(function(){
 					if($(this).hasClass('accordion-open')){
 						$(this).removeClass('accordion-open');
@@ -345,7 +345,7 @@ jQuery(document).ready(function($){
 					}                            
 					$('.tabcontent13').slideToggle();
 				});
-				<!-- left 5 -->
+				// left 5 -->
 					$('#tab2').click(function(){
 						if($(this).hasClass('accordion-open')){
 							$(this).removeClass('accordion-open');
@@ -356,7 +356,7 @@ jQuery(document).ready(function($){
 						}                            
 						$('.tabcontent2').slideToggle();
 					});
-					<!-- left 5 -->
+					// left 5 -->
 				$('#tab4').click(function(){
 					if($(this).hasClass('accordion-open')){
 						$(this).removeClass('accordion-open');
@@ -367,7 +367,7 @@ jQuery(document).ready(function($){
 					}                            
 					$('.tabcontent4').slideToggle();
 				});
-				<!-- left 6 -->
+				// left 6 -->
 				$('#tab3').click(function(){
 							if($(this).hasClass('accordion-open')){
 								$(this).removeClass('accordion-open');
@@ -378,7 +378,7 @@ jQuery(document).ready(function($){
 							}                            
 							$('.tabcontent3').slideToggle();
 						});
-					<!-- left 7 -->
+					// left 7 -->
 					$('#tab5').click(function(){
 						if($(this).hasClass('accordion-open')){
 							$(this).removeClass('accordion-open');
@@ -389,7 +389,7 @@ jQuery(document).ready(function($){
 						}                            
 						$('.tabcontent5').slideToggle();
 					});
-					<!-- toolbar top -->
+					// toolbar top -->
 					jQuery('.toolbar-top .selected-order').html(jQuery('.toolbar-top .select-order li .selected').html());
 					jQuery('.toolbar-top .selected-limiter').html(jQuery('.toolbar-top .select-limiter li .selected').html());
 					 jQuery('.toolbar-top .selected-limiter').click(function(){
@@ -407,7 +407,7 @@ jQuery(document).ready(function($){
 					   jQuery('.toolbar-top .select-order li').click(function(){
 					  jQuery('.toolbar-top .selected-order').html(jQuery(this).html());
 					  });
-					<!-- toolbar bootom-->
+					// toolbar bootom-->
 					jQuery('.toolbar-bottom .selected-order').html(jQuery('.toolbar-bottom .select-order li .selected').html());
 						jQuery('.toolbar-bottom .selected-limiter').html(jQuery('.toolbar-bottom .select-limiter li .selected').html());
 						 jQuery('.toolbar-bottom .selected-limiter').click(function(){
