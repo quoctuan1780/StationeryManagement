@@ -10996,3 +10996,17 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+
+/* Login background */
+.background-body-login {
+    background-image: url(../../images/background/bg.jpg);
+    background-size: cover;
+    background-repeat: no-repeat; 
+}
+
+.background-login {
+    background-image: url(../../images/background/1045.jpg_wh860.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+/* End login background */

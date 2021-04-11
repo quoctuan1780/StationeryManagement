@@ -34,6 +34,17 @@ namespace Services.Services
                 .ToListAsync();
         }
 
+        public async Task<IList<string>> GetColorByIdAsync(int productId)
+        {
+            var listDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
+            var listColor = new List<string>();
+            foreach(var item in listDetails)
+            {
+                listColor.Add(item.Color);
+            }
+            return listColor;
+        }
+
         public async Task<Product> GetProductByIdAsync(int id)
         {
             return await _context.Products.Where(x => x.ProductId == id)
@@ -41,6 +52,11 @@ namespace Services.Services
                             .Include(x => x.ProductImages)
                             .Include(x => x.ProductDetails)
                             .FirstOrDefaultAsync();
+        }
+
+        public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
+        {
+            return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
         }
 
         public async Task<bool> IsExistsProduct(Product product)

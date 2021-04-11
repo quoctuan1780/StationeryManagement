@@ -10,5 +10,14 @@
         public const string DISPLAY_PRODUCT_CATEGORY = "Loại sản phẩm";
         public const string DISPLAY_PRODUCT_IMAGE = "Hình ảnh";
         public const string DISPLAY_PRODUCT_QUANTITY = "Số lượng";
+
+
+        public const string DISPLAY_RECEIPT_REQUEST = "Mã phiếu yêu cầu";
+        public const string DISPLAY_RECEIPT_REQUEST_CREATE_DATE = "Ngày tạo";
+        public const string DISPLAY_RECEIPT_REQUEST_USER_ID = "Người tạo";
+        public const string DISPLAY_RECEIPT_REQUEST_STATUS = "Trạng thái";
+        public const string DISPLAY_PRODUCT_COLOR = "Màu sắc";
+        public const string DISPLAY_PRODUCT_SIZE = "Kích thước";
+        public const string DISPLAY_PRODUCT_ORIGIN = "Xuất xứ";
     }
 }

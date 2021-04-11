@@ -1,0 +1,215 @@
+﻿@model FinalProject.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+    var urlBack = ViewBag.UrlBack as string;
+    var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>@ViewData["Title"]</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template-->
+    <link href="~/admin/css/sb-admin-2.css" rel="stylesheet">
+
+
+    <!-- Latest compiled and minified JavaScript -->
+    <link rel="stylesheet" href="~/admin/bootstrap-select/css/bootstrap-select.min.css">
+</head>
+
+<body class="background-body-login">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-5 d-none d-lg-block background-login"></div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Tạo tài khoản mới!</h1>
+                            </div>
+                            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "form", role = "form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="form-group">
+                                    <label for="fullname">Họ tên</label>
+                                    @Html.TextBoxFor(m => m.FullName, new {@class = "form-control form-control-user",
+                                                       @placeholder = "Họ và tên"})
+                                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="gander">Giới tính</label>
+                                    <div class="col-sm-12 mb-3 mb-sm-0 text-center">
+                                        @Html.RadioButtonFor(m => m.Gender, "Nam", new { @checked = true })
+                                        <label for="gender">Nam</label>
+                                        @Html.RadioButtonFor(m => m.Gender, "Nữ")
+                                        <label for="gender">Nữ</label>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.Gender, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="dateofbirth">Ngày sinh</label>
+                                    @Html.TextBoxFor(m => m.DateOfBirth, new
+                                    {
+                                        @class = "form-control form-control-user",
+                                        @placeholder = "Ngày sinh",
+                                        @type = "date"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.DateOfBirth, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    @Html.TextBoxFor(m => m.Email, new
+                                    {
+                                        @type = "email",
+                                        @class = "form-control form-control-user",
+                                        @id = "exampleInputEmail",
+                                        @placeholder = "Email"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone-number">Số điện thoại</label>
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new 
+                                    { 
+                                        @class = "form-control form-control-user", 
+                                        @placeholder = "Số điện thoại" 
+                                    })
+                                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="address">Địa chỉ</label>
+                                    <div class="col-sm-12 row">
+                                        <div class="col-sm-4 mb-3 mb-sm-0">
+                                            <select class="selectpicker show-tick form-control" 
+                                                    onchange="getDistricts()" id="province" data-live-search="true">
+                                                <option>Tỉnh/Thành phố</option>
+                                                @if(!(provinces is null))
+                                                {
+                                                    foreach(var item in provinces)
+                                                    {
+                                                        <option value="@item.ProvinceId">@item.ProvinceName</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <select class="selectpicker show-tick form-control" id="district" 
+                                                    data-live-search="true">
+                                                
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <select name="WardCode" 
+                                                    class="selectpicker show-tick form-control" data-live-search="true">
+                                                <option>Phường/Xã</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.WardCode, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Mật khẩu</label>
+                                    <div class="com-sm-12 row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            @Html.PasswordFor(m => m.Password, new
+                                            {
+                                                @class = "form-control form-control-user",
+                                                @id = "exampleInputPassword",
+                                                @placeholder = "Mật khẩu"
+                                            })
+                                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-sm-6">
+                                            @Html.PasswordFor(m => m.ConfirmPassword, new
+                                            {
+                                                @class = "form-control form-control-user",
+                                                @placeholder = "Nhập lại mật khẩu"
+                                            })
+                                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-user btn-block">
+                                    Đăng ký
+                                </button>
+                                <hr>
+                                <a href="#" class="btn btn-google btn-user btn-block">
+                                    <i class="fab fa-google fa-fw"></i> Đăng ký với Google
+                                </a>
+                                <a href="#" class="btn btn-facebook btn-user btn-block">
+                                    <i class="fab fa-facebook-f fa-fw"></i> Đăng ký Facebook
+                                </a>
+                            }
+                            <hr>
+                            <div class="text-center">
+                                <a class="small" href="#">Quên mật khẩu?</a>
+                            </div>
+                            <div class="text-center">
+                                <a class="small" href="#">Bạn đã có tài khoản? Đăng nhập ngay!</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="~/admin/vendor/jquery/jquery.min.js"></script>
+
+    <script src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script>
+        async function getDistricts() {
+            var provinceId = $('#province').val();
+
+            var node = '<option>Phường/Xã</option>';
+
+            await $.ajax({
+                url: '/Account/District',
+                method: 'GET',
+                data: { provinceId: provinceId },
+                success: async function (data) {
+                    for (let i of JSON.parse(data)) {
+                        node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
+                    }
+                    console.log(node);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+    </script>
+</body>
+
+</html>

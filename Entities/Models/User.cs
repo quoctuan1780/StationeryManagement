@@ -11,10 +11,6 @@ namespace Entities.Models
         [StringLength(200, MinimumLength = 10)]
         public string FullName { get; set; } 
 
-        [Required]
-        [StringLength(300, MinimumLength = 10)]
-        public string Address { get; set; }
-
         public string Image { get; set; } 
 
         [StringLength(5, MinimumLength = 2)]
@@ -22,10 +18,15 @@ namespace Entities.Models
 
         public DateTime DateOfBirth { get; set; }
 
+        public string WardCode { get; set; }
+        public virtual Ward Ward { get; set; }
+
         public virtual IList<Notification> Notifications { get; set; }
 
         public virtual IList<RatingDetail> RatingDetails { get; set; }
 
         public virtual IList<Order> Orders { get; set; }
+
+        public virtual IList<CartItem> CartItems { get; set; }
     }
 }

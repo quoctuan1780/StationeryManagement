@@ -47,6 +47,10 @@ namespace FinalProject
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
             services.AddScoped<IProductDetailService, ProductDetailService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IProviderService, ProviderService>();
+            services.AddScoped<IReceiptService, ReceiptService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

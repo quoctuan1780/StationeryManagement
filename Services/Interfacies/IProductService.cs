@@ -15,5 +15,9 @@ namespace Services.Interfacies
         Task<bool> IsExistsProduct(Product product);
 
         Task<Product> GetProductByIdAsync(int id);
+
+        Task<IList<ProductDetail>> GetProductWithDetailsAsync();
+
+        Task<IList<string>> GetColorByIdAsync(int productId);
     }
 }
