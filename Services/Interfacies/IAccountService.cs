@@ -1,5 +1,7 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Services.Interfacies
@@ -17,5 +19,7 @@ namespace Services.Interfacies
         Task<IdentityResult> ConfirmEmailAsync(string userId, string token);
 
         Task LogoutAsync();
+
+        string GetUserId(ClaimsPrincipal user);
     }
 }

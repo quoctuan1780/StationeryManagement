@@ -50,6 +50,7 @@ namespace FinalProject
             services.AddScoped<IProductDetailService, ProductDetailService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddSingleton<IConfiguration>(Configuration);
             #endregion

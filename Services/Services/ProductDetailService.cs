@@ -59,6 +59,11 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId)
+        {
+            return await _context.ProductDetails.Where(x => x.ProductDetailId == productDetailId).FirstOrDefaultAsync();
+        }
+
         public async Task<IList<ProductDetail>> GetProductsDetailByProductIdAsync(int productId)
         {
             return await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();

@@ -2,7 +2,7 @@
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Services.Interfacies;
-using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -40,6 +40,16 @@ namespace Services.Services
         public async Task<string> GenerateEmailConfirmTokenAsync(User user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
+        public Task<string> GetUserIdAsync(Microsoft.AspNetCore.Mvc.ControllerBase User)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string GetUserId(ClaimsPrincipal user)
+        {
+            return _userManager.GetUserId(user);
         }
 
         public async Task<byte> LoginAsync(string email, string password)

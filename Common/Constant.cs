@@ -1,6 +1,4 @@
-﻿using System.Formats.Asn1;
-
-namespace Common
+﻿namespace Common
 {
     public class Constant
     {
@@ -15,6 +13,10 @@ namespace Common
         public const string SUCCESS = "Success";
 
         public const string FAIL = "Fail";
+
+        public const string MISS_VALUE = "Miss";
+
+        public const string UPDATED = "Updated";
 
         public const string COMMA = ",";
 

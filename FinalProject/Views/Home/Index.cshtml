@@ -2,6 +2,8 @@
     ViewData["Title"] = "Trang chủ";
 
     var products = ViewBag.Products as IList<Entities.Models.Product>;
+
+    string image = null;
 }
 
 <div class="position-01">
@@ -778,8 +780,11 @@
                                     <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
                                         @if (!(item.ProductImages.FirstOrDefault() is null))
                                         {
-                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image" 
+                                            {
+                                            <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image" 
                                              alt="Product demo" width="228" height="228" style="width: 100%; height: auto;" />
+                                            }
+                                            image = item.ProductImages.FirstOrDefault().Image;
                                         }
                                     </a>
                                     <div class="item-btn">
@@ -828,9 +833,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <a title="Add to cart" class="add-to-cart" href="javascript:void(0)" onclick="verticalTextColor()">
-                                    Thêm vào giỏ hàng <i class="icon-shopping-cart" style="padding-left: 1rem;"></i>
+                                </div> 
+                                <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                    Chi tiết
                                 </a>
                             </div>
                             <!--end item wrap -->
