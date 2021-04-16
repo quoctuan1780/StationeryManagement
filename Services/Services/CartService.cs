@@ -1,8 +1,10 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Schema;
 using Services.Interfacies;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -69,6 +71,15 @@ namespace Services.Services
             if (!result.Any()) return 0;
 
             return result.Sum(x => x.Quantity * x.Price);
+        }
+
+        public async Task<int> RemoveCartItemByUserId(string userId)
+        {
+            var carts = _context.CartItems.Where(x => x.UserId == userId);
+
+            _context.RemoveRange(carts);
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<CartItem> UpdateCartItemAsync(CartItem cartItem)

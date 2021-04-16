@@ -112,16 +112,17 @@ namespace FinalProject.Controllers
             }
         }
 
-        public async Task<IActionResult> MoMoSuccess(string orderId, string payType, string responseTime)
+        public async Task<IActionResult> MoMoSuccess(string orderId, string payType, string responseTime, string errorCode)
         {
-            var user = await _accountService.GetUserAsync(User);
-
-            var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
-
-            var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
-
-            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            if (errorCode.Equals(Constant.ZERO))
             {
+                var user = await _accountService.GetUserAsync(User);
+
+                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+
+                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 try
                 {
                     var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "MoMo");
@@ -146,9 +147,10 @@ namespace FinalProject.Controllers
 
                 }
 
+                return View();
             }
 
-            return View();
+            return Redirect("/Home/Error");
         }
 
         public async Task<IActionResult> PayPalSuccess(string token, string PayerID)
