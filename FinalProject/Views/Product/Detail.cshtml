@@ -47,11 +47,19 @@
                                             <ul class='exzoom_img_ul'>
                                                 @if (!(product.ProductImages is null))
                                                 {
-                                                    image = product.ProductImages.FirstOrDefault().Image;
-
-                                                    foreach (var item in product.ProductImages)
+                                                    if (!(product.ProductImages.FirstOrDefault() is null))
                                                     {
-                                                        <li><img src="~/images/product/@item.Image" class="img-full-100" style="cursor:pointer"></li>
+                                                        image = product.ProductImages.FirstOrDefault().Image;
+
+
+                                                        foreach (var item in product.ProductImages)
+                                                        {
+                                                            <li><img src="~/images/product/@item.Image" class="img-full-100" style="cursor:pointer"></li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li><img src="~/images/product/img_1.jpg" class="img-full-100" style="cursor:pointer"></li>
                                                     }
                                                 }
                                             </ul>
@@ -201,11 +209,6 @@
             });
         });
 
-        function checkValue() {
-            if ($("#Quantity").val() <= 0)
-                $("#Quantity").val(1);
-        }
-
         function setSizeQuantity(max, productId, color, origin, size) {
             $("#Quantity").attr({
                 "max": max,
@@ -228,28 +231,6 @@
 
         function loadingOut(loading) {
             setTimeout(() => loading.out(), 3000);
-        }
-
-        function decrease() {
-            var value = parseInt($('#Quantity').val());
-
-            if (value > 1) {
-                value -= 1;
-                document.getElementById("Quantity").value = value;
-            }
-        }
-
-        function ascending() {
-            var quantity = $('#Quantity');
-            var value = parseInt(quantity.val());
-            var max = parseInt(quantity.attr('max'))
-            if (value < max)
-                value += 1;
-            document.getElementById("Quantity").value = value;
-        }
-
-        function setQuantity() {
-            quantity = parseInt($('#Quantity').val());
         }
 
         function verticalTextColor() {
@@ -300,7 +281,7 @@
                     if (quantity > 0) {
                         $.ajax({
                             url: '/Cart/AddToCart',
-                            method: 'GET',
+                            method: 'POST',
                             async: true,
                             data: { productDetailId: productIdOrder, quantity: quantity, price: price },
                             success: function (data) {

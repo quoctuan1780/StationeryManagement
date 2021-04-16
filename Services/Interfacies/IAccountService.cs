@@ -20,5 +20,9 @@ namespace Services.Interfacies
         Task LogoutAsync();
 
         string GetUserId(ClaimsPrincipal user);
+
+        Task<User> GetUserAsync(ClaimsPrincipal user);
+
+        Task<User> GetUserByUserIdAsync(string userId);
     }
 }

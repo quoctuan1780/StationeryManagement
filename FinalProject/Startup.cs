@@ -55,6 +55,10 @@ namespace FinalProject
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IReceiptService, ReceiptService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPayPalService, PayPalService>();
+            services.AddScoped<IMoMoService, MoMoService>();
+            services.AddScoped<IOrderDetailService, OrderDetailService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

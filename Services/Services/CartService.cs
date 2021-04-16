@@ -52,6 +52,10 @@ namespace Services.Services
         public async Task<IList<CartItem>> GetCartsByUserIdAsync(string userId)
         {
             return await _context.CartItems.Where(x => x.UserId == userId)
+                        .Include(x => x.User)
+                        .Include(x => x.ProductDetail)
+                        .ThenInclude(x => x.Product)
+                        .ThenInclude(x => x.Category)
                         .Include(x => x.ProductDetail)
                         .ThenInclude(x => x.Product)
                         .ThenInclude(x => x.ProductImages)
@@ -74,6 +78,18 @@ namespace Services.Services
             await _context.SaveChangesAsync();
 
             return cartItem;
+        }
+
+        public async Task<int> UpdateQuantityOfCartItemAsync(int productDetailId, int quantity, string userId)
+        {
+            var result = 
+                _context.CartItems.Where(x => x.ProductDetailId == productDetailId && x.UserId == userId).FirstOrDefault();
+
+            result.Quantity = quantity;
+
+            _context.Update(result);
+
+            return await _context.SaveChangesAsync();
         }
     }
 }

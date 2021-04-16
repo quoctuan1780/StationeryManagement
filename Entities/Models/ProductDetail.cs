@@ -20,9 +20,15 @@ namespace Entities.Models
 
         public string  Color { get; set; }
 
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 0;
+
+        public int RemainingQuantity { get; set; } = 0;
+
+        public int QuantityOrdered { get; set; } = 0;
 
         public virtual IList<OrderDetail> OrderDetails { get; set; }
+
+        public virtual IList<BillDetail> BillDetails { get; set; }
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
         public virtual Product Product { get; set; }

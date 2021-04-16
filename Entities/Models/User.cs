@@ -28,5 +28,7 @@ namespace Entities.Models
         public virtual IList<Order> Orders { get; set; }
 
         public virtual IList<CartItem> CartItems { get; set; }
+
+        public  IList<Bill> Bills { get; set; }
     }
 }

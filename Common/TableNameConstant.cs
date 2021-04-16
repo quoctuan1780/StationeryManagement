@@ -12,6 +12,7 @@
         public const string TABLE_IMPORT_WAREHOUSE_DETAIL = "ImportWarehouseDetail";
         public const string TABLE_EXPORT_WAREHOUSE = "ExportWarehouse";
         public const string TABLE_BILL = "Bill";
+        public const string TABLE_BILL_DETAIL = "BillDetail";
         public const string TABLE_RECOMMENDATION = "Recommendation";
         public const string TABLE_RECOMMENDATION_DETAIL = "RecommendationDetail";
         public const string TABLE_NOTIFICTION = "Notification";
@@ -22,5 +23,7 @@
         public const string TABLE_SALE_PRODUCT = "SaleProduct";
         public const string TABLE_RECEIPT_REQUEST = "ReceiptRequest";
         public const string TABLE_RECEIPT_REQUEST_DETAIL = "ReceiptRequestDetail";
+        public const string TABLE_PAYPAL_PAYMENT = "PayPalPayment";
+        public const string TABLE_MOMO_PAYMENT = "MoMoPayment";
     }
 }

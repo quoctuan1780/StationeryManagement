@@ -20,7 +20,7 @@ namespace FinalProject.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<string> AddToCart(int? productDetailId, int? quantity, decimal? price)
         {
             if (productDetailId is null || quantity is null || price is null)
@@ -104,6 +104,46 @@ namespace FinalProject.Controllers
             decimal total = _cartService.GetCartTotalByUserId(userId);
 
             return total;
+        }
+
+        public async Task<IActionResult> Checkout()
+        {
+            var userId = _accountService.GetUserId(User);
+
+            ViewBag.CartItems = await _cartService.GetCartsByUserIdAsync(userId);
+
+            ViewBag.CartTotal = _cartService.GetCartTotalByUserId(userId);
+
+            return View();
+        }
+
+        [HttpPut]
+        public async Task<decimal> ChangeQuantityCartItem(int? productDetailId, int? quantity)
+        {
+
+            if (productDetailId is null || quantity is null)
+                return Constant.ERROR_CODE_NULL;
+
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var userId = _accountService.GetUserId(User);
+
+                var result = await _cartService
+                    .UpdateQuantityOfCartItemAsync(productDetailId.Value, quantity.Value, userId);
+                
+                if(result > 0)
+                {
+                    var total = _cartService.GetCartTotalByUserId(userId);
+
+                    transaction.Complete();
+
+                    return total;
+
+                }
+
+            }
+
+            return Constant.ERROR_CODE_SYSTEM;
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using Common;
+using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -11,11 +14,13 @@ namespace Services.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly ShopDbContext _context;
 
-        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         public async Task<IdentityResult> AddRoleAsync(User user)
@@ -88,6 +93,20 @@ namespace Services.Services
         public async Task<IdentityResult> RegisterAsync(User user, string password)
         {
             return await _userManager.CreateAsync(user, password);
+        }
+
+        public async Task<User> GetUserAsync(ClaimsPrincipal user)
+        {
+            return await _userManager.GetUserAsync(user);
+        }
+
+        public async Task<User> GetUserByUserIdAsync(string userId)
+        {
+            return await _context.Users.Where(x => x.Id == userId)
+                                       .Include(x => x.Ward)
+                                       .ThenInclude(x => x.District)
+                                       .ThenInclude(x => x.Province)
+                                       .FirstOrDefaultAsync();
         }
     }
 }

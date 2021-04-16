@@ -6,10 +6,13 @@
 
     var urlBack = Context.Request.Path;
 
+    long total = 0;
+
     if (!(User is null) && User.Identity.IsAuthenticated)
     {
         userId = _userManager.GetUserId(User);
         carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
+        total = (long) _cartService.GetCartTotalByUserId(userId);
     }
 }
 <div id="box-header">
@@ -19,7 +22,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="logo">
-                            <a href="./index.html"><img src="images/logo-home-03.png" alt="" /></a>
+                            <a href="/Home/Index"><img src="~/images/logo-home-03.png" alt="" /></a>
                         </div>
                         <div class="account-and-cart">
                             <div class="my-account">
@@ -47,7 +50,7 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="box-cart">
+                            <div class="box-cart" id="cart">
                                 <div class="cart-mini">
                                     <div class="title">
 
@@ -80,8 +83,16 @@
                                                             <li class="item">
                                                                 <input type="hidden" class="cart" value="@cartItem.ProductDetailId" />
                                                                 <a href="#" class="product-image">
-                                                                    <img src="~/images/product/@cartItem.ProductDetail.Product.ProductImages.FirstOrDefault().Image"
-                                                                         width="70" height="70" />
+                                                                    @if (cartItem.ProductDetail.Product.ProductImages is null || cartItem.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                                                    {
+                                                                        <img src="~/images/product/img_1.jpg"
+                                                                             width="70" height="70" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img src="~/images/product/@cartItem.ProductDetail.Product.ProductImages.FirstOrDefault().Image"
+                                                                             width="70" height="70" />
+                                                                    }
                                                                 </a>
                                                                 <a href="javascript:void(0)" onclick="removeItem(this)" class="btn-remove">Remove This Item</a>
                                                                 <div class="product-details">
@@ -115,12 +126,12 @@
                                             </ol>
                                             <div class="summary">
                                                 <p class="subtotal">
-                                                    <span class="label">Tổng tiền:</span> <span id="total-price" class="price">0 VNĐ</span>
+                                                    <span class="label">Tổng tiền:</span> <span id="total-price" class="price">@total VNĐ</span>
                                                 </p>
                                             </div>
                                             <div class="actions">
                                                 <div class="a-inner">
-                                                    <a href="#" title="Checkout" class="btn btn-success">Xem giỏ hàng</a>
+                                                    <a asp-action="Checkout" asp-controller="Cart" title="Checkout" class="btn btn-success">Xem giỏ hàng</a>
                                                 </div>
                                             </div>
                                         </div>

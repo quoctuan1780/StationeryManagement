@@ -1,7 +1,6 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Entities.Data
 {
@@ -43,14 +42,16 @@ namespace Entities.Data
         public virtual DbSet<Ward> Wards { get; set; }
         public virtual DbSet<ReceiptRequest> ReceiptRequests { get; set; }
         public virtual DbSet<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
+        public virtual DbSet<PayPalPayment> PayPalPayments { get; set; }
+        public virtual DbSet<MoMoPayment> MoMoPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (Microsoft.EntityFrameworkCore.Metadata.IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
             {
-                var tableName = entityType.GetTableName();
+                string tableName = entityType.GetTableName();
                 if (tableName.StartsWith("AspNet"))
                 {
                     entityType.SetTableName(tableName.Substring(6));
@@ -64,13 +65,24 @@ namespace Entities.Data
 
                 e.HasIndex(x => x.BillId);
 
-                e.HasOne(x => x.Order)
-                .WithOne(x => x.Bill)
-                .HasForeignKey<Bill>(x => x.OrderId);
-
                 e.Property(x => x.Total).HasPrecision(18, 2);
                 e.Property(x => x.PurchaseTotal).HasPrecision(18, 2);
                 e.Property(x => x.SaleTotal).HasPrecision(18, 2);
+
+                e.HasOne(x => x.User)
+                .WithMany(x => x.Bills)
+                .HasForeignKey(x => x.UserId);
+            });
+
+            // Entity Bill Detail
+            modelBuilder.Entity<BillDetail>(e =>
+            {
+                e.HasKey(x => new { x.BillId, x.ProductDetailId });
+                e.HasIndex(x => x.BillId);
+                e.HasIndex(x => x.ProductDetailId);
+
+                e.Property(x => x.Price).HasPrecision(18, 2);
+                e.Property(x => x.SalePrice).HasPrecision(18, 2);
             });
 
             // Entity ExportWarehouse
@@ -406,6 +418,32 @@ namespace Entities.Data
                 e.HasOne(x => x.ProductDetail)
                 .WithMany(x => x.ReceiptRequestDetails)
                 .HasForeignKey(x => x.ProductDetailId);
+            });
+
+            // Entity Momo Payment
+            modelBuilder.Entity<MoMoPayment>(e =>
+            {
+                e.HasKey(x => x.MoMoPaymentId);
+                e.HasIndex(x => x.MoMoPaymentId);
+                e.HasIndex(x => x.OrderId);
+                e.HasIndex(x => x.MoMoOrderId);
+
+                e.HasOne(x => x.Order)
+                .WithOne(x => x.MoMoPayment)
+                .HasForeignKey<MoMoPayment>(x => x.OrderId);
+            });
+
+            // Entity PayPal Payment
+            modelBuilder.Entity<PayPalPayment>(e =>
+            {
+                e.HasKey(x => x.PayPalPaymentId);
+                e.HasIndex(x => x.PayPalPaymentId);
+                e.HasIndex(x => x.PayerId);
+                e.HasIndex(x => x.OrderId);
+
+                e.HasOne(x => x.Order)
+                .WithOne(x => x.PayPalPayment)
+                .HasForeignKey<PayPalPayment>(x => x.OrderId);
             });
         }
     }

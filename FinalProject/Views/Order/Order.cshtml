@@ -1,0 +1,162 @@
+﻿
+@{
+    ViewData["Title"] = "Đặt hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = ViewBag.User as Entities.Models.User;
+    var addressString = user.Ward.WardName + " - " + user.Ward.District.DistrictName + " - " + user.Ward.District.Province.ProvinceName;
+    var carts = ViewBag.Carts as IList<Entities.Models.CartItem>;
+    var total = (decimal)ViewBag.TotalOfCart;
+
+    var orderInfo = "";
+}
+
+<div id="box-content">
+    <div class="position-02">
+        <div class="container">
+            @if (User.Identity.IsAuthenticated)
+            {
+                
+            <div class="row">
+                <div class="col-md-8 order-md-1">
+                    <h4 class="mb-3">Billing address</h4>
+                    <form class="needs-validation" novalidate="">
+                        <div class="row">
+                            <div class="col-md-12 mb-6">
+                                <label for="fullName">Họ và tên: </label>
+                                <input type="text" class="form-control" id="full-name" placeholder="" value="@user.FullName" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email">Email <span class="text-muted">(Optional)</span></label>
+                            <input type="email" class="form-control" id="email" value="@user.Email" placeholder="you@example.com" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address">Địa chỉ</label>
+                            <input type="text" class="form-control" id="address" value="@addressString" placeholder="1234 Main St" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address2">Địa chỉ nhận hàng khác: <span class="text-muted">(Optional)</span></label>
+                            <input type="text" class="form-control" id="address2" placeholder="Số nhà và tên đường">
+                        </div>
+                        <hr class="mb-4">
+                        <h4 class="mb-3">Thông tin thanh toán</h4>
+                        <div class="d-block my-3">
+                            @{
+                                orderInfo = "Đơn hàng của khách hàng " + user.FullName;
+                            }
+                            <div class="custom-control custom-radio">
+                                <div class="box">
+                                    <a class="paypal-button" asp-action="PayPalCheckout" asp-controller="Order">
+                                        <span class="paypal-button-title">
+                                            Thanh toán với
+                                        </span>
+                                        <span class="paypal-logo">
+                                            <i>Pay</i><i>Pal</i>
+                                        </span>
+                                    </a>
+                                </div>
+                                <div class="box">
+                                    <a class="paypal-button" asp-action="MoMoCheckout" asp-controller="Order"
+                                       asp-route-total="@total.ToString("G29")" asp-route-orderInfo="@user.FullName"
+                                       asp-route-email="@user.Email">
+                                        <span class="paypal-button-title">
+                                            Thanh toán với
+                                        </span>
+                                        <span class="paypal-logo">
+                                            <i>Mo</i><i>Mo</i>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input id="debit" name="paymentMethod" type="radio" class="custom-control-input" required="">
+                                <label class="custom-control-label" for="debit">Debit card</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required="">
+                                <label class="custom-control-label" for="paypal">PayPal</label>
+                            </div>
+                        </div>
+                        <hr class="mb-4">
+                        <button class="btn btn-success btn-lg btn-block" type="submit">Đặt hàng</button>
+                    </form>
+                </div>
+                <div class="col-md-4 order-md-2 mb-4">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Giỏ hàng của bạn: </span>
+                        <span class="badge badge-secondary badge-pill">@carts.Count</span>
+                    </h4>
+                    <ul class="list-group mb-3 sticky-top">
+                        @foreach(var item in carts)
+                        {
+                            <li class="list-group-item d-flex lh-condensed">
+                                <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; align-items: center;">
+                                    <div class="col-md-4">
+                                        @if (item.ProductDetail.Product.ProductImages is null || item.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                        {
+                                            <img src="~/images/product/img_1.jpg" style="width: 100%;" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" style="width: 100%;"/>
+                                        }
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h6 class="my-0">
+                                            <a asp-controller="Product" asp-action="Detail" 
+                                               asp-route-id="@item.ProductDetailId">@item.ProductDetail.Product.ProductName
+                                            </a>
+                                        </h6>
+                                        <p class="text-muted">Số lượng: @item.Quantity</p>
+                                        <p class="text-muted">Giá: @item.Price.ToString("G29")</p>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Tổng tiền: <strong>@total.ToString("G29")</strong> (VNĐ)</span>
+                        </li>
+                    </ul>
+                    <a class="btn btn-warning" asp-action="Checkout" asp-controller="Cart" style="width: 100%">Quay lại giỏ hàng</a>
+                </div>
+            </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-12 order-md-1">
+                        <h4 class="alert alert-success">Hết phiên đăng nhập, mời bạn đăng nhập lại</h4>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section Scripts{ 
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+            $('#cart').remove();
+        });
+
+        (function () {
+            'use strict'
+
+            window.addEventListener('load', function () {
+
+                var forms = document.getElementsByClassName('needs-validation')
+
+                Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            }, false)
+        }())
+    </script>
+}

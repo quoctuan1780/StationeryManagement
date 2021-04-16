@@ -1,0 +1,305 @@
+﻿@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cartItems = ViewBag.CartItems as IList<Entities.Models.CartItem>;
+
+    decimal cartTotal = 0;
+
+    cartTotal = (decimal)ViewBag.CartTotal;
+}
+
+<div id="box-content">
+    <div class="position-02">
+        <div class="container">
+            <div class="row">
+                <div class="">
+                    <h1>Thông tin giỏ hàng</h1>
+                    <div class="table-wrap">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Phân loại hàng</th>
+                                    <th>Xuất xứ</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in cartItems)
+                                {
+                                    <tr>
+                                        <td><a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductDetail.Product.ProductId">@item.ProductDetail.Product.ProductName</a></td>
+                                        <td>
+                                            @if (item.ProductDetail.Product.ProductImages is null || item.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                            {
+                                                <img src="~/images/product/img_1.jpg" alt="Ảnh" width="60" height="60">
+                                            }
+                                            else
+                                            {
+                                                <img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" alt="Ảnh" width="60" height="60">
+                                            }
+                                        </td>
+                                        <td>@item.ProductDetail.Color</td>
+                                        <td>@item.ProductDetail.Origin</td>
+                                        <td>
+                                            <button class="btn btn-danger" style="height: 30px;" type="button" onclick="decrease(this, @item.ProductDetailId, @item.ProductDetail.Quantity, @item.Price)">
+                                                -
+                                            </button>
+                                            <input type="text" name="Quantity" min="1" value="@item.Quantity" max="@item.ProductDetail.Quantity"
+                                                   class="input-quantity" onkeydown="validateValue(this)" onblur="checkValue()" onchange="setPrice(this, @item.ProductDetailId, @item.ProductDetail.Quantity, @item.Price)">
+                                            <button class="btn btn-danger" style="height: 30px" type="button" onclick="ascending(this, @item.ProductDetailId, @item.ProductDetail.Quantity, @item.Price)">
+                                                +
+                                            </button>
+                                        </td>
+                                        <td>@item.Price.ToString("G29") VNĐ</td>
+                                        <td class="total-item">
+                                            @{
+                                                var totalItem = item.Price * item.Quantity;
+                                            }
+                                            @totalItem.ToString("G29") VNĐ
+                                    </td>
+                                    <td><button class="btn btn-danger" type="button" onclick="removeCartItem(this, @item.ProductDetailId)"> - </button></td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-8"></div>
+                        <div class="col-lg-4" style="text-align: end;">
+                            <div><b>Tổng tiền gốc: </b><span id="totalOld">15000</span> VNĐ</div>
+                            <div><b>Tổng tiền khuyến mãi: </b><span id="totalSale">15000</span> VNĐ</div>
+                            <div><b>Tổng tiền thanh toán: </b><span id="total">@cartTotal.ToString("G29")</span> VNĐ</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-6 text-left">
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-warning">Tiếp tục mua sắm</a>
+                        </div>
+                        <div class="col-lg-6 text-right">
+                            <a  asp-action="Order" asp-controller="Order" class="btn btn-success">Đặt hàng</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            $('#left-nav').remove();
+            $('#banner').remove();
+            $('#cart').remove();
+
+            $(".table-wrap").each(function () {
+                var nmtTable = $(this);
+                var nmtHeadRow = nmtTable.find("thead tr");
+                nmtTable.find("tbody tr").each(function () {
+                    var curRow = $(this);
+                    for (var i = 0; i < curRow.find("td").length; i++) {
+                        var rowSelector = "td:eq(" + i + ")";
+                        var headSelector = "th:eq(" + i + ")";
+                        curRow.find(rowSelector).attr('data-title', nmtHeadRow.find(headSelector).text());
+                    }
+                });
+            });
+        });
+
+        function validateValue(e) {
+            
+            setInputFilter(e, function (value) {
+                return /^\d*$/.test(value) && ((value === "" || parseInt(value) > 0) && parseInt(value) <= parseInt($(e).attr('max')));
+            });
+        }
+
+        function verticalTextColor() {
+            var loading = new Loading({
+                title: 'Xin hãy đợi',
+                titleColor: 'rgb(217, 83, 79)',
+                discription: 'Loading...',
+                discriptionColor: 'rgb(77, 150, 223)',
+                animationOriginColor: 'rgb(33, 179, 132)',
+                mask: true,
+                loadingPadding: '20px 50px',
+                defaultApply: true,
+            });
+
+            return loading;
+        }
+
+        function decrease(e, productDetailId, maxQuantity, price) {
+            var node = $(e).parent().children('.input-quantity').get(0);
+
+            var value = parseInt($(node).val());
+
+            if (value > 1) {
+                value -= 1;
+
+                $(node).val(value.toString());
+
+                setPrice(e, productDetailId, maxQuantity, price);
+            }
+        }
+
+        function ascending(e, productDetailId, maxQuantity, price) {
+            var node = $(e).parent().children('.input-quantity').get(0);
+
+            var quantity = $(node).val();
+
+            var value = parseInt(quantity);
+
+            var max = parseInt($(node).attr('max'))
+
+            if (value < max)
+                value += 1;
+            $(node).val(value)
+
+            setPrice(e, productDetailId, maxQuantity, price);
+        }
+
+        function setPrice(e, productDetailId, maxQuantity, price) {
+            var loading = verticalTextColor();
+
+            setTimeout(function () {
+
+                loading
+
+                var node = $(e).parent().children('.input-quantity').get(0);
+
+                var quantity = $(node).val();
+
+                if (quantity < 0 || quantity > maxQuantity) {
+                    loading.out();
+
+                    $.notiny({
+                        position: 'right-top',
+                        theme: 'danger',
+                        width: '500px',
+                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                        text: 'Số lượng bạn nhập nhỏ hơn 0 hoặc lớn hơn tổng sản phẩm sẵn có!',
+                    });
+                }
+                else
+                    $.ajax({
+                        url: "/Cart/ChangeQuantityCartItem",
+                        method: "PUT",
+                        async: true,
+                        data: { productDetailId: productDetailId, quantity: quantity },
+                        success: function (data) {
+                            loading.out();
+
+                            switch (parseFloat(data)) {
+                                case -99:
+                                    $.notiny({
+                                        position: 'right-top',
+                                        theme: 'danger',
+                                        width: '500px',
+                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                        text: 'Lỗi hệ thống vui lòng tải lại trang!',
+                                    });
+                                    break;
+                                case -4:
+                                    $.notiny({
+                                        position: 'right-top',
+                                        theme: 'danger',
+                                        width: '500px',
+                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                        text: 'Sản phẩm hoặc số lượng bạn nhập không hợp lệ!',
+                                    });
+                                    break;
+                                default:
+                                    $("#total").text(data);
+                                    var total = price * quantity;
+                                    $($(e).parent().parent().children('.total-item').get(0)).text(parseFloat(total) + " VNĐ");
+                                    break;
+                            }
+                        },
+                        error: function (jpXHR, exception) {
+                            loading.out();
+
+                            $.notiny({
+                                position: 'right-top',
+                                theme: 'danger',
+                                width: '400px',
+                                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                text: 'Lỗi hệ thống, vui lòng thử lại sau!',
+                            });
+                        }
+                    })
+            }, 1000);
+        }
+
+        function removeCartItem(e, productDetailId) {
+            Swal.fire({
+                title: 'Bạn có muốn xóa sản phẩm này không?',
+                showDenyButton: true,
+                confirmButtonText: `Xóa`,
+                denyButtonText: `Hủy`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var loading = verticalTextColor();
+
+                    loading;
+
+                    $.ajax({
+                        url: '/Cart/RemoveCartItem',
+                        method: 'DELETE',
+                        async: true,
+                        data: { productDetailId: productDetailId },
+                        success: function (data) {
+                            loading.out();
+
+                            switch (data) {
+                                case "Success":
+                                    $.notiny({
+                                        position: 'right-top',
+                                        theme: 'success',
+                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                        text: 'Xóa sản phẩm thành công',
+                                    });
+
+                                    $(e).parent().parent().remove();
+
+                                    break;
+                                case "Fail":
+                                    $.notiny({
+                                        position: 'right-top',
+                                        theme: 'danger',
+                                        width: '400px',
+                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                        text: 'Hệ thống bị lỗi, vui lòng thử lại sau!',
+                                    });
+                                    break;
+                                case "Miss":
+                                    $.notiny({
+                                        position: 'right-top',
+                                        width: '380px',
+                                        theme: 'danger',
+                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                        text: 'Bạn chưa đăng nhập vào hệ thống',
+                                    });
+                                    break;
+                            }
+                        },
+                        error: function (err, exception) {
+                            loading.out();
+
+                            $.notiny({
+                                position: 'right-top',
+                                width: '380px',
+                                theme: 'danger',
+                                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                                text: 'Hệ thống xảy ra lỗi, vui lòng thủ lại sau',
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}
