@@ -1,5 +1,8 @@
 ﻿using Common;
+using Entities.Data;
+using Entities.Models;
 using FinalProject.Heplers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -199,5 +202,45 @@ namespace FinalProject.Controllers
                 return Redirect("/Home/Error");
             }
         }
+
+        //[HttpPost]
+        //public async Task<ActionResult> Post(long amount, string description, string bankcode)
+        //{
+        //    var embeddata = NgrokHelper.CreateEmbeddataWithPublicUrl();
+
+        //    if (bankcode.Equals("ATM"))
+        //    {
+        //        embeddata["bankgroup"] = "ATM";
+        //        bankcode = "";
+        //    }
+
+        //    var orderData = new OrderData(amount, description, bankcode, embeddata);
+        //    var order = await ZaloPayHelper.CreateOrder(orderData);
+        //    var returncode = (long)order["returncode"];
+
+        //    if (returncode == 1)
+        //    {
+        //        using (var db = new ShopDbContext())
+        //        {
+        //            db.Orders.Add(new ZalopayOrder
+        //            {
+        //                Apptransid = orderData.Apptransid,
+        //                Amount = orderData.Amount,
+        //                Timestamp = orderData.Apptime,
+        //                Description = orderData.Description,
+        //                Status = 0
+        //            });
+
+        //            db.SaveChanges();
+        //        }
+
+        //        return Redirect(order["orderurl"].ToString());
+        //    }
+        //    else
+        //    {
+        //        I  = true;
+        //        return Redirect("/Gateway");
+        //    }
+        //}
     }
 }

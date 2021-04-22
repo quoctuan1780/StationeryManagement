@@ -32,6 +32,10 @@ namespace Entities.Models
 
         public virtual PayPalPayment PayPalPayment { get; set; }
 
+        public virtual ZalopayOrder ZalopayOrder { get; set; }
+
+        public virtual ZalopayRefund ZalopayRefund { get; set; }
+
         public virtual ExportWarehouse ExportWarehouse { get; set; }
 
         public IList<OrderDetail> OrderDetails { get; set; }
