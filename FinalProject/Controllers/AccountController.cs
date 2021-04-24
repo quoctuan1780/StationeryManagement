@@ -1,11 +1,14 @@
 ﻿using Common;
 using Entities.Models;
+using FinalProject.Heplers;
 using FinalProject.ViewModels;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Services.Interfacies;
+using System;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace FinalProject.Controllers
 {
@@ -97,7 +100,8 @@ namespace FinalProject.Controllers
                     Email = model.Email,
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
-                    WardCode = model.WardCode
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName
                 };
 
                 var result = await _accountService.RegisterAsync(user, model.Password);
@@ -197,6 +201,101 @@ namespace FinalProject.Controllers
             urlBack ??= Url.Content(Constant.ROUTE_HOME_INDEX_CLIENT);
 
             return Redirect(urlBack);
+        }
+
+        public async Task<IActionResult> Information()
+        {
+            var userId = _accountService.GetUserId(User);
+
+            if(!(userId is null))
+            {
+                var user = await _accountService.GetUserByUserIdAsync(userId);
+
+                ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                if(!(user is null) && !(user.WardCode is null))
+                {
+                    ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+
+                    ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                }
+
+                var model = AccountHelper.ConvertFromUserToInformationClientViewModel(user);
+
+                return View(model);
+            }
+
+            return PartialView(Constant.ERROR_404_PAGE);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Information(InformationClientViewModel model)
+        {
+
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+            ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(model.ProvinceId);
+
+            ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(model.DistrictId);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                User user = null;
+                if (!(model.Image is null))
+                {
+                    var saveAvatarResult = await ImageHelper.SaveImageAsync(model.Image, 300, 300);
+
+                    user = new User()
+                    {
+                        Id = model.UserId,
+                        PhoneNumber = model.PhoneNumber,
+                        Gender = model.Gender,
+                        DateOfBirth = model.DateOfBirth,
+                        Image = saveAvatarResult,
+                        WardCode = model.WardCode,
+                        StreetName = model.StreetName,
+                        FullName = model.FullName
+                    };
+                }
+                else
+                {
+                    user = new User()
+                    {
+                        Id = model.UserId,
+                        PhoneNumber = model.PhoneNumber,
+                        Gender = model.Gender,
+                        DateOfBirth = model.DateOfBirth,
+                        WardCode = model.WardCode,
+                        StreetName = model.StreetName,
+                        FullName = model.FullName
+                    };
+                }
+
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+                var result = await _accountService.UpdateInformationClientAsync(user);
+
+                if (result > 0)
+                {
+                    transaction.Complete();
+
+                    ViewBag.MessageSuccess = "Cập nhật thông tin thành công";
+                }
+
+                else throw new Exception();
+            }
+            catch
+            {
+                ViewBag.MessageDanger = "Xảy ra lỗi hệ thống, vui lòng cập nhật lại thông tin sau";
+                return View(model);
+            }
+            return View(model);
         }
     }
 }

@@ -1,9 +1,13 @@
-﻿
-@{
-    ViewData["Title"] = "MoMoSuccess";
+﻿@{
+    ViewData["Title"] = "Thanh toán thành công";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>MoMoSuccess</h1>
-
-@ViewBag.OrderId;
+<div id="box-content">
+    <div class="position-02">
+        <div class="container">
+            <h2>Thanh toán thành công</h2>
+            <a asp-controller="Order" asp-action="OrderInfo" asp-route-orderId="@ViewBag.OrderId">Xem thông tin đơn hàng của bạn</a>
+        </div>
+    </div>
+</div>

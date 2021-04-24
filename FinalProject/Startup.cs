@@ -52,13 +52,14 @@ namespace FinalProject
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton(Configuration);
             services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IReceiptService, ReceiptService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPayPalService, PayPalService>();
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
+            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
@@ -67,7 +68,7 @@ namespace FinalProject
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.LoginPath = new PathString("/Account/Login");
-                options.LogoutPath = $"/logout/";
+                options.LogoutPath = $"/Account/Logout";
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 

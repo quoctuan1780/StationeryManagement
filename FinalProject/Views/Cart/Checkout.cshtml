@@ -60,9 +60,9 @@
                                             @{
                                                 var totalItem = item.Price * item.Quantity;
                                             }
-                                            @totalItem.ToString("G29") VNĐ
+                                            @totalItem.ToString("G29") VNĐ 
                                     </td>
-                                    <td><button class="btn btn-danger" type="button" onclick="removeCartItem(this, @item.ProductDetailId)"> - </button></td>
+                                    <td><button class="btn btn-danger" type="button" onclick="removeCartItem(this, @item.ProductDetailId, '@item.Price.ToString("G29")', @item.Quantity)"> - </button></td>
                                 </tr>
                             }
                             </tbody>
@@ -234,7 +234,7 @@
             }, 1000);
         }
 
-        function removeCartItem(e, productDetailId) {
+        function removeCartItem(e, productDetailId, price, quantity) {
             Swal.fire({
                 title: 'Bạn có muốn xóa sản phẩm này không?',
                 showDenyButton: true,
@@ -263,7 +263,11 @@
                                         text: 'Xóa sản phẩm thành công',
                                     });
 
+                                    var total = parseFloat($("#total").text()) - parseFloat(price) * quantity
+
                                     $(e).parent().parent().remove();
+
+                                    $("#total").text(total);
 
                                     break;
                                 case "Fail":

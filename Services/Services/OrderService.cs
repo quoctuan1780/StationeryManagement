@@ -1,9 +1,11 @@
 ﻿using Common;
 using Entities.Data;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services.Services 
@@ -51,6 +53,21 @@ namespace Services.Services
             await _context.SaveChangesAsync();
 
             return order;
+        }
+
+        public async Task<Order> GetOrderByIdAsync(int orderId)
+        {
+            return await _context.Orders.Where(x => x.OrderId == orderId)
+                .Include(x => x.OrderDetails)
+                .ThenInclude(x => x.ProductDetail)
+                .ThenInclude(x => x.Product)
+                .ThenInclude(x => x.ProductImages)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IList<Order>> GetOrdersByUserIdAsync(string userId)
+        {
+            return await _context.Orders.Where(x => x.UserId == userId).ToListAsync();
         }
     }
 }

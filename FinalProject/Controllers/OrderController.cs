@@ -1,5 +1,4 @@
 ﻿using Common;
-using FinalProject.Heplers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -45,7 +44,7 @@ namespace FinalProject.Controllers
             //else
             //    return Redirect(Constant.ROUTE_LOGIN_CLIENT);
 
-            var userId = _accountService.GetUserId(User);
+            string userId = _accountService.GetUserId(User);
 
             ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
 
@@ -56,24 +55,49 @@ namespace FinalProject.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Orders(string userId)
+        {
+            if(userId is null)
+            {
+                //return Redirect("/Home/NotFound");
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+
+            ViewBag.Orders = await _orderService.GetOrdersByUserIdAsync(userId);
+
+            return View();
+        }
+
+        public async Task<IActionResult> OrderInfo(int? orderId)
+        {
+            if (orderId is null)
+            {
+                return BadRequest();
+            }
+
+            ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
+
+            return View();
+        }
+
         public async Task<IActionResult> PaypalCheckout()
         {
-            var userId = _accountService.GetUserId(User);
-            var user = await _accountService.GetUserByUserIdAsync(userId);
-            var carts = await _cartService.GetCartsByUserIdAsync(userId);
-            var hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            string userId = _accountService.GetUserId(User);
+            Entities.Models.User user = await _accountService.GetUserByUserIdAsync(userId);
+            IList<Entities.Models.CartItem> carts = await _cartService.GetCartsByUserIdAsync(userId);
+            string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
 
             try
             {
-                var createOrderResponse = await _payPalService.PayPalCreateOrder(carts, user, hostName, true);
+                PayPalHttp.HttpResponse createOrderResponse = await _payPalService.PayPalCreateOrder(carts, user, hostName, true);
 
                 if (!(createOrderResponse is null))
                 {
-                    var createOrderResult = createOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+                    PayPalCheckoutSdk.Orders.Order createOrderResult = createOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    var link = Constant.EMPTY;
+                    string link = Constant.EMPTY;
 
-                    foreach (var item in createOrderResult.Links)
+                    foreach (PayPalCheckoutSdk.Orders.LinkDescription item in createOrderResult.Links)
                     {
                         if (item.Rel.Equals(Constant.PAYPAL_REL_APPROVE))
                         {
@@ -95,14 +119,14 @@ namespace FinalProject.Controllers
 
         public IActionResult MoMoCheckout(string total, string orderInfo, string email)
         {
-            var hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
             try
             {
-                var responseFromMomo = _moMoService.MoMoCheckout(total, orderInfo, email, hostName);
+                string responseFromMomo = _moMoService.MoMoCheckout(total, orderInfo, email, hostName);
 
-                var jmessage = JObject.Parse(responseFromMomo);
+                JObject jmessage = JObject.Parse(responseFromMomo);
 
-                var redirect = jmessage.GetValue("payUrl").ToString();
+                string redirect = jmessage.GetValue("payUrl").ToString();
 
                 return Redirect(redirect);
             }
@@ -116,20 +140,20 @@ namespace FinalProject.Controllers
         {
             if (errorCode.Equals(Constant.ZERO))
             {
-                var user = await _accountService.GetUserAsync(User);
+                Entities.Models.User user = await _accountService.GetUserAsync(User);
 
-                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+                Entities.Models.User userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
 
-                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+                IList<Entities.Models.CartItem> carts = await _cartService.GetCartsByUserIdAsync(user.Id);
 
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using TransactionScope transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 try
                 {
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "MoMo");
+                    Entities.Models.Order order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "MoMo");
 
                     if (!(order is null))
                     {
-                        var result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                         if (result > 0)
                         {
@@ -138,6 +162,8 @@ namespace FinalProject.Controllers
                             if (result > 0)
                             {
                                 transaction.Complete();
+
+                                ViewBag.OrderId = order.OrderId;
                             }
                         }
                     }
@@ -155,27 +181,27 @@ namespace FinalProject.Controllers
 
         public async Task<IActionResult> PayPalSuccess(string token, string PayerID)
         {
-            var user = await _accountService.GetUserAsync(User);
+            Entities.Models.User user = await _accountService.GetUserAsync(User);
 
-            var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+            Entities.Models.User userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
 
-            var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+            IList<Entities.Models.CartItem> carts = await _cartService.GetCartsByUserIdAsync(user.Id);
 
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            using TransactionScope transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
-                var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
+                PayPalHttp.HttpResponse captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
 
                 if (!(captureOrderResponse is null))
                 {
 
-                    var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+                    PayPalCheckoutSdk.Orders.Order captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "PayPal");
+                    Entities.Models.Order order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "PayPal");
 
                     if (!(order is null))
                     {
-                        var result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                         if (result > 0)
                         {
@@ -199,5 +225,10 @@ namespace FinalProject.Controllers
                 return Redirect("/Home/Error");
             }
         }
+
+        //public async Task<string> GetDeliveryFeeShip()
+        //{
+        //    return await _fastDeliveryService.CaculateFeeShipAsync();
+        //}
     }
 }

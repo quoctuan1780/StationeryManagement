@@ -8,5 +8,8 @@ namespace Services.Interfacies
     {
         Task<Order> AddOrderAsync(Order order);
         Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod);
+        Task<Order> GetOrderByIdAsync(int orderId);
+
+        Task<IList<Order>> GetOrdersByUserIdAsync(string userId);
     }
 }

@@ -10,6 +10,8 @@
 
         public const string IMAGE_LINK = "wwwroot/images/product/";
 
+        public const string IMAGE_AVATAR_LINK = "wwwroot/images/";
+
         public const string IMAGE_KEY = "imageKey";
 
         public const string SUCCESS = "Success";
@@ -35,6 +37,12 @@
         public const string VN_CODE = "VN";
 
         public const string VN_NAME = "Việt Nam";
+
+        public const string METHOD_POST = "POST";
+
+        #region Error Page
+        public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        #endregion
 
         #region Error Code
         public const int ERROR_CODE_NULL_ID = -2;
@@ -141,6 +149,31 @@
 
         #region Status
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
+        public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
+        public const string STATUS_RAINS_GOODS = "Đang giao hàng";
+        public const string STATUS_RECEIVED_GOODS = "Đã nhận hàng";
+        public const string STATUS_EVALUATE = "Đánh giá";
+        public const string STATUS_EVALUATED = "Đã đánh giá";
+        #endregion
+
+        #region Fast Delivery
+        public const string FAST_DELIVERY_URL_API = "FastDelivery:UrlAPI";
+        public const string FAST_DELIVERY_TOKEN = "FastDelivery:Token";
+        public const string FAST_DELIVERY_SHOP_ID = "FastDelivery:ShopId";
+        public const string FAST_DELIVERY_SHOP_ID_NAME = "ShopId";
+        public const string FAST_DELIVERY_TOKEN_NAME = "Token";
+
+        public const string FAST_DELIVERY_FROM_DISTRICT_ID = "from_district_id";
+        public const string FAST_DELIVERY_SERVICE_ID = "service_id";
+        public const string FAST_DELIVERY_SERVICE_TYPE_ID = "service_type_id";
+        public const string FAST_DELIVERY_TO_DISTRICT_ID = "to_district_id";
+        public const string FAST_DELIVERY_TO_WARD_CODE = "to_ward_code";
+        public const string FAST_DELIVERY_ITEM_HEIGHT = "height";
+        public const string FAST_DELIVERY_ITEM_LENGTH = "length";
+        public const string FAST_DELIVERY_ITEM_WEIGHT = "weight";
+        public const string FAST_DELIVERY_ITEM_WIDTH = "width";
+        public const string FAST_DELIVERY_INSURANCE_FEE = "insurance_fee";
+        public const string FAST_DELIVERY_COUPON = "coupon";
         #endregion
     }
 }

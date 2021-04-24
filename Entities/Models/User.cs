@@ -18,6 +18,8 @@ namespace Entities.Models
 
         public DateTime DateOfBirth { get; set; }
 
+        public string StreetName { get; set; }
+
         public string WardCode { get; set; }
         public virtual Ward Ward { get; set; }
 
