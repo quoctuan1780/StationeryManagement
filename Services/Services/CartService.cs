@@ -46,9 +46,10 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<CartItem> GetCartItemByProuctDetailIdAsync(int productDetailId)
+        public async Task<CartItem> GetCartItemsAsync(int productDetailId, string userId)
         {
-            return await _context.CartItems.Where(x => x.ProductDetailId == productDetailId).FirstOrDefaultAsync();
+            return await _context.CartItems.Where(x => x.ProductDetailId == productDetailId
+                    && x.UserId == userId).FirstOrDefaultAsync();
         }
 
         public async Task<IList<CartItem>> GetCartsByUserIdAsync(string userId)

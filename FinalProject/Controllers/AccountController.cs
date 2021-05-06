@@ -249,7 +249,7 @@ namespace FinalProject.Controllers
                 User user = null;
                 if (!(model.Image is null))
                 {
-                    var saveAvatarResult = await ImageHelper.SaveImageAsync(model.Image, 300, 300);
+                    var saveAvatarResult = await ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
 
                     user = new User()
                     {
@@ -262,6 +262,8 @@ namespace FinalProject.Controllers
                         StreetName = model.StreetName,
                         FullName = model.FullName
                     };
+
+                    model.ImageLink = saveAvatarResult;
                 }
                 else
                 {
@@ -285,14 +287,14 @@ namespace FinalProject.Controllers
                 {
                     transaction.Complete();
 
-                    ViewBag.MessageSuccess = "Cập nhật thông tin thành công";
+                    ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR;
                 }
 
                 else throw new Exception();
             }
             catch
             {
-                ViewBag.MessageDanger = "Xảy ra lỗi hệ thống, vui lòng cập nhật lại thông tin sau";
+                ViewBag.MessageDanger = MessageConstant.MESSAGE_ERROR_UPDATE_ACCOUNT_INFOR;
                 return View(model);
             }
             return View(model);

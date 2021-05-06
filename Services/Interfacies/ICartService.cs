@@ -12,7 +12,7 @@ namespace Services.Interfacies
 
         Task<int> DeleteCartItemByIdAsync(int cartItemId);
 
-        Task<CartItem> GetCartItemByProuctDetailIdAsync(int productDetailId);
+        Task<CartItem> GetCartItemsAsync(int productDetailId, string userId);
 
         Task<CartItem> UpdateCartItemAsync(CartItem cartItem);
 

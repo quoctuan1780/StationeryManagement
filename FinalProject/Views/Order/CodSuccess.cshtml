@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewData["Title"] = "Đặt hàng thàng công";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="box-content">
+    <div class="position-02">
+        <div class="container">
+            <h2>Đặt hàng thàng công</h2>
+            <a asp-controller="Order" asp-action="OrderInfo" asp-route-orderId="@ViewBag.OrderId" class="btn btn-primary btn-lg btn-block">
+                Xem thông tin đơn hàng của bạn
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success btn-lg btn-block">Trở về trang chủ</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+        }
+    </script>
+}

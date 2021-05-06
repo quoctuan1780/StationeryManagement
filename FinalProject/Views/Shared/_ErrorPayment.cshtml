@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>404 - Không tìm thấy trang</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/style/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="~/style/css/error-page.css" />
+    <link href="~/style/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <style>
+        /* Login background */
+        .background-body-login {
+            background-image: url(../../images/background/bg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+
+<body class="background-body-login">
+    <section id="error">
+        <div class="content text-center">
+            <i class="fa fa-warning"></i>
+            <p>Lỗi! - Thanh toán không thành công</p>
+            <a class="btn btn-danger" asp-controller="Order" asp-action="Order">Quay lại trang đặt hàng</a>
+            <a class="btn btn-warning" asp-controller="Home" asp-action="Index">Quay lại trang chủ</a>
+        </div>
+    </section>
+    <script src="~/style/bootstrap/js/bootstrap.js"></script>
+</body>
+
+</html>

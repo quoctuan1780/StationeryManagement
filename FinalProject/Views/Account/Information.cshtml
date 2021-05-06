@@ -17,11 +17,11 @@
                 <p class="image">
                     @if (Model.ImageLink is null)
                     {
-                        <img src="~/images/avatar.png" height="50" width="50" alt="Avatar">
+                        <img src="~/images/user/avatar.png" height="50" width="50" alt="Avatar">
                     }
                     else
                     {
-                        <img src="~/images/@Model.ImageLink" height="50" width="50" alt="Avatar">
+                        <img src="~/images/user/@Model.Email/@Model.ImageLink" height="50" width="50" alt="Avatar">
                     }
                 </p>
                 <p class="name">Tài khoản của</p>
@@ -148,7 +148,7 @@
                         </div>
                         <div class="col-sm-3" id="ward">
                             <select name="WardCode" id="ward-id"
-                                    class="selectpicker show-tick form-control" data-live-search="true">
+                                    class="selectpicker show-tick form-control" data-live-search="true" onchange="clearStreetName()">
                                 <option value="null">Phường/Xã</option>
                                 @if (!(wards is null))
                                 {
@@ -167,7 +167,7 @@
                             </select>
                         </div>
                         <div class="col-sm-3" id="street-name">
-                            <input type="text" class="form-control" placeholder="Tên đường/thôn" name="StreetName" value="@Model.StreetName">
+                            <input type="text" class="form-control" placeholder="Tên đường/thôn/khu phố" name="StreetName" value="@Model.StreetName">
                         </div>
                         <span class="text-danger" asp-validation-for="StreetName"></span>
                     </div>
@@ -216,6 +216,8 @@
 
             var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
                 + 'data-live-search="true"><option value="null">Phường/Xã</option>';
+
+            $($('#street-name').children()).val('');
 
             if (districtId === 'null') {
                 node += '</select>';
@@ -279,6 +281,8 @@
                 Size: 10
             });
 
+            $($('#street-name').children()).val('');
+
             if (provinceId === 'null') {
                 node += '</select>';
 
@@ -316,6 +320,10 @@
                     }
                 });
             setTimeout(() => loading.out(), 2000);
+        }
+
+        function clearStreetName(){
+            $($('#street-name').children()).val('');
         }
 
         $(document).ready(function () {

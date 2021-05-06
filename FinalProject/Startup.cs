@@ -60,6 +60,7 @@ namespace FinalProject
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IFastDeliveryService, FastDeliveryService>();
+            services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

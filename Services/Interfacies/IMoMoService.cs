@@ -6,7 +6,7 @@ namespace Services.Interfacies
     {
         string SendPaymentRequest(string endPoint, string postJsonString);
         string SignSHA256(string message, string key);
-        string MoMoCheckout(string total, string orderInfo, string email, string hostName);
+        string MoMoCheckout(string total, string orderInfo, string email, string hostName, string deliveryAddress);
         Task<int> AddMoMoPaymentAsync(int orderId, string moMoOrderId, string payType, string responseTime);
     }
 }

@@ -160,6 +160,33 @@ namespace Entities.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("Entities.Models.DeliveryAddress", b =>
+                {
+                    b.Property<int>("DeliveryAddressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("StreetName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("WardCode")
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("DeliveryAddressId");
+
+                    b.HasIndex("DeliveryAddressId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WardCode");
+
+                    b.ToTable("DeliveryAddress");
+                });
+
             modelBuilder.Entity("Entities.Models.District", b =>
                 {
                     b.Property<int>("DistrictId")
@@ -1074,6 +1101,21 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Entities.Models.DeliveryAddress", b =>
+                {
+                    b.HasOne("Entities.Models.User", "User")
+                        .WithMany("DeliveryAddresses")
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("Entities.Models.Ward", "Ward")
+                        .WithMany("DeliveryAddresses")
+                        .HasForeignKey("WardCode");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Ward");
+                });
+
             modelBuilder.Entity("Entities.Models.District", b =>
                 {
                     b.HasOne("Entities.Models.Province", "Province")
@@ -1491,6 +1533,8 @@ namespace Entities.Migrations
 
                     b.Navigation("CartItems");
 
+                    b.Navigation("DeliveryAddresses");
+
                     b.Navigation("Notifications");
 
                     b.Navigation("Orders");
@@ -1500,6 +1544,8 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.Ward", b =>
                 {
+                    b.Navigation("DeliveryAddresses");
+
                     b.Navigation("Users");
                 });
 #pragma warning restore 612, 618

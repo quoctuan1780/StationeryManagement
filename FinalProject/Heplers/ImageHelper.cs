@@ -26,7 +26,7 @@ namespace FinalProject.Heplers
             }
         }
 
-        public static async Task<string> SaveImageAsync(IFormFile formFile, int width, int height)
+        public static async Task<string> SaveImageAsync(IFormFile formFile, int width, int height, string userName)
         {
             if (formFile is null) return null;
 
@@ -37,8 +37,12 @@ namespace FinalProject.Heplers
 
             var resultHash = HashNameImage(formFile.FileName);
 
-            await image.SaveAsync(Constant.IMAGE_AVATAR_LINK + resultHash);
-           
+            string pathString = Path.Combine(Constant.IMAGE_AVATAR_LINK, userName);
+
+            Directory.CreateDirectory(pathString);
+
+            await image.SaveAsync(pathString + Constant.SLASH + resultHash);
+
             return resultHash;
         }
 

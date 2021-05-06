@@ -10,7 +10,11 @@
 
         public const string IMAGE_LINK = "wwwroot/images/product/";
 
-        public const string IMAGE_AVATAR_LINK = "wwwroot/images/";
+        public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
+
+        public const string SLASH = "/";
+
+        public const string HYPHEN = " - ";
 
         public const string IMAGE_KEY = "imageKey";
 
@@ -40,8 +44,13 @@
 
         public const string METHOD_POST = "POST";
 
+        public const string COD = "COD";
+
+        public const string G29 = "G29";
+
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
         #endregion
 
         #region Error Code
@@ -102,6 +111,7 @@
         public const string KEY_PAYPAL_CLIENT_SECRET = "PAYPAL_CLIENT_SECRET";
 
         #region PayPal
+        public const string PAYPAL = "PayPal";
         public const string PAYPAL_METHOD = "paypal";
         public const string PAYPAL_CLIENT_ID = "PayPal:ClientId";
         public const string PAYPAL_SECRET = "PayPal:Secret";
@@ -113,9 +123,11 @@
         public const string PAYPAL_HEADER_PREFER = "prefer";
         public const string PAYPAL_HEADER_RETURN = "return=representation";
         public const string PAYPAL_REL_APPROVE = "approve";
+        public const string PAYPAL_URL = "payUrl";
         #endregion
 
         #region MoMo        
+        public const string MOMO = "MoMo";
         public const string MOMO_PARTNER_CODE = "MoMo:PartnerCode";
         public const string MOMO_ACCESS_KEY = "MoMo:AccessKey";
         public const string MOMO_SECRET_KEY= "MoMo:Serectkey";

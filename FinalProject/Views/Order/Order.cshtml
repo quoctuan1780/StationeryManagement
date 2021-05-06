@@ -1,13 +1,14 @@
-﻿
+﻿@model FinalProject.ViewModels.OrderViewModel
 @{
     ViewData["Title"] = "Đặt hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var user = ViewBag.User as Entities.Models.User;
-    var addressString = user.Ward.WardName + " - " + user.Ward.District.DistrictName + " - " + user.Ward.District.Province.ProvinceName;
+    var addressString = user.StreetName + " - " + user.Ward.WardName + " - " + user.Ward.District.DistrictName + " - " + user.Ward.District.Province.ProvinceName;
     var carts = ViewBag.Carts as IList<Entities.Models.CartItem>;
     var total = (decimal)ViewBag.TotalOfCart;
-
+    var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
     var orderInfo = "";
+    var addresses = ViewBag.Addresses as IList<SelectListItem>;
 }
 
 <div id="box-content">
@@ -15,126 +16,120 @@
         <div class="container">
             @if (User.Identity.IsAuthenticated)
             {
-                
-            <div class="row">
-                <div class="col-md-8 order-md-1">
-                    <h4 class="mb-3">Billing address</h4>
-                    <form class="needs-validation" novalidate="">
-                        <div class="row">
-                            <div class="col-md-12 mb-6">
-                                <label for="fullName">Họ và tên: </label>
-                                <input type="text" class="form-control" id="full-name" placeholder="" value="@user.FullName" readonly>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email">Email <span class="text-muted">(Optional)</span></label>
-                            <input type="email" class="form-control" id="email" value="@user.Email" placeholder="you@example.com" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="address">Địa chỉ</label>
-                            <input type="text" class="form-control" id="address" value="@addressString" placeholder="1234 Main St" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="address2">Địa chỉ nhận hàng khác: <span class="text-muted">(Optional)</span></label>
-                            <input type="text" class="form-control" id="address2" placeholder="Số nhà và tên đường">
-                        </div>
-                        <hr class="mb-4">
-                        <h4 class="mb-3">Thông tin thanh toán</h4>
-                        <div class="d-block my-3">
-                            @{
-                                orderInfo = "Đơn hàng của khách hàng " + user.FullName;
-                            }
-                            <div class="custom-control custom-radio">
-                                <div class="box">
-                                    <a class="paypal-button" asp-action="PayPalCheckout" asp-controller="Order">
-                                        <span class="paypal-button-title">
-                                            Thanh toán với
-                                        </span>
-                                        <span class="paypal-logo">
-                                            <i>Pay</i><i>Pal</i>
-                                        </span>
-                                    </a>
-                                </div>
-                                <div class="box">
-                                    <a class="paypal-button" asp-action="MoMoCheckout" asp-controller="Order"
-                                       asp-route-total="@total.ToString("G29")" asp-route-orderInfo="@user.FullName"
-                                       asp-route-email="@user.Email">
-                                        <span class="paypal-button-title">
-                                            Thanh toán với
-                                        </span>
-                                        <span class="paypal-logo">
-                                            <i>Mo</i><i>Mo</i>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                            @*<div class="radio-custom">
-	                            <div class="radiobtn">
-                                    <img src="~/images/logo/momo.png" alt="Momo" width="80" height="80" />
-		                            <input type="radio" id="Momo"
-					                             name="drone" value="Momo" checked />
-		                            <label for="Momo">Ví Momo</label>
-	                            </div>
 
-                                <div class="radiobtn">
-                                    <img src="~/images/logo/paypal-54-675727.png" alt="Paypal" width="80" height="80" />
-                                    <input type="radio" id="Paypal"
-                                           name="drone" value="Paypal" />
-                                    <label for="Paypal">Ví Paypal</label>
+                <div class="row">
+                    <div class="col-md-8 order-md-1">
+                        <h4 class="mb-3">Thông tin thanh toán</h4>
+                        <form id="order" class="needs-validation" asp-action="Order" asp-controller="Order" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="Total" value="@total" />
+                            <div class="row">
+                                <div class="col-md-12 mb-6">
+                                    <label for="fullName">Họ và tên: </label>
+                                    <input type="text" class="form-control" id="full-name" placeholder="" value="@user.FullName" readonly>
                                 </div>
-                            </div>*@
-                            @*<div class="custom-control custom-radio">
-                                <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required="">
-                                <label class="custom-control-label" for="paypal"><img src="~/images/logo/paypal-54-675727.png" alt="Paypal" width="140" height="140"/></label>
                             </div>
-                            <div class="custom-control custom-radio">
-                                <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required="">
-                                <label class="custom-control-label" for="paypal"><img src="~/images/logo/momo.png" alt="Momo" width="140" height="140"/></label>
-                            </div>*@
-                        </div>
-                        <hr class="mb-4">
-                        <button class="btn btn-success btn-lg btn-block" type="submit">Đặt hàng</button>
-                    </form>
-                </div>
-                <div class="col-md-4 order-md-2 mb-4">
-                    <h4 class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted">Giỏ hàng của bạn: </span>
-                        <span class="badge badge-secondary badge-pill">@carts.Count</span>
-                    </h4>
-                    <ul class="list-group mb-3 sticky-top">
-                        @foreach(var item in carts)
-                        {
-                            <li class="list-group-item d-flex lh-condensed">
-                                <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; align-items: center;">
-                                    <div class="col-md-4">
-                                        @if (item.ProductDetail.Product.ProductImages is null || item.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                            <div class="mb-3">
+                                <label for="email">Email <span class="text-muted">(Optional)</span></label>
+                                <input type="email" class="form-control" id="email" value="@user.Email" placeholder="you@example.com" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address">Địa chỉ nhận hàng</label>
+                                <select class="selectpicker show-tick form-control" name="DeliveryAddress"
+                                        onchange="getDistricts()" id="delivery-address" data-live-search="true">
+                                    <option value="@null">Địa chỉ giao hàng</option>
+                                    @if (!(addresses is null))
+                                    {
+                                        <option value="@addressString">@addressString</option>
+                                        foreach (var item in addresses)
                                         {
-                                            <img src="~/images/product/img_1.jpg" style="width: 100%;" />
+                                            <option value="@item.Text">@item.Text</option>
                                         }
-                                        else
-                                        {
-                                            <img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" style="width: 100%;"/>
-                                        }
+                                    }
+                                </select>
+                                <span class="text-danger" asp-validation-for="DeliveryAddress"></span>
+                            </div>
+                            <br />
+                            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addNewAddress">Thêm địa chỉ nhận hàng khác</button>
+                            <hr class="mb-4">
+                            <h4 class="mb-3">Phương thức thanh toán</h4>
+                            <div class="d-block my-3">
+                                @{
+                                    orderInfo = "Đơn hàng của khách hàng " + user.FullName;
+                                }
+                                
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio image-checkbox">
+                                            <input type="radio" class="custom-control-input" name="PaymentMethod" value="MoMo">
+                                            <label class="custom-control-label" for="ck2a">
+                                                <img src="~/images/logo/momo.png" width="80" height="80" alt="#" class="img-fluid">
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="col-md-8">
-                                        <h6 class="my-0">
-                                            <a asp-controller="Product" asp-action="Detail" 
-                                               asp-route-id="@item.ProductDetailId">@item.ProductDetail.Product.ProductName
-                                            </a>
-                                        </h6>
-                                        <p class="text-muted">Số lượng: @item.Quantity</p>
-                                        <p class="text-muted">Giá: @item.Price.ToString("G29")</p>
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio image-checkbox">
+                                            <input type="radio" class="custom-control-input" name="PaymentMethod" value="PayPal">
+                                            <label class="custom-control-label" for="ck2b">
+                                                <img src="~/images/logo/paypal.png" width="80" height="80" alt="#" class="img-fluid">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio image-checkbox">
+                                            <input type="radio" class="custom-control-input" name="PaymentMethod" value="COD">
+                                            <label class="custom-control-label" for="ck2b">
+                                                <img src="~/images/logo/cod.png" width="80" height="80" alt="#" class="img-fluid">
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
+                                <span class="text-danger" asp-validation-for="PaymentMethod"></span>
+                            </div>
+                            <hr class="mb-4">
+                        </form>
+                        <button class="btn btn-success btn-lg btn-block" type="button" onclick="order()">Đặt hàng</button>
+                    </div>
+                    <div class="col-md-4 order-md-2 mb-4">
+                        <h4 class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Giỏ hàng của bạn: </span>
+                            <span class="badge badge-secondary badge-pill">@carts.Count</span>
+                        </h4>
+                        <ul class="list-group mb-3 sticky-top">
+                            @foreach (var item in carts)
+                            {
+                                <li class="list-group-item d-flex lh-condensed">
+                                    <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; align-items: center;">
+                                        <div class="col-md-4">
+                                            @if (item.ProductDetail.Product.ProductImages is null || item.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                            {
+                                                <img src="~/images/product/img_1.jpg" style="width: 100%;" />
+                                            }
+                                            else
+                                            {
+                                                <img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" style="width: 100%;" />
+                                            }
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h6 class="my-0">
+                                                <a asp-controller="Product" asp-action="Detail"
+                                                   asp-route-id="@item.ProductDetail.Product.ProductId">
+                                                    @item.ProductDetail.Product.ProductName
+                                                </a>
+                                            </h6>
+                                            <p class="text-muted">Số lượng: @item.Quantity</p>
+                                            <p class="text-muted">Giá: @item.Price.ToString("G29")</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Tổng tiền: <strong>@total.ToString("G29")</strong> (VNĐ)</span>
                             </li>
-                        }
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Tổng tiền: <strong>@total.ToString("G29")</strong> (VNĐ)</span>
-                        </li>
-                    </ul>
-                    <a class="btn btn-warning" asp-action="Checkout" asp-controller="Cart" style="width: 100%">Quay lại giỏ hàng</a>
+                        </ul>
+                        <a class="btn btn-warning" asp-action="Checkout" asp-controller="Cart" style="width: 100%">Quay lại giỏ hàng</a>
+                    </div>
                 </div>
-            </div>
             }
             else
             {
@@ -144,15 +139,271 @@
                     </div>
                 </div>
             }
+            <div class="modal fade" id="addNewAddress" role="dialog" style="z-index: 100000">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Thêm địa chỉ giao hàng mới</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="col-sm-12 row modal-lg">
+                                <div class="col-sm-4 mb-3 mb-sm-0">
+                                    <select class="selectpicker show-tick form-control" name="ProvinceId"
+                                            onchange="getDistricts()" id="province" data-live-search="true">
+                                        <option value="null">Tỉnh/Thành phố</option>
+                                        @if (!(provinces is null))
+                                        {
+                                            foreach (var item in provinces)
+                                            {
+                                                <option value="@item.ProvinceId">@item.ProvinceName</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-sm-4" id="district">
+                                    <select class="selectpicker show-tick form-control"
+                                            name="DistrictId"
+                                            id="district-id" onchange="getWards()"
+                                            data-live-search="true">
+                                        <option value="null">Quận/Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4" id="ward">
+                                    <select name="WardCode" id="ward-id"
+                                            class="selectpicker show-tick form-control" data-live-search="true">
+                                        <option value="null">Phường/Xã</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="modal-lg col-sm-12 row">
+                                <div class="col-sm-6" id="street-name">
+                                    <input type="text" class="form-control" placeholder="Tên đường/Thôn/Khu phố" id="street" name="StreetName">
+                                </div>
+                            </div>
+                            <div class="modal-lg col-sm-12 row">
+                                <span class="text-danger" id="address-alert"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" onclick="addNewAddress('@user.Id')">Thêm địa chỉ</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 </div>
-@section Scripts{ 
+@section Scripts{
+    <script type="text/javascript" src="~/admin/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script>
+        function order() {
+            var deliveryAddress = $('#delivery-address').val();
+
+            if (deliveryAddress === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi...',
+                    text: 'Bạn chưa chọn địa chỉ giao hàng',
+                });
+            }
+            else {
+                $('#order').submit();
+            }
+        }
+
+        async function verticalTextColor() {
+            var loading = new Loading({
+                title: 'Xin hãy đợi...',
+                titleColor: 'rgb(217, 83, 79)',
+                discription: 'Loading...',
+                discriptionColor: 'rgb(77, 150, 223)',
+                animationOriginColor: 'rgb(33, 179, 132)',
+                mask: true,
+                loadingPadding: '20px 50px',
+                defaultApply: true,
+            });
+
+            return loading;
+        }
+
+        async function getWards() {
+            var loading = await verticalTextColor();
+
+            loading;
+
+            var districtId = $("#district-id").val();
+
+            var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
+                + 'data-live-search="true"><option value="null">Phường/Xã</option>';
+
+            if (districtId === 'null') {
+                node += '</select>';
+                $('#ward').children().remove();
+                $('#ward').append(node);
+
+                $('#ward').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
+
+                await $.ajax({
+                    url: '/Account/Ward',
+                    method: 'GET',
+                    async: true,
+                    data: { districtId: districtId },
+                    success: async function (data) {
+                        for (let i of JSON.parse(data)) {
+                            node += '<option value="' + i.WardCode + '">' + i.WardName + '</option>'
+                        }
+                        node += '</select>';
+
+                        $('#ward').children().remove();
+                        $('#ward').append(node);
+
+                        $('#ward').children().selectpicker({
+                            liveSearch: true,
+                            showSubtext: true,
+                            Size: 10
+                        });
+                    }
+                })
+            loading.out();
+        }
+
+        async function getDistricts() {
+
+            var loading = await verticalTextColor();
+
+            loading;
+
+            var provinceId = $('#province').val();
+
+            var node = '<select class="selectpicker show-tick form-control" name="DistrictId" id="district-id"' + 'onchange="getWards()"'
+                + 'data-live-search="true"><option value="null">Quận/Huyện</option>';
+
+            var nodeWard = '<select name="WardCode" id="ward-id"' +
+                'class="selectpicker show-tick form-control" data - live - search="true" >' +
+                '<option value="null">Phường/Xã</option</select>';
+            '<option value="null">Phường/Xã</option</select>';
+
+            $('#ward').children().remove();
+            $('#ward').append(nodeWard);
+
+            $('#ward').children().selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+
+            if (provinceId === 'null') {
+                node += '</select>';
+
+                $('#district').children().remove();
+                $('#district').append(node);
+
+
+                $('#district').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
+                await $.ajax({
+                    url: '/Account/District',
+                    method: 'GET',
+                    async: true,
+                    data: { provinceId: provinceId },
+                    success: async function (data) {
+                        for (let i of JSON.parse(data)) {
+                            node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
+                        }
+
+                        node += '</select>';
+
+                        $('#district').children().remove();
+                        $('#district').append(node);
+
+                        $('#district').children().selectpicker({
+                            liveSearch: true,
+                            showSubtext: true,
+                            Size: 10
+                        });
+                    }
+                });
+            loading.out();
+        }
+
+        async function addNewAddress(userId) {
+            var province = $("#province").val();
+            var districtId = $("#district-id").val();
+            var ward = $("#ward-id").val();
+            var streetName = $("#street").val();
+            if (province === 'null' || districtId === 'null' || ward === 'null' || streetName === '')
+                $('#address-alert').text('Địa chỉ không được bỏ trống');
+            else {
+
+                var loading = await verticalTextColor();
+
+                loading;
+
+                $('#address-alert').text('');
+                await $.ajax({
+                    url: '/DeliveryAddress/AddDelivery',
+                    method: 'POST',
+                    data: { wardCode: ward, userId: userId, streetName: streetName },
+                    success: async function (data) {
+                        loading.out();
+                        switch (data) {
+                            case "Success":
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công',
+                                    text: 'Thêm địa chỉ giao hàng thành công',
+                                })
+                                break;
+                            case "Fail":
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi...',
+                                    text: 'Lỗi hệ thống! vui lòng thử lại sau',
+                                })
+                                break;
+                        }
+                    },
+                    error: async function (code, err) {
+                        loading.out();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi...',
+                            text: 'Lỗi hệ thống! vui lòng thử lại sau',
+                        })
+                    }
+                });
+            }
+        }
+
         $(document).ready(function () {
             $('#left-nav').remove();
             $('#banner').remove();
             $('#cart').remove();
+
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
         });
 
         (function () {

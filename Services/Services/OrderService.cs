@@ -27,9 +27,8 @@ namespace Services.Services
             return order;
         }
 
-        public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod)
+        public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress)
         {
-            string address = user.Ward.WardName + " - " + user.Ward.District.DistrictName + " - " + user.Ward.District.Province.ProvinceName;
 
             decimal total = 0;
 
@@ -40,7 +39,7 @@ namespace Services.Services
 
             var order = new Order()
             {
-                Address = address,
+                Address = deliveryAddress,
                 UserId = user.Id,
                 PaymentMethod = paymentMethod,
                 Status = Constant.STATUS_WAITING_CONFIRM,

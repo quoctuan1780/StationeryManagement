@@ -5,7 +5,7 @@
     <title>404 - Không tìm thấy trang</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/style/css/font-awesome.css">
+    <link rel="stylesheet" href="~/style/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="~/style/css/error-page.css"/>
     <style>
         /* Login background */
@@ -23,10 +23,16 @@
             <i class="fa fa-warning"></i>
             <h1>404</h1>
             <p>Lỗi! - Không tìm thấy trang bạn yêu cầu</p>
-            <a class="back" href="javascript:history()">Back</a>
+            <button class="btn btn-warning" type="button" onclick="goBack()">Quay lại</button>
+            <a class="back" asp-action="Index" asp-controller="Home">Quay lại trang chủ</a>
         </div>
     </section>
 
+    <script>
+        function goBack() {
+            window.history.back()
+        }
+    </script>
 </body>
 
 </html>
