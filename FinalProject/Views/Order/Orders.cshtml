@@ -1,0 +1,67 @@
+﻿
+@{
+    ViewData["Title"] = "Thông tin tất cả đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+}
+
+<div id="box-content">
+    <div class="position-02">
+        <div class="container">
+            <div class="row">
+                <div class="">
+                    <h1>Thông tin giỏ hàng</h1>
+                    <div class="table-wrap">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id đơn hàng</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Địa chỉ giao hàng</th>
+                                    <th>Hình thức thanh toán</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in orders)
+                                {
+                                <tr>
+                                    <td>@item.OrderId</td>
+
+                                    <td>@item.OrderDate</td>
+                                    <td>
+                                        @item.Address
+                                    </td>
+                                    <td>@item.PaymentMethod</td>
+                                    <td>
+                                        <a class="btn btn-danger" asp-action="OrderInfo" asp-controller="Order" asp-route-orderId="@item.OrderId"> Xem đơn hàng </a>
+                                        <button class="btn btn-danger" type="button"> Hủy đơn hàng </button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @*<div class="col-lg-12">
+                        <div class="col-lg-6 text-left">
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-warning">Tiếp tục mua sắm</a>
+                        </div>
+                        <div class="col-lg-6 text-right">
+                            <a asp-action="Order" asp-controller="Order" class="btn btn-success">Đặt hàng</a>
+                        </div>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{ 
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+        });
+    </script>
+}

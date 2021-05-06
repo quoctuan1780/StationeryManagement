@@ -8,7 +8,9 @@ using PayPalHttp;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Services.Services
 {
@@ -42,9 +44,9 @@ namespace Services.Services
                             ?? _configuration[Constant.PAYPAL_SECRET]);
         }
 
-        public OrderRequest BuildRequestBody(IList<CartItem> carts, User user, string host)
+        public OrderRequest BuildRequestBody(IList<CartItem> carts, User user, string host, string deliveryAddress)
         {
-            List<Item> items = new List<Item>();
+            var items = new List<Item>();
 
             decimal total = 0;
 
@@ -79,7 +81,7 @@ namespace Services.Services
                 ApplicationContext = new ApplicationContext
                 {
                     CancelUrl = $"{host}/Order/PayPalFail",
-                    ReturnUrl = $"{host}/Order/PayPalSuccess",
+                    ReturnUrl = $"{host}/Order/PayPalSuccess?deliveryAddress={deliveryAddress}",
                 },
                 PurchaseUnits = new List<PurchaseUnitRequest>
                 {
@@ -127,7 +129,7 @@ namespace Services.Services
                             },
                             AddressPortable = new AddressPortable
                             {
-                                AddressLine1 = user.Ward.WardName + user.Ward.District.DistrictName + user.Ward.District.Province.ProvinceName,
+                                AddressLine1 = HttpUtility.UrlDecode(deliveryAddress),
                                 AdminArea2 = Constant.VN_NAME,
                                 AdminArea1 = Constant.VN_CODE,
                                 PostalCode = Constant.ZERO,
@@ -141,13 +143,13 @@ namespace Services.Services
             return orderRequest;
         }
 
-        public async Task<HttpResponse> PayPalCreateOrder(IList<CartItem> carts, User user, string host, bool debug = false)
+        public async Task<HttpResponse> PayPalCreateOrder(string deliveryAddress, IList<CartItem> carts, User user, string host, bool debug = false)
         {
             try
             {
                 var request = new OrdersCreateRequest();
                 request.Headers.Add(Constant.PAYPAL_HEADER_PREFER, Constant.PAYPAL_HEADER_RETURN);
-                request.RequestBody(BuildRequestBody(carts, user, host));
+                request.RequestBody(BuildRequestBody(carts, user, host, deliveryAddress));
                 HttpResponse response = await Client().Execute(request);
 
                 return response;

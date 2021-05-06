@@ -24,5 +24,7 @@ namespace Services.Interfacies
         Task<User> GetUserAsync(ClaimsPrincipal user);
 
         Task<User> GetUserByUserIdAsync(string userId);
+
+        Task<int> UpdateInformationClientAsync(User user);
     }
 }

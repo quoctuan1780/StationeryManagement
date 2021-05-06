@@ -37,5 +37,8 @@ namespace FinalProject.ViewModels
         public string PhoneNumber { get; set; }
 
         public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = ValidationConstant.ERROR_ADDRESS_EMPTY)]
+        public string StreetName { get; set; }
     }
 }

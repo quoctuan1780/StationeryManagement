@@ -1,5 +1,8 @@
 ﻿using Common;
+using Entities.Models;
 using FinalProject.Heplers;
+using FinalProject.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -9,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web;
 
 namespace FinalProject.Controllers
 {
@@ -21,10 +25,12 @@ namespace FinalProject.Controllers
         private readonly IMoMoService _moMoService;
         private readonly IOrderDetailService _orderDetailService;
         private readonly IOrderService _orderService;
+        private readonly IAddressService _addressService;
+        private readonly IDeliveryAddressService _deliveryAddressService;
 
         public OrderController(IAccountService accountService, ICartService cartService, IConfiguration configuration,
             IPayPalService payPalService, IMoMoService moMoService, IOrderDetailService orderDetailService,
-            IOrderService orderService)
+            IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService)
         {
             _accountService = accountService;
             _cartService = cartService;
@@ -33,30 +39,165 @@ namespace FinalProject.Controllers
             _moMoService = moMoService;
             _orderDetailService = orderDetailService;
             _orderService = orderService;
+            _addressService = addressService;
+            _deliveryAddressService = deliveryAddressService;
         }
         public async Task<IActionResult> Order()
         {
-            //if (User.Identity.IsAuthenticated)
-            //{
-            //    ViewBag.User = await _accountService.GetUserAsync(User);
+            try
+            {
+                string userId = _accountService.GetUserId(User);
 
-            //    return View();
-            //}
-            //else
-            //    return Redirect(Constant.ROUTE_LOGIN_CLIENT);
+                ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
 
-            var userId = _accountService.GetUserId(User);
+                ViewBag.Carts = await _cartService.GetCartsByUserIdAsync(userId);
 
-            ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
+                ViewBag.TotalOfCart = _cartService.GetCartTotalByUserId(userId);
 
-            ViewBag.Carts = await _cartService.GetCartsByUserIdAsync(userId);
+                ViewBag.Provinces = await _addressService.GetProvincesAsync();
 
-            ViewBag.TotalOfCart = _cartService.GetCartTotalByUserId(userId);
+                ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
+                    await _deliveryAddressService.GetDeliveryAddressesAsync(userId));
+
+            }
+            catch
+            {
+
+            }
+
+            return View();
+
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Order(OrderViewModel model)
+        {
+            try
+            {
+                string userId = _accountService.GetUserId(User);
+
+                var user = await _accountService.GetUserByUserIdAsync(userId);
+
+                var carts = await _cartService.GetCartsByUserIdAsync(userId);
+
+                var total = _cartService.GetCartTotalByUserId(userId);
+
+                #region ViewBag
+                ViewBag.User = user;
+
+                ViewBag.Carts = carts;
+
+                ViewBag.TotalOfCart = total;
+
+                ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
+                    await _deliveryAddressService.GetDeliveryAddressesAsync(userId));
+                #endregion
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                string deliveryAddressEncoder = HttpUtility.UrlEncode(model.DeliveryAddress);
+
+                switch (model.PaymentMethod)
+                {
+                    case Constant.MOMO:
+                        return MoMoCheckout(total.ToString(Constant.G29), user.FullName, user.Email, deliveryAddressEncoder);
+                    case Constant.PAYPAL:
+                        return await PaypalCheckout(deliveryAddressEncoder);
+                    case Constant.COD:
+                        return await CodCheckout(model, user, total, carts);
+                }
+
+            }
+            catch
+            {
+
+            }
+            return View(model);
+        }
+
+        public async Task<IActionResult> Orders(string userId)
+        {
+            if (userId is null)
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+
+            try
+            {
+                ViewBag.Orders = await _orderService.GetOrdersByUserIdAsync(userId);
+            }
+            catch
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
 
             return View();
         }
 
-        public async Task<IActionResult> PaypalCheckout()
+        public async Task<IActionResult> OrderInfo(int? orderId)
+        {
+            if (orderId is null)
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+            try
+            {
+                ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
+            }
+            catch
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+
+            return View();
+        }
+
+        public async Task<IActionResult> CodCheckout(OrderViewModel model, User user, decimal? total, IList<CartItem> carts)
+        {
+            if(user is null || total is null || carts is null)
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            var order = await _orderService.AddOrderFromCartsAsync(carts, user, Constant.COD, model.DeliveryAddress);
+
+            if (!(order is null))
+            {
+                int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+
+                if(result > 0)
+                {
+                    transaction.Complete();
+
+                    return RedirectToAction("CodSuccess", new { orderId = order.OrderId });
+                }
+            }
+
+            return Redirect("/Home/Error");
+        }
+
+        public IActionResult CodSuccess(int? orderId)
+        {
+            if (orderId is null)
+            {
+                return PartialView(Constant.ERROR_404_PAGE);
+            }
+
+            ViewBag.OrderId = orderId.Value;
+
+            return View();
+        }
+
+        public async Task<IActionResult> PaypalCheckout(string deliveryAddress)
         {
             var userId = _accountService.GetUserId(User);
             var user = await _accountService.GetUserByUserIdAsync(userId);
@@ -65,7 +206,7 @@ namespace FinalProject.Controllers
 
             try
             {
-                var createOrderResponse = await _payPalService.PayPalCreateOrder(carts, user, hostName, true);
+                var createOrderResponse = await _payPalService.PayPalCreateOrder(deliveryAddress, carts, user, hostName, true);
 
                 if (!(createOrderResponse is null))
                 {
@@ -73,7 +214,7 @@ namespace FinalProject.Controllers
 
                     var link = Constant.EMPTY;
 
-                    foreach (var item in createOrderResult.Links)
+                    foreach (PayPalCheckoutSdk.Orders.LinkDescription item in createOrderResult.Links)
                     {
                         if (item.Rel.Equals(Constant.PAYPAL_REL_APPROVE))
                         {
@@ -89,30 +230,30 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return Redirect("/Home/Error");
+                return PartialView(Constant.ERROR_PAYMENT_PAGE);
             }
         }
 
-        public IActionResult MoMoCheckout(string total, string orderInfo, string email)
+        public IActionResult MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
         {
-            var hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
             try
             {
-                var responseFromMomo = _moMoService.MoMoCheckout(total, orderInfo, email, hostName);
+                string responseFromMomo = _moMoService.MoMoCheckout(total, orderInfo, email, hostName, deliveryAddress);
 
-                var jmessage = JObject.Parse(responseFromMomo);
+                JObject jmessage = JObject.Parse(responseFromMomo);
 
-                var redirect = jmessage.GetValue("payUrl").ToString();
+                string redirect = jmessage.GetValue(Constant.PAYPAL_URL).ToString();
 
                 return Redirect(redirect);
             }
             catch
             {
-                return Redirect("/Home/Error");
+                return PartialView(Constant.ERROR_PAYMENT_PAGE);
             }
         }
 
-        public async Task<IActionResult> MoMoSuccess(string orderId, string payType, string responseTime, string errorCode)
+        public async Task<IActionResult> MoMoSuccess(string deliveryAddress, string orderId, string payType, string responseTime, string errorCode)
         {
             if (errorCode.Equals(Constant.ZERO))
             {
@@ -123,13 +264,14 @@ namespace FinalProject.Controllers
                 var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
 
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
                 try
                 {
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "MoMo");
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, Constant.MOMO, HttpUtility.UrlDecode(deliveryAddress));
 
                     if (!(order is null))
                     {
-                        var result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                         if (result > 0)
                         {
@@ -138,6 +280,10 @@ namespace FinalProject.Controllers
                             if (result > 0)
                             {
                                 transaction.Complete();
+
+                                ViewBag.OrderId = order.OrderId;
+
+                                return View();
                             }
                         }
                     }
@@ -146,24 +292,22 @@ namespace FinalProject.Controllers
                 {
 
                 }
-
-                return View();
             }
 
-            return Redirect("/Home/Error");
+            return PartialView(Constant.ERROR_PAYMENT_PAGE);
         }
 
-        public async Task<IActionResult> PayPalSuccess(string token, string PayerID)
+        public async Task<IActionResult> PayPalSuccess(string deliveryAddress, string token, string PayerID)
         {
-            var user = await _accountService.GetUserAsync(User);
-
-            var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
-
-            var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
-
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
+                var user = await _accountService.GetUserAsync(User);
+
+                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+
+                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+
                 var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
 
                 if (!(captureOrderResponse is null))
@@ -171,11 +315,11 @@ namespace FinalProject.Controllers
 
                     var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, "PayPal");
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, Constant.PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
 
                     if (!(order is null))
                     {
-                        var result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                         if (result > 0)
                         {
@@ -185,6 +329,8 @@ namespace FinalProject.Controllers
                             if (result > 0)
                             {
                                 transaction.Complete();
+
+                                ViewBag.OrderId = order.OrderId;
                             }
                         }
                     }
@@ -199,5 +345,10 @@ namespace FinalProject.Controllers
                 return Redirect("/Home/Error");
             }
         }
+
+        //public async Task<string> GetDeliveryFeeShip()
+        //{
+        //    return await _fastDeliveryService.CaculateFeeShipAsync();
+        //}
     }
 }

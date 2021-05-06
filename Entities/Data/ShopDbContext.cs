@@ -44,6 +44,7 @@ namespace Entities.Data
         public virtual DbSet<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
         public virtual DbSet<PayPalPayment> PayPalPayments { get; set; }
         public virtual DbSet<MoMoPayment> MoMoPayments { get; set; }
+        public virtual DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -444,6 +445,23 @@ namespace Entities.Data
                 e.HasOne(x => x.Order)
                 .WithOne(x => x.PayPalPayment)
                 .HasForeignKey<PayPalPayment>(x => x.OrderId);
+            });
+
+            // Entity Delivery Address
+            modelBuilder.Entity<DeliveryAddress>(e =>
+            {
+                e.HasKey(x => x.DeliveryAddressId);
+                e.HasIndex(x => x.DeliveryAddressId);
+                e.HasIndex(x => x.WardCode);
+                e.HasIndex(x => x.UserId);
+
+                e.HasOne(x => x.Ward)
+                .WithMany(x => x.DeliveryAddresses)
+                .HasForeignKey(x => x.WardCode);
+
+                e.HasOne(x => x.User)
+                .WithMany(x => x.DeliveryAddresses)
+                .HasForeignKey(x => x.UserId);
             });
         }
     }

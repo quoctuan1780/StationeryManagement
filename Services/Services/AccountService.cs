@@ -108,5 +108,28 @@ namespace Services.Services
                                        .ThenInclude(x => x.Province)
                                        .FirstOrDefaultAsync();
         }
+
+        public async Task<int> UpdateInformationClientAsync(User user)
+        {
+            if (user is null) return 0;
+
+            var userDb = await _context.Users.FirstAsync(x => x.Id == user.Id);
+
+            if(!(user.Image is null))
+            {
+                userDb.Image = user.Image;
+            }
+
+            userDb.FullName = user.FullName;
+            userDb.Gender = user.Gender;
+            userDb.PhoneNumber = user.PhoneNumber;
+            userDb.WardCode = user.WardCode;
+            userDb.StreetName = user.StreetName;
+            userDb.DateOfBirth = user.DateOfBirth;
+
+            _context.Users.Update(userDb);
+
+            return await _context.SaveChangesAsync();
+        }
     }
 }

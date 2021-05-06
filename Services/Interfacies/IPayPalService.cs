@@ -15,9 +15,9 @@ namespace Services.Interfacies
 
         HttpClient Client(string refreshToken);
 
-        OrderRequest BuildRequestBody(IList<CartItem> carts, User user, string host);
+        OrderRequest BuildRequestBody(IList<CartItem> carts, User user, string host, string deliveryAddress);
 
-        Task<HttpResponse> PayPalCreateOrder(IList<CartItem> carts, User user, string host, bool debug = false);
+        Task<HttpResponse> PayPalCreateOrder(string deliveryAddress, IList<CartItem> carts, User user, string host, bool debug = false);
 
         Task<HttpResponse> PayPalCaptureOrder(string OrderId, bool debug = false);
 

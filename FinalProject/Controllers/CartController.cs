@@ -30,11 +30,10 @@ namespace FinalProject.Controllers
             {
                 var userId = _accountService.GetUserId(User);
 
-                var cartItem = await _cartService.GetCartItemByProuctDetailIdAsync(productDetailId.Value);
+                var cartItem = await _cartService.GetCartItemsAsync(productDetailId.Value, userId);
 
                 if (cartItem is null)
                 {
-
                     var cart = new CartItem()
                     {
                         UserId = userId,

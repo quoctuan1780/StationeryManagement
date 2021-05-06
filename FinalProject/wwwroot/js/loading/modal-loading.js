@@ -72,7 +72,7 @@
 
 		// zIndex
 		if(this.set.zIndex <= 0) {
-			this.set.zIndex = (this.$target.siblings().length-1 || this.$target.children().siblings().length) + 10001;
+			this.set.zIndex = (this.$target.siblings().length-1 || this.$target.children().siblings().length) + 100001;
 		}
 
 		// var attr, value;
