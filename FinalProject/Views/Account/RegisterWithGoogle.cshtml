@@ -1,7 +1,7 @@
 ﻿@model FinalProject.ViewModels.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Đăng ký";
+    ViewData["Title"] = "Đăng ký tài khoản với Google";
     Layout = null;
     var urlBack = ViewBag.UrlBack as string;
     var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
@@ -52,57 +52,41 @@
                             {
                                 <div class="alert alert-danger">@ViewBag.Message</div>
                             }
-                            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "form", role = "form" }))
-                            {
+                            <form asp-action="RegisterWithGoogle" asp-controller="Account" method="post" id="form" role="form">
                                 @Html.AntiForgeryToken()
                                 <div class="form-group">
                                     <label for="fullname">Họ tên</label>
-                                    @Html.TextBoxFor(m => m.FullName, new
-                                    {
-                                        @class = "form-control form-control-user",
-                                                       @placeholder = "Họ và tên"
-                                    })
-                                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                                    <input type="text" name="FullName" value="@Model.FullName" class="form-control form-control-user" 
+                                           placeholder="Họ và tên"/>
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="gander">Giới tính</label>
                                     <div class="col-sm-12 mb-3 mb-sm-0 text-center">
-                                        @Html.RadioButtonFor(m => m.Gender, "Nam", new { @checked = true })
+                                        <input type="radio" name="Gender" value="Nam" checked/>
                                         <label for="gender">Nam</label>
-                                        @Html.RadioButtonFor(m => m.Gender, "Nữ")
+                                        <input type="radio" name="Gender" value="Nữ" />
                                         <label for="gender">Nữ</label>
                                     </div>
                                     @Html.ValidationMessageFor(m => m.Gender, "", new { @class = "text-danger" })
                                 </div>
                                 <div class="form-group">
                                     <label for="dateofbirth">Ngày sinh</label>
-                                    @Html.TextBoxFor(m => m.DateOfBirth, new
-                                    {
-                                        @class = "form-control form-control-user",
-                                        @placeholder = "Ngày sinh",
-                                        @type = "date"
-                                    })
-                                    @Html.ValidationMessageFor(m => m.DateOfBirth, "", new { @class = "text-danger" })
+                                    <input type="date" name="DateOfBirth" value="@Model.DateOfBirth" class="form-control form-control-user"
+                                           placeholder="Ngày sinh" />
+                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    @Html.TextBoxFor(m => m.Email, new
-                                    {
-                                        @type = "email",
-                                        @class = "form-control form-control-user",
-                                        @id = "exampleInputEmail",
-                                        @placeholder = "Email"
-                                    })
-                                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                                    <input type="email" name="Email" value="@Model.Email" class="form-control form-control-user"
+                                           placeholder="Ngày sinh" readonly/>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="phone-number">Số điện thoại</label>
-                                    @Html.TextBoxFor(m => m.PhoneNumber, new
-                                    {
-                                        @class = "form-control form-control-user",
-                                        @placeholder = "Số điện thoại"
-                                    })
-                                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                                    <input type="text" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control form-control-user"
+                                           placeholder="Số điện thoại" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="address">Địa chỉ</label>
@@ -140,48 +124,13 @@
                                         <div class="col-sm-6" id="street-name">
                                             <input type="text" class="form-control" placeholder="Tên đường/thôn" name="StreetName">
                                         </div>
-                                        @Html.ValidationMessageFor(m => m.StreetName, "", new { @class = "text-danger" })
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Mật khẩu</label>
-                                    <div class="com-sm-12 row">
-                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                            @Html.PasswordFor(m => m.Password, new
-                                            {
-                                                @class = "form-control form-control-user",
-                                                @id = "exampleInputPassword",
-                                                @placeholder = "Mật khẩu"
-                                            })
-                                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                                        </div>
-                                        <div class="col-sm-6">
-                                            @Html.PasswordFor(m => m.ConfirmPassword, new
-                                            {
-                                                @class = "form-control form-control-user",
-                                                @placeholder = "Nhập lại mật khẩu"
-                                            })
-                                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
-                                        </div>
+                                        <span class="text-danger" asp-validation-for="StreetName"></span>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-user btn-block">
                                     Đăng ký
                                 </button>
                                 <hr />
-                            }
-                            <form asp-action="ExternalLogin" asp-controller="Account" method="post"
-                                  asp-route-returnRul="@Model.ReturnUrl">
-                                <button type="submit" name="provider"
-                                        value="@Model.ExternalLogins[0].Name"
-                                        class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Đăng ký Google
-                                </button>
-                                <button type="submit" name="provider"
-                                        value="@Model.ExternalLogins[1].Name"
-                                        class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Đăng ký Facebook
-                                </button>
                             </form>
                             <hr>
                             <div class="text-center">
@@ -271,7 +220,7 @@
                         });
                     }
                 })
-            setTimeout(() => loading.out(), 2000);
+            loading.out();
         }
 
         async function getDistricts() {
@@ -335,7 +284,7 @@
                         });
                     }
                 });
-            setTimeout(() => loading.out(), 2000);
+            loading.out();
         }
 
         $(document).ready(function () {

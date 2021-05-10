@@ -48,6 +48,9 @@
 
         public const string G29 = "G29";
 
+        public const string PROVIDER_GOOGLE = "Google";
+        public const string PROVIDER_FACEBOOK = "Facebook";
+
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
         public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
@@ -75,6 +78,10 @@
 
         public const byte CODE_NOT_EXISTS_ACCOUNT = 4;
 
+        #region Model Field
+        public const string MODEL_FIELD_PASSWORD = "Password";
+        public const string MODEL_FIELD_CONFIRM_PASSWORD = "ConfirmPassword";
+        #endregion
 
         #region Email Sender
         public const string EMAIL_SENDER_PORT = "EmailSender:Port";
@@ -100,6 +107,9 @@
 
         #region View name
         public const string VIEW_LOGIN = "Login";
+        public const string VIEW_REGISTER_WITH_GOOGLE = "RegisterWithGoogle";
+        public const string VIEW_REGISTER_WITH_FACEBOOK = "RegisterWithFacebook";
+        public const string VIEW_EXTERNAL_LOGIN = "ExternalLoginCallback";
         #endregion
 
         public const string ACTION_CONFIRM_EMAIL = "ConfirmEmail";

@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using static Common.Constant;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace FinalProject.Controllers
         public async Task<string> AddDelivery(string wardCode, string userId, string streetName)
         {
             if (wardCode is null || userId is null || streetName is null)
-                return Constant.EMPTY;
+                return EMPTY;
 
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -31,14 +31,14 @@ namespace FinalProject.Controllers
                 {
                     transaction.Complete();
 
-                    return Constant.SUCCESS;
+                    return SUCCESS;
                 }
             }
             catch
             {
             }
 
-            return Constant.FAIL;
+            return FAIL;
         }
     }
 }
