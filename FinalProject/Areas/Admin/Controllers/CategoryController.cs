@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using static Common.Constant;
+using static Common.MessageConstant;
 using Entities.Models;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(Constant.AREA_ADMIN)]
+    [Area(AREA_ADMIN)]
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -50,17 +51,17 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         if (!(result is null))
                         {
-                            ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_ADD_CATEGORY;
+                            ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_CATEGORY;
                         }
                     }
                     else
                     {
-                        ViewBag.MessageExists = MessageConstant.MESSAGE_EXISTS_ADD_CATEGORY;
+                        ViewBag.MessageExists = MESSAGE_EXISTS_ADD_CATEGORY;
                     }
                 }
                 catch
                 {
-                    ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_CATEGORY;
+                    ViewBag.MessageError = MESSAGE_ERROR_ADD_CATEGORY;
                 }
             }
 

@@ -70,16 +70,21 @@ namespace FinalProject
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.LoginPath = new PathString("/Account/Login");
                 options.LogoutPath = $"/Account/Logout";
-                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+                //options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
-            //services.AddAuthentication().AddGoogle(options =>
-            //{
-            //    var googleAuth = Configuration.GetSection("Authentication:Google");
-
-            //    options.ClientId = googleAuth["ClientId"];
-            //    options.ClientSecret = googleAuth["ClientSecret"];
-            //});
+            services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                options.ClientId = Configuration["Google:ClientId"];
+                options.ClientSecret = Configuration["Google:ClientSecret"];
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = Configuration["Facebook:AppId"];
+                options.AppSecret = Configuration["Facebook:AppSecret"];
+                options.CallbackPath = "/signin-facebook";
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -117,6 +122,7 @@ namespace FinalProject
 
             app.UseEndpoints(endpoints =>
             {
+
                 endpoints.MapControllerRoute(
                   name: "areas",
                   pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
@@ -125,6 +131,8 @@ namespace FinalProject
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapRazorPages();
             });
         }
     }

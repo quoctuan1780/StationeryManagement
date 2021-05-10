@@ -27,6 +27,6 @@
         public const string MESSAGE_CONFIRM_EMAIL_REGISTER = "Đăng ký tài khoản thành công, một email đã được gửi đến hộp thư của bạn";
         public const string MESSAGE_CONFIRM_EMAIL_SUCCESS = "Tài khoản của bạn đã được xác nhận";
         public const string MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR = "Cập nhật thông tin thành công";
-
+        public const string MESSAGE_ERROR_GET_EXTERNAL_INFOMATION_ACCOUNT = "Xảy ra lỗi khi lấy thông tin tài khoản";
     }
 }

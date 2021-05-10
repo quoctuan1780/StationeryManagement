@@ -1,5 +1,4 @@
-﻿using Common;
-using Entities.Models;
+﻿using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -7,8 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Transactions;
+using static Common.Constant;
+using static Common.MessageConstant;
 
 namespace FinalProject.Controllers
 {
@@ -23,20 +26,98 @@ namespace FinalProject.Controllers
             _accountService = accountService;
             _addressService = addressService;
             _emailSender = emailSender;
-
         }
-        public IActionResult Login(string urlBack)
+        public async Task<IActionResult> Login(string urlBack)
         {
             ViewBag.UrlBack = urlBack;
 
-            return View();
+            var model = new LoginViewModel()
+            {
+                ReturnUrl = urlBack,
+                ExternalLogins = await _accountService.GetExternalAuthenticationSchemesAsync()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl)
+        {
+            var redirectUrl = Url.Action(VIEW_EXTERNAL_LOGIN, CONTROLLER_ACCOUNT, new { ReturnUrl = returnUrl });
+
+            var properties = _accountService.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
+            return new ChallengeResult(provider, properties);
+        }
+
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
+
+            var loginViewModel = new LoginViewModel
+            {
+                ReturnUrl = returnUrl,
+                ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
+            };
+
+            var info = await _accountService.GetExternalLoginInfoAsync();
+
+            if (info == null)
+            {
+                ModelState.AddModelError(EMPTY, MESSAGE_ERROR_GET_EXTERNAL_INFOMATION_ACCOUNT);
+
+                return View(VIEW_LOGIN, loginViewModel);
+            }
+
+            var signInResult = await _accountService.ExternalLoginSignInAsync(info.LoginProvider,
+                                            info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
+            if (signInResult.Succeeded)
+            {
+                if (returnUrl.Equals(ROUTE_LOGIN_CLIENT))
+                {
+                    return Redirect(ROUTE_HOME_INDEX_CLIENT);
+                }
+                else
+                {
+                    return LocalRedirect(returnUrl);
+                }
+            }
+            else
+            {
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+                ViewBag.UrlBack = returnUrl;
+
+                ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                var model = new RegisterViewModel()
+                {
+                    Email = email,
+                    ReturnUrl = returnUrl,
+                    ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
+                };
+
+                if (info.ProviderDisplayName.Equals(PROVIDER_GOOGLE))
+                {
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+                else if (info.ProviderDisplayName.Equals(PROVIDER_FACEBOOK))
+                {
+                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
+                }
+                else
+                {
+                    return Redirect(ROUTE_LOGIN_CLIENT);
+                }
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
         {
-            urlBack ??= Url.Content(Constant.ROUTE_HOME_INDEX_CLIENT);
+            urlBack ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
 
 
             if (ModelState.IsValid)
@@ -45,23 +126,23 @@ namespace FinalProject.Controllers
 
                 switch (result)
                 {
-                    case Constant.CODE_SUCCESS:
+                    case CODE_SUCCESS:
                         return Redirect(urlBack);
 
-                    case Constant.CODE_FAIL:
-                        ViewBag.Message = MessageConstant.MESSAGE_ERROR_LOGIN_WRONG;
+                    case CODE_FAIL:
+                        ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
                         break;
 
-                    case Constant.CODE_NOT_EXISTS_ACCOUNT:
-                        ViewBag.Message = MessageConstant.MESSAGE_ERROR_EXISTS_ACCOUNT;
+                    case CODE_NOT_EXISTS_ACCOUNT:
+                        ViewBag.Message = MESSAGE_ERROR_EXISTS_ACCOUNT;
                         break;
 
-                    case Constant.CODE_LOOK_ACCOUNT:
-                        ViewBag.Message = MessageConstant.MESSAGE_ERROR_LOCKED_ACCOUNT;
+                    case CODE_LOOK_ACCOUNT:
+                        ViewBag.Message = MESSAGE_ERROR_LOCKED_ACCOUNT;
                         break;
 
-                    case Constant.ERROR_CODE_DO_NOT_CONFIRM_EMAIL:
-                        ViewBag.Message = MessageConstant.MESSAGE_ERROR_CONFIRM_EMAIL;
+                    case ERROR_CODE_DO_NOT_CONFIRM_EMAIL:
+                        ViewBag.Message = MESSAGE_ERROR_CONFIRM_EMAIL;
 
                         break;
                 }
@@ -76,7 +157,13 @@ namespace FinalProject.Controllers
 
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
 
-            return View();
+            var model = new RegisterViewModel()
+            {
+                ReturnUrl = urlBack,
+                ExternalLogins = await _accountService.GetExternalAuthenticationSchemesAsync()
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -89,8 +176,7 @@ namespace FinalProject.Controllers
 
             if (ModelState.IsValid)
             {
-
-                urlBack ??= Url.Content(Constant.ROUTE_LOGIN_CLIENT);
+                urlBack ??= Url.Content(ROUTE_LOGIN_CLIENT);
 
                 var user = new User()
                 {
@@ -103,75 +189,242 @@ namespace FinalProject.Controllers
                     WardCode = model.WardCode,
                     StreetName = model.StreetName
                 };
-
-                var result = await _accountService.RegisterAsync(user, model.Password);
-
-                if(!result.Succeeded)
+                using var trabsaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                try
                 {
-                    ViewBag.Message = MessageConstant.MESSAGE_ERROR_ACCOUNT_REGISTER;
+                    var result = await _accountService.RegisterAsync(user, model.Password);
 
-                    return View(model);
+                    if (!result.Succeeded)
+                    {
+                        ViewBag.Message = MESSAGE_ERROR_ACCOUNT_REGISTER;
+
+                        return View(model);
+                    }
+
+                    var resultAddRole = await _accountService.AddRoleAsync(user);
+
+                    if (resultAddRole is null)
+                    {
+                        ViewBag.Message = MESSAGE_ERROR_STRONG_PASSWORD;
+
+                        return View(model);
+                    }
+
+                    var token = await _accountService.GenerateEmailConfirmTokenAsync(user);
+
+                    var callbackUrl =
+                        Url.ActionLink(ACTION_CONFIRM_EMAIL, CONTROLLER_ACCOUNT,
+                            new { UserId = user.Id, Token = token },
+                            Request.Scheme);
+
+                    string subject = EMAIL_SUBJECT;
+
+                    string body = EMAIL_HEADER_START + user.Email
+                        + EMAIL_HEADER_END + EMAIL_BODY_START + callbackUrl + EMAIL_BODY_END;
+
+                    await _emailSender.SendEmailAsync(user.Email, subject, body);
+
+                    if (resultAddRole.Succeeded)
+                    {
+                        await _accountService.LoginAsync(model.Email, model.Password);
+
+                        TempData[KEY_CONFIRM_EMAIL] = MESSAGE_CONFIRM_EMAIL_REGISTER;
+
+                        trabsaction.Complete();
+
+                        return Redirect(urlBack);
+                    }
+                    else
+                    {
+                        ViewBag.Message = MESSAGE_ERROR_SYSTEM;
+                    }
                 }
-
-                var resultAddRole = await _accountService.AddRoleAsync(user);
-
-                if (resultAddRole is null)
+                catch
                 {
-                    ViewBag.Message = MessageConstant.MESSAGE_ERROR_STRONG_PASSWORD;
-                    
-                    return View(model);
-                }
-
-                var token = await _accountService.GenerateEmailConfirmTokenAsync(user);
-
-                var callbackUrl = 
-                    Url.ActionLink(Constant.ACTION_CONFIRM_EMAIL, Constant.CONTROLLER_ACCOUNT, 
-                        new { UserId = user.Id, Token = token }, 
-                        Request.Scheme);
-
-                string subject = Constant.EMAIL_SUBJECT;
-
-                string body = Constant.EMAIL_HEADER_START + user.Email 
-                    + Constant.EMAIL_HEADER_END + Constant.EMAIL_BODY_START + callbackUrl + Constant.EMAIL_BODY_END;
-
-                await _emailSender.SendEmailAsync(user.Email, subject, body);
-
-                if (resultAddRole.Succeeded)
-                {
-                    await _accountService.LoginAsync(model.Email, model.Password);
-
-                    TempData[Constant.KEY_CONFIRM_EMAIL] = MessageConstant.MESSAGE_CONFIRM_EMAIL_REGISTER;
-
-                    return Redirect(urlBack);
-                }
-                else
-                {
-                    ViewBag.Message = MessageConstant.MESSAGE_ERROR_SYSTEM;
+                    ViewBag.Message = MESSAGE_ERROR_SYSTEM;
                 }
             }
 
             return View(model);
         }
 
+        #region Register With External Account
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterWithGoogle(RegisterViewModel model)
+        {
+            ViewBag.UrlBack = model.ReturnUrl;
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+            ModelState.Remove(MODEL_FIELD_PASSWORD);
+            ModelState.Remove(MODEL_FIELD_CONFIRM_PASSWORD);
+
+            if (!ModelState.IsValid)
+            {
+                return View(VIEW_REGISTER_WITH_GOOGLE, model);
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                model.ReturnUrl ??= Url.Content(ROUTE_LOGIN_CLIENT);
+                var info = await _accountService.GetExternalLoginInfoAsync();
+                var user = new User()
+                {
+                    FullName = model.FullName,
+                    Gender = model.Gender,
+                    UserName = model.Email,
+                    Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = model.PhoneNumber,
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName
+                };
+
+                var result = await _accountService.RegisterAsync(user, info);
+
+                if (!result.Succeeded)
+                {
+                    ViewBag.Message = MESSAGE_ERROR_ACCOUNT_REGISTER;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+
+                var resultAddRole = await _accountService.AddRoleAsync(user);
+
+                if (resultAddRole is null)
+                {
+                    ViewBag.Message = MESSAGE_ERROR_STRONG_PASSWORD;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+
+                var token = await _accountService.GenerateEmailConfirmTokenAsync(user);
+
+                await _accountService.ConfirmEmailAsync(user, token);
+
+                if (resultAddRole.Succeeded)
+                {
+                    await _accountService.LoginAsync(user, false);
+
+                    transaction.Complete();
+
+                    return Redirect(model.ReturnUrl);
+                }
+                else
+                {
+                    ViewBag.Message = MESSAGE_ERROR_SYSTEM;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+            }
+            catch
+            {
+                // tạm thời
+                return PartialView(ERROR_404_PAGE);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterWithFacebook(RegisterViewModel model)
+        {
+            ViewBag.UrlBack = model.ReturnUrl;
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+            ModelState.Remove(MODEL_FIELD_PASSWORD);
+            ModelState.Remove(MODEL_FIELD_CONFIRM_PASSWORD);
+
+            if (!ModelState.IsValid)
+            {
+                return View(VIEW_REGISTER_WITH_GOOGLE, model);
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                model.ReturnUrl ??= Url.Content(ROUTE_LOGIN_CLIENT);
+                var info = await _accountService.GetExternalLoginInfoAsync();
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (!(email is null))
+                {
+                    model.Email = email;
+                }
+
+                var user = new User()
+                {
+                    FullName = model.FullName,
+                    Gender = model.Gender,
+                    UserName = model.Email,
+                    Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = model.PhoneNumber,
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName
+                };
+
+                var result = await _accountService.RegisterAsync(user, info);
+
+                if (!result.Succeeded)
+                {
+                    ViewBag.Message = MESSAGE_ERROR_ACCOUNT_REGISTER;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+
+                var resultAddRole = await _accountService.AddRoleAsync(user);
+
+                if (resultAddRole is null)
+                {
+                    ViewBag.Message = MESSAGE_ERROR_STRONG_PASSWORD;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+
+                var token = await _accountService.GenerateEmailConfirmTokenAsync(user);
+
+                await _accountService.ConfirmEmailAsync(user, token);
+
+                if (resultAddRole.Succeeded)
+                {
+                    await _accountService.LoginAsync(user, false);
+
+                    transaction.Complete();
+
+                    return Redirect(model.ReturnUrl);
+                }
+                else
+                {
+                    ViewBag.Message = MESSAGE_ERROR_SYSTEM;
+
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+            }
+            catch
+            {
+                // tạm thời
+                return PartialView(ERROR_404_PAGE);
+            }
+        }
+        #endregion
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             var result = await _accountService.ConfirmEmailAsync(userId, token);
 
             if (result.Succeeded)
             {
-                TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS] = MessageConstant.MESSAGE_CONFIRM_EMAIL_SUCCESS;
+                TempData[KEY_CONFIRM_EMAIL_SUCCESS] = MESSAGE_CONFIRM_EMAIL_SUCCESS;
 
-                return View(Constant.VIEW_LOGIN);
+                return View(VIEW_LOGIN);
             }
             else
             {
-                return Redirect(Constant.ROUTE_REGISTER_CLIENT);
+                return Redirect(ROUTE_REGISTER_CLIENT);
             }
         }
 
         public async Task<string> District(int? provinceId)
         {
-            if(provinceId is null)
+            if (provinceId is null)
             {
                 return null;
             }
@@ -198,34 +451,39 @@ namespace FinalProject.Controllers
         {
             await _accountService.LogoutAsync();
 
-            urlBack ??= Url.Content(Constant.ROUTE_HOME_INDEX_CLIENT);
+            urlBack ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
 
             return Redirect(urlBack);
         }
 
         public async Task<IActionResult> Information()
         {
-            var userId = _accountService.GetUserId(User);
-
-            if(!(userId is null))
+            try
             {
-                var user = await _accountService.GetUserByUserIdAsync(userId);
+                var userId = _accountService.GetUserId(User);
 
-                ViewBag.Provinces = await _addressService.GetProvincesAsync();
-
-                if(!(user is null) && !(user.WardCode is null))
+                if (!(userId is null))
                 {
-                    ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+                    var user = await _accountService.GetUserByUserIdAsync(userId);
 
-                    ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                    ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                    if (!(user is null) && !(user.WardCode is null))
+                    {
+                        ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+
+                        ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                    }
+
+                    var model = AccountHelper.ConvertFromUserToInformationClientViewModel(user);
+
+                    return View(model);
                 }
-
-                var model = AccountHelper.ConvertFromUserToInformationClientViewModel(user);
-
-                return View(model);
             }
-
-            return PartialView(Constant.ERROR_404_PAGE);
+            catch
+            {
+            }
+            return PartialView(ERROR_404_PAGE);
         }
 
         [HttpPost]
@@ -287,14 +545,14 @@ namespace FinalProject.Controllers
                 {
                     transaction.Complete();
 
-                    ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR;
+                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR;
                 }
 
                 else throw new Exception();
             }
             catch
             {
-                ViewBag.MessageDanger = MessageConstant.MESSAGE_ERROR_UPDATE_ACCOUNT_INFOR;
+                ViewBag.MessageDanger = MESSAGE_ERROR_UPDATE_ACCOUNT_INFOR;
                 return View(model);
             }
             return View(model);

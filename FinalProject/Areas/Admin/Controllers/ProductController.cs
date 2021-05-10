@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using static Common.Constant;
+using static Common.MessageConstant;
 using Entities.Models;
 using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Admin.ViewModels;
@@ -11,7 +12,7 @@ using System.Transactions;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(Constant.AREA_ADMIN)]
+    [Area(AREA_ADMIN)]
     public class ProductController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -87,25 +88,25 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                     if (result > 0)
                                     {
-                                        ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_ADD_PRODUCT;
+                                        ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_PRODUCT;
 
                                         transaction.Complete();
                                     }
-                                    else if(result == Constant.ERROR_CODE_NULL)
+                                    else if(result == ERROR_CODE_NULL)
                                     {
-                                        ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_PRODUCT_DETAIL;
+                                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT_DETAIL;
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            ViewBag.MessageExists = MessageConstant.MESSAGE_EXISTS_ADD_PRODUCT;
+                            ViewBag.MessageExists = MESSAGE_EXISTS_ADD_PRODUCT;
                         }
                     }
                     catch
                     {
-                        ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_PRODUCT;
+                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
                     }
                 }
             }
@@ -191,28 +192,28 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                         ProductHelper.RemoveFile(imageRemove);
 
-                                        ViewBag.MessageSuccess = MessageConstant.MESSAGE_SUCCESS_UPDATE_PRODUCT;
+                                        ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_PRODUCT;
                                     }
-                                    else if(result == Constant.ERROR_CODE_NULL)
+                                    else if(result == ERROR_CODE_NULL)
                                     {
-                                        ViewBag.MessageSuccess = MessageConstant.MESSAGE_ERROR_UPDATE_PRODUCT_DETAIL;
+                                        ViewBag.MessageSuccess = MESSAGE_ERROR_UPDATE_PRODUCT_DETAIL;
                                     }
                                 }
                                 else
                                 {
-                                    ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_UPDATE_PRODUCT_NULL;
+                                    ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT_NULL;
                                 }
                             }
                         }
-                        else if(result == Constant.ERROR_CODE_CONVERT_TO_INT)
+                        else if(result == ERROR_CODE_CONVERT_TO_INT)
                         {
-                            ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_CONVERT_TO_INT;
+                            ViewBag.MessageError = MESSAGE_ERROR_CONVERT_TO_INT;
                         }
                     }
                 }
                 catch 
                 {
-                    ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_UPDATE_PRODUCT;
+                    ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT;
                 }
             }
 

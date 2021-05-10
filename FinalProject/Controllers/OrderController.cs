@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using static Common.Constant;
 using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
@@ -106,11 +106,11 @@ namespace FinalProject.Controllers
 
                 switch (model.PaymentMethod)
                 {
-                    case Constant.MOMO:
-                        return MoMoCheckout(total.ToString(Constant.G29), user.FullName, user.Email, deliveryAddressEncoder);
-                    case Constant.PAYPAL:
+                    case MOMO:
+                        return MoMoCheckout(total.ToString(G29), user.FullName, user.Email, deliveryAddressEncoder);
+                    case PAYPAL:
                         return await PaypalCheckout(deliveryAddressEncoder);
-                    case Constant.COD:
+                    case COD:
                         return await CodCheckout(model, user, total, carts);
                 }
 
@@ -126,7 +126,7 @@ namespace FinalProject.Controllers
         {
             if (userId is null)
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
 
             try
@@ -135,7 +135,7 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
 
             return View();
@@ -145,7 +145,7 @@ namespace FinalProject.Controllers
         {
             if (orderId is null)
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
             try
             {
@@ -153,7 +153,7 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
 
             return View();
@@ -163,12 +163,12 @@ namespace FinalProject.Controllers
         {
             if(user is null || total is null || carts is null)
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
 
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            var order = await _orderService.AddOrderFromCartsAsync(carts, user, Constant.COD, model.DeliveryAddress);
+            var order = await _orderService.AddOrderFromCartsAsync(carts, user, COD, model.DeliveryAddress);
 
             if (!(order is null))
             {
@@ -189,7 +189,7 @@ namespace FinalProject.Controllers
         {
             if (orderId is null)
             {
-                return PartialView(Constant.ERROR_404_PAGE);
+                return PartialView(ERROR_404_PAGE);
             }
 
             ViewBag.OrderId = orderId.Value;
@@ -212,11 +212,11 @@ namespace FinalProject.Controllers
                 {
                     var createOrderResult = createOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    var link = Constant.EMPTY;
+                    var link = EMPTY;
 
                     foreach (PayPalCheckoutSdk.Orders.LinkDescription item in createOrderResult.Links)
                     {
-                        if (item.Rel.Equals(Constant.PAYPAL_REL_APPROVE))
+                        if (item.Rel.Equals(PAYPAL_REL_APPROVE))
                         {
                             link = item.Href;
 
@@ -230,7 +230,7 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return PartialView(Constant.ERROR_PAYMENT_PAGE);
+                return PartialView(ERROR_PAYMENT_PAGE);
             }
         }
 
@@ -243,19 +243,19 @@ namespace FinalProject.Controllers
 
                 JObject jmessage = JObject.Parse(responseFromMomo);
 
-                string redirect = jmessage.GetValue(Constant.PAYPAL_URL).ToString();
+                string redirect = jmessage.GetValue(PAYPAL_URL).ToString();
 
                 return Redirect(redirect);
             }
             catch
             {
-                return PartialView(Constant.ERROR_PAYMENT_PAGE);
+                return PartialView(ERROR_PAYMENT_PAGE);
             }
         }
 
         public async Task<IActionResult> MoMoSuccess(string deliveryAddress, string orderId, string payType, string responseTime, string errorCode)
         {
-            if (errorCode.Equals(Constant.ZERO))
+            if (errorCode.Equals(ZERO))
             {
                 var user = await _accountService.GetUserAsync(User);
 
@@ -267,7 +267,7 @@ namespace FinalProject.Controllers
 
                 try
                 {
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, Constant.MOMO, HttpUtility.UrlDecode(deliveryAddress));
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, MOMO, HttpUtility.UrlDecode(deliveryAddress));
 
                     if (!(order is null))
                     {
@@ -294,7 +294,7 @@ namespace FinalProject.Controllers
                 }
             }
 
-            return PartialView(Constant.ERROR_PAYMENT_PAGE);
+            return PartialView(ERROR_PAYMENT_PAGE);
         }
 
         public async Task<IActionResult> PayPalSuccess(string deliveryAddress, string token, string PayerID)
@@ -315,7 +315,7 @@ namespace FinalProject.Controllers
 
                     var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, Constant.PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
 
                     if (!(order is null))
                     {

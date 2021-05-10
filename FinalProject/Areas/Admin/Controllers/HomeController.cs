@@ -1,9 +1,9 @@
-﻿using Common;
+﻿using static Common.Constant;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(Constant.AREA_ADMIN)]
+    [Area(AREA_ADMIN)]
     public class HomeController : Controller
     {
         public IActionResult Dashboard()
