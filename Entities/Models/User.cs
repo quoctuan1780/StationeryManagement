@@ -34,5 +34,7 @@ namespace Entities.Models
         public  virtual IList<Bill> Bills { get; set; }
 
         public virtual IList<DeliveryAddress> DeliveryAddresses { get; set; }
+
+        public virtual IList<Comment> Comments { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.MessageConstant;
+using static Common.RoleConstant;
 
 namespace FinalProject.Controllers
 {
@@ -456,6 +458,7 @@ namespace FinalProject.Controllers
             return Redirect(urlBack);
         }
 
+        [Authorize(Roles = ROLE_CUSTOMER)]
         public async Task<IActionResult> Information()
         {
             try
@@ -488,6 +491,7 @@ namespace FinalProject.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = ROLE_CUSTOMER)]
         public async Task<IActionResult> Information(InformationClientViewModel model)
         {
 

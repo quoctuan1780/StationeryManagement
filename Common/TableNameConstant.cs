@@ -26,5 +26,6 @@
         public const string TABLE_PAYPAL_PAYMENT = "PayPalPayment";
         public const string TABLE_MOMO_PAYMENT = "MoMoPayment";
         public const string TABLE_DELIVERY_ADDRESS = "DeliveryAddress";
+        public const string TABLE_COMMENT = "Comment";
     }
 }

@@ -40,5 +40,7 @@ namespace Entities.Models
         public virtual IList<ProductImage> ProductImages { get; set; }
 
         public virtual IList<ProductDetail> ProductDetails { get; set; }
+
+        public virtual IList<Comment> Comments { get; set; }
     }
 }

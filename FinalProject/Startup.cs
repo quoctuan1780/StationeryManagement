@@ -61,6 +61,7 @@ namespace FinalProject
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
+            services.AddScoped<ICommentService, CommentService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
