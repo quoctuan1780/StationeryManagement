@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using static Common.Constant;
+using static Common.MessageConstant;
 using Entities.Models;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ using System.Transactions;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
-    [Area(Constant.AREA_ADMIN)]
+    [Area(AREA_ADMIN)]
     //[Authorize(Roles = RoleConstant.ROLE_WAREHOUSE_MANAGER)]
     public class WarehouseController : Controller
     {
@@ -210,7 +211,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     }
                     catch
                     {
-                        ViewBag.MessageError = MessageConstant.MESSAGE_ERROR_ADD_PRODUCT;
+                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
                     }
                 }
             }

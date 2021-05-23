@@ -1,9 +1,9 @@
 ﻿@using System.Web
+@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var product = ViewBag.Product as Entities.Models.Product;
-
 
     int? productDetailId = null;
 
@@ -12,7 +12,110 @@
     decimal? price = null;
 
     var isLogin = User.Identity.IsAuthenticated;
+
+    var user = await userManager.GetUserAsync(User);
+
+    var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
 }
+
+<style>
+    [contenteditable="true"] {
+        background: #ffffff;
+        -moz-box-sizing: border-box;
+        border: 1px solid #CBD5DD;
+        border-radius: 2px;
+        max-height: 50px;
+        word-wrap: break-word;
+        margin: 0;
+        min-height: 30px;
+        overflow: auto;
+        position: relative;
+        padding-left: 5px;
+        vertical-align: top;
+        box-sizing: border-box;
+    }
+
+    .blog-comment::before,
+    .blog-comment::after,
+    .blog-comment-form::before,
+    .blog-comment-form::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .blog-comment {
+        padding-left: 15%;
+        padding-right: 15%;
+    }
+
+    .blog-comment ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .blog-comment img {
+        opacity: 1;
+        filter: Alpha(opacity=100);
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        -o-border-radius: 4px;
+        border-radius: 4px;
+    }
+
+    .blog-comment img.avatar {
+        position: relative;
+        float: left;
+        margin-left: 0;
+        margin-top: 0;
+        width: 65px;
+        height: 65px;
+    }
+
+    .blog-comment .post-comments {
+        border: 1px solid #eee;
+        margin-bottom: 20px;
+        margin-left: 85px;
+        margin-right: 0px;
+        padding: 10px 20px;
+        position: relative;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        -o-border-radius: 4px;
+        border-radius: 4px;
+        background: #fff;
+        color: #6b6e80;
+        position: relative;
+    }
+
+    .blog-comment .meta {
+        font-size: 13px;
+        color: #aaaaaa;
+        padding-bottom: 8px;
+        margin-bottom: 10px !important;
+        border-bottom: 1px solid #eee;
+    }
+
+    .blog-comment ul.comments ul {
+        list-style-type: none;
+        padding: 0;
+        margin-left: 85px;
+    }
+
+    .blog-comment-form {
+        padding-left: 15%;
+        padding-right: 15%;
+        padding-top: 40px;
+    }
+
+    .blog-comment h3,
+    .blog-comment-form h3 {
+        margin-bottom: 40px;
+        font-size: 26px;
+        line-height: 30px;
+        font-weight: 800;
+    }
+</style>
 
 <div class="breadcrumbs">
     <div class="container">
@@ -113,13 +216,24 @@
                                                                 <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
                                                                         onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">
                                                                     @item.Color
-                                                                    </button>
+                                                                </button>
 
-                                                                    productDetailId = item.ProductDetailId;
+                                                                productDetailId = item.ProductDetailId;
 
-                                                                    price = product.Price;
-                                                                }
+                                                                price = product.Price;
                                                             }
+                                                            else
+                                                            {
+                                                                <button type="button" class="btn btn-default btn-outline-warning disabled" value="@item.ProductDetailId"
+                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">
+                                                                    @item.Color
+                                                                </button>
+
+                                                                productDetailId = item.ProductDetailId;
+
+                                                                price = product.Price;
+                                                            }
+                                                        }
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -179,6 +293,279 @@
                         </div>
                     </div>
                     <!--Tab detail-->
+                    <div class="tab-detail">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Mô tả</a></li>
+                            <li><a data-toggle="tab" href="#menu1">Màu sắc / kích thước</a></li>
+                            <li><a data-toggle="tab" href="#menu2">Đánh giá</a></li>
+                            <li><a data-toggle="tab" href="#menu3">Bình Luận</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                @Html.Raw(HttpUtility.HtmlDecode(product.Description))
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="data-table review-summary-table ratings" id="product-review-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Màu sắc</th>
+                                            <th>Kích thước</th>
+                                            <th>Xuất xứ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in product.ProductDetails)
+                                        {
+                                            <tr>
+                                                <td class="value">@item.Color</td>
+                                                <td class="value">@string.Concat(item.Width, "x", item.Height, "x", item.Length)</td>
+                                                <td class="value">@item.Origin</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="menu2" class="tab-pane fade">
+                                <h3>Customer Reviews 1 item(s)</h3>
+                                <p><span tyle="float:left;">1 Item(s)</span> <span style="float:right;">Show <select><option>6</option><option selected>10</option><option>12</option><option>15</option><option>20</option></select>per page</span></p>
+                                <br />
+                                <p><a href="#>">7uptheme</a></p>
+                                <p>At verov eos et accusamus et iusto ods un dignissimos ducimus qui blan ditiis prasixer esentium</p>
+                                <table class="ratings-table">
+                                    <colgroup>
+                                        <col class="review-label" />
+                                        <col class="review-value" />
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <th>Quality</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:80%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Price</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:80%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Value</th>
+                                            <td>
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:100%;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p>Review by 7uptheme / (Posted on 4/14/2015)</p>
+                                <div class="form-add">
+                                    <h2>Write Your Own Review</h2>
+                                    <form action="" method="post" id="review-form">
+                                        <input name="form_key" type="hidden" value="JbT1G5uAkBcFDot6" />
+                                        <h3>
+                                            You're reviewing: <span>Ipad Air and iOS7</span>
+                                        </h3>
+                                        <div class="fieldset">
+                                            <h4>How do you rate this product? <em class="required">*</em></h4>
+                                            <span id="input-message-box"></span>
+                                            <table class="data-table review-summary-table ratings" id="product-review-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:20%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:40%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:60%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:80%;"></span>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="rating-box">
+                                                                <span class="rating nobr" style="width:100%;"></span>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Price</th>
+                                                        <td class="value"><label for="Price_1"><input type="radio" name="ratings[3]" id="Price_1" value="11" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_2"><input type="radio" name="ratings[3]" id="Price_2" value="12" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_3"><input type="radio" name="ratings[3]" id="Price_3" value="13" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_4"><input type="radio" name="ratings[3]" id="Price_4" value="14" class="radio" /></label></td>
+                                                        <td class="value"><label for="Price_5"><input type="radio" name="ratings[3]" id="Price_5" value="15" class="radio" /></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Value</th>
+                                                        <td class="value"><label for="Value_1"><input type="radio" name="ratings[2]" id="Value_1" value="6" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_2"><input type="radio" name="ratings[2]" id="Value_2" value="7" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_3"><input type="radio" name="ratings[2]" id="Value_3" value="8" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_4"><input type="radio" name="ratings[2]" id="Value_4" value="9" class="radio" /></label></td>
+                                                        <td class="value"><label for="Value_5"><input type="radio" name="ratings[2]" id="Value_5" value="10" class="radio" /></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Quality</th>
+                                                        <td class="value"><label for="Quality_1"><input type="radio" name="ratings[1]" id="Quality_1" value="1" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_2"><input type="radio" name="ratings[1]" id="Quality_2" value="2" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_3"><input type="radio" name="ratings[1]" id="Quality_3" value="3" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_4"><input type="radio" name="ratings[1]" id="Quality_4" value="4" class="radio" /></label></td>
+                                                        <td class="value"><label for="Quality_5"><input type="radio" name="ratings[1]" id="Quality_5" value="5" class="radio" /></label></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <input type="hidden" name="validate_rating" class="validate-rating" value="" />
+                                            <ul class="form-list">
+                                                <li>
+                                                    <label for="review_field" class="required"><em>*</em>Let us know your thoughts</label>
+                                                    <div class="input-box">
+                                                        <textarea name="detail" id="review_field" cols="5" rows="3" class="required-entry"></textarea>
+                                                    </div>
+                                                </li>
+                                                <li class="inline-label">
+                                                    <label for="summary_field" class="required"><em>*</em>Summary of Your Review</label>
+                                                    <div class="input-box">
+                                                        <input type="text" name="title" id="summary_field" class="input-text required-entry" value="" />
+                                                    </div>
+                                                </li>
+                                                <li class="inline-label">
+                                                    <label for="nickname_field" class="required"><em>*</em>What's your nickname?</label>
+                                                    <div class="input-box">
+                                                        <input type="text" name="nickname" id="nickname_field" class="input-text required-entry" value="" />
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="buttons-set">
+                                            <button type="submit" title="Submit Review" class="button"><span><span>Submit Review</span></span></button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                            <div id="menu3" class="tab-pane fade">
+                                <div class="container bootstrap snippets bootdey">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="blog-comment">
+                                                <h3 class="text-success">Bình luận</h3>
+                                                <hr />
+                                                <ul class="comments" id="comment">
+                                                    
+                                                    @for (int i = 0; i < comments.Count; i++)
+                                                    {
+                                                        if (comments[i].ReplyCommentId == null)
+                                                        {
+                                                            <li class="clearfix">
+                                                                <div class="comment-block">
+                                                                    @if (comments[i].User.Image != null)
+                                                                    {
+                                                                        <img src="~/images/user/@comments[i].User.Email/@comments[i].User.Image" class="avatar" alt="">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img src="~/images/user/avatar.png" class="avatar" alt="">
+                                                                    }
+                                                                    <div class="post-comments">
+                                                                        <p class="meta">
+                                                                            @comments[i].CreateDate.Date.ToLongDateString() <a href="#">@comments[i].User.FullName </a>
+                                                                            Nói : 
+                                                                            @if (isLogin)
+                                                                            {
+                                                                                <i class="pull-right"><span style="cursor: pointer;" onclick="addInput(this, @comments[i].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')"><small>Trả lời</small></span></i>
+                                                                            }
+                                                                        </p>
+                                                                        <p>
+                                                                            @comments[i].Content
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <ul class="comments">
+                                                                    @{ 
+                                                                        var commentReplies = comments.Where(x => x.ReplyCommentId == comments[i].CommentId).ToList();
+                                                                    }
+                                                                    @for (int j = 0; j < commentReplies.Count; j++)
+                                                                    {
+                                                                        <li class="clearfix">
+                                                                            <div class="comment-block">
+                                                                                @if (commentReplies[j].User.Image != null)
+                                                                                {
+                                                                                    <img src="~/images/user/@commentReplies[j].User.Email/@commentReplies[j].User.Image" class="avatar" alt="">
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <img src="~/images/user/avatar.png" class="avatar" alt="">
+                                                                                }
+                                                                                <div class="post-comments">
+                                                                                    <p class="meta">
+                                                                                        @commentReplies[j].CreateDate.Date.ToLongDateString() <a href="#">@commentReplies[j].User.FullName </a>
+                                                                                        Nói :
+                                                                                        @if (isLogin)
+                                                                                        {
+                                                                                            <i class="pull-right"><span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[j].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')"><small>Trả lời</small></span></i>
+                                                                                        }
+                                                                                    </p>
+                                                                                    <p>
+                                                                                        @commentReplies[j].Content
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </li>
+                                                                    }
+                                                                </ul>
+                                                            </li>
+                                                                            }
+                                                                        }
+                                                    
+                                                    <!--imageLink, userId, isLogin, email, name-->
+                                                </ul>
+                                                @if (isLogin)
+                                                {
+                                                    string imageLink = "avatar.png";
+                                                    
+                                                    if(!(user.Image is null))
+                                                    {
+                                                        imageLink = user.Email + "/" + user.Image;
+                                                    }
+                                                    
+                                                    <div class="comment">
+                                                        <div class="comment-block">
+                                                            <img src="~/images/user/@imageLink" class="avatar" alt="">
+                                                            <div class="post-comments">
+                                                                <textarea id="comment-content" contenteditable="true" class="form-control"
+                                                                          placeholder="Viết bình luận"></textarea>
+                                                                <button type="button" onclick="addOwnerComment('@user.Image', '@user.Id', '@isLogin', '@user.Email', '@user.FullName', @product.ProductId)" class="btn btn-success" style="margin-top: 5px;">Gửi</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!--End Upselt product-->
                 </div>
             </div>
@@ -373,6 +760,233 @@
                     }
                 }
             }
+        }
+    </script>
+
+    <script>
+        function addInput(e, commentId, productId, email, userId, userName, imageLink) {
+            var node = "<li class='clearfix'><div class='comment-block'>" +
+                "<img src='/images/user/" + convertImageLink(imageLink, email) + "' class='avatar' alt=''>" +
+                "<div class='post-comments'><textarea contenteditable='true' class='form-control' placeholder='Viết bình luận'></textarea>" +
+                "<button type='button' class='btn btn-success' style='margin-top: 5px;'" +
+                "onclick='addComment(this," + commentId + "," + productId + "," + '"' + email + '"' + "," + '"' + userId + '"' + "," + '"' + userName + '"' + "," + '"' + imageLink + '"' + ")'>Gửi</button>" +
+                "<button type='button' class='btn btn-success' style='margin-top: 5px; margin-left: 5px;' onclick='removeComment(this)'>Hủy</button>" +
+                "</div></div></li>";
+            $(e).closest('.clearfix').children("ul.comments").append(node);
+        }
+
+        function addReplyChildrentInput(e, commentId, productId, email, userId, userName, imageLink) {
+            console.log(email)
+            var node = "<li class='clearfix'><div class='comment-block'>" +
+                "<img src='/images/user/" + convertImageLink(imageLink, email) + "' class='avatar' alt=''>" +
+                "<div class='post-comments'><textarea contenteditable='true' class='form-control' placeholder='Viết bình luận'></textarea>" +
+                "<button type='button' class='btn btn-success' style='margin-top: 5px;'" +
+                "onclick='addReplyChildrentComment(this," + commentId + "," + productId + "," + '"' + email + '"' + "," + '"' + userId + '"' + "," + '"' + userName + '"' + "," + '"' + imageLink + '"' + ")' > Gửi</button >" +
+                "<button type='button' class='btn btn-success' style='margin-top: 5px; margin-left: 5px;' onclick='removeComment(this)'>Hủy</button>" +
+                "</div></div></li>";
+
+            $(e).closest('.comments').append(node);
+        }
+
+        function removeComment(e) {
+            $(e).closest('.clearfix').remove();
+        }
+
+        function addComment(e, commentId, productId, email, userId, userName, imageLink) {
+
+            var content = $($(e).closest(".post-comments").children("textarea.form-control")).val();
+
+            if (content === null || content.trim() === '') {
+                showErrorNullComment();
+            }
+            
+            $.ajax({
+                url: '/Comment/AddChildrentComment',
+                method: 'POST',
+                async: true,
+                data: { userId: userId, content: content, productId: productId, commentId: commentId, userName: userName },
+                success: function (data) {
+                    switch (data) {
+                        case "1":
+                            var node = "<div class='comment-block'><img src='/images/user/" + convertImageLink(imageLink, email) + "' class='avatar' alt = ''>" +
+                                "<div class='post-comments'>" +
+                                "<p class='meta'>" + getDate() + " <a href='#'>" + userName + "</a> nói :<i class='pull-right'>" +
+                                "<span style='cursor: pointer;'" +
+                                "onclick='addReplyChildrentInput(this," + commentId + "," + productId + "," + '"' + email + '"' + "," + '"' + userId + '"' + "," + '"' + userName + '"' + "," + '"' + imageLink + '"' + ")'>" +
+                                "<small>Trả lời</small></span></i></p>" +
+                                "<p>" + content + "</p>" +
+                                "</div></div>";
+
+                            e = $(e).closest('.clearfix');
+
+                            $(e).children('.comment-block').remove();
+
+                            $(e).closest('.clearfix').append(node);
+
+                            //$([document.documentElement, document.body]).animate({
+                            //    scrollTop: $(e).offset().top
+                            //}, 2000);
+
+                            break;
+                        case "-4":
+                            showErrorNullComent();
+                            break;
+                        case "-99":
+                            showErrorSystem();
+                            break;
+                    }
+                },
+                error: function (code, err) {
+
+                }
+            });
+        }
+
+        function addReplyChildrentComment(e, commentId, productId, email, userId, userName, imageLink) {
+
+            var content = $($(e).closest(".post-comments").children("textarea.form-control")).val();
+
+            if (content === null || content.trim() === '') {
+                showErrorNullComment();
+            }
+
+            $.ajax({
+                url: '/Comment/AddChildrentReplyComment',
+                method: 'POST',
+                async: true,
+                data: { userId: userId, content: content, productId: productId, commentId: commentId, userName: userName },
+                success: function (data) {
+                    switch (data) {
+                        case "1":
+                            var node = "<div class='comment-block'><img src='/images/user/" + convertImageLink(imageLink, email) + "' class='avatar' alt = ''>" +
+                                "<div class='post-comments'>" +
+                                "<p class='meta'>" + getDate() + " <a href='#'>" + userName + "</a> nói :<i class='pull-right'>" +
+                                "<span style='cursor: pointer;'" +
+                                "onclick='addReplyChildrentInput(this," + commentId + "," + productId + "," + '"' + email + '"' + "," + '"' + userId + '"' + "," + '"' + userName + '"' + "," + '"' + imageLink + '"' + ")'>" +
+                                "<small>Trả lời</small></span></i></p>" +
+                                "<p>" + content + "</p>" +
+                                "</div></div>";
+
+                            e = $(e).closest('.clearfix');
+
+                            $(e).children('.comment-block').remove();
+
+                            $(e).closest('.clearfix').append(node);
+
+                            break;
+                        case "-4":
+                            showErrorNullComent();
+                            break;
+                        case "-99":
+                            showErrorSystem();
+                            break;
+                    }
+                },
+                error: function (code, err) {
+
+                }
+            });
+        }
+
+        function addOwnerComment(imageLink, userId, isLogin, email, name, productId) {
+            var content = $('#comment-content').val();
+            if (isLogin === 'False') {
+                showErrorLogin();
+            }
+            else if (content === null || content.trim() === '') {
+                showErrorNullComment();
+            }
+            else{
+
+                $.ajax({
+                    url: '/Comment/AddParentComment',
+                    method: 'POST',
+                    async: true,
+                    data: { userId: userId, content: content, productId: productId },
+                    success: function (data) {
+                        var json = JSON.parse(data);
+                        switch (json.Status) {
+                            case -4:
+                                showErrorNullComment();
+                                break;
+                            case 1:
+                                var node = "<li class='clearfix'><div class='comment-block'><img src='/images/user/" + convertImageLink(imageLink, email) + "' class='avatar' alt = ''>" +
+                                    "<div class='post-comments'>" +
+                                    "<p class='meta'>" + getDate() + " <a href='#'>" + name + " </a> nói :<i class='pull-right'>" +
+                                    "<span style='cursor: pointer;' onclick='" +
+                                    "addInput(this, " + json.CommentId + ", " + productId + ", " + '"' + email + '"' + ", " + '"' + userId + '"' + ", " + '"' + name + '"' + ", " + '"' + imageLink + '"' + ")'>" +
+                                    "<small>Trả lời</small></span></i></p>" +
+                                    "<p>" + content + "</p>" +
+                                    "</div></div>" +
+                                    "<ul class='comments'><li class='clearfix'></li></ul></li>";
+
+                                console.log(node)
+
+                                $('#comment-content').val('');
+
+                                $('#comment').append(node);
+                                break;
+
+                            case -99:
+                                showErrorSystem();
+                                break;
+                        }
+                    },
+                    error: function (code, err) {
+
+                    }
+                });
+            }
+        }
+
+        function showErrorSystem() {
+            $.notiny({
+                position: 'right-top',
+                theme: 'danger',
+                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                text: 'Lỗi hệ thống vui lòng thử lại sau',
+            });
+        }
+
+        function showErrorNullComment() {
+            $.notiny({
+                position: 'right-top',
+                theme: 'danger',
+                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                text: 'Bạn chưa nhập bình luận',
+            });
+        }
+
+        function showErrorLogin() {
+            $.notiny({
+                position: 'right-top',
+                theme: 'danger',
+                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
+                text: 'Bạn chưa đăng nhập vào hệ thống',
+            });
+        }
+
+        function convertImageLink(imageLink, email) {
+            var imageShow = '';
+            if (imageLink === '') {
+                imageShow = 'avatar.png';
+            }
+            else {
+                imageShow = email + '/' + imageLink;
+            }
+
+            return imageShow;
+        }
+
+        function getDate() {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            const dateObj = new Date();
+            const month = monthNames[dateObj.getMonth()];
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const year = dateObj.getFullYear();
+
+            return month + ' ' + day + ',' + year;
         }
     </script>
 }

@@ -15,8 +15,8 @@ namespace Services.Services
 {
     public class MoMoService : IMoMoService
     {
-        private ShopDbContext _context;
-        private IConfiguration _configuration;
+        private readonly ShopDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public MoMoService(ShopDbContext context, IConfiguration configuration)
         {
@@ -43,7 +43,7 @@ namespace Services.Services
             return 0;
         }
 
-        public string MoMoCheckout(string total, string orderInfo, string email, string hostName)
+        public string MoMoCheckout(string total, string orderInfo, string email, string hostName, string deliveryAddress)
         {
             
             string endPoint = _configuration[Constant.MOMO_LINK];
@@ -51,8 +51,8 @@ namespace Services.Services
             string partnerCode = _configuration[Constant.MOMO_PARTNER_CODE];
             string accessKey = _configuration[Constant.MOMO_ACCESS_KEY];
             string serectkey = _configuration[Constant.MOMO_SECRET_KEY];
-            string returnUrl = $"{hostName}/Order/MoMoSuccess";
-            string notifyurl = $"{hostName}/Order/MoMoFail";
+            string returnUrl = $"{hostName}/Order/MoMoSuccess?deliveryAddress={deliveryAddress}";
+            string notifyUrl = $"{hostName}/Order/MoMoFail";
             string amount = total;
             string orderId = Guid.NewGuid().ToString();
             string requestId = Guid.NewGuid().ToString();
@@ -66,7 +66,7 @@ namespace Services.Services
                 orderId + Constant.MOMO_SHA_ORDER_INFO +
                 orderInfo + Constant.MOMO_SHA_RETURN_URL +
                 returnUrl + Constant.MOMO_SHA_NOTIFY_URL +
-                notifyurl + Constant.MOMO_SHA_EXTRA_DATA +
+                notifyUrl + Constant.MOMO_SHA_EXTRA_DATA +
                 extraData;
 
             //sign signature SHA256
@@ -82,7 +82,7 @@ namespace Services.Services
                 { Constant.MOMO_JSON_ORDER_ID, orderId },
                 { Constant.MOMO_JSON_ORDER_INFO, orderInfo },
                 { Constant.MOMO_JSON_RETURN_URL, returnUrl },
-                { Constant.MOMO_JSON_NOTIFY_URL, notifyurl },
+                { Constant.MOMO_JSON_NOTIFY_URL, notifyUrl },
                 { Constant.MOMO_JSON_EXTRA_DATA, extraData },
                 { Constant.MOMO_JSON_REQUEST_TYPE, Constant.MOMO_JSON_CAPTURE_MOMO_WALLET },
                 { Constant.MOMO_JSON_SIGNATURE, signature }

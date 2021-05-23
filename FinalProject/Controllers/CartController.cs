@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using static Common.Constant;
+using static Common.RoleConstant;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -6,9 +7,11 @@ using Services.Interfacies;
 using System;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Controllers
 {
+    [Authorize(Roles = ROLE_CUSTOMER)]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
@@ -24,17 +27,16 @@ namespace FinalProject.Controllers
         public async Task<string> AddToCart(int? productDetailId, int? quantity, decimal? price)
         {
             if (productDetailId is null || quantity is null || price is null)
-                return Constant.MISS_VALUE;
+                return MISS_VALUE;
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var userId = _accountService.GetUserId(User);
 
-                var cartItem = await _cartService.GetCartItemByProuctDetailIdAsync(productDetailId.Value);
+                var cartItem = await _cartService.GetCartItemsAsync(productDetailId.Value, userId);
 
                 if (cartItem is null)
                 {
-
                     var cart = new CartItem()
                     {
                         UserId = userId,
@@ -63,12 +65,12 @@ namespace FinalProject.Controllers
                     {
                         transaction.Complete();
 
-                        return Constant.UPDATED;
+                        return UPDATED;
                     }
                 }
             }
 
-            return Constant.EMPTY;
+            return EMPTY;
         }
 
         [HttpDelete]
@@ -78,7 +80,7 @@ namespace FinalProject.Controllers
 
             if (productDetailId is null || userId is null)
             {
-                return Constant.MISS_VALUE;
+                return MISS_VALUE;
             }
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -89,11 +91,11 @@ namespace FinalProject.Controllers
                 {
                     transaction.Complete();
 
-                    return Constant.SUCCESS;
+                    return SUCCESS;
                 }
             }
 
-            return Constant.FAIL;
+            return FAIL;
         }
 
         [HttpGet]
@@ -122,7 +124,7 @@ namespace FinalProject.Controllers
         {
 
             if (productDetailId is null || quantity is null)
-                return Constant.ERROR_CODE_NULL;
+                return ERROR_CODE_NULL;
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -143,7 +145,7 @@ namespace FinalProject.Controllers
 
             }
 
-            return Constant.ERROR_CODE_SYSTEM;
+            return ERROR_CODE_SYSTEM;
         }
     }
 }

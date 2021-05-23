@@ -14,5 +14,7 @@ namespace Entities.Models
         public string WardName { get; set; }
 
         public virtual IList<User> Users { get; set; }
+
+        public virtual IList<DeliveryAddress> DeliveryAddresses { get; set; }
     }
 }

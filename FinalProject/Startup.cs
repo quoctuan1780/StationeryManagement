@@ -52,7 +52,7 @@ namespace FinalProject
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton(Configuration);
             services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IReceiptService, ReceiptService>();
             services.AddScoped<IOrderService, OrderService>();
@@ -60,6 +60,9 @@ namespace FinalProject
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IRecommendationService, RecommandationService>();
+            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
+            services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
+            services.AddScoped<ICommentService, CommentService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
@@ -68,17 +71,22 @@ namespace FinalProject
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.LoginPath = new PathString("/Account/Login");
-                options.LogoutPath = $"/logout/";
-                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+                options.LogoutPath = $"/Account/Logout";
+                //options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
-            //services.AddAuthentication().AddGoogle(options =>
-            //{
-            //    var googleAuth = Configuration.GetSection("Authentication:Google");
-
-            //    options.ClientId = googleAuth["ClientId"];
-            //    options.ClientSecret = googleAuth["ClientSecret"];
-            //});
+            services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                options.ClientId = Configuration["Google:ClientId"];
+                options.ClientSecret = Configuration["Google:ClientSecret"];
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = Configuration["Facebook:AppId"];
+                options.AppSecret = Configuration["Facebook:AppSecret"];
+                options.CallbackPath = "/signin-facebook";
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -116,6 +124,7 @@ namespace FinalProject
 
             app.UseEndpoints(endpoints =>
             {
+
                 endpoints.MapControllerRoute(
                   name: "areas",
                   pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
@@ -124,6 +133,8 @@ namespace FinalProject
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapRazorPages();
             });
         }
     }

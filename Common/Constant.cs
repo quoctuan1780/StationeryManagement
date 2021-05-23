@@ -10,6 +10,12 @@
 
         public const string IMAGE_LINK = "wwwroot/images/product/";
 
+        public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
+
+        public const string SLASH = "/";
+
+        public const string HYPHEN = " - ";
+
         public const string IMAGE_KEY = "imageKey";
 
         public const string SUCCESS = "Success";
@@ -36,6 +42,20 @@
 
         public const string VN_NAME = "Việt Nam";
 
+        public const string METHOD_POST = "POST";
+
+        public const string COD = "COD";
+
+        public const string G29 = "G29";
+
+        public const string PROVIDER_GOOGLE = "Google";
+        public const string PROVIDER_FACEBOOK = "Facebook";
+
+        #region Error Page
+        public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
+        #endregion
+
         #region Error Code
         public const int ERROR_CODE_NULL_ID = -2;
 
@@ -58,6 +78,10 @@
 
         public const byte CODE_NOT_EXISTS_ACCOUNT = 4;
 
+        #region Model Field
+        public const string MODEL_FIELD_PASSWORD = "Password";
+        public const string MODEL_FIELD_CONFIRM_PASSWORD = "ConfirmPassword";
+        #endregion
 
         #region Email Sender
         public const string EMAIL_SENDER_PORT = "EmailSender:Port";
@@ -83,6 +107,9 @@
 
         #region View name
         public const string VIEW_LOGIN = "Login";
+        public const string VIEW_REGISTER_WITH_GOOGLE = "RegisterWithGoogle";
+        public const string VIEW_REGISTER_WITH_FACEBOOK = "RegisterWithFacebook";
+        public const string VIEW_EXTERNAL_LOGIN = "ExternalLoginCallback";
         #endregion
 
         public const string ACTION_CONFIRM_EMAIL = "ConfirmEmail";
@@ -94,6 +121,7 @@
         public const string KEY_PAYPAL_CLIENT_SECRET = "PAYPAL_CLIENT_SECRET";
 
         #region PayPal
+        public const string PAYPAL = "PayPal";
         public const string PAYPAL_METHOD = "paypal";
         public const string PAYPAL_CLIENT_ID = "PayPal:ClientId";
         public const string PAYPAL_SECRET = "PayPal:Secret";
@@ -105,9 +133,11 @@
         public const string PAYPAL_HEADER_PREFER = "prefer";
         public const string PAYPAL_HEADER_RETURN = "return=representation";
         public const string PAYPAL_REL_APPROVE = "approve";
+        public const string PAYPAL_URL = "payUrl";
         #endregion
 
         #region MoMo        
+        public const string MOMO = "MoMo";
         public const string MOMO_PARTNER_CODE = "MoMo:PartnerCode";
         public const string MOMO_ACCESS_KEY = "MoMo:AccessKey";
         public const string MOMO_SECRET_KEY= "MoMo:Serectkey";
@@ -141,6 +171,31 @@
 
         #region Status
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
+        public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
+        public const string STATUS_RAINS_GOODS = "Đang giao hàng";
+        public const string STATUS_RECEIVED_GOODS = "Đã nhận hàng";
+        public const string STATUS_EVALUATE = "Đánh giá";
+        public const string STATUS_EVALUATED = "Đã đánh giá";
+        #endregion
+
+        #region Fast Delivery
+        public const string FAST_DELIVERY_URL_API = "FastDelivery:UrlAPI";
+        public const string FAST_DELIVERY_TOKEN = "FastDelivery:Token";
+        public const string FAST_DELIVERY_SHOP_ID = "FastDelivery:ShopId";
+        public const string FAST_DELIVERY_SHOP_ID_NAME = "ShopId";
+        public const string FAST_DELIVERY_TOKEN_NAME = "Token";
+
+        public const string FAST_DELIVERY_FROM_DISTRICT_ID = "from_district_id";
+        public const string FAST_DELIVERY_SERVICE_ID = "service_id";
+        public const string FAST_DELIVERY_SERVICE_TYPE_ID = "service_type_id";
+        public const string FAST_DELIVERY_TO_DISTRICT_ID = "to_district_id";
+        public const string FAST_DELIVERY_TO_WARD_CODE = "to_ward_code";
+        public const string FAST_DELIVERY_ITEM_HEIGHT = "height";
+        public const string FAST_DELIVERY_ITEM_LENGTH = "length";
+        public const string FAST_DELIVERY_ITEM_WEIGHT = "weight";
+        public const string FAST_DELIVERY_ITEM_WIDTH = "width";
+        public const string FAST_DELIVERY_INSURANCE_FEE = "insurance_fee";
+        public const string FAST_DELIVERY_COUPON = "coupon";
         #endregion
     }
 }

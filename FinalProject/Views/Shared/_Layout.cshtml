@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="~/style/css/image.css">
     <link rel="stylesheet" type="text/css" href="~/style/css/checkout.css">
     <link rel="stylesheet" type="text/css" href="~/style/css/jquery.exzoom.css" />
+    <link rel="stylesheet" type="text/css" href="~/admin/bootstrap-select/css/bootstrap-select.min.css">
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading.css" />
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading-animate.css" />
     <link rel="stylesheet" type="text/css" href="~/style/sweetalert2/dist/sweetalert2.min.css" />
@@ -50,12 +51,38 @@
     <script type="text/javascript" src="~/js/theme-home-03.js"></script>
     <script type="text/javascript" src="~/js/images-show/images-loader.js"></script>
     <script type="text/javascript" src="~/js/images-show/jquery.exzoom.js"></script>
-    <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/js/ProductDetailHelper.js"></script>
+    <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/style/sweetalert2/dist/sweetalert2.min.js"></script>
     <script type="text/javascript" src="~/js/snackbar/notiny.js"></script>
     <script type="text/javascript" src="~/js/cart/cart.js"></script>
     <script type="text/javascript" src="~/js/QuantityHelper.js"></script>
+    @if (User.Identity.IsAuthenticated) 
+    { 
+        <script>
+            var idleTime = 0;
+            $(document).ready(function () {
+                //Increment the idle time counter every minute.
+                //var idleInterval =
+                setInterval(timerIncrement, 60000); // 1 minute
+
+                //Zero the idle timer on mouse movement.
+                $(this).mousemove(function (e) {
+                    idleTime = 0;
+                });
+                $(this).keypress(function (e) {
+                    idleTime = 0;
+                });
+            });
+
+            function timerIncrement() {
+                idleTime = idleTime + 1;
+                if (idleTime > 29) { // 29 minutes
+                    window.location.href = "/Account/Logout"
+                }
+            }
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

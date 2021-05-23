@@ -18,6 +18,8 @@ namespace Entities.Models
 
         public DateTime DateOfBirth { get; set; }
 
+        public string StreetName { get; set; }
+
         public string WardCode { get; set; }
         public virtual Ward Ward { get; set; }
 
@@ -29,6 +31,10 @@ namespace Entities.Models
 
         public virtual IList<CartItem> CartItems { get; set; }
 
-        public  IList<Bill> Bills { get; set; }
+        public  virtual IList<Bill> Bills { get; set; }
+
+        public virtual IList<DeliveryAddress> DeliveryAddresses { get; set; }
+
+        public virtual IList<Comment> Comments { get; set; }
     }
 }

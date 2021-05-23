@@ -136,7 +136,12 @@
                                             </select>
                                         </div>
                                     </div>
-                                    @Html.ValidationMessageFor(m => m.WardCode, "", new { @class = "text-danger" })
+                                    <div class="col-lg-12 row">
+                                        <div class="col-sm-6" id="street-name">
+                                            <input type="text" class="form-control" placeholder="Tên đường/thôn" name="StreetName">
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.StreetName, "", new { @class = "text-danger" })
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="password">Mật khẩu</label>
@@ -163,14 +168,21 @@
                                 <button type="submit" class="btn btn-primary btn-user btn-block">
                                     Đăng ký
                                 </button>
-                                <hr>
-                                <a href="#" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Đăng ký với Google
-                                </a>
-                                <a href="#" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Đăng ký Facebook
-                                </a>
+                                <hr />
                             }
+                            <form asp-action="ExternalLogin" asp-controller="Account" method="post"
+                                  asp-route-returnRul="@Model.ReturnUrl">
+                                <button type="submit" name="provider"
+                                        value="@Model.ExternalLogins[0].Name"
+                                        class="btn btn-google btn-user btn-block">
+                                    <i class="fab fa-google fa-fw"></i> Đăng ký Google
+                                </button>
+                                <button type="submit" name="provider"
+                                        value="@Model.ExternalLogins[1].Name"
+                                        class="btn btn-facebook btn-user btn-block">
+                                    <i class="fab fa-facebook-f fa-fw"></i> Đăng ký Facebook
+                                </button>
+                            </form>
                             <hr>
                             <div class="text-center">
                                 <a class="small" href="#">Quên mật khẩu?</a>

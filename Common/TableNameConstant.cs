@@ -25,5 +25,7 @@
         public const string TABLE_RECEIPT_REQUEST_DETAIL = "ReceiptRequestDetail";
         public const string TABLE_PAYPAL_PAYMENT = "PayPalPayment";
         public const string TABLE_MOMO_PAYMENT = "MoMoPayment";
+        public const string TABLE_DELIVERY_ADDRESS = "DeliveryAddress";
+        public const string TABLE_COMMENT = "Comment";
     }
 }

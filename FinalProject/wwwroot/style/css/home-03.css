@@ -529,9 +529,9 @@
 }
 
     .header-container .header .box-header-02 .bgr-menu {
-        position: fixed;
-        width: 5000px;
-        height: 5000px;
+        position: absolute;
+        width: 100%;
+        height: 100%;
         background-color: rgba(0,0,0,.3);
         z-index: 98;
         display: none;
