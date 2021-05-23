@@ -1,4 +1,5 @@
 ﻿using static Common.Constant;
+using static Common.RoleConstant;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -6,9 +7,11 @@ using Services.Interfacies;
 using System;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Controllers
 {
+    [Authorize(Roles = ROLE_CUSTOMER)]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;

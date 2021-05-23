@@ -13,9 +13,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
+using static Common.RoleConstant;
 
 namespace FinalProject.Controllers
 {
+    [Authorize(Roles = ROLE_CUSTOMER)]
     public class OrderController : Controller
     {
         private readonly IAccountService _accountService;

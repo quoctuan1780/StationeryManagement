@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210516013948_AddNewTableComment")]
+    partial class AddNewTableComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,10 +181,7 @@ namespace Entities.Migrations
                     b.Property<DateTime>("ModifyDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReplyCommentId")
+                    b.Property<int>("ReplyCommentId")
                         .HasColumnType("int");
 
                     b.Property<string>("TagName")
@@ -194,8 +193,6 @@ namespace Entities.Migrations
                     b.HasKey("CommentId");
 
                     b.HasIndex("CommentId");
-
-                    b.HasIndex("ProductId");
 
                     b.HasIndex("ReplyCommentId");
 
@@ -1147,17 +1144,9 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.Comment", b =>
                 {
-                    b.HasOne("Entities.Models.Product", "Product")
-                        .WithMany("Comments")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Entities.Models.User", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("Product");
 
                     b.Navigation("User");
                 });
@@ -1532,8 +1521,6 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.Product", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("ProductDetails");
 
                     b.Navigation("ProductImages");

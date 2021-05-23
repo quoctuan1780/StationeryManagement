@@ -1,11 +1,14 @@
 ﻿using static Common.Constant;
+using static Common.RoleConstant;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Controllers
 {
+    [Authorize(Roles = ROLE_CUSTOMER)]
     public class DeliveryAddressController : Controller
     {
         private readonly IDeliveryAddressService _deliveryAddressService;
