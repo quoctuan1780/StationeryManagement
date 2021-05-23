@@ -3,7 +3,10 @@ using Entities.Models;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
@@ -20,13 +23,76 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
+        private readonly IRecommendationService _recommendationService;
 
-        public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService)
+        public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
+            IRecommendationService recommendationService)
         {
             _productService = productService;
             _providerService = providerService;
             _receiptService = receiptService;
+            _recommendationService = recommendationService;
         }
+        public async Task<IActionResult> ViewRecommendation()
+        {
+            ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
+            return View();
+        }
+
+        public string GetRecomandation()
+        {
+
+           var result = _recommendationService.GetRecommandtion(3,0.75);
+            var recommandation = new List<JObject>();
+
+            foreach (var item in result)
+            {
+                var obj = new JObject
+                {
+                    { "productDetailId", item.ProductDetailId },
+                    { "productName", item.Product.ProductName },
+                    { "color", item.Color },
+                    { "length", item.Length},
+                    { "height", item.Height },
+                    { "width", item.Width },
+                    { "totalQuantity", item.Quantity },
+                    { "quantityOrdered", item.QuantityOrdered },
+                    { "RemainingQuantity", item.RemainingQuantity }
+                };
+
+                recommandation.Add(obj);
+            }
+
+            return JsonConvert.SerializeObject(recommandation);
+        }
+
+        public async Task<string> GetBestSeller(int quantity)
+        {
+            var result = await _productService.BestSellerInMonthAsync(quantity);
+
+            var bestSellerList = new List<JObject>();
+
+            foreach (var item in result)
+            {
+                var obj = new JObject
+                {
+                    { "productDetailId", item.ProductDetailId },
+                    { "productName", item.Product.ProductName },
+                    { "color", item.Color },
+                    { "length", item.Length},
+                    { "height", item.Height },
+                    { "width", item.Width },
+                    { "totalQuantity", item.Quantity },
+                    { "quantityOrdered", item.QuantityOrdered },
+                    { "RemainingQuantity", item.RemainingQuantity }
+                };
+
+                bestSellerList.Add(obj);
+            }
+
+            return JsonConvert.SerializeObject(bestSellerList);
+        }
+
 
         public IActionResult Index()
         {

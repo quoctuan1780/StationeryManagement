@@ -19,5 +19,9 @@ namespace Services.Interfacies
         Task<IList<ProductDetail>> GetProductWithDetailsAsync();
 
         Task<IList<string>> GetColorByIdAsync(int productId);
+
+        Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync();
+
+        Task<IList<ProductDetail>> BestSellerInMonthAsync(int quantity);
     }
 }

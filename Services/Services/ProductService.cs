@@ -2,8 +2,10 @@
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -24,6 +26,21 @@ namespace Services.Services
             await _context.SaveChangesAsync();
 
             return product;
+        }
+
+        public async Task<IList<ProductDetail>> BestSellerInMonthAsync(int quantity)
+        {
+            var result = await _context.OrderDetails
+                    .Include(x => x.Order)
+                    .Where(x => x.Order.OrderDate.Month == DateTime.Now.Month)
+                    .Where(x => x.Order.OrderDate.Year == DateTime.Now.Year)
+                    .GroupBy(x => x.ProductDetailId)
+                    .OrderByDescending(x => x.Key)
+                    .Take(quantity)
+                    .Select(x => x.Key)
+                    .ToListAsync();
+
+            return await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
         }
 
         public async Task<IList<Product>> GetAllProductsAsync()
@@ -53,6 +70,17 @@ namespace Services.Services
                             .Include(x => x.ProductDetails)
                             .FirstOrDefaultAsync();
         }
+
+        public async Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
+        {
+            var result = await _context.ProductDetails.Include(x => x.Product).Where(x => x.RemainingQuantity < 10).ToListAsync();
+
+            dynamic a = 0;
+
+            return result;
+        }
+
+
 
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
         {
