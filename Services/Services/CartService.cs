@@ -54,7 +54,7 @@ namespace Services.Services
 
         public async Task<IList<CartItem>> GetCartsByUserIdAsync(string userId)
         {
-            return await _context.CartItems.Where(x => x.UserId == userId)
+            var cartItems = await _context.CartItems.Where(x => x.UserId == userId)
                         .Include(x => x.User)
                         .Include(x => x.ProductDetail)
                         .ThenInclude(x => x.Product)
@@ -63,11 +63,24 @@ namespace Services.Services
                         .ThenInclude(x => x.Product)
                         .ThenInclude(x => x.ProductImages)
                         .ToListAsync();
+            foreach(var item in cartItems)
+            {
+                if(item.Quantity > item.ProductDetail.RemainingQuantity)
+                {
+                    item.isStocking = false;
+                }
+            }
+
+            _context.CartItems.UpdateRange(cartItems);
+
+            await _context.SaveChangesAsync();
+
+            return cartItems;
         }
 
         public decimal GetCartTotalByUserId(string userId)
         {
-            var result = _context.CartItems.Where(x => x.UserId == userId);
+            var result = _context.CartItems.Where(x => x.UserId == userId && x.isStocking == false);
 
             if (!result.Any()) return 0;
 

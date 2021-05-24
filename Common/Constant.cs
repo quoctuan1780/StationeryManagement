@@ -197,5 +197,10 @@
         public const string FAST_DELIVERY_INSURANCE_FEE = "insurance_fee";
         public const string FAST_DELIVERY_COUPON = "coupon";
         #endregion
+
+        #region Json key 
+        public const string JSON_KEY_STATUS = "Status";
+        public const string JSON_KEY_COMMENT_ID = "CommentId";
+        #endregion
     }
 }
