@@ -28,7 +28,7 @@ namespace FinalProject.Controllers
 
             if (userId is null && content is null && productId is null)
             {
-                json.Add("Status", ERROR_CODE_NULL.ToString());
+                json.Add(JSON_KEY_STATUS, ERROR_CODE_NULL.ToString());
 
                 return json.ToString();
             }
@@ -49,8 +49,8 @@ namespace FinalProject.Controllers
 
                 if (!(result is null))
                 {
-                    json.Add("Status", CODE_SUCCESS);
-                    json.Add("CommentId", comment.CommentId);
+                    json.Add(JSON_KEY_STATUS, CODE_SUCCESS);
+                    json.Add(JSON_KEY_COMMENT_ID, result.CommentId);
                     
                     transaction.Complete();
 
@@ -61,7 +61,7 @@ namespace FinalProject.Controllers
             {
             }
 
-            json.Add("Status", ERROR_CODE_SYSTEM.ToString());
+            json.Add(JSON_KEY_STATUS, ERROR_CODE_SYSTEM.ToString());
 
             return json.ToString();
         }
@@ -69,11 +69,16 @@ namespace FinalProject.Controllers
         [HttpPost]
         public async Task<string> AddChildrentComment(int? commentId, string userId, string userName, string content, int? productId)
         {
-            if (commentId is null || userId is null || userName is null || content is null || productId is null)
+            var json = new JObject();
+
+            if (userId is null && content is null && productId is null)
             {
-                return ERROR_CODE_NULL.ToString();
+                json.Add(JSON_KEY_STATUS, ERROR_CODE_NULL.ToString());
+
+                return json.ToString();
             }
 
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 var replyConment = new Comment()
@@ -91,23 +96,36 @@ namespace FinalProject.Controllers
 
                 if (!(result is null))
                 {
-                    return CODE_SUCCESS.ToString();
+                    json.Add(JSON_KEY_STATUS, CODE_SUCCESS);
+                    json.Add(JSON_KEY_COMMENT_ID, result.CommentId);
+
+                    transaction.Complete();
+
+                    return json.ToString();
                 }
             }
             catch
             {
             }
 
-            return ERROR_CODE_SYSTEM.ToString();
+            json.Add(JSON_KEY_STATUS, ERROR_CODE_SYSTEM.ToString());
+
+            return json.ToString();
         }
 
         [HttpPost]
         public async Task<string> AddChildrentReplyComment(int? commentId, string userId, string userName, string content, int? productId)
         {
+            var json = new JObject();
+
             if (commentId is null || userId is null || userName is null || content is null || productId is null)
             {
-                return ERROR_CODE_NULL.ToString();
+                json.Add(JSON_KEY_STATUS, ERROR_CODE_NULL.ToString());
+
+                return json.ToString();
             }
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
             try
             {
                 var comment = await _commentService.GetCommentByIdAsync(commentId.Value);
@@ -115,7 +133,7 @@ namespace FinalProject.Controllers
                 if (!(comment is null))
                 {
                     int commentIdReply = comment.CommentId;
-                    if(!(comment.ReplyCommentId is null))
+                    if (!(comment.ReplyCommentId is null))
                     {
                         commentIdReply = comment.ReplyCommentId.Value;
                     }
@@ -135,8 +153,71 @@ namespace FinalProject.Controllers
 
                     if (!(result is null))
                     {
-                        return CODE_SUCCESS.ToString();
+                        json.Add(JSON_KEY_STATUS, CODE_SUCCESS);
+                        json.Add(JSON_KEY_COMMENT_ID, result.CommentId);
+
+                        transaction.Complete();
+
+                        return json.ToString();
                     }
+                }
+            }
+            catch
+            {
+            }
+
+            json.Add(JSON_KEY_STATUS, ERROR_CODE_SYSTEM.ToString());
+
+            return json.ToString();
+        }
+
+        [HttpDelete]
+        public async Task<string> DeleteComment(int? commentId)
+        {
+            if(commentId is null)
+            {
+                return ERROR_CODE_NULL.ToString();
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                var result = await _commentService.DeleteCommentByIdAsync(commentId.Value);
+
+                if(result > 0)
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS.ToString();
+                }
+            }
+            catch
+            {
+            }
+
+            return ERROR_CODE_SYSTEM.ToString();
+        }
+        
+        [HttpPut]
+        public async Task<string> UpdateComment(int? commentId, string content)
+        {
+            if (commentId is null || content is null)
+            {
+                return ERROR_CODE_NULL.ToString();
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                var result = await _commentService.UpdateCommentAsync(commentId.Value, content);
+
+                if (!(result is null))
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS.ToString();
                 }
             }
             catch
