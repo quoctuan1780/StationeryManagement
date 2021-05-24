@@ -67,7 +67,7 @@ namespace Services.Services
             {
                 if(item.Quantity > item.ProductDetail.RemainingQuantity)
                 {
-                    item.isStocking = false;
+                    item.IsStocking = false;
                 }
             }
 
@@ -80,7 +80,7 @@ namespace Services.Services
 
         public decimal GetCartTotalByUserId(string userId)
         {
-            var result = _context.CartItems.Where(x => x.UserId == userId && x.isStocking == false);
+            var result = _context.CartItems.Where(x => x.UserId == userId && x.IsStocking == false);
 
             if (!result.Any()) return 0;
 

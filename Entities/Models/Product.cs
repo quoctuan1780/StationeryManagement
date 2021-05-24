@@ -42,5 +42,7 @@ namespace Entities.Models
         public virtual IList<ProductDetail> ProductDetails { get; set; }
 
         public virtual IList<Comment> Comments { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

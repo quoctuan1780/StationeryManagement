@@ -18,5 +18,7 @@ namespace Entities.Models
         public bool status { get; set; }
 
         public virtual IList<Product> Products { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

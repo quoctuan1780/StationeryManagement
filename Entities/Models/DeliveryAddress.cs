@@ -12,5 +12,6 @@ namespace Entities.Models
         public string UserId { get; set; }
         public virtual User User { get; set; }
         public string StreetName { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }
