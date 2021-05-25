@@ -5,7 +5,7 @@ using Services.Interfacies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -43,19 +43,37 @@ namespace Services.Services
             return await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
         }
 
+        public async Task<int> DeleteProductByIdAsync(int productId)
+        {
+            var product = await _context.Products.FindAsync(productId);
+
+            if(!(product is null))
+            {
+                product.IsDeleted = true;
+
+                _context.Update(product);
+
+                return await _context.SaveChangesAsync();
+            }
+
+            return 0;
+        }
+
         public async Task<IList<Product>> GetAllProductsAsync()
         {
             return await _context.Products
+                .Where(x => x.IsDeleted == false)
                 .Include(x => x.Category)
-                .Include(x => x.ProductImages)
+                .Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
                 .ToListAsync();
         }
 
+        //check deteted item
         public async Task<IList<string>> GetColorByIdAsync(int productId)
         {
             var listDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
             var listColor = new List<string>();
-            foreach(var item in listDetails)
+            foreach (var item in listDetails)
             {
                 listColor.Add(item.Color);
             }
@@ -66,11 +84,12 @@ namespace Services.Services
         {
             return await _context.Products.Where(x => x.ProductId == id)
                             .Include(x => x.Category)
-                            .Include(x => x.ProductImages)
-                            .Include(x => x.ProductDetails)
+                            .Include(x => x.ProductImages.Where(y => y.IsDeleted == false))
+                            .Include(x => x.ProductDetails.Where(y => y.IsDeleted == false))
                             .FirstOrDefaultAsync();
         }
 
+        //check deteted item
         public async Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
         {
             var result = await _context.ProductDetails.Include(x => x.Product).Where(x => x.RemainingQuantity < 10).ToListAsync();
@@ -81,7 +100,7 @@ namespace Services.Services
         }
 
 
-
+        //check deteted item
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
         {
             return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
@@ -91,7 +110,7 @@ namespace Services.Services
         {
             var result = await _context.Products.Where(x => x.ProductName == product.ProductName).FirstOrDefaultAsync();
 
-            if(result is null)
+            if (result is null)
             {
                 return false;
             }

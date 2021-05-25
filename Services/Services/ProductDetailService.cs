@@ -47,13 +47,12 @@ namespace Services.Services
 
                     // check parse data to int type
                     if (!checkParse) return Constant.ERROR_CODE_CONVERT_TO_INT;
-
-                    productRemove.Add(
-                        productsDetail.Where(x => x.ProductDetailId == result).FirstOrDefault()
-                    );
+                    var productDetail = productsDetail.Where(x => x.ProductDetailId == result).FirstOrDefault();
+                    productDetail.IsDeleted = true;
+                    productRemove.Add(productDetail);
                 }
 
-                _context.ProductDetails.RemoveRange(productRemove);
+                _context.ProductDetails.UpdateRange(productRemove);
             }
 
             return await _context.SaveChangesAsync();
