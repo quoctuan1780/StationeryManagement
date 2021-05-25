@@ -23,5 +23,7 @@ namespace Services.Interfacies
         Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync();
 
         Task<IList<ProductDetail>> BestSellerInMonthAsync(int quantity);
+
+        Task<int> DeleteProductByIdAsync(int productId);
     }
 }
