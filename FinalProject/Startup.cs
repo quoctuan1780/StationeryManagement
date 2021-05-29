@@ -59,10 +59,7 @@ namespace FinalProject
             services.AddScoped<IPayPalService, PayPalService>();
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
-            services.AddScoped<IRecommendationService, RecommandationService>();
-            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
-            services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
-            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<ISearchItemService, SearchItemService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();

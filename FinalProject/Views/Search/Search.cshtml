@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+
+    var products = ViewBag.ListProduct as IList<Entities.Models.Product>;
+
+    string image = null;
+}
+
+
+<div class="position-01">
+    <div class="container">
+        <div class="row">
+            <div class="row">
+                @if (products is not null)
+                {
+                    foreach (var item in products)
+                    {
+                        <div class="col-lg-3">
+                            <div class="products-grid">
+                                <div class="item">
+                                    <div class="item-wrap">
+                                        <div class="item-image">
+                                            <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                                @if (item.ProductImages is not null && item.ProductImages.Count > 0)
+                                                {
+                                                    {
+                                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                    }
+                                                    image = item.ProductImages.FirstOrDefault().Image;
+                                                }
+                                                else
+                                                {
+                                                    <img class="first_image" src="~/images/product/img_1.jpg"
+                                                         alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                }
+                                            </a>
+                                            <div class="item-btn">
+                                                <div class="box-inner">
+                                                    <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                    <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                                    <span class="qview">
+                                                        <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                           data-placement="left" data-toggle="tooltip"
+                                                           asp-controller="Product" asp-action="Detail"
+                                                           asp-route-id="@item.ProductId">
+                                                            <span>
+                                                                Quick
+                                                                View
+                                                            </span>
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="pro-info">
+                                            <div class="pro-inner">
+                                                <div class="pro-title product-name">
+                                                    <a href="detail.html">
+                                                        @item.ProductName
+                                                    </a>
+                                                </div>
+                                                <div class="pro-content">
+                                                    <div class="wrap-price">
+                                                        <div class="price-box">
+                                                            <span class="regular-price">
+                                                                <span class="price">@item.Price VNĐ</span>
+                                                            </span>
+                                                            @*<p class="special-price">
+                                                        <span class="price">@item.Price VNĐ</span>
+                                                    </p>*@
+                                                        </div>
+                                                    </div>
+                                                    <p>Chưa có đánh giá</p>
+                                                    @*<div class="ratings" style="margin-bottom: .5rem;">
+                                                <div class="rating-box">
+
+                                                    <div class="rating" style="width:80%">
+                                                    </div>
+                                                </div>
+                                            </div>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                            Chi tiết sản phẩm
+                                        </a>
+                                    </div>
+                                    <!--end item wrap -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+            }
+            else
+            {
+            <p>Không có sản phẩm</p> 
+            }
+            </div>
+            </div>
+        </div>
+    </div>
+
+                @section Scripts{
+                    <script>
+                        function loadingOut(loading) {
+                            setTimeout(() => loading.out(), 3000);
+                        }
+
+                        function verticalTextColor() {
+                            var loading = new Loading({
+                                title: 'Xin hãy đợi',
+                                titleColor: 'rgb(217, 83, 79)',
+                                discription: 'Loading...',
+                                discriptionColor: 'rgb(77, 150, 223)',
+                                animationOriginColor: 'rgb(33, 179, 132)',
+                                mask: true,
+                                loadingPadding: '20px 50px',
+                                defaultApply: true,
+                            });
+
+                            loadingOut(loading);
+                        }
+                    </script>
+                }
