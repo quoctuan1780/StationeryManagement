@@ -15,5 +15,7 @@ namespace Entities.Models
         public string ProviderName { get; set; }
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

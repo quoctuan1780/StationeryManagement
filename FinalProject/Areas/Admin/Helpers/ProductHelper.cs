@@ -1,5 +1,4 @@
-﻿using Common;
-using Entities.Models;
+﻿using Entities.Models;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +12,8 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using static Common.Constant;
+using static Common.ValidationConstant;
 
 namespace FinalProject.Areas.Admin.Helpers
 {
@@ -23,7 +24,7 @@ namespace FinalProject.Areas.Admin.Helpers
         {
             if (productsDetailId.FirstOrDefault() is null) return model;
 
-            var productsDetailIdConvert = productsDetailId.FirstOrDefault().Split(Constant.COMMA);
+            var productsDetailIdConvert = productsDetailId.FirstOrDefault().Split(COMMA);
 
             foreach(var item in productsDetailIdConvert)
             {
@@ -97,11 +98,11 @@ namespace FinalProject.Areas.Admin.Helpers
         {
             if (images.FirstOrDefault() is null) return;
 
-            var imagesRemove = images.FirstOrDefault().Split(Constant.COMMA);
+            var imagesRemove = images.FirstOrDefault().Split(COMMA);
 
             foreach (var item in imagesRemove)
             {
-                File.Delete(Constant.IMAGE_LINK + item);
+                File.Delete(IMAGE_LINK + item);
             }
         }
 
@@ -122,7 +123,7 @@ namespace FinalProject.Areas.Admin.Helpers
 
                 filesName.Add(resultHash);
 
-                await image.SaveAsync(Constant.IMAGE_LINK + resultHash);
+                await image.SaveAsync(IMAGE_LINK + resultHash);
             }
 
             return filesName;
@@ -145,9 +146,9 @@ namespace FinalProject.Areas.Admin.Helpers
 
             string resultHash = Convert.ToBase64String(dst).ToString() + name;
 
-            var rgx = new Regex(ValidationConstant.VALIDATION_NON_ANPHABETIC);
+            var rgx = new Regex(VALIDATION_NON_ANPHABETIC);
 
-            resultHash = rgx.Replace(resultHash, Constant.EMPTY);
+            resultHash = rgx.Replace(resultHash, EMPTY);
 
 
             return resultHash;
@@ -172,7 +173,7 @@ namespace FinalProject.Areas.Admin.Helpers
             return productImages;
         }
 
-        public static ProductViewModel ConvertProductToProductViewModel(Product product)
+        public static ProductViewModel ConvertProductToProductViewModel(Product product, IList<string> imagesDeleted, IList<string> productDetailIsDeleted)
         {
             if (product is null) return null;
 
@@ -196,12 +197,22 @@ namespace FinalProject.Areas.Admin.Helpers
             var color = new List<string>();
             var quantities = new List<int>();
 
+            if(!(imagesDeleted is null))
+            {
+                product.ProductImages = product.ProductImages.Where(x => !(imagesDeleted.Contains(x.Image))).ToList();
+            }
+
             foreach (var item in product.ProductImages)
             {
                 images.Add(item.Image);
             }
 
-            for(int i = 0; i < product.ProductDetails.Count; i++)
+            if (!(productDetailIsDeleted is null))
+            {
+                product.ProductDetails = product.ProductDetails.Where(x => !(productDetailIsDeleted.Contains(x.ProductDetailId.ToString()))).ToList();
+            }
+
+            for (int i = 0; i < product.ProductDetails.Count; i++)
             {
                 origins.Add(product.ProductDetails[i].Origin);
                 weights.Add(product.ProductDetails[i].Weight);

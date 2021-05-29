@@ -35,5 +35,7 @@ namespace Entities.Models
         public virtual IList<CartItem> CartItems { get; set; }
 
         public virtual IList<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

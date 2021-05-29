@@ -11,5 +11,9 @@ namespace Services.Interfacies
         Task<IList<Comment>> GetAllCommentsByProductIdAsync(int productId);
 
         Task<Comment> GetCommentByIdAsync(int commentId);
+
+        Task<int> DeleteCommentByIdAsync(int commentId);
+
+        Task<Comment> UpdateCommentAsync(int commentId, string content);
     }
 }

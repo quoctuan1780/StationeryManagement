@@ -37,11 +37,18 @@ namespace Services.Services
 
         public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress)
         {
+            var productDetailsId = cartItems.Select(x => x.ProductDetailId);
+            var productDetails = await _context.ProductDetails.Where(x => productDetailsId.Contains(x.ProductDetailId)).ToListAsync();
 
             decimal total = 0;
 
             foreach(var item in cartItems)
             {
+                var index = productDetails.FindIndex(x => x.ProductDetailId == item.ProductDetailId);
+
+                productDetails[index].QuantityOrdered += item.Quantity;
+                productDetails[index].RemainingQuantity += productDetails[index].Quantity - item.Quantity;
+
                 total += item.Quantity * item.Price;
             }
 
@@ -55,7 +62,9 @@ namespace Services.Services
                 Total = total
             };
 
-            await _context.AddAsync(order);
+            await _context.Orders.AddAsync(order);
+
+            _context.ProductDetails.UpdateRange(productDetails);
 
             await _context.SaveChangesAsync();
 

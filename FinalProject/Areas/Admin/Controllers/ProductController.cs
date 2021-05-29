@@ -1,14 +1,15 @@
-﻿using static Common.Constant;
-using static Common.MessageConstant;
-using Entities.Models;
+﻿using Entities.Models;
 using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using static Common.Constant;
+using static Common.MessageConstant;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -34,6 +35,27 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return View();
         }
+
+        public async Task<IActionResult> ProductDetail(int? productId)
+        {
+            if (productId is null)
+            {
+                return PartialView(ERROR_404_PAGE_ADMIN);
+            }
+
+            try
+            {
+                ViewBag.ProductDetail = await _productDetailService.GetProductsDetailByProductIdAsync(productId.Value);
+
+                return View();
+            }
+            catch
+            { 
+            }
+
+            return PartialView(ERROR_404_PAGE_ADMIN);
+        }
+
         public async Task<IActionResult> AddProduct()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
@@ -81,7 +103,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                 if (result > 0)
                                 {
-                                    var productsDetail = 
+                                    var productsDetail =
                                         ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId);
 
                                     result = await _productDetailService.AddProductsDetailAsync(productsDetail);
@@ -92,7 +114,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                         transaction.Complete();
                                     }
-                                    else if(result == ERROR_CODE_NULL)
+                                    else if (result == ERROR_CODE_NULL)
                                     {
                                         ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT_DETAIL;
                                     }
@@ -114,6 +136,33 @@ namespace FinalProject.Areas.Admin.Controllers
             return View(model);
         }
 
+        public async Task<int> DeleteProduct(int? productId)
+        {
+            if(productId is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                var result = await _productService.DeleteProductByIdAsync(productId.Value);
+
+                if(result > 0)
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS;
+                }
+            }
+            catch
+            {
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
+
         public async Task<IActionResult> EditProduct(int id, string urlCallback)
         {
             var product = await _productService.GetProductByIdAsync(id);
@@ -127,14 +176,14 @@ namespace FinalProject.Areas.Admin.Controllers
                 return Redirect(urlCallback);
             }
 
-            ProductViewModel model = ProductHelper.ConvertProductToProductViewModel(product);
+            ProductViewModel model = ProductHelper.ConvertProductToProductViewModel(product, null, null);
 
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProduct(ProductViewModel model, IList<string> imageRemove, 
+        public async Task<IActionResult> EditProduct(ProductViewModel model, IList<string> imageRemove,
             IList<string> productsDetailsId)
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
@@ -147,78 +196,82 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 try
                 {
-                    using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    var option = new TransactionOptions
                     {
-                        result = await _productImageService.DeleteListImagesOfProductByNameAsync(imageRemove, model.ProductId);
+                        IsolationLevel = IsolationLevel.ReadCommitted
+                    };
 
-                        // delete images successfully
+                    using var transaction = new TransactionScope(TransactionScopeOption.Required, option, TransactionScopeAsyncFlowOption.Enabled);
+
+                    result = await _productImageService.DeleteListImagesOfProductByNameAsync(imageRemove, model.ProductId);
+
+                    // delete images successfully
+                    if (result > 0)
+                    {
+                        result = await _productDetailService.DeleteProductsDetailAsync(productsDetailsId, model.ProductId);
+
+                        // delete products detail successfully
                         if (result > 0)
                         {
-                            result = await _productDetailService.DeleteProductsDetailAsync(productsDetailsId, model.ProductId);
-
-                            // delete products detail successfully
-                            if (result > 0)
+                            var product = new Product()
                             {
-                                var product = new Product()
+                                ProductName = model.ProductName,
+                                DateCreate = model.CreateDate,
+                                Description = model.Description,
+                                Price = model.Price,
+                                CategoryId = model.CategoryId,
+                                ProductId = model.ProductId
+                            };
+
+                            product = await _productService.UpdateProductAsync(product);
+
+                            if (!(product is null))
+                            {
+
+                                result = await _productDetailService.UpdateProductsDetailAsync(
+                                    ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId));
+
+                                if (result > 0)
                                 {
-                                    ProductName = model.ProductName,
-                                    DateCreate = model.CreateDate,
-                                    Description = model.Description,
-                                    Price = model.Price,
-                                    CategoryId = model.CategoryId,
-                                    ProductId = model.ProductId
-                                };
-
-                                product = await _productService.UpdateProductAsync(product);
-
-                                if (!(product is null))
-                                {
-
-                                    result = await _productDetailService.UpdateProductsDetailAsync(
-                                        ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId));
-
-                                    if (result > 0)
+                                    // if user added images
+                                    if (!(model.Images is null))
                                     {
-                                        // if user added images
-                                        if (!(model.Images is null))
-                                        {
-                                            var imagesName = await ProductHelper.SaveImageAsync(model.Images, 1920, 1080);
+                                        var imagesName = await ProductHelper.SaveImageAsync(model.Images, 1920, 1080);
 
-                                            await _productImageService.AddListImagesAsync(
-                                                ProductHelper.CreateProductImages(imagesName, product.ProductId));
-                                        }
-
-                                        transaction.Complete();
-
-                                        ProductHelper.RemoveFile(imageRemove);
-
-                                        ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_PRODUCT;
+                                        await _productImageService.AddListImagesAsync(
+                                            ProductHelper.CreateProductImages(imagesName, product.ProductId));
                                     }
-                                    else if(result == ERROR_CODE_NULL)
-                                    {
-                                        ViewBag.MessageSuccess = MESSAGE_ERROR_UPDATE_PRODUCT_DETAIL;
-                                    }
+
+                                    transaction.Complete();
+
+                                    //ProductHelper.RemoveFile(imageRemove);
+
+                                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_PRODUCT;
                                 }
-                                else
+                                else if (result == ERROR_CODE_NULL)
                                 {
-                                    ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT_NULL;
+                                    ViewBag.MessageSuccess = MESSAGE_ERROR_UPDATE_PRODUCT_DETAIL;
                                 }
                             }
-                        }
-                        else if(result == ERROR_CODE_CONVERT_TO_INT)
-                        {
-                            ViewBag.MessageError = MESSAGE_ERROR_CONVERT_TO_INT;
+                            else
+                            {
+                                ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT_NULL;
+                            }
                         }
                     }
+                    else if (result == ERROR_CODE_CONVERT_TO_INT)
+                    {
+                        ViewBag.MessageError = MESSAGE_ERROR_CONVERT_TO_INT;
+                    }
                 }
-                catch 
+                catch
                 {
                     ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT;
                 }
             }
 
             model = ProductHelper.ConvertProductToProductViewModel(
-                await _productService.GetProductByIdAsync(model.ProductId));
+                        await _productService.GetProductByIdAsync(model.ProductId), imageRemove, productsDetailsId);
 
             return View(model);
         }

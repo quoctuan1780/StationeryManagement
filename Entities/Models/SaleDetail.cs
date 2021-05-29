@@ -17,5 +17,7 @@ namespace Entities.Models
         public DateTime SaleStartDate { get; set; } = DateTime.Now;
 
         public DateTime SaleEndDate { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

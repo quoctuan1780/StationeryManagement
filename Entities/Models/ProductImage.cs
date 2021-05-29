@@ -12,5 +12,7 @@ namespace Entities.Models
         public string Image { get; set; }
 
         public bool PrimaryImage { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

@@ -53,6 +53,7 @@
 
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        public const string ERROR_404_PAGE_ADMIN = "~/Areas/Admin/Views/Shared/_Error404.cshtml";
         public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
         #endregion
 
@@ -196,6 +197,11 @@
         public const string FAST_DELIVERY_ITEM_WIDTH = "width";
         public const string FAST_DELIVERY_INSURANCE_FEE = "insurance_fee";
         public const string FAST_DELIVERY_COUPON = "coupon";
+        #endregion
+
+        #region Json key 
+        public const string JSON_KEY_STATUS = "Status";
+        public const string JSON_KEY_COMMENT_ID = "CommentId";
         #endregion
     }
 }
