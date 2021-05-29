@@ -22,9 +22,17 @@ namespace Services.Services
         {
             await _context.AddAsync(order);
 
-            await _context.SaveChangesAsync();
+            if( await _context.SaveChangesAsync() > 0)
+            {
+                _context.SavedChanges += new EventHandler<SavedChangesEventArgs>(OrderedSignal);
+            }
 
             return order;
+        }
+
+        public void OrderedSignal(object sender, EventArgs e)
+        {
+            
         }
 
         public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress)
