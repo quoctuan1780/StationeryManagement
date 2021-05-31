@@ -13,7 +13,8 @@
         public const string ERROR_PHONENUMBER_EMPTY = "Số điện thoại không được để trống";
         public const string ERROR_PHONENUMBER_RANGE = "Số điện thoại phải là 10 hoặc 11 số";
         public const string ERROR_PHONENUMBER_FORMAT = "Định dạng phải là số điện thoại";
-       
+        public const string ERROR_ROLE_EMPTY = "Chức vụ không được để trống";
+
         public const string ERROR_ADDRESS_EMPTY = "Địa chỉ không được để trống";
         public const string ERROR_FULLNAME_RANGE = "Họ và tên không nhỏ hơn 3 và lớn hơn 200 ký tự";
         public const string ERROR_ADDRESS_RANGE = "Địa chỉ không nhỏ hơn 6 và lớn hơn 300 ký tự";

@@ -43,7 +43,7 @@ namespace FinalProject
             }).AddEntityFrameworkStores<ShopDbContext>()
             .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
-            #region Register Dependencies
+                #region Register Dependencies
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
@@ -60,6 +60,7 @@ namespace FinalProject
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<ISearchItemService, SearchItemService>();
+            services.AddScoped<IRecommendationService, RecommandationService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
