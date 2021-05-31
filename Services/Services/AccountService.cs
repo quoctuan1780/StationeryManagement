@@ -64,7 +64,7 @@ namespace Services.Services
             if (!emailConfirmed) return Constant.ERROR_CODE_DO_NOT_CONFIRM_EMAIL;
 
 
-            var result = await _signInManager.PasswordSignInAsync(email, password, true, true);
+            var result = await _signInManager.PasswordSignInAsync(emailFinded, password, false, true);
 
             if (result.Succeeded)
             {

@@ -63,6 +63,7 @@ namespace FinalProject
             services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             #endregion
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
@@ -127,7 +128,7 @@ namespace FinalProject
 
                 endpoints.MapControllerRoute(
                   name: "areas",
-                  pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
+                  pattern: "{area:exists}/{controller=Account}/{action=Login}/{id?}"
                 );
 
                 endpoints.MapControllerRoute(

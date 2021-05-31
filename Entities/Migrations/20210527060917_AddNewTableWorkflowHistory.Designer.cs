@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210527060917_AddNewTableWorkflowHistory")]
+    partial class AddNewTableWorkflowHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1006,9 +1008,9 @@ namespace Entities.Migrations
                     b.ToTable("Wards");
                 });
 
-            modelBuilder.Entity("Entities.Models.WorkflowHistory", b =>
+            modelBuilder.Entity("Entities.Models.WorkflowHostory", b =>
                 {
-                    b.Property<int>("WorkflowHistoryId")
+                    b.Property<int>("WorkflowHostoryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -1037,13 +1039,13 @@ namespace Entities.Migrations
                     b.Property<string>("UserEmail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("WorkflowHistoryId");
+                    b.HasKey("WorkflowHostoryId");
 
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("RecordId");
 
-                    b.HasIndex("WorkflowHistoryId");
+                    b.HasIndex("WorkflowHostoryId");
 
                     b.ToTable("WorkflowHistory");
                 });

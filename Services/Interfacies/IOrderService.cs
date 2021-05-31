@@ -10,5 +10,10 @@ namespace Services.Interfacies
         Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress);
         Task<Order> GetOrderByIdAsync(int orderId);
         Task<IList<Order>> GetOrdersByUserIdAsync(string userId);
+        Task<IList<Order>> GetOrdersAsync();
+        Task<IList<Order>> GetOrdersWaitExportWarehouseAsync();
+        Task<IList<Order>> GetOrdersWaitDeliveryAsync();
+        Task<int> AdminConfirmOrderAsync(int orderId);
+        Task<int> WarehouseManagementConfirmOrderAsync(int orderId);
     }
 }

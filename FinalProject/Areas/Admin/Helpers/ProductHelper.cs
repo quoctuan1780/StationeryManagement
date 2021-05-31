@@ -197,9 +197,10 @@ namespace FinalProject.Areas.Admin.Helpers
             var color = new List<string>();
             var quantities = new List<int>();
 
-            if(!(imagesDeleted is null))
+            if(!(imagesDeleted is null) && !(imagesDeleted.FirstOrDefault() is null))
             {
-                product.ProductImages = product.ProductImages.Where(x => !(imagesDeleted.Contains(x.Image))).ToList();
+                var imageConvert = imagesDeleted.FirstOrDefault().Split(COMMA).ToList();
+                product.ProductImages = product.ProductImages.Where(x => !(imageConvert.Contains(x.Image))).ToList();
             }
 
             foreach (var item in product.ProductImages)
@@ -207,9 +208,10 @@ namespace FinalProject.Areas.Admin.Helpers
                 images.Add(item.Image);
             }
 
-            if (!(productDetailIsDeleted is null))
+            if (!(productDetailIsDeleted is null) &&  !(productDetailIsDeleted.FirstOrDefault() is null))
             {
-                product.ProductDetails = product.ProductDetails.Where(x => !(productDetailIsDeleted.Contains(x.ProductDetailId.ToString()))).ToList();
+                var productDetailConvert = productDetailIsDeleted.FirstOrDefault().Split(COMMA).ToList(); 
+                product.ProductDetails = product.ProductDetails.Where(x => !(productDetailConvert.Contains(x.ProductDetailId.ToString()))).ToList();
             }
 
             for (int i = 0; i < product.ProductDetails.Count; i++)

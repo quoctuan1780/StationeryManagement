@@ -5,6 +5,7 @@ using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -66,6 +67,66 @@ namespace FinalProject.Areas.Admin.Controllers
             }
 
             return View();
+        }
+
+        [HttpDelete]
+        public async Task<int> DeleteCategory(int? categoryId)
+        {
+            if (categoryId is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                var result = await _categoryService.DeleteCategoryByIdAsync(categoryId.Value);
+
+                if (result > 0)
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS;
+                }
+            }
+            catch
+            {
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
+
+        [HttpPut]
+        public async Task<int> RepairCategory(int? categoryId, string content)
+        {
+            if (categoryId is null || content is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                var result = await _categoryService.UpdateCategoryByIdAsync(categoryId.Value, content);
+
+                if (result > 0)
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS;
+                }
+                else
+                {
+                    return CODE_FAIL;
+                }
+            }
+            catch
+            {
+            }
+
+            return ERROR_CODE_SYSTEM;
         }
     }
 }

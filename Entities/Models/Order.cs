@@ -35,5 +35,9 @@ namespace Entities.Models
         public virtual ExportWarehouse ExportWarehouse { get; set; }
 
         public IList<OrderDetail> OrderDetails { get; set; }
+
+        public DateTime ModifiedDate { get; set; } = DateTime.Now;
+        
+        public string ModifiedBy { get; set; }
     }
 }

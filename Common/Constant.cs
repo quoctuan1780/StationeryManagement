@@ -172,11 +172,13 @@
 
         #region Status
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
+        public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
-        public const string STATUS_RAINS_GOODS = "Đang giao hàng";
+        public const string STATUS_ON_DELIVERY_GOODS = "Đang giao hàng";
         public const string STATUS_RECEIVED_GOODS = "Đã nhận hàng";
-        public const string STATUS_EVALUATE = "Đánh giá";
+        public const string STATUS_WAITING_EVALUATE = "Chờ đánh giá";
         public const string STATUS_EVALUATED = "Đã đánh giá";
+        public const string STATUS_CANCELED = "Đã hủy";
         #endregion
 
         #region Fast Delivery
