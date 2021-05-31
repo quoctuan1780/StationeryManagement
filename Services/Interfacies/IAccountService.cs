@@ -40,5 +40,13 @@ namespace Services.Interfacies
         Task<SignInResult> ExternalLoginSignInAsync(string loginProvider, string providerKey, bool isPersistent, bool bypassTwoFactor);
 
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+
+        Task<IdentityResult> CreateAccountAsync(User user, string role);
+        public Task<IdentityResult> AddRoleAsync(User user, string role);
+
+        public Task<IList<IdentityUser>> GetAllEmployeesAync();
+        public Task<int> CountAccountContainsTextAsync(string text);
+
+        public Task<List<IdentityRole>> GetUserRole();
     }
 }
