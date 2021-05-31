@@ -3,12 +3,16 @@ using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using static Common.RoleConstant;
 
 namespace Services.Services
 {
@@ -17,17 +21,26 @@ namespace Services.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ShopDbContext _context;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context)
+        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context, 
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _roleManager = roleManager;
         }
 
         public async Task<IdentityResult> AddRoleAsync(User user)
         {
             return await _userManager.AddToRoleAsync(user, RoleConstant.ROLE_CUSTOMER);
+        }
+
+        public async Task<IdentityResult> AddRoleAsync(User user, string role)
+        {
+           var result = await _userManager.AddToRoleAsync(user, role);
+            return result;
         }
 
         public async Task<IdentityResult> ConfirmEmailAsync(string userId, string token)
@@ -162,6 +175,42 @@ namespace Services.Services
         public async Task LoginAsync(User user, bool isPersistent)
         {
             await _signInManager.SignInAsync(user, isPersistent: false);
+        }
+
+        public async Task<IdentityResult> CreateAccountAsync(User user, string role)
+        {
+            var rnd = new Random();
+            string randomNumber = rnd.Next(100000, 999999).ToString();
+            string password = "ab" + randomNumber;
+
+            var registerResult = await RegisterAsync(user, password);
+            if (registerResult.Succeeded)
+            {
+                return await AddRoleAsync(user, role);
+            }
+            return registerResult;
+        }
+
+        public async Task<List<IdentityRole>> GetUserRole()
+        {
+            return await _roleManager.Roles.Where(x => x.Name.Contains(ROLE_SHIPPER) || x.Name.Contains(ROLE_WAREHOUSE_MANAGER)).ToListAsync();
+        }
+
+        public async Task<int> CountAccountContainsTextAsync(string text)
+        {
+            var list = await _userManager.Users.Where(u => u.UserName.Contains(text)).ToListAsync();
+            return list.Count;
+        }
+
+        public async Task<IList<User>> GetAllEmployeesAync()
+        {
+            var userShipper = await _userManager.GetUsersInRoleAsync(ROLE_SHIPPER);
+
+            var userWM = await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
+
+            userShipper = (IList<User>)userShipper.Union(userWM);
+
+            return userShipper;
         }
     }
 }

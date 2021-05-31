@@ -66,6 +66,20 @@
         </div>
     </li>
 
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#accountManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <div id="accountManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Custom Utilities:</h6>
+                <a class="collapse-item" asp-action="Index" asp-controller="Account" asp-area="Admin">Danh sách tài khoản</a>
+                <a class="collapse-item" asp-action="CreateEmployeeAccount" asp-controller="Account" asp-area="Admin">Thêm tài khoản</a>
+            </div>
+        </div>
+    </li>
+
     <li>
         <hr class="sidebar-divider">
     </li>

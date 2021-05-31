@@ -22,9 +22,17 @@ namespace Services.Services
         {
             await _context.AddAsync(order);
 
-            await _context.SaveChangesAsync();
+            if( await _context.SaveChangesAsync() > 0)
+            {
+                _context.SavedChanges += new EventHandler<SavedChangesEventArgs>(OrderedSignal);
+            }
 
             return order;
+        }
+
+        public void OrderedSignal(object sender, EventArgs e)
+        {
+            
         }
 
         public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress)
@@ -123,6 +131,43 @@ namespace Services.Services
             }
 
             order.Status = STATUS_WAITING_PICK_GOODS;
+
+            _context.Orders.Update(order);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> ShipperConfirmOrderAsync(int orderId)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+
+            if (order is null)
+            {
+                return 0;
+            }
+
+            order.Status = STATUS_ON_DELIVERY_GOODS;
+
+            _context.Orders.Update(order);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IList<Order>> GetOrdersDeliveryAsync()
+        {
+            return await _context.Orders.Where(x => x.Status.Equals(STATUS_ON_DELIVERY_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
+        }
+
+        public async Task<int> ShipperConfirmDeliveryAsync(int orderId)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+
+            if (order is null)
+            {
+                return 0;
+            }
+
+            order.Status = STATUS_RECEIVED_GOODS;
 
             _context.Orders.Update(order);
 

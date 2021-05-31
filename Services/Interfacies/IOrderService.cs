@@ -13,7 +13,10 @@ namespace Services.Interfacies
         Task<IList<Order>> GetOrdersAsync();
         Task<IList<Order>> GetOrdersWaitExportWarehouseAsync();
         Task<IList<Order>> GetOrdersWaitDeliveryAsync();
+        Task<IList<Order>> GetOrdersDeliveryAsync();
         Task<int> AdminConfirmOrderAsync(int orderId);
         Task<int> WarehouseManagementConfirmOrderAsync(int orderId);
+        Task<int> ShipperConfirmOrderAsync(int orderId);
+        Task<int> ShipperConfirmDeliveryAsync(int orderId);
     }
 }
