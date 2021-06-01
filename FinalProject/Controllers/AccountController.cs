@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -73,9 +74,14 @@ namespace FinalProject.Controllers
 
             var signInResult = await _accountService.ExternalLoginSignInAsync(info.LoginProvider,
                                             info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
             if (signInResult.Succeeded)
             {
+                var user = await _accountService.GetUserByEmailAsync(email);
+
+                await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
+
                 if (returnUrl.Equals(ROUTE_LOGIN_CLIENT))
                 {
                     return Redirect(ROUTE_HOME_INDEX_CLIENT);
@@ -87,8 +93,6 @@ namespace FinalProject.Controllers
             }
             else
             {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-
                 ViewBag.UrlBack = returnUrl;
 
                 ViewBag.Provinces = await _addressService.GetProvincesAsync();
@@ -129,6 +133,8 @@ namespace FinalProject.Controllers
                 switch (result)
                 {
                     case CODE_SUCCESS:
+                        var user = await _accountService.GetUserByEmailAsync(model.Email);
+                        await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
                         return Redirect(urlBack);
 
                     case CODE_FAIL:
@@ -453,12 +459,14 @@ namespace FinalProject.Controllers
         {
             await _accountService.LogoutAsync();
 
+            await HttpContext.SignOutAsync(ROLE_CUSTOMER);
+
             urlBack ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
 
             return Redirect(urlBack);
         }
 
-        [Authorize(Roles = ROLE_CUSTOMER)]
+        [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
         public async Task<IActionResult> Information()
         {
             try
@@ -491,7 +499,7 @@ namespace FinalProject.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = ROLE_CUSTOMER)]
+        [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
         public async Task<IActionResult> Information(InformationClientViewModel model)
         {
 
@@ -560,6 +568,11 @@ namespace FinalProject.Controllers
                 return View(model);
             }
             return View(model);
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

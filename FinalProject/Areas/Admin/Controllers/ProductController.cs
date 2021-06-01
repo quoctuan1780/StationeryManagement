@@ -14,6 +14,7 @@ using static Common.MessageConstant;
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
+    //[Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class ProductController : Controller
     {
         private readonly ICategoryService _categoryService;

@@ -3,14 +3,12 @@ using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using static Common.RoleConstant;
 
@@ -23,7 +21,7 @@ namespace Services.Services
         private readonly ShopDbContext _context;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context, 
+        public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context,
             RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
@@ -39,7 +37,7 @@ namespace Services.Services
 
         public async Task<IdentityResult> AddRoleAsync(User user, string role)
         {
-           var result = await _userManager.AddToRoleAsync(user, role);
+            var result = await _userManager.AddToRoleAsync(user, role);
             return result;
         }
 
@@ -123,7 +121,7 @@ namespace Services.Services
 
             var userDb = await _context.Users.FirstAsync(x => x.Id == user.Id);
 
-            if(!(user.Image is null))
+            if (!(user.Image is null))
             {
                 userDb.Image = user.Image;
             }
@@ -208,6 +206,11 @@ namespace Services.Services
             var userWM = await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
             userShipper = (IList<User>)userShipper.Union(userWM);
             return userShipper;
+        }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
         }
     }
 }
