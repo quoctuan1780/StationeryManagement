@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Admin.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System;
@@ -10,10 +11,12 @@ using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.MessageConstant;
+using static Common.RoleConstant;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
+    [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class ProductController : Controller
     {
         private readonly ICategoryService _categoryService;

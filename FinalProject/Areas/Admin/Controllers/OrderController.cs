@@ -11,6 +11,7 @@ using static Common.RoleConstant;
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
+    [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -103,7 +104,6 @@ namespace FinalProject.Areas.Admin.Controllers
         }
 
         [HttpPut]
-        [Authorize(Roles = ROLE_ADMIN_WAREHOUSE_MANAGER)]
         public async Task<int> WarehouseManagementComfirmOrder(int? orderId)
         {
             if (orderId is null)

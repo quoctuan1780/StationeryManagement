@@ -1,16 +1,17 @@
-﻿using FinalProject.Areas.Shipper.ViewModels;
-using FinalProject.Heplers;
-using Microsoft.AspNetCore.Authentication;
+﻿using FinalProject.Areas.Warehouse.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System.Threading.Tasks;
 using static Common.Constant;
-using static Common.MessageConstant;
 using static Common.RoleConstant;
+using static Common.MessageConstant;
+using FinalProject.Heplers;
+using Microsoft.AspNetCore.Authentication;
 
-namespace FinalProject.Areas.Shipper.Controllers
+namespace FinalProject.Areas.Warehouse.Controllers
 {
-    [Area(ROLE_SHIPPER)]
+    [Area(AREA_WAREHOUSE)]
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
@@ -36,11 +37,11 @@ namespace FinalProject.Areas.Shipper.Controllers
                 {
                     case CODE_SUCCESS:
                         var user = await _accountService.GetUserByEmailAsync(model.Email);
-                        if (await _accountService.IsInRoleAsync(user, ROLE_SHIPPER))
+                        if (await _accountService.IsInRoleAsync(user, ROLE_WAREHOUSE_MANAGER))
                         {
-                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
+                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_WAREHOUSE_MANAGER, ROLE_WAREHOUSE_MANAGER);
                         }
-                        return Redirect("/Shipper/Home/Dashboard");
+                        return Redirect("/Warehouse/Home/Dashboard");
 
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
@@ -67,9 +68,9 @@ namespace FinalProject.Areas.Shipper.Controllers
         {
             await _accountService.LogoutAsync();
 
-            await HttpContext.SignOutAsync(scheme: ROLE_SHIPPER);
+            await HttpContext.SignOutAsync(scheme: ROLE_WAREHOUSE_MANAGER);
 
-            return Redirect("/Shipper/Account/Login");
+            return Redirect("/Warehouse/Account/Login");
         }
 
         public IActionResult AccessDenied()

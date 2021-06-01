@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
-    [Authorize(Roles = ROLE_ADMIN)]
+    [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class HomeController : Controller
     {
         public IActionResult Dashboard()

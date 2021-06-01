@@ -8,6 +8,9 @@ using static Common.RoleConstant;
 ﻿using Entities.Models;
 using System.Transactions;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authentication;
+using FinalProject.Heplers;
+using FinalProject.Areas.Admin.Helpers;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -52,15 +55,12 @@ namespace FinalProject.Areas.Admin.Controllers
                 switch (result)
                 {
                     case CODE_SUCCESS:
-                        if (User.IsInRole(ROLE_ADMIN))
+                        var user = await _accountService.GetUserByEmailAsync(model.Email);
+                        if (await _accountService.IsInRoleAsync(user, ROLE_ADMIN))
                         {
-                            return Redirect("/Admin/Home/Dashboard");
+                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_ADMIN, ROLE_ADMIN);
                         }
-                        else if (User.IsInRole(ROLE_SHIPPER))
-                        {
-                            return Redirect("/Admin/Order/Index");
-                        }
-                        break;
+                        return Redirect("/Admin/Home/Dashboard");
 
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
@@ -87,6 +87,8 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             await _accountService.LogoutAsync();
 
+            await HttpContext.SignOutAsync(scheme: ROLE_ADMIN);
+
             return Redirect("/Admin/Account/Login");
         }
 
@@ -95,7 +97,15 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
         {
             try
+            {
+                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+
+                string image = "admin.png";
+
+                if(!(fileName is null))
                 {
+                    image = fileName;
+                }
                 var user = new User
                 {
                     UserName = model.Email,
@@ -104,7 +114,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
                     Gender = model.Gender,
-                    Image = model.Image,
+                    Image = image,
                     WardCode = model.WardCode,
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -113,6 +123,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 if (result.Succeeded)
                 {
                     transaction.Complete();
+
                     return RedirectToAction("Index");
                 }
                 
@@ -140,7 +151,10 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(result); ;
         }
 
-
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
         public async Task<string> Ward(int? districtId)
         {
             if (districtId is null)

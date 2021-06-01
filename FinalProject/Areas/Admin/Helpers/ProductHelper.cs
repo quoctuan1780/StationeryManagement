@@ -106,6 +106,22 @@ namespace FinalProject.Areas.Admin.Helpers
             }
         }
 
+        public static async Task<string> SaveImageAccountAsync(IFormFile formFile, int width, int height, string path)
+        {
+            if (formFile is null) return null;
+
+            var image = Image.Load(formFile.OpenReadStream());
+
+            image.Mutate(x =>
+                x.Resize(image.Width > width ? width : image.Width, image.Height > height ? height : image.Height));
+
+            var resultHash = HashNameImage(formFile.FileName);
+
+            await image.SaveAsync("wwwroot/images/user/" + path + "/" + resultHash);
+            
+            return resultHash;
+        }
+
         public static async Task<IList<string>> SaveImageAsync(IList<IFormFile> formFiles, int width, int height)
         {
             if (formFiles is null) return null;

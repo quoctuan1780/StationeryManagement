@@ -11,7 +11,7 @@ using static Common.RoleConstant;
 
 namespace FinalProject.Controllers
 {
-    [Authorize(Roles = ROLE_CUSTOMER)]
+    [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
     public class CommentController : Controller
     {
         private readonly ICommentService _commentService;

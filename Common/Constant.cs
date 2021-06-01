@@ -32,6 +32,10 @@
 
         public const string AREA_ADMIN = "Admin";
 
+        public const string AREA_SHIPPER = "Shipper";
+
+        public const string AREA_WAREHOUSE = "Warehouse";
+
         public const double EXCHANGE_RATE_USD = 23070.26;
 
         public const string CURRENCY_USE = "USD";
@@ -54,6 +58,8 @@
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_ADMIN = "~/Areas/Admin/Views/Shared/_Error404.cshtml";
+        public const string ERROR_404_PAGE_SHIPPER = "~/Areas/Shipper/Views/Shared/_Error404.cshtml";
+        public const string ERROR_404_PAGE_WAREHOUSE = "~/Areas/Warehouse/Views/Shared/_Error404.cshtml";
         public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
         #endregion
 

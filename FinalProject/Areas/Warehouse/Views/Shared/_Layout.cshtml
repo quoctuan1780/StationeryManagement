@@ -25,16 +25,16 @@
 
 <body id="page-top">
     <div id="wrapper">
-        @await Html.PartialAsync("~/Areas/Shipper/Views/Shared/_LeftNavigation.cshtml")
+        @await Html.PartialAsync("~/Areas/Warehouse/Views/Shared/_LeftNavigation.cshtml")
 
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-                @await Html.PartialAsync("~/Areas/Shipper/Views/Shared/_Navigation.cshtml")
+                @await Html.PartialAsync("~/Areas/Warehouse/Views/Shared/_Navigation.cshtml")
 
                 @RenderBody()
             </div>
 
-            @await Html.PartialAsync("~/Areas/Shipper/Views/Shared/_Footer.cshtml")
+            @await Html.PartialAsync("~/Areas/Warehouse/Views/Shared/_Footer.cshtml")
         </div>
     </div>
 
@@ -54,7 +54,7 @@
                 <div class="modal-body">Bạn có muốn đăng xuất không ?</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
-                    <a class="btn btn-primary" asp-action="Logout" asp-controller="Account" asp-area="Shipper">Đăng xuất</a>
+                    <a class="btn btn-primary" asp-action="Logout" asp-controller="Account" asp-area="Warehouse">Đăng xuất</a>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
             function timerIncrement() {
                 idleTime = idleTime + 1;
                 if (idleTime > 29) { // 29 minutes
-                    window.location.href = "/Shipper/Account/Logout"
+                    window.location.href = "/Warehouse/Account/Logout"
                 }
             }
         </script>

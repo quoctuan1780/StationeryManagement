@@ -10,8 +10,8 @@ using static Common.RoleConstant;
 
 namespace FinalProject.Areas.Shipper.Controllers
 {
-    [Area("Shipper")]
-    [Authorize(Roles = ROLE_SHIPPER)]
+    [Area(AREA_SHIPPER)]
+    [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -40,7 +40,7 @@ namespace FinalProject.Areas.Shipper.Controllers
         {
             if (orderId is null)
             {
-                return PartialView(ERROR_404_PAGE_ADMIN);
+                return PartialView(ERROR_404_PAGE_SHIPPER);
             }
 
             ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
