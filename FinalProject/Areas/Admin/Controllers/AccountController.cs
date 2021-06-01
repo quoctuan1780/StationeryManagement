@@ -93,7 +93,10 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(result); ;
         }
 
-
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
         public async Task<string> Ward(int? districtId)
         {
             if (districtId is null)
