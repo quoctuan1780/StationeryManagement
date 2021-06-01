@@ -1,6 +1,6 @@
 ﻿@model FinalProject.Areas.Admin.ViewModels.CreateAccountEmployeeViewModel
 @{
-    ViewData["Title"] = "CreateEmployeeAccount";
+    ViewData["Title"] = "Tạo tài khoản";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
     var roles = ViewBag.Role as IList<Microsoft.AspNetCore.Identity.IdentityRole>;
@@ -12,13 +12,15 @@
     {
         <div class="alert alert-danger">@ViewBag.Message</div>
     }
-    <div class="row">
-        <div class="col-4 align-middle center-block">
-            <img alt="Ảnh đại diện" width="100" id="avatar" />
-            <input type="file" accept="image/*" class="form-control" asp-for="Image" id="choosedfile" onchange="ChangeAvatar(event)" />
-        </div>
-        <div class="col-8">
-            <form action="/Admin/Account/CreateEmployeeAccount" method="post">
+    <form asp-area="Admin" asp-controller="Account" asp-action="CreateEmployeeAccount" enctype="multipart/form-data" method="post">
+        <div class="row">
+            <div class="col-4 align-middle center-block">
+                <img alt="Ảnh đại diện" width="100" id="avatar" />
+                <input type="file" accept="image/*" class="form-control" asp-for="Image" id="choosedfile" onchange="ChangeAvatar(event)" />
+            </div>
+
+            <div class="col-8">
+                @Html.AntiForgeryToken()
                 <div class="form-group">
                     <label for="Name">Họ và tên</label>
                     <input class="form-control" id="Name" asp-for="FullName" type="text" />
@@ -101,12 +103,12 @@
                     <span asp-validation-for="Role"></span>
                 </div>
                 <div>
-                    <input type="submit" value="Thêm mới" />
+                    <input class="btn btn-primary" type="submit" value="Thêm mới" />
                 </div>
-            </form>
-        </div>
-    </div>
 
+            </div>
+        </div>
+    </form>
 
 </div>
 @section Scripts{ 

@@ -11,5 +11,9 @@ namespace Services.Interfacies
         Task<bool> IsExistsCategoryAsync(Category category);
 
         Task<IList<Category>> GetAllCategoriesAsync();
+
+        Task<int> DeleteCategoryByIdAsync(int categoryId);
+
+        Task<int> UpdateCategoryByIdAsync(int categoryId, string categoryName);
     }
 }

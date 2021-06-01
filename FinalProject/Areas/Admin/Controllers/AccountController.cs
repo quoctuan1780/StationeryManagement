@@ -1,11 +1,16 @@
-﻿using Entities.Models;
 using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Services.Interfacies;
 using System.Threading.Tasks;
-using System.Transactions;
 using static Common.Constant;
+using static Common.MessageConstant;
+using static Common.RoleConstant;
+﻿using Entities.Models;
+using System.Transactions;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authentication;
+using FinalProject.Heplers;
+using FinalProject.Areas.Admin.Helpers;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -20,6 +25,12 @@ namespace FinalProject.Areas.Admin.Controllers
             _accountService = accountService;
             _addressService = addressService;
         }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+       
         public IActionResult Index()
         {
             ViewBag.Users = _accountService.GetAllEmployeesAync(); 
@@ -29,36 +40,81 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
             ViewBag.Role = await _accountService.GetUserRole();
+
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _accountService.LoginAsync(model.Email, model.Password);
+
+                switch (result)
+                {
+                    case CODE_SUCCESS:
+                        var user = await _accountService.GetUserByEmailAsync(model.Email);
+                        if (await _accountService.IsInRoleAsync(user, ROLE_ADMIN))
+                        {
+                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_ADMIN, ROLE_ADMIN);
+                        }
+                        return Redirect("/Admin/Home/Dashboard");
+
+                    case CODE_FAIL:
+                        ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
+                        break;
+
+                    case CODE_NOT_EXISTS_ACCOUNT:
+                        ViewBag.Message = MESSAGE_ERROR_EXISTS_ACCOUNT;
+                        break;
+
+                    case CODE_LOOK_ACCOUNT:
+                        ViewBag.Message = MESSAGE_ERROR_LOCKED_ACCOUNT;
+                        break;
+
+                    case ERROR_CODE_DO_NOT_CONFIRM_EMAIL:
+                        ViewBag.Message = MESSAGE_ERROR_CONFIRM_EMAIL;
+                        break;
+                }
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _accountService.LogoutAsync();
+
+            await HttpContext.SignOutAsync(scheme: ROLE_ADMIN);
+
+            return Redirect("/Admin/Account/Login");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
         {
-            var name = model.FullName;        
-            //split name with letter ' '
-            string[] separateName = name.Split(' ');
-            string userName = separateName[0];
-
-            //get fisrt letter of each element except the last element
-            for (int i = 1; i < separateName.Length - 1; i++)
-            {
-                separateName[i].ToLower();
-                userName += separateName[i][0].ToString();
-            }
-            int count = await _accountService.CountAccountContainsTextAsync(userName);
-            userName += count.ToString();
             try
+            {
+                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+
+                string image = "admin.png";
+
+                if(!(fileName is null))
                 {
+                    image = fileName;
+                }
                 var user = new User
                 {
-                    UserName = userName,
+                    UserName = model.Email,
                     FullName = model.FullName,
                     Email = model.Email,
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
                     Gender = model.Gender,
-                    Image = model.Image,
+                    Image = image,
                     WardCode = model.WardCode,
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -67,6 +123,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 if (result.Succeeded)
                 {
                     transaction.Complete();
+
                     return RedirectToAction("Index");
                 }
                 
@@ -78,6 +135,7 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.Message = "Không thể thêm mới nhân viên này";
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
             ViewBag.Role = await _accountService.GetUserRole();
+
             return View(model);
         }
 

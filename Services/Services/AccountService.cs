@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Accord.Math;
+using Common;
 using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -75,7 +76,7 @@ namespace Services.Services
             if (!emailConfirmed) return Constant.ERROR_CODE_DO_NOT_CONFIRM_EMAIL;
 
 
-            var result = await _signInManager.PasswordSignInAsync(email, password, true, true);
+            var result = await _signInManager.PasswordSignInAsync(emailFinded, password, false, true);
 
             if (result.Succeeded)
             {
@@ -203,14 +204,22 @@ namespace Services.Services
         public async Task<IList<User>> GetAllEmployeesAync()
         {
             var userShipper = await _userManager.GetUsersInRoleAsync(ROLE_SHIPPER);
+
             var userWM = await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
+
             userShipper = (IList<User>)userShipper.Union(userWM);
+
             return userShipper;
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<bool> IsInRoleAsync(User user, string role)
+        {
+            return await _userManager.IsInRoleAsync(user, role);
         }
     }
 }

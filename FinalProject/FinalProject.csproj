@@ -41,6 +41,10 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Shipper\Data\" />
+    <Folder Include="Areas\Shipper\Models\" />
+    <Folder Include="Areas\Warehouse\Data\" />
+    <Folder Include="Areas\Warehouse\Models\" />
   </ItemGroup>
 
 </Project>

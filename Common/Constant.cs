@@ -32,6 +32,10 @@
 
         public const string AREA_ADMIN = "Admin";
 
+        public const string AREA_SHIPPER = "Shipper";
+
+        public const string AREA_WAREHOUSE = "Warehouse";
+
         public const double EXCHANGE_RATE_USD = 23070.26;
 
         public const string CURRENCY_USE = "USD";
@@ -54,6 +58,8 @@
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_ADMIN = "~/Areas/Admin/Views/Shared/_Error404.cshtml";
+        public const string ERROR_404_PAGE_SHIPPER = "~/Areas/Shipper/Views/Shared/_Error404.cshtml";
+        public const string ERROR_404_PAGE_WAREHOUSE = "~/Areas/Warehouse/Views/Shared/_Error404.cshtml";
         public const string ERROR_PAYMENT_PAGE = "~/Views/Shared/_ErrorPayment.cshtml";
         #endregion
 
@@ -172,11 +178,13 @@
 
         #region Status
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
+        public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
-        public const string STATUS_RAINS_GOODS = "Đang giao hàng";
+        public const string STATUS_ON_DELIVERY_GOODS = "Đang giao hàng";
         public const string STATUS_RECEIVED_GOODS = "Đã nhận hàng";
-        public const string STATUS_EVALUATE = "Đánh giá";
+        public const string STATUS_WAITING_EVALUATE = "Chờ đánh giá";
         public const string STATUS_EVALUATED = "Đã đánh giá";
+        public const string STATUS_CANCELED = "Đã hủy";
         #endregion
 
         #region Fast Delivery

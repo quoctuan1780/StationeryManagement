@@ -39,7 +39,7 @@ namespace Services.Services
         }
 
 
-        public async Task<IList<Product>> SearchByTextAsync(string? text)
+        public async Task<IList<Product>> SearchByTextAsync(string text)
         {
             if(text is not null)
             {

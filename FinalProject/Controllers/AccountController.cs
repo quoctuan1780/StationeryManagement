@@ -79,9 +79,10 @@ namespace FinalProject.Controllers
             if (signInResult.Succeeded)
             {
                 var user = await _accountService.GetUserByEmailAsync(email);
-
-                await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
-
+                if (await _accountService.IsInRoleAsync(user, ROLE_CUSTOMER))
+                {
+                    await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
+                }
                 if (returnUrl.Equals(ROUTE_LOGIN_CLIENT))
                 {
                     return Redirect(ROUTE_HOME_INDEX_CLIENT);
@@ -134,7 +135,10 @@ namespace FinalProject.Controllers
                 {
                     case CODE_SUCCESS:
                         var user = await _accountService.GetUserByEmailAsync(model.Email);
-                        await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
+                        if (await _accountService.IsInRoleAsync(user, ROLE_CUSTOMER))
+                        {
+                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
+                        }
                         return Redirect(urlBack);
 
                     case CODE_FAIL:

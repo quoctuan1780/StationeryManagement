@@ -106,6 +106,22 @@ namespace FinalProject.Areas.Admin.Helpers
             }
         }
 
+        public static async Task<string> SaveImageAccountAsync(IFormFile formFile, int width, int height, string path)
+        {
+            if (formFile is null) return null;
+
+            var image = Image.Load(formFile.OpenReadStream());
+
+            image.Mutate(x =>
+                x.Resize(image.Width > width ? width : image.Width, image.Height > height ? height : image.Height));
+
+            var resultHash = HashNameImage(formFile.FileName);
+
+            await image.SaveAsync("wwwroot/images/user/" + path + "/" + resultHash);
+            
+            return resultHash;
+        }
+
         public static async Task<IList<string>> SaveImageAsync(IList<IFormFile> formFiles, int width, int height)
         {
             if (formFiles is null) return null;
@@ -197,9 +213,10 @@ namespace FinalProject.Areas.Admin.Helpers
             var color = new List<string>();
             var quantities = new List<int>();
 
-            if(!(imagesDeleted is null))
+            if(!(imagesDeleted is null) && !(imagesDeleted.FirstOrDefault() is null))
             {
-                product.ProductImages = product.ProductImages.Where(x => !(imagesDeleted.Contains(x.Image))).ToList();
+                var imageConvert = imagesDeleted.FirstOrDefault().Split(COMMA).ToList();
+                product.ProductImages = product.ProductImages.Where(x => !(imageConvert.Contains(x.Image))).ToList();
             }
 
             foreach (var item in product.ProductImages)
@@ -207,9 +224,10 @@ namespace FinalProject.Areas.Admin.Helpers
                 images.Add(item.Image);
             }
 
-            if (!(productDetailIsDeleted is null))
+            if (!(productDetailIsDeleted is null) &&  !(productDetailIsDeleted.FirstOrDefault() is null))
             {
-                product.ProductDetails = product.ProductDetails.Where(x => !(productDetailIsDeleted.Contains(x.ProductDetailId.ToString()))).ToList();
+                var productDetailConvert = productDetailIsDeleted.FirstOrDefault().Split(COMMA).ToList(); 
+                product.ProductDetails = product.ProductDetails.Where(x => !(productDetailConvert.Contains(x.ProductDetailId.ToString()))).ToList();
             }
 
             for (int i = 0; i < product.ProductDetails.Count; i++)

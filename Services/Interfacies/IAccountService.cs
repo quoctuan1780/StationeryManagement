@@ -32,5 +32,6 @@ namespace Services.Interfacies
         Task<IList<User>> GetAllEmployeesAync();
         Task<int> CountAccountContainsTextAsync(string text);
         Task<List<IdentityRole>> GetUserRole();
+        Task<bool> IsInRoleAsync(User user, string role);
     }
 }

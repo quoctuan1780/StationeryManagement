@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Admin.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System;
@@ -10,11 +11,12 @@ using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.MessageConstant;
+using static Common.RoleConstant;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
-    //[Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+    [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class ProductController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -67,7 +69,7 @@ namespace FinalProject.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddProduct(ProductViewModel model)
+        public async Task<IActionResult> AddProduct(ProductViewModel model, string imagePreviewDeteted)
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
 
@@ -75,68 +77,87 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                try
                 {
-                    try
+                    if (!(imagePreviewDeteted is null))
                     {
-                        var imagesName = new List<string>();
-
-
-                        var fileNames = await ProductHelper.SaveImageAsync(model.Images, 1920, 1080);
-
-                        var product = new Product()
+                        var imagesPreviewDeleted = imagePreviewDeteted.Split(COMMA).ToArray();
+                        if (!(model.Images is null))
                         {
-                            ProductName = model.ProductName,
-                            DateCreate = DateTime.Now,
-                            Description = model.Description,
-                            Price = model.Price,
-                            CategoryId = model.CategoryId
-                        };
-
-                        if (!(await _productService.IsExistsProduct(product)))
-                        {
-                            product = await _productService.AddProductAsync(product);
-
-                            if (!(product is null))
+                            int i = 0;
+                            while (i < model.Images.Count)
                             {
-                                var result = await _productImageService.AddListImagesAsync(
-                                    ProductHelper.CreateProductImages(fileNames, product.ProductId));
-
-                                if (result > 0)
+                                if (imagesPreviewDeleted.Contains(model.Images[i].FileName))
                                 {
-                                    var productsDetail =
-                                        ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId);
-
-                                    result = await _productDetailService.AddProductsDetailAsync(productsDetail);
-
-                                    if (result > 0)
-                                    {
-                                        ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_PRODUCT;
-
-                                        transaction.Complete();
-                                    }
-                                    else if (result == ERROR_CODE_NULL)
-                                    {
-                                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT_DETAIL;
-                                    }
+                                    model.Images.Remove(model.Images[i]);
+                                }
+                                else
+                                {
+                                    i++;
                                 }
                             }
                         }
-                        else
+                    }
+
+                    var imagesName = new List<string>();
+
+
+                    var fileNames = await ProductHelper.SaveImageAsync(model.Images, 1920, 1080);
+
+                    var product = new Product()
+                    {
+                        ProductName = model.ProductName,
+                        DateCreate = DateTime.Now,
+                        Description = model.Description,
+                        Price = model.Price,
+                        CategoryId = model.CategoryId
+                    };
+
+                    if (!(await _productService.IsExistsProduct(product)))
+                    {
+                        product = await _productService.AddProductAsync(product);
+
+                        if (!(product is null))
                         {
-                            ViewBag.MessageExists = MESSAGE_EXISTS_ADD_PRODUCT;
+                            var result = await _productImageService.AddListImagesAsync(
+                                ProductHelper.CreateProductImages(fileNames, product.ProductId));
+
+                            if (result > 0)
+                            {
+                                var productsDetail =
+                                    ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId);
+
+                                result = await _productDetailService.AddProductsDetailAsync(productsDetail);
+
+                                if (result > 0)
+                                {
+                                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_PRODUCT;
+
+                                    transaction.Complete();
+                                }
+                                else if (result == ERROR_CODE_NULL)
+                                {
+                                    ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT_DETAIL;
+                                }
+                            }
                         }
                     }
-                    catch
+                    else
                     {
-                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
+                        ViewBag.MessageExists = MESSAGE_EXISTS_ADD_PRODUCT;
                     }
+                }
+                catch
+                {
+                    ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
                 }
             }
 
             return View(model);
         }
 
+        [HttpDelete]
         public async Task<int> DeleteProduct(int? productId)
         {
             if(productId is null)
@@ -185,7 +206,7 @@ namespace FinalProject.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProduct(ProductViewModel model, IList<string> imageRemove,
-            IList<string> productsDetailsId)
+            IList<string> productsDetailsId, string imagePreviewDeteted)
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
 
@@ -197,12 +218,26 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 try
                 {
-                    var option = new TransactionOptions
+                    if (!(imagePreviewDeteted is null))
                     {
-                        IsolationLevel = IsolationLevel.ReadCommitted
-                    };
-
-                    using var transaction = new TransactionScope(TransactionScopeOption.Required, option, TransactionScopeAsyncFlowOption.Enabled);
+                        var imagesPreviewDeteted = imagePreviewDeteted.Split(COMMA).ToArray();
+                        if (!(model.Images is null))
+                        {
+                            int i = 0;
+                            while (i < model.Images.Count)
+                            {
+                                if (imagePreviewDeteted.Contains(model.Images[i].FileName))
+                                {
+                                    model.Images.Remove(model.Images[i]);
+                                }
+                                else
+                                {
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                    using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
                     result = await _productImageService.DeleteListImagesOfProductByNameAsync(imageRemove, model.ProductId);
 
@@ -270,6 +305,8 @@ namespace FinalProject.Areas.Admin.Controllers
                     ViewBag.MessageError = MESSAGE_ERROR_UPDATE_PRODUCT;
                 }
             }
+
+            var images = await _productImageService.GetImagesByProductIdAsync(model.ProductId);
 
             model = ProductHelper.ConvertProductToProductViewModel(
                         await _productService.GetProductByIdAsync(model.ProductId), imageRemove, productsDetailsId);

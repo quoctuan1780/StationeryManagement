@@ -62,7 +62,10 @@ namespace FinalProject
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<ISearchItemService, SearchItemService>();
             services.AddScoped<IRecommendationService, RecommandationService>();
+            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             #endregion
 
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
@@ -96,26 +99,23 @@ namespace FinalProject
                 options.AccessDeniedPath = "/Admin/Account/AccessDenied";
             });
 
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            //    options.LoginPath = new PathString("/Account/Login");
-            //    options.LogoutPath = $"/Account/Logout";
-            //    //options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
-            //});
+            services.AddAuthentication(defaultScheme: ROLE_SHIPPER)
+            .AddCookie(ROLE_SHIPPER, options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = new PathString("/Shipper/Account/Login");
+                options.LogoutPath = "/Shipper/Account/Logout";
+                options.AccessDeniedPath = "/Shipper/Account/AccessDenied";
+            });
 
-            //services.AddAuthentication()
-            //.AddGoogle("user", options =>
-            //{
-            //    options.ClientId = Configuration["Google:ClientId"];
-            //    options.ClientSecret = Configuration["Google:ClientSecret"];
-            //})
-            //.AddFacebook("user", options =>
-            //{
-            //    options.AppId = Configuration["Facebook:AppId"];
-            //    options.AppSecret = Configuration["Facebook:AppSecret"];
-            //    options.CallbackPath = "/signin-facebook";
-            //});
+            services.AddAuthentication(defaultScheme: ROLE_WAREHOUSE_MANAGER)
+            .AddCookie(ROLE_WAREHOUSE_MANAGER, options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = new PathString("/Warehouse/Account/Login");
+                options.LogoutPath = "/Warehouse/Account/Logout";
+                options.AccessDeniedPath = "/Warehouse/Account/AccessDenied";
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -156,7 +156,7 @@ namespace FinalProject
 
                 endpoints.MapControllerRoute(
                   name: "areas",
-                  pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
+                  pattern: "{area:exists}/{controller=Account}/{action=Login}/{id?}"
                 );
 
                 endpoints.MapControllerRoute(

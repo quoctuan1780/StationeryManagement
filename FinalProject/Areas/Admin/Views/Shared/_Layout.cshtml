@@ -54,7 +54,7 @@
                 <div class="modal-body">Bạn có muốn đăng xuất không ?</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
-                    <a class="btn btn-primary" href="login.html">Đăng xuất</a>
+                    <a class="btn btn-primary" asp-action="Logout" asp-controller="Account" asp-area="Admin">Đăng xuất</a>
                 </div>
             </div>
         </div>
@@ -74,6 +74,32 @@
     <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/js/loading/loading.js"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            var idleTime = 0;
+            $(document).ready(function () {
+                //Increment the idle time counter every minute.
+                //var idleInterval =
+                setInterval(timerIncrement, 60000); // 1 minute
+
+                //Zero the idle timer on mouse movement.
+                $(this).mousemove(function (e) {
+                    idleTime = 0;
+                });
+                $(this).keypress(function (e) {
+                    idleTime = 0;
+                });
+            });
+
+            function timerIncrement() {
+                idleTime = idleTime + 1;
+                if (idleTime > 29) { // 29 minutes
+                    window.location.href = "/Admin/Account/Logout"
+                }
+            }
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

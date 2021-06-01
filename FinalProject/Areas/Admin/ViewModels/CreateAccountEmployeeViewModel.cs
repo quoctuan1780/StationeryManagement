@@ -1,6 +1,8 @@
 ﻿using System;
 using static Common.ValidationConstant;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace FinalProject.Areas.Admin.ViewModels
 {
@@ -20,7 +22,7 @@ namespace FinalProject.Areas.Admin.ViewModels
         public int ProvinceId { get; set; }
         public int DistrictId { get; set; }
 
-        public string Image { get; set; }
+        public IFormFile Image { get; set; }
 
         [Required(ErrorMessage = ERROR_ADDRESS_EMPTY)]
         public string WardCode { get; set; }

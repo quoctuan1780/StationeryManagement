@@ -7,7 +7,7 @@ namespace Services.Interfacies
     public interface IProductImageService
     {
         Task<int> AddListImagesAsync(IList<ProductImage> productImages);
-
         Task<int> DeleteListImagesOfProductByNameAsync(IList<string> images, int id);
+        Task<IList<ProductImage>> GetImagesByProductIdAsync(int productId);
     }
 }

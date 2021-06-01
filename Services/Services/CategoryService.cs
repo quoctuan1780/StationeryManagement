@@ -3,6 +3,7 @@ using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,14 +26,32 @@ namespace Services.Services
             return category;
         }
 
+        public async Task<int> DeleteCategoryByIdAsync(int categoryId)
+        {
+            var result = await _context.Categories.FindAsync(categoryId);
+
+            if(!(result is null))
+            {
+                result.IsDeleted = true;
+
+                _context.Categories.Update(result);
+
+                return await _context.SaveChangesAsync();
+            }
+
+            return 0;
+        }
+
         public async Task<IList<Category>> GetAllCategoriesAsync()
         {
-            return await _context.Categories.ToListAsync();
+            return await _context.Categories
+                    .Where(x => x.IsDeleted == false)
+                    .ToListAsync();
         }
 
         public async Task<bool> IsExistsCategoryAsync(Category category)
         {
-            var result = await _context.Categories.Where(x => x.CategoryName == category.CategoryName).FirstOrDefaultAsync();
+            var result = await _context.Categories.Where(x => x.CategoryName == category.CategoryName && x.IsDeleted == false).FirstOrDefaultAsync();
 
             if (result is null)
             {
@@ -40,6 +59,29 @@ namespace Services.Services
             }
 
             return false;
+        }
+
+        public async Task<int> UpdateCategoryByIdAsync(int categoryId, string categoryName)
+        {
+            var category = await _context.Categories.FindAsync(categoryId);
+
+            if(!(category is null))
+            {
+                category.CategoryName = categoryName;
+
+                bool isExists = await IsExistsCategoryAsync(category);
+
+                if (!isExists)
+                {
+                    return -1;
+                }
+
+                _context.Categories.Update(category);
+
+                return await _context.SaveChangesAsync();
+            }
+
+            return 0;
         }
     }
 }
