@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace Services.Interfacies
 
         Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync();
 
-        Task<IList<ProductDetail>> BestSellerInMonthAsync(int quantity);
+        Task<IList<ProductDetail>> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity);
 
         Task<int> DeleteProductByIdAsync(int productId);
     }

@@ -41,12 +41,12 @@ namespace Services.Interfacies
 
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);
 
-        Task<IdentityResult> CreateAccountAsync(User user, string role);
-        public Task<IdentityResult> AddRoleAsync(User user, string role);
+        Task<IdentityResult> CreateAccountAsync(User user, string role,string password);
+        Task<IdentityResult> AddRoleAsync(User user, string role);
 
-        public Task<IList<IdentityUser>> GetAllEmployeesAync();
-        public Task<int> CountAccountContainsTextAsync(string text);
+        Task<IList<User>> GetAllEmployeesByRoleAync(string role);
+        Task<int> CountAccountContainsTextAsync(string text);
 
-        public Task<List<IdentityRole>> GetUserRole();
+        Task<List<IdentityRole>> GetUserRole();
     }
 }

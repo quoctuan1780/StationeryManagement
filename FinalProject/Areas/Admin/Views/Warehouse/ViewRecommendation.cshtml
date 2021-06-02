@@ -52,6 +52,10 @@
         </div>
     </div>
     <h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm bán chạy </h2>
+    <span>Từ ngày: </span>
+    <input type="date" id="fromdate" name="fromDate" />
+    <span>Đến ngày: </span>
+    <input type="date" id="todate" name="toDate" />
     <span>Nhập số lượng sản phẩm: </span>
     <input type="number" required min="1" id="quantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
     <div class="card shadow mb-4">
@@ -112,12 +116,13 @@
         function ShowBestSeller() {
 
             var quantity = $('#quantity').val();
-
+            var fromDate = $('#fromdate').val();
+            var toDate = $('#todate').val();
             $.ajax({
                 url: '/Admin/Warehouse/GetBestSeller',
                 method: 'GET',
                 async: true,
-                data: { quantity: quantity },
+                data: { fromDate: fromDate, toDate: toDate, quantity: quantity },
                 success: function (data) {
                     var listProduct = JSON.parse(data);
                     var str = '';
@@ -134,28 +139,31 @@
                 }
             });
             var quantity = $('#quantity').val();
-
-            $.ajax({
-                url: '/Admin/Warehouse/GetRecomandation',
-                method: 'GET',
-                async: true,
-                data: { quantity: quantity },
-                success: function (data) {
-                    var listProduct = JSON.parse(data);
-                    var str = '';
-                    for (let item of listProduct) {
-                        str += '<tr><td>' + item.productDetailId + '</td>' +
-                            '<td>' + item.productName + '</td>' +
-                            '<td>' + item.color + '</td>' +
-                            '<td>' + item.length + 'x' + item.width + 'x' + item.height + '</td>' +
-                            '<td>' + item.totalQuantity + '</td>' +
-                            '<td>' + item.quantityOrdered + '</td>' +
-                            '<td>' + item.RemainingQuantity + '</td></tr>';
+            if (listProduct.length > 0) {
+                $.ajax({
+                    url: '/Admin/Warehouse/GetRecomandation',
+                    method: 'GET',
+                    async: true,
+                    data: { quantity: quantity },
+                    success: function (data) {
+                        var listProduct = JSON.parse(data);
+                        var str = '';
+                        for (let item of listProduct) {
+                            str += '<tr><td>' + item.productDetailId + '</td>' +
+                                '<td>' + item.productName + '</td>' +
+                                '<td>' + item.color + '</td>' +
+                                '<td>' + item.length + 'x' + item.width + 'x' + item.height + '</td>' +
+                                '<td>' + item.totalQuantity + '</td>' +
+                                '<td>' + item.quantityOrdered + '</td>' +
+                                '<td>' + item.RemainingQuantity + '</td></tr>';
+                        }
+                        $('#Rule').html(str);
+                        alert(data);
                     }
-                    $('#Rule').html(str);
-                    alert(data);
-                }
-            })
+                })
+            }
+
+           
         }
     </script>
 }

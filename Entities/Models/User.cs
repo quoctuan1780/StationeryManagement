@@ -21,6 +21,7 @@ namespace Entities.Models
         public string StreetName { get; set; }
 
         public string WardCode { get; set; }
+        public bool IsDeleted { get; set; }
         public virtual Ward Ward { get; set; }
 
         public virtual IList<Notification> Notifications { get; set; }
