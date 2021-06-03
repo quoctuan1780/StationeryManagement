@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Services.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,11 +13,14 @@ namespace Services.Interfacies
         Task<IList<Order>> GetOrdersByUserIdAsync(string userId);
         Task<IList<Order>> GetOrdersAsync();
         Task<IList<Order>> GetOrdersWaitExportWarehouseAsync();
-        Task<IList<Order>> GetOrdersWaitDeliveryAsync();
-        Task<IList<Order>> GetOrdersDeliveryAsync();
+        IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery();
+        Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId);
+        IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick();
+        Task<IList<Order>> GetOrdersDeliveryAsync(string userId);
         Task<int> AdminConfirmOrderAsync(int orderId);
-        Task<int> WarehouseManagementConfirmOrderAsync(int orderId);
+        Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId);
         Task<int> ShipperConfirmOrderAsync(int orderId);
         Task<int> ShipperConfirmDeliveryAsync(int orderId);
+        Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId);
     }
 }

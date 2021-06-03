@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
@@ -24,15 +25,54 @@ namespace FinalProject.Areas.Shipper.Controllers
             _accountService = accountService;
             _workflowHistoryService = workflowHistoryService;
         }
+        public IActionResult OrderWaitPick()
+        {
+            ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+
+            return View();
+        }
+
+        [HttpPut]
+        public async Task<int> ConfirmOrder(IList<int> ordersPicked)
+        {
+            if(ordersPicked is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+            try
+            {
+                var user = await _accountService.GetUserAsync(User);
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                var result = await _orderService.ShipperConfirmPickOrdersAsync(ordersPicked, user.Id);
+                if (result > 0)
+                {
+                    transaction.Complete();
+
+                    return CODE_SUCCESS;
+                }
+            }
+            catch
+            {
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
+
         public async Task<IActionResult> OrderWaitDelivery()
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync();
+            var user = await _accountService.GetUserAsync(User);
+
+            ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync(user.Id);
+
             return View();
         }
 
         public async Task<IActionResult> OrderDelivery()
         {
-            ViewBag.Orders = await _orderService.GetOrdersDeliveryAsync();
+            var user = await _accountService.GetUserAsync(User);
+
+            ViewBag.Orders = await _orderService.GetOrdersDeliveryAsync(user.Id);
+
             return View();
         }
 
@@ -108,7 +148,7 @@ namespace FinalProject.Areas.Shipper.Controllers
             {
                 var user = await _accountService.GetUserAsync(User);
 
-                var result = await _orderService.ShipperConfirmDeliveryAsync    (orderId.Value);
+                var result = await _orderService.ShipperConfirmDeliveryAsync(orderId.Value);
 
                 if (result > 0)
                 {
