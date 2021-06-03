@@ -141,21 +141,8 @@
             <div class="rounded scroll">
                 @switch (order.Status)
                 {
-                    case STATUS_WAITING_CONFIRM:
-                        if (User.IsInRole(ROLE_ADMIN))
-                        {
-                            <button class="btn btn-success btn-sm" onclick="adminConfirm(@order.OrderId)">Admin xác nhận</button>
-                            <button class="btn btn-danger btn-sm">Hủy đơn hàng</button>
-                        }
-                        break;
-                    case STATUS_PREPARING_GOODS:
-                        if (User.IsInRole(ROLE_ADMIN) || User.IsInRole(ROLE_WAREHOUSE_MANAGER))
-                        {
-                            <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã chuẩn bị hàng</button>
-                        }
-                        break;
                     case STATUS_WAITING_PICK_GOODS:
-                        if (User.IsInRole(ROLE_SHIPPER))
+                        if (User.IsInRole(ROLE_SHIPPER) && order != null && order.ShipperId != null)
                         {
                             <button class="btn btn-success btn-sm" onclick="shipperConfirm(@order.OrderId)">Xác nhận đã lấy hàng</button>
                         }

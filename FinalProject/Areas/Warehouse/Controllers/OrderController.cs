@@ -57,7 +57,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
             {
                 var user = await _accountService.GetUserAsync(User);
 
-                var result = await _orderService.WarehouseManagementConfirmOrderAsync(orderId.Value);
+                var result = await _orderService.WarehouseManagementConfirmOrderAsync(orderId.Value, user.Id);
 
                 if (result > 0)
                 {

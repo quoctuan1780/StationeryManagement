@@ -38,15 +38,22 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OrderWaitDelivery()
+        public IActionResult OrderDelivery()
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync();
+            ViewBag.Orders = _orderService.GetOrdersWaitDelivery();
+            return View();
+        }
+
+        public IActionResult OrderWaitToPick()
+        {
+            ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+
             return View();
         }
 
         public async Task<IActionResult> OrderDetail(int? orderId)
         {
-            if(orderId is null)
+            if (orderId is null)
             {
                 return PartialView(ERROR_404_PAGE_ADMIN);
             }
@@ -60,7 +67,7 @@ namespace FinalProject.Areas.Admin.Controllers
         [Authorize(Roles = ROLE_ADMIN)]
         public async Task<int> AdminComfirmOrder(int? orderId)
         {
-            if(orderId is null)
+            if (orderId is null)
             {
                 return ERROR_CODE_NULL;
             }
@@ -73,7 +80,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                 var result = await _orderService.AdminConfirmOrderAsync(orderId.Value);
 
-                if(result > 0)
+                if (result > 0)
                 {
                     var workFlow = new WorkflowHistory()
                     {
@@ -88,7 +95,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
 
-                    if(!(resultAddworkflow is null))
+                    if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
 
@@ -117,7 +124,7 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 var user = await _accountService.GetUserAsync(User);
 
-                var result = await _orderService.WarehouseManagementConfirmOrderAsync(orderId.Value);
+                var result = await _orderService.WarehouseManagementConfirmOrderAsync(orderId.Value, user.Id);
 
                 if (result > 0)
                 {

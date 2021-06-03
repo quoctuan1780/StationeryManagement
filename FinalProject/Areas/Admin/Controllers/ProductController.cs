@@ -306,8 +306,6 @@ namespace FinalProject.Areas.Admin.Controllers
                 }
             }
 
-            var images = await _productImageService.GetImagesByProductIdAsync(model.ProductId);
-
             model = ProductHelper.ConvertProductToProductViewModel(
                         await _productService.GetProductByIdAsync(model.ProductId), imageRemove, productsDetailsId);
 
