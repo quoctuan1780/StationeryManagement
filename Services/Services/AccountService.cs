@@ -99,7 +99,8 @@ namespace Services.Services
 
         public async Task<IdentityResult> RegisterAsync(User user, string password)
         {
-            return await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user, password);
+            return result;
         }
 
         public async Task<User> GetUserAsync(ClaimsPrincipal user)
@@ -176,11 +177,9 @@ namespace Services.Services
             await _signInManager.SignInAsync(user, isPersistent: false);
         }
 
-        public async Task<IdentityResult> CreateAccountAsync(User user, string role)
+        public async Task<IdentityResult> CreateAccountAsync(User user, string role, string password)
         {
-            var rnd = new Random();
-            string randomNumber = rnd.Next(100000, 999999).ToString();
-            string password = "ab" + randomNumber;
+            
 
             var registerResult = await RegisterAsync(user, password);
             if (registerResult.Succeeded)
@@ -201,15 +200,10 @@ namespace Services.Services
             return list.Count;
         }
 
-        public async Task<IList<User>> GetAllEmployeesAync()
+        public async Task<IList<User>> GetAllEmployeesByRoleAync(string role)
         {
-            var userShipper = await _userManager.GetUsersInRoleAsync(ROLE_SHIPPER);
-
-            var userWM = await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
-
-            userShipper = (IList<User>)userShipper.Union(userWM);
-
-            return userShipper;
+            var users = await _userManager.GetUsersInRoleAsync(role);
+            return users;
         }
 
         public async Task<User> GetUserByEmailAsync(string email)

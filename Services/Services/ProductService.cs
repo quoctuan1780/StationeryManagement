@@ -28,12 +28,12 @@ namespace Services.Services
             return product;
         }
 
-        public async Task<IList<ProductDetail>> BestSellerInMonthAsync(int quantity)
+        public async Task<IList<ProductDetail>> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity)
         {
             var result = await _context.OrderDetails
                     .Include(x => x.Order)
-                    .Where(x => x.Order.OrderDate.Month == DateTime.Now.Month)
-                    .Where(x => x.Order.OrderDate.Year == DateTime.Now.Year)
+                    .Where(x => x.Order.OrderDate.Month >= fromDate.Month && x.Order.OrderDate.Month <= toDdate.Month)
+                    .Where(x => x.Order.OrderDate.Year >= fromDate.Year && x.Order.OrderDate.Year <= toDdate.Year)
                     .GroupBy(x => x.ProductDetailId)
                     .OrderByDescending(x => x.Key)
                     .Take(quantity)

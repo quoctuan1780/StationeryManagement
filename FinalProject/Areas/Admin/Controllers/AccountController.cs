@@ -1,10 +1,12 @@
 using FinalProject.Areas.Admin.ViewModels;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
+using System;
 using System.Threading.Tasks;
 using static Common.Constant;
-using static Common.MessageConstant;
 using static Common.RoleConstant;
+using static Common.MessageConstant;
 ﻿using Entities.Models;
 using System.Transactions;
 using Newtonsoft.Json;
@@ -19,21 +21,28 @@ namespace FinalProject.Areas.Admin.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IAddressService _addressService;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(IAccountService accountService, IAddressService addressService)
+        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender)
         {
             _accountService = accountService;
             _addressService = addressService;
+            _emailSender = emailSender;
         }
-
         public IActionResult Login()
         {
             return View();
         }
        
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            ViewBag.Users = _accountService.GetAllEmployeesAync(); 
+            ViewBag.Shippers =await _accountService.GetAllEmployeesByRoleAync(ROLE_SHIPPER);
+            ViewBag.WM =await _accountService.GetAllEmployeesByRoleAync(ROLE_WAREHOUSE_MANAGER);
+            return View();
+        }
+        public async Task<IActionResult> ViewInfor(string id)
+        {
+            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
             return View();
         }
         public async Task<IActionResult> CreateEmployeeAccount()
@@ -96,8 +105,8 @@ namespace FinalProject.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
         {
-            try
-            {
+            //try
+            //{
                 var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
 
                 string image = "admin.png";
@@ -119,19 +128,38 @@ namespace FinalProject.Areas.Admin.Controllers
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                var result = await _accountService.CreateAccountAsync(user, model.Role);
+                var rd = new Random();
+                var password = "ab" + rd.Next(100000, 999999);
+                var result = await _accountService.CreateAccountAsync(user, model.Role,password);
                 if (result.Succeeded)
                 {
                     transaction.Complete();
+                    string subject = "Chào mừng bạn tới với ngôi nhà chung Stationary Store!";
+                    string area = "Shipper";
+                    if (model.Role.Equals(ROLE_WAREHOUSE_MANAGER))
+                    {
+                        area = "Warehouse";
+                    }
 
+                     var callbackUrl =  Url.ActionLink("Login", "Account",
+                            new { Area = area },
+                            Request.Scheme);
+
+                    string body = EMAIL_HEADER_START + user.FullName
+                        + EMAIL_HEADER_END + "Chúc mừng bạn đã trở thành thành viên của gia đình Stationary Store!" +
+                        "\n Đây là tài khoản và mật khẩu của bạn:" +
+                        "\n Tài khoản: "+user.UserName+
+                        "\n Mật khẩu: "+password+"\n Vui lòng không chia sẻ với bất cứ ai thông tin đăng nhập của bạn!"+ EMAIL_BODY_END;
+
+                    await _emailSender.SendEmailAsync(user.Email, subject, body);
                     return RedirectToAction("Index");
                 }
                 
-            }
-            catch
-            {
+            //}
+            //catch
+            //{
 
-            }
+            //}
             ViewBag.Message = "Không thể thêm mới nhân viên này";
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
             ViewBag.Role = await _accountService.GetUserRole();
@@ -139,6 +167,7 @@ namespace FinalProject.Areas.Admin.Controllers
             return View(model);
         }
 
+        
         public async Task<string> District(int? provinceId)
         {
             if (provinceId is null)

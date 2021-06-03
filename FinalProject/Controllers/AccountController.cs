@@ -201,7 +201,7 @@ namespace FinalProject.Controllers
                     WardCode = model.WardCode,
                     StreetName = model.StreetName
                 };
-                using var trabsaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 try
                 {
                     var result = await _accountService.RegisterAsync(user, model.Password);
@@ -242,7 +242,7 @@ namespace FinalProject.Controllers
 
                         TempData[KEY_CONFIRM_EMAIL] = MESSAGE_CONFIRM_EMAIL_REGISTER;
 
-                        trabsaction.Complete();
+                        transaction.Complete();
 
                         return Redirect(urlBack);
                     }

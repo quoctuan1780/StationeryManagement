@@ -67,9 +67,9 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(recommandation);
         }
 
-        public async Task<string> GetBestSeller(int quantity)
+        public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDdate, int quantity)
         {
-            var result = await _productService.BestSellerInMonthAsync(quantity);
+            var result = await _productService.BestSellerInMonthAsync(fromDate,toDdate,quantity);
 
             var bestSellerList = new List<JObject>();
 

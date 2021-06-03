@@ -1,7 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    var Users = ViewBag.Account as IList<Entities.Models.User>;
+    var Shippers = ViewBag.Shippers as IList<Entities.Models.User>;
+    var WM = ViewBag.WM as IList<Entities.Models.User>;
 }
 <div class="container-fluid">
 
@@ -29,14 +30,40 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @*@foreach (var item in Users)
+
+                        @if (WM is not null)
                         {
-                            <tr>
-                                <td>@item.CategoryId</td>
-                                <td>@item.CategoryName</td>
-                                <td><a href="#">Xóa</a> <a href="#">Sửa</a></td>
-                            </tr>
-                        }*@
+                            @foreach (var item in WM)
+                            {
+                                <tr>
+                                    <td>@item.UserName</td>
+                                    <td>@item.FullName</td>
+                                    <td>@item.Gender</td>
+                                    <td>@item.Email</td>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>Quản lý kho</td>
+                                    <td><a href="#">Xóa</a> <a href="#">Sửa</a></td>
+                                </tr>
+                            }
+                        }
+                        @if (WM is not null)
+                        {
+                            @foreach (var item in Shippers)
+                            {
+                    <tr>
+                        <td>@item.UserName</td>
+                        <td>@item.FullName</td>
+                        <td>@item.Gender</td>
+                        <td>@item.Email</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>Người giao hàng</td>
+                        <td>
+                            <a asp-action="ViewInfor" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xem</a>
+                            <a asp-action="DeleteUser" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xóa</a>
+                        </td>
+                    </tr>
+                            }
+                        }
                     </tbody>
                 </table>
             </div>

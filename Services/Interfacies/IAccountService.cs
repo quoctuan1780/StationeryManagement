@@ -27,10 +27,12 @@ namespace Services.Interfacies
         Task<ExternalLoginInfo> GetExternalLoginInfoAsync();
         Task<SignInResult> ExternalLoginSignInAsync(string loginProvider, string providerKey, bool isPersistent, bool bypassTwoFactor);
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);
-        Task<IdentityResult> CreateAccountAsync(User user, string role);
+        Task<IdentityResult> CreateAccountAsync(User user, string role,string password);
         Task<IdentityResult> AddRoleAsync(User user, string role);
-        Task<IList<User>> GetAllEmployeesAync();
+
+        Task<IList<User>> GetAllEmployeesByRoleAync(string role);
         Task<int> CountAccountContainsTextAsync(string text);
+
         Task<List<IdentityRole>> GetUserRole();
         Task<bool> IsInRoleAsync(User user, string role);
     }
