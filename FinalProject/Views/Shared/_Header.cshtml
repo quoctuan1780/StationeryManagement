@@ -1,5 +1,6 @@
 @inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> _userManager
 @inject Services.Interfacies.ICartService _cartService
+@inject Services.Interfacies.IAccountService _accountService
 @{
     IList<Entities.Models.CartItem> carts = null;
     string userId = null;
@@ -8,11 +9,19 @@
 
     long total = 0;
 
+    bool checkUserRole = false;
+
+    Entities.Models.User user = null;
     if (!(User is null) && User.Identity.IsAuthenticated)
     {
-        userId = _userManager.GetUserId(User);
-        carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
-        total = (long) _cartService.GetCartTotalByUserId(userId);
+        user = await _accountService.GetUserAsync(User);
+        checkUserRole = await _accountService.IsInRoleAsync(user, "Customer");
+        if (checkUserRole)
+        {
+            userId = _userManager.GetUserId(User);
+            carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
+            total = (long)_cartService.GetCartTotalByUserId(userId);
+        }
     }
 }
 <div id="box-header">
@@ -28,14 +37,9 @@
                             <div class="my-account">
                                 <div class="content">
                                     <ul class="left">
-                                        <li><a class="top-link-myaccount" href="./information.html">My Account</a></li>
-                                        <li><a class="top-link-wishlist" href="#">My Wishlist</a></li>
-                                        <li><a class="top-link-checkout" href="#">Xem toa</a></li>
                                         <li>
-                                            @if (User.Identity.IsAuthenticated)
-                                            {
-                                                var user = await _userManager.GetUserAsync(User);
-                                            
+                                            @if (User.Identity.IsAuthenticated && checkUserRole)
+                                            {                                            
                                                 <a class="top-link-checkout" asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">Xem đơn hàng</a>
                                                 <a class="top-link-login" asp-controller="Account" asp-action="Information">
                                                     @user.FullName
@@ -68,7 +72,7 @@
                                         <div class="inner">
                                             <p class="block-subtitle">Giỏ hàng</p>
                                             <ol id="cart-sidebar" class="mini-products-list">
-                                                @if (!(userId is null))
+                                                @if (!(userId is null) && checkUserRole)
                                                 {
                                                     if (carts is null || carts.FirstOrDefault() is null)
                                                     {

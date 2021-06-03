@@ -1,0 +1,76 @@
+﻿@using static Common.Constant
+@{
+    ViewData["Title"] = "Đơn hàng chờ xuất kho";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+    var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hành chờ xuất kho</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Tên khách hàng</th>
+                            <th>Tên ngày đặt</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Tổng tiền (VNĐ)</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!(orders is null))
+                        {
+                            foreach (var item in orders)
+                            {
+                                <tr>
+                                    <td>@item.OrderId</td>
+                                    <td>@item.User.FullName</td>
+                                    <td>@item.OrderDate.Date.ToShortDateString()</td>
+                                    <td>@item.PaymentMethod</td>
+                                    <td>@item.Total</td>
+                                    @switch (item.Status)
+                                    {
+                                        case STATUS_WAITING_CONFIRM:
+                                            <td class="alert alert-warning">@item.Status</td>
+                                            break;
+                                        case STATUS_PREPARING_GOODS:
+                                            <td class="alert alert-warning">@item.Status</td>
+                                            break;
+                                        case STATUS_WAITING_PICK_GOODS:
+                                            <td class="alert alert-warning">@item.Status</td>
+                                            break;
+                                        case STATUS_ON_DELIVERY_GOODS:
+                                            <td class="alert alert-warning">@item.Status</td>
+                                            break;
+                                        case STATUS_RECEIVED_GOODS:
+                                            <td class="alert alert-success">@item.Status</td>
+                                            break;
+                                        case STATUS_WAITING_EVALUATE:
+                                            <td class="alert alert-success">@item.Status</td>
+                                            break;
+                                        case STATUS_EVALUATED:
+                                            <td class="alert alert-success">@item.Status</td>
+                                            break;
+                                    }
+                                    <td>
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Warehouse" asp-route-orderId="@item.OrderId">
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

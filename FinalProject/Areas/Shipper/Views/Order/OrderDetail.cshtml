@@ -1,0 +1,261 @@
+﻿@using static Common.Constant
+@using static Common.RoleConstant
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
+    var order = ViewBag.Order as Entities.Models.Order;
+    string address = "";
+
+    if (!(order is null))
+    {
+        address = order.User.StreetName + " - " + order.User.Ward.WardName + " - "
+            + order.User.Ward.District.DistrictName + " - " + order.User.Ward.District.Province.ProvinceName;
+    }
+}
+
+<style>
+    .scroll {
+        position: fixed;
+        bottom: 1rem;
+        right: 5%;
+        color: white;
+        border-radius: 4px;
+    }
+</style>
+<div class="container-fluid">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card shadow mb-4" style="height: 95%;">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thông tin khách hàng</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6" style="display: flex; flex-direction: column;
+                                            justify-content: center;">
+                                <h6><b>Họ tên:</b> <span>@order.User.FullName</span></h6>
+                                <h6>
+                                    <b>Địa chỉ:</b> <span>@address</span>
+                                </h6>
+                                <h6><b>Email:</b> <span>@order.User.Email</span></h6>
+                                <h6><b>Số điện thoại:</b> <span>@order.User.PhoneNumber</span></h6>
+                            </div>
+                            <div class="col-lg-6">
+                                @if (order.User.Image is null)
+                                {
+                                    <img class="btn-circle btn-lg" src="~/images/user/avatar.png"
+                                         alt="Avatar" style="width: 100%; height: 100%;">
+                                }
+                                else
+                                {
+                                    <img class="btn-circle btn-lg" src="~/images/user/@order.User.Email/@order.User.Image"
+                                         alt="Avatar" style="width: 100%; height: 100%;">
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4" style="height: 95%;">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thông tin đơn hàng</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="col-lg-12" style="display: flex; flex-direction: column; justify-content: center;">
+                            <h6><b>Mã đơn hàng:</b> <span>@order.OrderId</span></h6>
+                            <h6><b>Ngày đặt:</b> <span>@order.OrderDate.ToShortDateString()</span></h6>
+                            <h6>
+                                <b>Địa chỉ giao hàng:</b> <span>@order.Address</span>
+                            </h6>
+                            <h6><b>Trạng thái:</b> <span>@order.Status</span></h6>
+                            <h6><b>Tổng tiền:</b> <span>@order.Total.ToString("G29") VNĐ</span></h6>
+                            <h6><b>Phương thức thanh toán:</b> <span>@order.PaymentMethod</span></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+               role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                <h6 class="m-0 font-weight-bold text-primary">Chi tiết đơn hàng</h6>
+            </a>
+            <div class="collapse show" id="collapseCardExample">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Phân loại hàng</th>
+                                    <th>Xuất xứ</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!(order is null))
+                                {
+                                    foreach (var item in order.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td>@item.ProductDetail.Product.ProductName</td>
+                                            <td>
+                                                @if (item.ProductDetail.Product.ProductImages is null || item.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                                {
+                                                    <img src="~/images/product/img_1.jpg" alt="Ảnh" width="60" height="60">
+                                                }
+                                                else
+                                                {
+                                                    <img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" alt="Ảnh" width="60" height="60">
+                                                }
+                                            </td>
+                                            <td>@item.ProductDetail.Color</td>
+                                            <td>@item.ProductDetail.Origin</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@item.Price</td>
+                                            <td>
+                                                @{
+                                                    var total = item.Quantity * item.Price;
+                                                }
+                                                @total
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="rounded scroll">
+                @switch (order.Status)
+                {
+                    case STATUS_WAITING_CONFIRM:
+                        if (User.IsInRole(ROLE_ADMIN))
+                        {
+                            <button class="btn btn-success btn-sm" onclick="adminConfirm(@order.OrderId)">Admin xác nhận</button>
+                            <button class="btn btn-danger btn-sm">Hủy đơn hàng</button>
+                        }
+                        break;
+                    case STATUS_PREPARING_GOODS:
+                        if (User.IsInRole(ROLE_ADMIN) || User.IsInRole(ROLE_WAREHOUSE_MANAGER))
+                        {
+                            <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã chuẩn bị hàng</button>
+                        }
+                        break;
+                    case STATUS_WAITING_PICK_GOODS:
+                        if (User.IsInRole(ROLE_SHIPPER))
+                        {
+                            <button class="btn btn-success btn-sm" onclick="shipperConfirm(@order.OrderId)">Xác nhận đã lấy hàng</button>
+                        }
+                        break;
+                    case STATUS_ON_DELIVERY_GOODS:
+                        if (User.IsInRole(ROLE_SHIPPER))
+                        {
+                            <button class="btn btn-success btn-sm" onclick="shipperConfirmDelivered(@order.OrderId)">Xác nhận đã giao hàng</button>
+                        }
+                        break;
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
+    <script>
+        function shipperConfirm(orderId) {
+            if (orderId === '') {
+                showError("Không tồn tại đơn hàng này");
+            }
+            else
+                Swal.fire({
+                    title: 'Xác nhận giao đơn hàng!',
+                    text: "Bạn xác nhận giao đơn hàng này ?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: `Xóa`,
+                    cancelButtonText: `Hủy`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Shipper/Order/ShipperComfirmOrder',
+                            method: 'PUT',
+                            async: true,
+                            data: { orderId: orderId },
+                            success: function (data) {
+                                switch (data) {
+                                    case 1:
+                                        window.location.reload();
+                                        break;
+                                    case -4:
+                                        showError('Lỗi không tìm thấy đơn hàng này');
+                                        break;
+                                    case -99:
+                                        showErrorSystem();
+                                        break;
+                                }
+                            },
+                            error: function (code, err) {
+
+                            }
+                        });
+                    }
+                })
+        }
+
+        function shipperConfirmDelivered(orderId) {
+            if (orderId === '') {
+                showError("Không tồn tại đơn hàng này");
+            }
+            else
+                Swal.fire({
+                    title: 'Xác nhận đã giao đơn hàng!',
+                    text: "Bạn xác nhận đã giao đơn hàng này ?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: `Xóa`,
+                    cancelButtonText: `Hủy`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Shipper/Order/ShipperComfirmDelivery',
+                            method: 'PUT',
+                            async: true,
+                            data: { orderId: orderId },
+                            success: function (data) {
+                                switch (data) {
+                                    case 1:
+                                        window.location.reload();
+                                        break;
+                                    case -4:
+                                        showError('Lỗi không tìm thấy đơn hàng này');
+                                        break;
+                                    case -99:
+                                        showErrorSystem();
+                                        break;
+                                }
+                            },
+                            error: function (code, err) {
+
+                            }
+                        });
+                    }
+                })
+        }
+    </script>
+}

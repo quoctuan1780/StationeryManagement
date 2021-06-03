@@ -51,5 +51,10 @@ namespace Services.Services
 
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<IList<ProductImage>> GetImagesByProductIdAsync(int productId)
+        {
+            return await _context.ProductImages.Where(x => x.ProductId == productId && x.IsDeleted == false).ToListAsync();
+        }
     }
 }

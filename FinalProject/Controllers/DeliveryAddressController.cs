@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Controllers
 {
-    [Authorize(Roles = ROLE_CUSTOMER)]
+    [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
     public class DeliveryAddressController : Controller
     {
         private readonly IDeliveryAddressService _deliveryAddressService;

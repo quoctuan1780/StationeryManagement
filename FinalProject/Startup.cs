@@ -1,7 +1,6 @@
 using Common;
 using Entities.Data;
 using Entities.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Services.Interfacies;
 using Services.Services;
 using System;
+using static Common.RoleConstant;
 
 namespace FinalProject
 {
@@ -43,7 +43,7 @@ namespace FinalProject
             }).AddEntityFrameworkStores<ShopDbContext>()
             .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
-                #region Register Dependencies
+            #region Register Dependencies
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
@@ -57,33 +57,64 @@ namespace FinalProject
             services.AddScoped<IReceiptService, ReceiptService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPayPalService, PayPalService>();
+            services.AddScoped<IPayPalService, PayPalService>();
             services.AddScoped<IMoMoService, MoMoService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<ISearchItemService, SearchItemService>();
             services.AddScoped<IRecommendationService, RecommandationService>();
+            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
+            services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             #endregion
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
-
-            services.ConfigureApplicationCookie(options =>
+            services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
+            .AddCookie(ROLE_CUSTOMER, options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.LoginPath = new PathString("/Account/Login");
-                options.LogoutPath = $"/Account/Logout";
-                //options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
-            });
-
-            services.AddAuthentication()
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            })
             .AddGoogle(options =>
             {
                 options.ClientId = Configuration["Google:ClientId"];
                 options.ClientSecret = Configuration["Google:ClientSecret"];
+                options.AccessDeniedPath = "/Account/AccessDenied";
             })
             .AddFacebook(options =>
             {
                 options.AppId = Configuration["Facebook:AppId"];
                 options.AppSecret = Configuration["Facebook:AppSecret"];
                 options.CallbackPath = "/signin-facebook";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
+
+            services.AddAuthentication(defaultScheme: ROLE_ADMIN)
+            .AddCookie(ROLE_ADMIN, options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = new PathString("/Admin/Account/Login");
+                options.LogoutPath = "/Admin/Account/Logout";
+                options.AccessDeniedPath = "/Admin/Account/AccessDenied";
+            });
+
+            services.AddAuthentication(defaultScheme: ROLE_SHIPPER)
+            .AddCookie(ROLE_SHIPPER, options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = new PathString("/Shipper/Account/Login");
+                options.LogoutPath = "/Shipper/Account/Logout";
+                options.AccessDeniedPath = "/Shipper/Account/AccessDenied";
+            });
+
+            services.AddAuthentication(defaultScheme: ROLE_WAREHOUSE_MANAGER)
+            .AddCookie(ROLE_WAREHOUSE_MANAGER, options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = new PathString("/Warehouse/Account/Login");
+                options.LogoutPath = "/Warehouse/Account/Logout";
+                options.AccessDeniedPath = "/Warehouse/Account/AccessDenied";
             });
 
             services.AddControllersWithViews();
@@ -125,7 +156,7 @@ namespace FinalProject
 
                 endpoints.MapControllerRoute(
                   name: "areas",
-                  pattern: "{area:exists}/{controller=Home}/{action=Dashboard}/{id?}"
+                  pattern: "{area:exists}/{controller=Account}/{action=Login}/{id?}"
                 );
 
                 endpoints.MapControllerRoute(

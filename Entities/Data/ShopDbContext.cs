@@ -46,6 +46,7 @@ namespace Entities.Data
         public virtual DbSet<MoMoPayment> MoMoPayments { get; set; }
         public virtual DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
+        public virtual DbSet<WorkflowHistory> WorkflowHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -481,6 +482,15 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.Comments)
                 .HasForeignKey(x => x.ProductId);
+            });
+
+            //Entity Workflow History
+            modelBuilder.Entity<WorkflowHistory>(e =>
+            {
+                e.HasKey(x => x.WorkflowHistoryId);
+                e.HasIndex(x => x.WorkflowHistoryId);
+                e.HasIndex(x => x.RecordId);
+                e.HasIndex(x => x.CreatedBy);
             });
         }
     }
