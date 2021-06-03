@@ -1,0 +1,167 @@
+﻿@using static Common.Constant
+@{
+    ViewData["Title"] = "Danh sách đơn hàng chờ người giao hàng nhận";
+    Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
+    var orders = ViewBag.Orders as IList<Services.Helpers.OrderHelper.OrderJoinHelper>;
+}
+
+<style>
+    .scroll {
+        position: fixed;
+        bottom: 1rem;
+        right: 5%;
+        color: white;
+        border-radius: 4px;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hành chờ giao</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Chọn đơn</th>
+                            <th>Id</th>
+                            <th>Tên khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Địa chỉ giao hàng</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Tổng tiền (VNĐ)</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!(orders is null))
+                        {
+                            foreach (var item in orders)
+                            {
+                                <tr>
+                                    <td><input type="checkbox" name="delivery-choose" value="@item.order.OrderId" onchange="chooseOrder(this)" /></td>
+                                    <td>@item.order.OrderId</td>
+                                    <td>@item.order.User.FullName</td>
+                                    <td>@item.order.OrderDate.Date.ToShortDateString()</td>
+                                    <td>@item.order.Address</td>
+                                    <td>@item.order.PaymentMethod</td>
+                                    <td>@item.order.Total</td>
+                                    @switch (item.order.Status)
+                                    {
+                                        case STATUS_WAITING_CONFIRM:
+                                            <td class="alert alert-warning">@item.order.Status</td>
+                                            break;
+                                        case STATUS_PREPARING_GOODS:
+                                            <td class="alert alert-warning">@item.order.Status</td>
+                                            break;
+                                        case STATUS_WAITING_PICK_GOODS:
+                                            <td class="alert alert-warning">@item.order.Status</td>
+                                            break;
+                                        case STATUS_ON_DELIVERY_GOODS:
+                                            <td class="alert alert-warning">@item.order.Status</td>
+                                            break;
+                                        case STATUS_RECEIVED_GOODS:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                        case STATUS_WAITING_EVALUATE:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                        case STATUS_EVALUATED:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                    }
+                                    <td>
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Shipper" asp-route-orderId="@item.order.OrderId">
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="rounded scroll">
+                <button class="btn btn-success btn-sm" onclick="confirmOrder()">Xác nhận giao hàng</button>
+                <button class="btn btn-warning btn-sm" onclick="selectAllOrder()">Chọn tất cả</button>
+                <button class="btn btn-warning btn-sm" onclick="unselectAllOrder()">Bỏ chọn tất cả</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
+    <script src="~/js/loading/loading.js"></script>
+    <script>
+        var chooseDelivery = [];
+
+        function chooseOrder(e) {
+            var dom = $(e);
+
+            if (dom[0].checked) {
+                chooseDelivery.push(dom.val());
+            }
+            else {
+                chooseDelivery.splice(chooseDelivery.indexOf(dom.val()), 1);
+            }
+
+            console.log(chooseDelivery)
+        }
+
+        function selectAllOrder() {
+            $('input[name=delivery-choose]').attr('checked', true);
+
+            var checkbox = $('input[name=delivery-choose]');
+
+            chooseDelivery = [];
+
+            for (let item of checkbox) {
+                chooseDelivery.push(item.value);
+            }
+        }
+
+        function unselectAllOrder() {
+            chooseDelivery = [];
+            $('input[name=delivery-choose]').attr('checked', false);
+        }
+
+        function confirmOrder() {
+            if (chooseDelivery.length < 1) {
+                showError("Bạn chưa chọn đơn hàng nào");
+            }
+            else {
+                var loading = verticalTextColor();
+                loading;
+                $.ajax({
+                    url: '/Shipper/Order/ConfirmOrder',
+                    method: 'PUT',
+                    async: true,
+                    data: { ordersPicked: chooseDelivery },
+                    success: function (data) {
+                        loadingOut(loading, 0);
+                        switch (data) {
+                            case -4:
+                                showError("Bạn chưa chọn đơn hàng nào");
+                                break;
+                            case -99:
+                                showErrorSystem();
+                                break;
+                            case 1:
+                                window.location.href = "/Shipper/Order/OrderWaitDelivery";
+                                break;
+                        }
+                    },
+                    error: function (code, err) {
+                        loadingOut(loading, 0);
+                    }
+                });
+            }
+        }
+    </script>
+}   

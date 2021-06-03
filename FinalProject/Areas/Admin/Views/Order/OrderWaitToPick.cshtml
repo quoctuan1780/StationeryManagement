@@ -1,12 +1,11 @@
-﻿@using static Common.Constant
+﻿@using static Common.Constant 
 @{
-    ViewData["Title"] = "Đơn hàng chờ giao hàng";
-    Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
-    var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+    ViewData["Title"] = "Đơn hàng chờ người lấy hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var orders = ViewBag.Orders as IList<Services.Helpers.OrderHelper.OrderJoinHelper>;
 }
-
 <div class="container-fluid">
-    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hành đang giao</h1>
+    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hàng chờ người lấy hàng</h1>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
         </div>
@@ -17,6 +16,7 @@
                         <tr>
                             <th>Id</th>
                             <th>Tên khách hàng</th>
+                            <th>Người xác nhận xuất kho</th>
                             <th>Tên ngày đặt</th>
                             <th>Phương thức thanh toán</th>
                             <th>Tổng tiền (VNĐ)</th>
@@ -30,37 +30,38 @@
                             foreach (var item in orders)
                             {
                                 <tr>
-                                    <td>@item.OrderId</td>
-                                    <td>@item.User.FullName</td>
-                                    <td>@item.OrderDate.Date.ToShortDateString()</td>
-                                    <td>@item.PaymentMethod</td>
-                                    <td>@item.Total</td>
-                                    @switch (item.Status)
+                                    <td>@item.order.OrderId</td>
+                                    <td>@item.order.User.FullName</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.order.OrderDate.Date.ToShortDateString()</td>
+                                    <td>@item.order.PaymentMethod</td>
+                                    <td>@item.order.Total</td>
+                                    @switch (item.order.Status)
                                     {
                                         case STATUS_WAITING_CONFIRM:
-                                            <td class="alert alert-warning">@item.Status</td>
+                                            <td class="alert alert-warning">@item.order.Status</td>
                                             break;
                                         case STATUS_PREPARING_GOODS:
-                                            <td class="alert alert-warning">@item.Status</td>
+                                            <td class="alert alert-warning">@item.order.Status</td>
                                             break;
                                         case STATUS_WAITING_PICK_GOODS:
-                                            <td class="alert alert-warning">@item.Status</td>
+                                            <td class="alert alert-warning">@item.order.Status</td>
                                             break;
                                         case STATUS_ON_DELIVERY_GOODS:
-                                            <td class="alert alert-warning">@item.Status</td>
+                                            <td class="alert alert-warning">@item.order.Status</td>
                                             break;
                                         case STATUS_RECEIVED_GOODS:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.order.Status</td>
                                             break;
                                         case STATUS_WAITING_EVALUATE:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.order.Status</td>
                                             break;
                                         case STATUS_EVALUATED:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.order.Status</td>
                                             break;
                                     }
                                     <td>
-                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Shipper" asp-route-orderId="@item.OrderId">
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.order.OrderId">
                                             Xem
                                         </a>
                                     </td>

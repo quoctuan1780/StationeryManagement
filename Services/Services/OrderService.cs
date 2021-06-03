@@ -1,6 +1,7 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helpers;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
@@ -111,9 +112,9 @@ namespace Services.Services
             return await _context.Orders.Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync()
+        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId)
         {
-            return await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
+            return await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS) && x.ShipperId.Equals(userId)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
         }
 
         public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync()
@@ -121,7 +122,7 @@ namespace Services.Services
             return await _context.Orders.Where(x => x.Status.Equals(STATUS_PREPARING_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
         }
 
-        public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId)
+        public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId)
         {
             var order = await _context.Orders.FindAsync(orderId);
 
@@ -130,6 +131,7 @@ namespace Services.Services
                 return 0;
             }
 
+            order.WarehouseId = userId;
             order.Status = STATUS_WAITING_PICK_GOODS;
 
             _context.Orders.Update(order);
@@ -153,9 +155,9 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<IList<Order>> GetOrdersDeliveryAsync()
+        public async Task<IList<Order>> GetOrdersDeliveryAsync(string userId)
         {
-            return await _context.Orders.Where(x => x.Status.Equals(STATUS_ON_DELIVERY_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
+            return await _context.Orders.Where(x => x.Status.Equals(STATUS_ON_DELIVERY_GOODS) && x.ShipperId.Equals(userId)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
         }
 
         public async Task<int> ShipperConfirmDeliveryAsync(int orderId)
@@ -172,6 +174,80 @@ namespace Services.Services
             _context.Orders.Update(order);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick()
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join
+                            user in _context.Users on order.WarehouseId equals user.Id
+                         where order.Status.Equals(STATUS_WAITING_PICK_GOODS) && order.ShipperId == null
+                         select new
+                         {
+                             Order = order,
+                             Name = user.FullName
+                         };
+
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+
+            foreach (var item in result)
+            {
+                var temp = new OrderHelper.OrderJoinHelper
+                {
+                    order = item.Order,
+                    Name = item.Name
+                };
+
+                orders.Add(temp);
+            }
+
+            return orders;
+        }
+
+        public async Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId)
+        {
+            var orders = await _context.Orders.Where(x => ordersId.Contains(x.OrderId)).ToListAsync();
+            
+            if(orders is null)
+            {
+                return 0;
+            }
+
+            foreach(var item in orders)
+            {
+                item.ShipperId = userId;
+            }
+
+            _context.Orders.UpdateRange(orders);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery()
+        {
+            var result = from order in _context.Orders
+                         join user in _context.Users
+                            on order.ShipperId equals user.Id
+                         where order.Status.Equals(STATUS_ON_DELIVERY_GOODS)
+                         select new
+                         {
+                             Order = order,
+                             ShipperName = user.FullName
+                         };
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+
+            foreach(var item in result)
+            {
+                var temp = new OrderHelper.OrderJoinHelper
+                {
+                    order = item.Order,
+                    Name = item.ShipperName
+                };
+
+                orders.Add(temp);
+            }
+
+            return orders;
         }
     }
 }

@@ -117,7 +117,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 listProduct.Add(new SelectListItem
                 {
                     Value = product.ProductId.ToString(),
-                    Text = product.Product.ProductName + " " + product.Color + " Xuất xứ" + product.Origin
+                    Text = product.Product.ProductName + " " + product.Color + " Xuất xứ " + product.Origin
                 }) ;
             }
 

@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210602030840_AddNewFieldInOrderTable")]
+    partial class AddNewFieldInOrderTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,7 +462,7 @@ namespace Entities.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
@@ -489,16 +491,16 @@ namespace Entities.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WarehouseId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("ModifiedBy");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Order");
                 });
@@ -1367,7 +1369,7 @@ namespace Entities.Migrations
                 {
                     b.HasOne("Entities.Models.User", "User")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("ModifiedBy");
 
                     b.Navigation("User");
                 });
