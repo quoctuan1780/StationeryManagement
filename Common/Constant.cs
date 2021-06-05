@@ -10,6 +10,8 @@
 
         public const string IMAGE_LINK = "wwwroot/images/product/";
 
+        public const string IMAGE_LINK_BANNER = "wwwroot/images/banner/";
+
         public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
 
         public const string SLASH = "/";
@@ -210,6 +212,10 @@
         #region Json key 
         public const string JSON_KEY_STATUS = "Status";
         public const string JSON_KEY_COMMENT_ID = "CommentId";
+        #endregion
+
+        #region Validation Key
+        public const string KEY_IMAGE = "Image";
         #endregion
     }
 }

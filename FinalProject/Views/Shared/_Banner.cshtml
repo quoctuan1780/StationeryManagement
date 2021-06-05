@@ -1,12 +1,24 @@
-﻿<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+﻿@inject Services.Interfacies.IBannerService _bannerService
+@{ 
+    var banners = await _bannerService.GetBannerAsync();
+    var rnd = new Random();
+}
+<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
     <div class="box-slide-show">
         <div class="slide-show">
             <div class="vt-slideshow">
                 <ul>
-                    @*<li class="slide1" data-transition="random"><img src="images/slide/home03/bg-s2.png" alt="" /></li>
-                    <li class="slide2" data-transition="random"><img src="images/slide/home03/bg-s1.png" alt="" /></li>
-                    <li class="slide3" data-transition="random"><img src="images/slide/home03/bg-s3.png" alt="" /></li>
-                    <li class="slide3" data-transition="random"><img src="images/slide/home03/bg-s4.png" alt="" /></li>*@
+                    @if (!(banners is null) && !(banners.FirstOrDefault() is null))
+                    {
+                        foreach (var item in banners)
+                        {
+                            int num = rnd.Next(1, 5);
+
+                            string className = "slide" + num.ToString();
+
+                            <li class="@className" data-transition="random"><img src="~/images/banner/@item.Image" alt="Banner" /></li>
+                        }
+                    }
                 </ul>
             </div>
         </div>
