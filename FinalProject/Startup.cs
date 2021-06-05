@@ -66,6 +66,7 @@ namespace FinalProject
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
+            services.AddScoped<IBannerService, BannerService>();
             #endregion
 
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)

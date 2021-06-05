@@ -3,6 +3,7 @@
     public class MessageConstant
     {
         public const string MESSAGE_SUCCESS_ADD_CATEGORY = "Thêm loại sản phẩm thành công";
+        public const string MESSAGE_SUCCESS_ADD_BANNER = "Thêm quảng cáo thành công";
         public const string MESSAGE_SUCCESS_ADD_PRODUCT = "Thêm sản phẩm thành công";
         public const string MESSAGE_SUCCESS_UPDATE_PRODUCT = "Cập nhật sản phẩm thành công";
         public const string MESSAGE_ERROR_UPDATE_PRODUCT = "Xảy ra lỗi khi cập nhật sản phẩm";
@@ -28,5 +29,9 @@
         public const string MESSAGE_CONFIRM_EMAIL_SUCCESS = "Tài khoản của bạn đã được xác nhận";
         public const string MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR = "Cập nhật thông tin thành công";
         public const string MESSAGE_ERROR_GET_EXTERNAL_INFOMATION_ACCOUNT = "Xảy ra lỗi khi lấy thông tin tài khoản";
+
+
+        public const string MESSAGE_BANNER_UPDATE_SUCCESS = "Cập nhật quảng cáo thành công";
+        public const string MESSAGE_BANNER_UPDATE_FAIL = "Cập nhật quảng cáo không thành công";
     }
 }
