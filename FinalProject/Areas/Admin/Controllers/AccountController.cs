@@ -12,7 +12,7 @@ using System.Transactions;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication;
 using FinalProject.Heplers;
-using FinalProject.Areas.Admin.Helpers;
+using static FinalProject.Areas.Admin.Helpers.ImageHelper;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -107,7 +107,7 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             //try
             //{
-                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+                var fileName = await SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
 
                 string image = "admin.png";
 

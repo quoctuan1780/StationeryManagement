@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,7 +24,11 @@ namespace FinalProject.Areas.Admin.Helpers
 
             var resultHash = HashNameImage(formFile.FileName);
 
-            await image.SaveAsync(path + resultHash);
+            string pathString = Path.Combine(IMAGE_AVATAR_LINK, path);
+
+            Directory.CreateDirectory(pathString);
+
+            await image.SaveAsync(pathString + SLASH + resultHash);
 
             return resultHash;
         }
