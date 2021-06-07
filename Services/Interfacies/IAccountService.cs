@@ -11,6 +11,7 @@ namespace Services.Interfacies
     {
         Task<byte> LoginAsync(string email, string password);
         Task LoginAsync(User user, bool isPersistent);
+        Task<int> UpdateInformationEmployeeAsync(User user);
         Task<IdentityResult> RegisterAsync(User user, string password);
         Task<IdentityResult> RegisterAsync(User user, ExternalLoginInfo info);
         Task<IdentityResult> AddRoleAsync(User user);
@@ -35,5 +36,7 @@ namespace Services.Interfacies
 
         Task<List<IdentityRole>> GetUserRole();
         Task<bool> IsInRoleAsync(User user, string role);
+        Task<int> DeleteUser(string id);
+        Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass);
     }
 }

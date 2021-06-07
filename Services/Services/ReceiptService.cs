@@ -1,7 +1,10 @@
 ﻿using Entities.Data;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -24,7 +27,49 @@ namespace Services.Services
                 return false;
         }
 
-       
+        public async Task<int> AddReceiptAsync(int id)
+        {
+            var request = await _context.ReceiptRequests.Include(x => x.ReceiptRequestDetails).Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
+
+            try
+            {
+                var receipt = new ImportWarehouse
+                {
+                    CreateDate = DateTime.Now,
+                    ReceiptRequestId = request.ReceiptRequestId,
+                    Status = "Chờ xử lý",
+                    Total = 0
+                };
+                _context.Add(receipt);
+                var count = request.ReceiptRequestDetails.Count;
+                if (await _context.SaveChangesAsync() > 0)
+                {
+                    foreach (var item in request.ReceiptRequestDetails)
+                    {
+                        var detail = new ImportWarehouseDetail
+                        {
+                            ProductDetailId = item.ProductDetailId,
+                            Quantity = item.Quantity,
+                            ActualQuantity = 0,
+                            Status = "Chờ xử lý",
+                            ImportWarehouseId = receipt.ImportWarehouseId
+                        };
+                        _context.Add(detail);
+
+                    }
+                    if (await _context.SaveChangesAsync() == count)
+                    {
+                        return count;
+                    }
+
+
+
+                }
+            }
+            catch { return 0; }
+
+            return 0;
+        }
 
         public async Task<bool> AddReceiptDetailAsync(ImportWarehouseDetail importWarehouseDetail)
         {

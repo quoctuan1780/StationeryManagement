@@ -48,4 +48,22 @@
             <button class="rounded-circle border-0" id="sidebarToggle"></button>
         </div>
     </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#accountManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-file-invoice"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <div id="accountManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Custom Utilities:</h6>
+                <a class="collapse-item" asp-action="ViewInfor" asp-controller="Account" asp-area="Warehouse">Xem thông tin tài khoản </a>
+            </div>
+        </div>
+        <div id="accountManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Custom Utilities:</h6>
+                <a class="collapse-item" asp-action="ChangePassword" asp-controller="Account" asp-area="Warehouse">Thay đổi mật khẩu </a>
+            </div>
+        </div>
+    </li>
 </ul>

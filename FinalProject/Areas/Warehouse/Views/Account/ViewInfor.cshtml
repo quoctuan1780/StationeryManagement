@@ -1,0 +1,287 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.CreateAccountEmployeeViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    Layout = "~Area/Warehouse/Views/Shared/_Layout.cshtml";
+
+    var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
+
+    var districts = ViewBag.Districts as IList<Entities.Models.District>;
+
+    var wards = ViewBag.Wards as IList<Entities.Models.Ward>;
+
+    var user = ViewBag.User as Entities.Models.User;
+
+
+}
+
+@if (!(ViewBag.Message is null))
+{
+    <div class="alert alert-danger">@ViewBag.Message</div>
+}
+<form asp-area="Warehouse" asp-controller="Account" asp-action="EditEmployee" enctype="multipart/form-data" method="post">
+    <div class="row">
+        <div class="col-4 align-middle center-block">
+            <img alt="Ảnh đại diện" width="100" id="avatar" src="/images/@user.Image" />
+            <input type="file" accept="image/*" class="form-control" asp-for="Image" id="choosedfile" onchange="ChangeAvatar(event)" />
+        </div>
+
+        <div class="col-8">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label for="Name">Họ và tên</label>
+                <input class="form-control" id="Name" asp-for="FullName" type="text" value="@user.FullName" readonly />
+            </div>
+            <div class="form-group">
+                <label for="Gender">Giới tính</label>
+                @if (user.Gender == "Nam")
+                {
+                    <input id="Gender" asp-for="Gender" type="radio" value="Nam" checked readonly />
+                    <label>Nam</label>
+                    <input id="Gender" asp-for="Gender" type="radio" value="Nữ" readonly />
+                    <label>Nữ</label>
+                }
+
+                else
+                {
+                    <input id="Gender" asp-for="Gender" type="radio" value="Nam" readonly />
+                    <label>Nam</label>
+                    <input id="Gender" asp-for="Gender" type="radio" value="Nữ" checked readonly />
+                    <label>Nữ</label>
+                }
+
+            </div>
+            <div class="form-group">
+                <label for="DoB">Ngày sinh</label>
+                <input class="form-control" id="DoB" asp-for="DateOfBirth" type="date" value="@user.DateOfBirth" readonly />
+
+            </div>
+            <div class="form-group">
+                <label for="PhoneNumber">Số Điện thoại</label>
+                <input class="form-control" id="PhoneNumber" asp-for="PhoneNumber" type="tel" value="@user.PhoneNumber" />
+                <span class="text-danger" asp-validation-for="PhoneNumber"></span>
+            </div>
+            <div class="form-group">
+                <label for="Email">Email</label>
+                <input class="form-control" id="Email" asp-for="Email" type="email" value="@user.Email" readonly />
+            </div>
+            <div class="form-group">
+                <label for="address">Địa chỉ</label>
+                <div class="col-sm-12 row">
+                    <div class="col-sm-4 mb-3 mb-sm-0">
+                        <select class="selectpicker show-tick form-control" name="ProvinceId"
+                                onchange="getDistricts()" id="province" data-live-search="true">
+                            <option value="null">Tỉnh/Thành phố</option>
+                            @if (!(provinces is null))
+                            {
+                                foreach (var item in provinces)
+                                {
+                                    if (user.Ward.District.Province.ProvinceName == item.ProvinceName)
+                                    {
+                                        <option value="@item.ProvinceId" selected>@item.ProvinceName</option>
+                                    }
+
+                                    else
+                                    {
+                                        <option value="@item.ProvinceId">@item.ProvinceName</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                        <span class="text-danger" asp-validation-for="ProvinceId"></span>
+                    </div>
+                    <div class="col-sm-4" id="district">
+                        <select class="selectpicker show-tick form-control"
+                                name="DistrictId"
+                                id="district-id" onchange="getWards()"
+                                data-live-search="true">
+                            <option value="null">Quận/Huyện</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="DistrictId"></span>
+                    </div>
+                    <div class="col-sm-4" id="ward">
+                        <select name="WardCode" id="ward-id"
+                                class="selectpicker show-tick form-control" data-live-search="true">
+                            <option value="null">Phường/Xã</option>
+
+                        </select>
+                        <span class="text-danger" asp-validation-for="WardCode"></span>
+                    </div>
+                </div>
+                <div class="col-lg-12 row">
+                    <div class="col-sm-6" id="street-name">
+                        <input type="text" class="form-control" placeholder="Tên đường/thôn" asp-for="StreetName" value="@user.StreetName">
+                    </div>
+                    <span class="text-danger" asp-validation-for="StreetName"></span>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label>Chức vụ</label>
+                <select class="form-control" asp-for="Role" disabled>
+                    <option value="WarehouseManager">Quản lý kho hàng</option>
+                </select>
+                <span asp-validation-for="Role"></span>
+            </div>
+            <div>
+                <input class="btn btn-primary" type="submit" value="Sửa thông tin" />
+            </div>
+
+        </div>
+    </div>
+</form>
+
+
+
+@section Scripts{
+    <script type="text/javascript" src="~/admin/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script>
+        async function verticalTextColor() {
+            var loading = new Loading({
+                title: 'Xin hãy đợi...',
+                titleColor: 'rgb(217, 83, 79)',
+                discription: 'Loading...',
+                discriptionColor: 'rgb(77, 150, 223)',
+                animationOriginColor: 'rgb(33, 179, 132)',
+                mask: true,
+                loadingPadding: '20px 50px',
+                defaultApply: true,
+            });
+
+            return loading;
+        }
+
+        async function getWards() {
+            var loading = await verticalTextColor();
+
+            loading;
+
+            var districtId = $("#district-id").val();
+
+            var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
+                + 'data-live-search="true"><option value="null">Phường/Xã</option>';
+
+            $($('#street-name').children()).val('');
+
+            if (districtId === 'null') {
+                node += '</select>';
+                $('#ward').children().remove();
+                $('#ward').append(node);
+
+                $('#ward').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
+
+                await $.ajax({
+                    url: '/Account/Ward',
+                    method: 'GET',
+                    async: true,
+                    data: { districtId: districtId },
+                    success: async function (data) {
+                        for (let i of JSON.parse(data)) {
+                            node += '<option value="' + i.WardCode + '">' + i.WardName + '</option>'
+                        }
+                        node += '</select>';
+
+                        $('#ward').children().remove();
+                        $('#ward').append(node);
+
+                        $('#ward').children().selectpicker({
+                            liveSearch: true,
+                            showSubtext: true,
+                            Size: 10
+                        });
+                    }
+                })
+            loading.out();
+        }
+
+        async function getDistricts() {
+
+            var loading = await verticalTextColor();
+
+            loading;
+
+            var provinceId = $('#province').val();
+
+            var node = '<select class="selectpicker show-tick form-control" name="DistrictId" id="district-id"' + 'onchange="getWards()"'
+                + 'data-live-search="true"><option value="null">Quận/Huyện</option>';
+
+            var nodeWard = '<select name="WardCode" id="ward-id"' +
+                'class="selectpicker show-tick form-control" data - live - search="true" >' +
+                '<option value="null">Phường/Xã</option</select>';
+            '<option value="null">Phường/Xã</option</select>';
+
+            $('#ward').children().remove();
+            $('#ward').append(nodeWard);
+
+            $('#ward').children().selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+
+            $($('#street-name').children()).val('');
+
+            if (provinceId === 'null') {
+                node += '</select>';
+
+                $('#district').children().remove();
+                $('#district').append(node);
+
+
+                $('#district').children().selectpicker({
+                    liveSearch: true,
+                    showSubtext: true,
+                    Size: 10
+                });
+            }
+            else
+                await $.ajax({
+                    url: '/Account/District',
+                    method: 'GET',
+                    async: true,
+                    data: { provinceId: provinceId },
+                    success: async function (data) {
+                        for (let i of JSON.parse(data)) {
+                            node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
+                        }
+
+                        node += '</select>';
+
+                        $('#district').children().remove();
+                        $('#district').append(node);
+
+                        $('#district').children().selectpicker({
+                            liveSearch: true,
+                            showSubtext: true,
+                            Size: 10
+                        });
+                    }
+                });
+            loading.out();
+        }
+
+        function clearStreetName() {
+            $($('#street-name').children()).val('');
+        }
+
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+    </script>
+}

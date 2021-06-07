@@ -134,7 +134,7 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 CreateDate = model.CreateDate,
                 Status = model.Status,
-                //UserId = model.UserId
+                UserId = model.UserId
             };
 
                 if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
@@ -148,7 +148,7 @@ namespace FinalProject.Areas.Admin.Controllers
                             ReceiptRequestId = receiptRequest.ReceiptRequestId,
                             ProductDetailId = model.ProductDetailId[i],
                             Quantity = model.Quantity[i],
-                            Status = "Chờ xử lý"
+                            Status = "Chờ duyệt"
 
                         };
                         receiptRequestDetails.Add(receiptRequestDetail);
@@ -156,8 +156,12 @@ namespace FinalProject.Areas.Admin.Controllers
 
                     if (await _receiptService.AddReceiptDetailRequestsAsync(receiptRequestDetails))
                     {
-                        transaction.Complete();
-                        Redirect("/Admin/Warehouse/Index");
+                       if(await _receiptService.AddReceiptAsync(receiptRequest.ReceiptRequestId) > 0)
+                        {
+                            transaction.Complete();
+                            Redirect("/Admin/Warehouse/Index");
+                        }
+                        
 
                     }
                     else
