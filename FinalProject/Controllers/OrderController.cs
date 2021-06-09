@@ -1,4 +1,6 @@
 ﻿using static Common.Constant;
+using static Common.RoleConstant;
+using static Common.SignalRConstant;
 using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
@@ -14,7 +16,8 @@ using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
-using static Common.RoleConstant;
+using Services.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FinalProject.Controllers
 {
@@ -30,10 +33,12 @@ namespace FinalProject.Controllers
         private readonly IOrderService _orderService;
         private readonly IAddressService _addressService;
         private readonly IDeliveryAddressService _deliveryAddressService;
+        private readonly IHubContext<SignalServer> _hubContext;
 
         public OrderController(IAccountService accountService, ICartService cartService, IConfiguration configuration,
             IPayPalService payPalService, IMoMoService moMoService, IOrderDetailService orderDetailService,
-            IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService)
+            IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService,
+            IHubContext<SignalServer> hubContext)
         {
             _accountService = accountService;
             _cartService = cartService;
@@ -44,6 +49,7 @@ namespace FinalProject.Controllers
             _orderService = orderService;
             _addressService = addressService;
             _deliveryAddressService = deliveryAddressService;
+            _hubContext = hubContext;
         }
         public async Task<IActionResult> Order()
         {
@@ -181,14 +187,14 @@ namespace FinalProject.Controllers
                 {
                     transaction.Complete();
 
-                    return RedirectToAction("CodSuccess", new { orderId = order.OrderId });
+                    return RedirectToAction(COD_SUCCESS, new { orderId = order.OrderId });
                 }
             }
 
-            return Redirect("/Home/Error");
+            return PartialView(ERROR_PAYMENT_PAGE);
         }
 
-        public IActionResult CodSuccess(int? orderId)
+        public async Task<IActionResult> CodSuccess(int? orderId)
         {
             if (orderId is null)
             {
@@ -196,6 +202,9 @@ namespace FinalProject.Controllers
             }
 
             ViewBag.OrderId = orderId.Value;
+
+            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
 
             return View();
         }
@@ -286,6 +295,9 @@ namespace FinalProject.Controllers
 
                                 ViewBag.OrderId = order.OrderId;
 
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+
                                 return View();
                             }
                         }
@@ -334,9 +346,13 @@ namespace FinalProject.Controllers
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;
+
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
                             }
                         }
                     }
+
 
                     return View();
                 }
@@ -345,7 +361,7 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return Redirect("/Home/Error");
+                return PartialView(ERROR_PAYMENT_PAGE);
             }
         }
 

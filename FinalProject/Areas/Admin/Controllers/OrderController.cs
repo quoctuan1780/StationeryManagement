@@ -32,6 +32,13 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
+        public async Task<IActionResult> OrderWaitComfirm()
+        {
+            ViewBag.Orders = await _orderService.GetOrdersWaitToConfirmAsync();
+
+            return View();
+        }
+
         public async Task<IActionResult> OrderWaitExportWarehouse()
         {
             ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();

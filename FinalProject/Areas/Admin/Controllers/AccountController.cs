@@ -105,8 +105,8 @@ namespace FinalProject.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
         {
-            //try
-            //{
+            try
+            {
                 var fileName = await SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
 
                 string image = "admin.png";
@@ -154,12 +154,12 @@ namespace FinalProject.Areas.Admin.Controllers
                     await _emailSender.SendEmailAsync(user.Email, subject, body);
                     return RedirectToAction("Index");
                 }
-                
-            //}
-            //catch
-            //{
 
-            //}
+            }
+            catch
+            {
+
+            }
             ViewBag.Message = "Không thể thêm mới nhân viên này";
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
             ViewBag.Role = await _accountService.GetUserRole();

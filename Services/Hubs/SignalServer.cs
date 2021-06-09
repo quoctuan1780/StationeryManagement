@@ -1,0 +1,13 @@
+﻿using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
+
+namespace Services.Hubs
+{
+    public class SignalServer : Hub
+    {
+        public Task AdminJoinGroup(string groupName)
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
+    }
+}
