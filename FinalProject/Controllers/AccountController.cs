@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Services.Hubs;
 using Services.Interfacies;
 using System;
 using System.Linq;
@@ -15,6 +17,7 @@ using System.Transactions;
 using static Common.Constant;
 using static Common.MessageConstant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 
 namespace FinalProject.Controllers
 {
@@ -23,12 +26,14 @@ namespace FinalProject.Controllers
         private readonly IAccountService _accountService;
         private readonly IAddressService _addressService;
         private readonly IEmailSender _emailSender;
+        private readonly IHubContext<SignalServer> _hubContext;
 
-        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender)
+        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender, IHubContext<SignalServer> hubContext)
         {
             _accountService = accountService;
             _addressService = addressService;
             _emailSender = emailSender;
+            _hubContext = hubContext;
         }
         public async Task<IActionResult> Login(string urlBack)
         {
@@ -186,6 +191,9 @@ namespace FinalProject.Controllers
 
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
 
+            model.ReturnUrl = urlBack;
+            model.ExternalLogins = await _accountService.GetExternalAuthenticationSchemesAsync();
+
             if (ModelState.IsValid)
             {
                 urlBack ??= Url.Content(ROUTE_LOGIN_CLIENT);
@@ -199,7 +207,8 @@ namespace FinalProject.Controllers
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
                     WardCode = model.WardCode,
-                    StreetName = model.StreetName
+                    StreetName = model.StreetName,
+                    CreateDate = DateTime.Now
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 try
@@ -244,6 +253,8 @@ namespace FinalProject.Controllers
 
                         transaction.Complete();
 
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
+
                         return Redirect(urlBack);
                     }
                     else
@@ -263,6 +274,7 @@ namespace FinalProject.Controllers
         #region Register With External Account
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterWithGoogle(RegisterViewModel model)
         {
             ViewBag.UrlBack = model.ReturnUrl;
@@ -321,6 +333,8 @@ namespace FinalProject.Controllers
 
                     transaction.Complete();
 
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
+
                     return Redirect(model.ReturnUrl);
                 }
                 else
@@ -338,6 +352,7 @@ namespace FinalProject.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterWithFacebook(RegisterViewModel model)
         {
             ViewBag.UrlBack = model.ReturnUrl;
@@ -401,6 +416,8 @@ namespace FinalProject.Controllers
                     await _accountService.LoginAsync(user, false);
 
                     transaction.Complete();
+
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
 
                     return Redirect(model.ReturnUrl);
                 }
@@ -534,7 +551,8 @@ namespace FinalProject.Controllers
                         Image = saveAvatarResult,
                         WardCode = model.WardCode,
                         StreetName = model.StreetName,
-                        FullName = model.FullName
+                        FullName = model.FullName,
+                        ModifyDate = DateTime.Now
                     };
 
                     model.ImageLink = saveAvatarResult;
@@ -549,7 +567,8 @@ namespace FinalProject.Controllers
                         DateOfBirth = model.DateOfBirth,
                         WardCode = model.WardCode,
                         StreetName = model.StreetName,
-                        FullName = model.FullName
+                        FullName = model.FullName,
+                        ModifyDate = DateTime.Now
                     };
                 }
 

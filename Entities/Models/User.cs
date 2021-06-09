@@ -20,6 +20,9 @@ namespace Entities.Models
 
         public string StreetName { get; set; }
 
+        public DateTime CreateDate { get; set; }
+        public DateTime ModifyDate { get; set; }
+
         public string WardCode { get; set; }
         public bool IsDeleted { get; set; }
         public virtual Ward Ward { get; set; }

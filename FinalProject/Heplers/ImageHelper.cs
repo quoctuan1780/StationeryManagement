@@ -37,7 +37,7 @@ namespace FinalProject.Heplers
 
             var resultHash = HashNameImage(formFile.FileName);
 
-            string pathString = Path.Combine(Constant.IMAGE_AVATAR_LINK, userName);
+            string pathString = Path.Combine(Constant.IMAGE_AVATAR_LINK, userName.Replace('+', 'a'));
 
             Directory.CreateDirectory(pathString);
 

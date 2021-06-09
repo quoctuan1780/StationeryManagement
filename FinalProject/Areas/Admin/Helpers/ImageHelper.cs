@@ -13,7 +13,7 @@ namespace FinalProject.Areas.Admin.Helpers
 {
     public static class ImageHelper
     {
-        public static async Task<string> SaveImageAccountAsync(IFormFile formFile, int width, int height, string path)
+        public static async Task<string> SaveImageAccountAsync(IFormFile formFile, int width, int height, string userName)
         {
             if (formFile is null) return null;
 
@@ -24,7 +24,7 @@ namespace FinalProject.Areas.Admin.Helpers
 
             var resultHash = HashNameImage(formFile.FileName);
 
-            string pathString = Path.Combine(IMAGE_AVATAR_LINK, path);
+            string pathString = Path.Combine(IMAGE_AVATAR_LINK, userName.Replace('+', 'a'));
 
             Directory.CreateDirectory(pathString);
 
