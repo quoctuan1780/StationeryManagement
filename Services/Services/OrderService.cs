@@ -249,5 +249,10 @@ namespace Services.Services
 
             return orders;
         }
+
+        public async Task<IList<Order>> GetOrdersWaitToConfirmAsync()
+        {
+            return await _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM)).OrderBy(x => x.OrderDate).ToListAsync();
+        }
     }
 }

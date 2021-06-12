@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Services.Hubs;
 using Services.Interfacies;
 using Services.Services;
 using System;
@@ -67,6 +68,7 @@ namespace FinalProject
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             services.AddScoped<IBannerService, BannerService>();
+            services.AddTransient<IHubService, HubService>();
             #endregion
 
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
@@ -120,6 +122,7 @@ namespace FinalProject
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddSignalR();
 
             services.AddSession(options =>
             {
@@ -154,6 +157,7 @@ namespace FinalProject
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<SignalServer>("/signalServer");
 
                 endpoints.MapControllerRoute(
                   name: "areas",

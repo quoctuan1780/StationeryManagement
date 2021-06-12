@@ -16,6 +16,7 @@ namespace Services.Interfacies
         IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery();
         Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId);
         IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick();
+        Task<IList<Order>> GetOrdersWaitToConfirmAsync();
         Task<IList<Order>> GetOrdersDeliveryAsync(string userId);
         Task<int> AdminConfirmOrderAsync(int orderId);
         Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId);

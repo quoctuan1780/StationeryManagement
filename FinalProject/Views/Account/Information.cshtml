@@ -21,7 +21,9 @@
                     }
                     else
                     {
-                        <img src="~/images/user/@Model.Email/@Model.ImageLink" height="50" width="50" alt="Avatar">
+                        string email = Model.Email.Replace('+', 'a');
+
+                        <img src="~/images/user/@email/@Model.ImageLink" height="50" width="50" alt="Avatar">
                     }
                 </p>
                 <p class="name">Tài khoản của</p>

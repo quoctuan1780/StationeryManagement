@@ -134,6 +134,7 @@ namespace Services.Services
             userDb.WardCode = user.WardCode;
             userDb.StreetName = user.StreetName;
             userDb.DateOfBirth = user.DateOfBirth;
+            userDb.ModifyDate = user.ModifyDate;
 
             _context.Users.Update(userDb);
 

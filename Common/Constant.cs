@@ -54,6 +54,8 @@
 
         public const string G29 = "G29";
 
+        public const string COD_SUCCESS = "CodSuccess";
+
         public const string PROVIDER_GOOGLE = "Google";
         public const string PROVIDER_FACEBOOK = "Facebook";
 
