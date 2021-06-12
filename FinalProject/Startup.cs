@@ -69,6 +69,7 @@ namespace FinalProject
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             services.AddScoped<IBannerService, BannerService>();
             services.AddTransient<IHubService, HubService>();
+            services.AddTransient<IHubShipperService, HubShipperService>();
             #endregion
 
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)

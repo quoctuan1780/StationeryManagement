@@ -1,12 +1,15 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
 using Services.Interfacies;
 using System;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
@@ -14,12 +17,14 @@ namespace FinalProject.Areas.Warehouse.Controllers
     [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class OrderController : Controller
     {
+        private readonly IHubContext<SignalServer> _hubContext;
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
         private IWorkflowHistoryService _workflowHistoryService;
 
-        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService)
+        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext)
         {
+            _hubContext = hubContext;
             _orderService = orderService;
             _accountService = accountService;
             _workflowHistoryService = workflowHistoryService;
@@ -77,6 +82,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
 
                         return CODE_SUCCESS;
                     }

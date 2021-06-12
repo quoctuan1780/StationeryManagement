@@ -124,11 +124,14 @@
             for (let item of checkbox) {
                 chooseDelivery.push(item.value);
             }
+
+            console.log(chooseDelivery);
         }
 
         function unselectAllOrder() {
             chooseDelivery = [];
             $('input[name=delivery-choose]').attr('checked', false);
+            console.log(chooseDelivery)
         }
 
         function confirmOrder() {
