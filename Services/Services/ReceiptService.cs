@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Common.Constant;
 
 namespace Services.Services
 {
@@ -106,6 +107,41 @@ namespace Services.Services
                 return true;
             else
                 return false;
+        }
+
+        public async Task<int> AddReceiptRequestDetailAsync(ReceiptRequestDetail receiptRequest)
+        {
+            _context.Add(receiptRequest);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> ApproveReceiptRequestAsync(int id)
+        {
+            var receipt = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
+            receipt.Status = RECEIPT_REQUEST_STATUS_APPROVED;
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> DeleteReceiptRequest(int requesrID)
+        {
+            var rr = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == requesrID).FirstOrDefaultAsync();
+            _context.ReceiptRequests.Remove(rr);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<ReceiptRequest> GetReceiptRequestAsync(int id)
+        {
+            return await _context.ReceiptRequests.Include(x => x.ReceiptRequestDetails).Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<IList<ReceiptRequest>> GetReceiptRequestsAsync()
+        {
+            return await _context.ReceiptRequests.OrderBy(x => x.CreateDate).ToListAsync();
+        }
+
+        public Task<int> RejectReceiptRequestAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

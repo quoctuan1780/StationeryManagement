@@ -2,7 +2,7 @@
 @model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
 @{
     ViewData["Title"] = "CreateReceiptRequest";
-    Layout = "~/Areas/Wasrehouse/Views/Shared/_Layout.cshtml";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var products = ViewBag.Products as IList<SelectListItem>;
     var productJson = Newtonsoft.Json.JsonConvert.SerializeObject(products);
     var user = await userManager.GetUserAsync(User);

@@ -19,5 +19,11 @@
         public const string DISPLAY_PRODUCT_COLOR = "Màu sắc";
         public const string DISPLAY_PRODUCT_SIZE = "Kích thước";
         public const string DISPLAY_PRODUCT_ORIGIN = "Xuất xứ";
+        
+        
+        public const string DISPLAY_BANNER_IMAGE = "Hình ảnh";
+        public const string DISPLAY_BANNER_START_DATE = "Ngày bắt đầu";
+        public const string DISPLAY_BANNER_END_DATE = "Ngày kết thúc";
+        public const string DISPLAY_BANNER_URL = "Liên kết";
     }
 }

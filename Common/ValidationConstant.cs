@@ -2,6 +2,10 @@
 {
     public class ValidationConstant
     {
+        public const string ERROR_BANNER_IMAGE_EMPTY = "Hình ảnh quảng cáo không được để trống";
+        public const string ERROR_BANNER_START_DATE_EMPTY = "Ngày bắt đầu không được để trống";
+        public const string ERROR_BANNER_END_DATE_EMPTY = "Ngày kết thúc không được để trống";
+
         public const string ERROR_EMAIL_EMPTY = "Email không được để trống";
         public const string ERROR_EMAIL_TYPE = "Định dạng phải là một email";
         public const string ERROR_PASSWORD_ENPTY = "Mật khẩu không được để trống";

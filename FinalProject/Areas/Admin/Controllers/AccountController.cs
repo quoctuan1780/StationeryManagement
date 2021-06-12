@@ -16,6 +16,8 @@ using FinalProject.Areas.Admin.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 
+using static FinalProject.Areas.Admin.Helpers.ImageHelper;
+
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
@@ -46,10 +48,14 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
-        [Authorize(Roles = ROLE_ADMIN,AuthenticationSchemes =ROLE_ADMIN)]
         public async Task<IActionResult> ViewInfor()
         {
             string id = _userManager.GetUserId(User);
+            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
+            return View();
+        }
+        public async Task<IActionResult> ViewInforEmployee(string id)
+        {
             ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
             return View();
         }
@@ -176,7 +182,7 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             try
             {
-                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+                var fileName = await SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
 
                 string image = "admin.png";
 
@@ -193,7 +199,8 @@ namespace FinalProject.Areas.Admin.Controllers
                     PhoneNumber = model.PhoneNumber,
                     Gender = model.Gender,
                     Image = image,
-                    WardCode = model.WardCode
+                    WardCode = model.WardCode,
+                    EmailConfirmed = true,
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -263,6 +270,7 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(result);
         }
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        [HttpDelete]
         public async Task<int> Delete(string id)
         {
             if(await _accountService.DeleteUser(id) > 0)

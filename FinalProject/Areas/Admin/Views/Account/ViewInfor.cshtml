@@ -40,7 +40,7 @@
                     <div class="gender">
                         <label for="gender">Giới tính</label>
                     </div>
-                    @if (User.Gender.Equals("Nam"))
+                    @if (User.Gender == "Nam")
                     {
                         <label class="radio-inline"><input type="radio" readonly name="Gender" value="Nam" checked>Nam</label>
                         <label class="radio-inline"><input type="radio" readonly name="Gender" value="Nữ" style="margin-left:30px;">Nữ</label>

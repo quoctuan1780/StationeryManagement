@@ -16,12 +16,25 @@
     <li class="nav-item">
         <a class="nav-link" asp-action="Dashboard" asp-controller="Home" asp-area="Admin">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span>
+            <span>Bảng điều khiển</span>
         </a>
     </li>
 
     <li>
         <hr class="sidebar-divider">
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#banner" aria-expanded="true" aria-controls="collapseTwo">
+            <i class="fas fa-fw fa-images"></i>
+            <span>Quản lý quảng cáo</span>
+        </a>
+        <div id="banner" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="Index" asp-controller="Banner" asp-area="Admin">Danh sách quảng cáo</a>
+                <a class="collapse-item" asp-action="AddBanner" asp-controller="Banner" asp-area="Admin">Thêm quảng cáo</a>
+            </div>
+        </div>
     </li>
 
     <li class="nav-item">

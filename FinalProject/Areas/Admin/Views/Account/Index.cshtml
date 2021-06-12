@@ -43,8 +43,8 @@
                             <td>@item.PhoneNumber</td>
                             <td>Quản lý kho</td>
                             <td>
-                                <a class="label-info" asp-action="ViewInfor" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xem</a>
-                                <a class="danger" onclick="Delete(@item.Id)">Xóa</a>
+                                <a class="label-info" asp-action="ViewInforEmployee" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xem</a>
+                                <a class="danger" onclick="Delete('@item.Id')">Xóa</a>
                             </td>
                         </tr>
                             }
@@ -61,8 +61,8 @@
                         <td>@item.PhoneNumber</td>
                         <td>Người giao hàng</td>
                         <td>
-                            <a class="label-info" asp-action="ViewInfor" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xem</a>
-                            <a class="danger" onclick="Delete(@item.Id)">Xóa</a>
+                            <a class="label-info" asp-action="ViewInforEmployee" asp-controller="Account" asp-area="Admin" asp-route-id="@item.Id">Xem</a>
+                            <a class="danger" onclick="Delete('@item.Id')">Xóa</a>
                         </td>
                     </tr>
                             }
@@ -78,12 +78,12 @@
 @section Scripts{ 
 <script>
     function Delete(id) {
-        await $.ajax({
-            url: '/Account/Delete',
-            method: 'GET',
+        $.ajax({
+            url: '/Admin/Account/Delete',
+            method: 'DELETE',
             async: true,
             data: { id: id },
-            success: async function (data) {
+            success: function (data) {
                 if (data > 0) {
                     Swal.fire({
                         title: 'Thông báo',

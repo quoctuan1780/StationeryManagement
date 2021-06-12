@@ -204,7 +204,7 @@ namespace Services.Services
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
 
-            users.Where(x => x.IsDeleted == false);
+            users = users.Where(x => x.IsDeleted == false).ToList();
 
             return users;
         }

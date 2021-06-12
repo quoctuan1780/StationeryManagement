@@ -1,0 +1,159 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.BannerViewModel
+@{
+    ViewData["Title"] = "Sửa quảng cáo";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Sửa quảng cáo</h1>
+    <hr class="hr-end-list" />
+
+    @if (!(ViewBag.MessageSuccess is null))
+    {
+        <div class="alert alert-success">@ViewBag.MessageSuccess</div>
+    }
+    @if (!(ViewBag.MessageError is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageError</div>
+    }
+
+    <form asp-action="EditBanner" asp-controller="Banner" asp-area="Admin" method="post" role="form" enctype="multipart/form-data"
+          id="form">
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="imagePreviewDeteted" id="image-preview-deleted" />
+        <input type="hidden" name="ImageString" value="@Model.ImageString" id="image-deleted" />
+        <input type="hidden" asp-for="BannerId" />
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="StartDate"></label>
+                    <input type="date" asp-for="StartDate" class="form-control" id="start-date" />
+                    <span class="text-danger" asp-validation-for="StartDate"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="EndDate"></label>
+                    <input type="date" asp-for="EndDate" class="form-control" id="end-date" />
+                    <span class="text-danger" asp-validation-for="EndDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group form-flex" style="text-align: center;" id="show-image-preview">
+            @if (Model.ImageString != null)
+            {
+                <div class="show-image">
+                    <img src="~/images/banner/@Model.ImageString" class="image-product" style="width: 100%; height: 60%;" />
+                    <i class="delete fa fa-times" onclick="confirmDeleteImage(this)">
+                    </i>
+                </div>
+            }
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Image"></label>
+            <input type="file" class="form-control-file" accept="image/*" asp-for="Image" onchange="previewImage(event)" id="images-file" />
+            <span class="text-danger" asp-validation-for="Image"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Url"></label>
+            <input type="text" asp-for="Url" class="form-control" id="start-date" />
+            <span class="text-danger" asp-validation-for="Url"></span>
+        </div>
+    </form>
+
+    <div class="form-group">
+        <input type="button" value="Sửa quảng cáo" class="btn btn-success" onclick="submit()" />
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var files = [];
+
+        function previewImage(e) {
+            files = [];
+
+            var node = '';
+
+            var imageFiles = e.target.files;
+
+            if (imageFiles.length > 0) {
+                files.push(imageFiles[0].name);
+                node += `<div class="show-image">
+                                <img src="`+ URL.createObjectURL(imageFiles[0]) + `" class="image-product" style="width: 100%; height: 60%;" />
+                                <i class="delete fa fa-times" onclick="confirmDeleteImage(this)">
+                                </i>
+                            </div>`;
+
+                $('#show-image-preview').children().remove();
+                $('#show-image-preview').append(node);
+                $('#image-preview-deleted').val('');
+                $('#image-deleted').val('');
+            }
+        }
+
+        function confirmDeleteImage(e) {
+            Swal.fire({
+                title: 'Xóa hình ảnh!',
+                text: "Bạn có muốn xóa hình ảnh này ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Xóa`,
+                cancelButtonText: `Hủy`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(e).closest('.show-image').remove();
+
+                    $('#image-preview-deleted').val(files);
+                    $('#image-deleted').val('');
+                }
+            })
+        }
+
+        function getDateTimeNow() {
+            var dateObj = new Date();
+            var month = dateObj.getUTCMonth() + 1;
+            var day = dateObj.getUTCDate();
+            var year = dateObj.getUTCFullYear
+            newdate = day + "/" + month + "/" + year;
+
+            return newdate;
+        }
+
+        function submit() {
+            var startDate = new Date($("#start-date").val());
+            var endDate = new Date($("#end-date").val());
+
+            var today = new Date(getDateTimeNow());
+
+            if (today.get > startDate.getTime()) {
+                Swal.fire({
+                    title: 'Thông báo',
+                    text: "Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại",
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: `Ok`,
+                });
+            }
+            else if (startDate.getTime() > endDate.getTime()) {
+                Swal.fire({
+                    title: 'Thông báo',
+                    text: "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc",
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: `Ok`,
+                });
+
+            }
+            else {
+                $('#form').submit();
+            }
+        }
+    </script>
+}

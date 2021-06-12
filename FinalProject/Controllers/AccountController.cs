@@ -426,7 +426,7 @@ namespace FinalProject.Controllers
             {
                 TempData[KEY_CONFIRM_EMAIL_SUCCESS] = MESSAGE_CONFIRM_EMAIL_SUCCESS;
 
-                return View(VIEW_LOGIN);
+                return Redirect(ROUTE_LOGIN_CLIENT);
             }
             else
             {

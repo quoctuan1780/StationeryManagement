@@ -10,6 +10,8 @@
 
         public const string IMAGE_LINK = "wwwroot/images/product/";
 
+        public const string IMAGE_LINK_BANNER = "wwwroot/images/banner/";
+
         public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
 
         public const string SLASH = "/";
@@ -210,6 +212,20 @@
         #region Json key 
         public const string JSON_KEY_STATUS = "Status";
         public const string JSON_KEY_COMMENT_ID = "CommentId";
+        #endregion
+
+        #region Validation Key
+        public const string KEY_IMAGE = "Image";
+        #endregion
+
+        #region Receipt Status
+        public const string RECEIPT_STATUS_WAITING = "Chờ xử lý";
+        public const string RECEIPT_STATUS_PROCESSING = "Đang nhập hàng";
+        public const string RECEIPT_STATUS_COMPLETE = "Hoàn thành";
+        public const string RECEIPT_REQUEST_STATUS_WAITING = "Chờ xác nhận";
+        public const string RECEIPT_REQUEST_STATUS_APPROVED = "Đã duyệt";
+        public const string RECEIPT_REQUEST_REJECT = "Từ chối";
+
         #endregion
     }
 }

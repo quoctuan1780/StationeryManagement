@@ -11,6 +11,12 @@ namespace Services.Interfacies
         Task<bool> AddReceiptDetailAsync(ImportWarehouseDetail importWarehouseDetail);
 
         Task<bool> AddReceiptRequestAsync(ReceiptRequest receiptRequest);
+        Task<int> AddReceiptRequestDetailAsync(ReceiptRequestDetail receiptRequest);
+        Task<IList<ReceiptRequest>> GetReceiptRequestsAsync();
+        Task<int> DeleteReceiptRequest(int requesrID);
         Task<bool> AddReceiptDetailRequestsAsync(IList<ReceiptRequestDetail> receiptRequestDetails);
+        Task<ReceiptRequest> GetReceiptRequestAsync(int id);
+        Task<int> ApproveReceiptRequestAsync(int id);
+        Task<int> RejectReceiptRequestAsync(int id);
     }
 }

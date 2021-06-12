@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using FinalProject.Areas.Warehouse.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Services.Interfacies;
@@ -17,11 +18,15 @@ namespace FinalProject.Areas.Warehouse.Controllers
     public class HomeController : Controller
     {
         private readonly IReceiptService _receiptService;
+        private readonly IAccountService _accountService;
+        private readonly UserManager<User> _userManager;
         private readonly IProductService _productService;
 
-        public HomeController(IProductService productService, IReceiptService receiptService)
+        public HomeController(IProductService productService, IReceiptService receiptService,IAccountService accountService, UserManager<User> userManager)
         {
             _receiptService = receiptService;
+            _accountService = accountService;
+            _userManager = userManager;
             _productService = productService;
         }
         [HttpGet]
@@ -44,6 +49,24 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ViewListRequestReceipt()
+        {
+            ViewBag.ListRequests = await _receiptService.GetReceiptRequestsAsync();
+            return View();
+        }
+
+        [HttpDelete]
+        public async Task<int> DeleteRequest(int requestId)
+        {
+            return await _receiptService.DeleteReceiptRequest(requestId);
+        }
+
+        public async Task<IActionResult> ViewRequestReceipt(int id)
+        {
+            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id);
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
         {
@@ -53,42 +76,35 @@ namespace FinalProject.Areas.Warehouse.Controllers
                 {
                     CreateDate = model.CreateDate,
                     Status = model.Status,
-                    UserId = model.UserId
+                    UserId = _accountService.GetUserId(User)
                 };
+
 
                 if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
                 {
-                    ReceiptRequestDetail receiptRequestDetail;
-                    List<ReceiptRequestDetail> receiptRequestDetails = new List<ReceiptRequestDetail>();
-                    for (var i = 0; i < model.Quantity.Count; i++)
+                    int count = 0;
+                    for(int i = 0; i < model.ProductDetailId.Count; i++)
                     {
-                        receiptRequestDetail = new ReceiptRequestDetail
+                        var requestDetail = new ReceiptRequestDetail()
                         {
-                            ReceiptRequestId = receiptRequest.ReceiptRequestId,
                             ProductDetailId = model.ProductDetailId[i],
                             Quantity = model.Quantity[i],
-                            Status = "Chờ duyệt"
+                            ReceiptRequestId = receiptRequest.ReceiptRequestId,
+                            Status = RECEIPT_REQUEST_STATUS_WAITING,
 
                         };
-                        receiptRequestDetails.Add(receiptRequestDetail);
+                      count += await  _receiptService.AddReceiptRequestDetailAsync(requestDetail);
                     }
-
-                    if (await _receiptService.AddReceiptDetailRequestsAsync(receiptRequestDetails))
-                    {
-                        if (await _receiptService.AddReceiptAsync(receiptRequest.ReceiptRequestId) > 0)
-                        {
-                            transaction.Complete();
-                            Redirect("/Admin/Warehouse/Index");
-                        }
-
-
-                    }
-                    else
-                    {
-                        ViewBag.Message = "Thêm phiếu nhập lỗi";
-
-                    }
+                    if(count == model.ProductDetailId.Count)
+                        transaction.Complete();
+                    Redirect("/Warehouse/Home/ListReceipRequest");
                 }
+                else
+                {
+                    ViewBag.Message = "Thêm phiếu nhập lỗi";
+
+                }
+                
             }
             return View(model);
 
