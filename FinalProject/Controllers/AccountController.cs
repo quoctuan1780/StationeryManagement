@@ -35,6 +35,8 @@ namespace FinalProject.Controllers
             _emailSender = emailSender;
             _hubContext = hubContext;
         }
+
+        #region Login
         public async Task<IActionResult> Login(string urlBack)
         {
             ViewBag.UrlBack = urlBack;
@@ -46,83 +48,6 @@ namespace FinalProject.Controllers
             };
 
             return View(model);
-        }
-
-        [HttpPost]
-        public IActionResult ExternalLogin(string provider, string returnUrl)
-        {
-            var redirectUrl = Url.Action(VIEW_EXTERNAL_LOGIN, CONTROLLER_ACCOUNT, new { ReturnUrl = returnUrl });
-
-            var properties = _accountService.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-
-            return new ChallengeResult(provider, properties);
-        }
-
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
-        {
-            returnUrl ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
-
-            var loginViewModel = new LoginViewModel
-            {
-                ReturnUrl = returnUrl,
-                ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
-            };
-
-            var info = await _accountService.GetExternalLoginInfoAsync();
-
-            if (info == null)
-            {
-                ModelState.AddModelError(EMPTY, MESSAGE_ERROR_GET_EXTERNAL_INFOMATION_ACCOUNT);
-
-                return View(VIEW_LOGIN, loginViewModel);
-            }
-
-            var signInResult = await _accountService.ExternalLoginSignInAsync(info.LoginProvider,
-                                            info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-
-            if (signInResult.Succeeded)
-            {
-                var user = await _accountService.GetUserByEmailAsync(email);
-                if (await _accountService.IsInRoleAsync(user, ROLE_CUSTOMER))
-                {
-                    await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
-                }
-                if (returnUrl.Equals(ROUTE_LOGIN_CLIENT))
-                {
-                    return Redirect(ROUTE_HOME_INDEX_CLIENT);
-                }
-                else
-                {
-                    return LocalRedirect(returnUrl);
-                }
-            }
-            else
-            {
-                ViewBag.UrlBack = returnUrl;
-
-                ViewBag.Provinces = await _addressService.GetProvincesAsync();
-
-                var model = new RegisterViewModel()
-                {
-                    Email = email,
-                    ReturnUrl = returnUrl,
-                    ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
-                };
-
-                if (info.ProviderDisplayName.Equals(PROVIDER_GOOGLE))
-                {
-                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
-                }
-                else if (info.ProviderDisplayName.Equals(PROVIDER_FACEBOOK))
-                {
-                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
-                }
-                else
-                {
-                    return Redirect(ROUTE_LOGIN_CLIENT);
-                }
-            }
         }
 
         [HttpPost]
@@ -165,9 +90,14 @@ namespace FinalProject.Controllers
                 }
             }
 
+            model.ReturnUrl = urlBack;
+            model.ExternalLogins = await _accountService.GetExternalAuthenticationSchemesAsync();
+
             return View(model);
         }
+        #endregion
 
+        #region Register
         public async Task<IActionResult> Register(string urlBack)
         {
             ViewBag.UrlBack = urlBack;
@@ -270,8 +200,89 @@ namespace FinalProject.Controllers
 
             return View(model);
         }
+        #endregion
 
-        #region Register With External Account
+        #region Login with external account
+
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl)
+        {
+            var redirectUrl = Url.Action(VIEW_EXTERNAL_LOGIN, CONTROLLER_ACCOUNT, new { ReturnUrl = returnUrl });
+
+            var properties = _accountService.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
+            return new ChallengeResult(provider, properties);
+        }
+
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content(ROUTE_HOME_INDEX_CLIENT);
+
+            var loginViewModel = new LoginViewModel
+            {
+                ReturnUrl = returnUrl,
+                ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
+            };
+
+            var info = await _accountService.GetExternalLoginInfoAsync();
+
+            if (info == null)
+            {
+                ModelState.AddModelError(EMPTY, MESSAGE_ERROR_GET_EXTERNAL_INFOMATION_ACCOUNT);
+
+                return View(VIEW_LOGIN, loginViewModel);
+            }
+
+            var signInResult = await _accountService.ExternalLoginSignInAsync(info.LoginProvider,
+                                            info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+            if (signInResult.Succeeded)
+            {
+                var user = await _accountService.GetUserByEmailAsync(email);
+                if (await _accountService.IsInRoleAsync(user, ROLE_CUSTOMER))
+                {
+                    await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
+                }
+                if (returnUrl.Equals(ROUTE_LOGIN_CLIENT))
+                {
+                    return Redirect(ROUTE_HOME_INDEX_CLIENT);
+                }
+                else
+                {
+                    return LocalRedirect(returnUrl);
+                }
+            }
+            else
+            {
+                ViewBag.UrlBack = returnUrl;
+
+                ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                var model = new RegisterViewModel()
+                {
+                    Email = email,
+                    ReturnUrl = returnUrl,
+                    ExternalLogins = (await _accountService.GetExternalAuthenticationSchemesAsync()).ToList()
+                };
+
+                if (info.ProviderDisplayName.Equals(PROVIDER_GOOGLE))
+                {
+                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                }
+                else if (info.ProviderDisplayName.Equals(PROVIDER_FACEBOOK))
+                {
+                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
+                }
+                else
+                {
+                    return Redirect(ROUTE_LOGIN_CLIENT);
+                }
+            }
+        }
+        #endregion
+
+        #region Register with external account
 
         [HttpPost]
         [ValidateAntiForgeryToken]

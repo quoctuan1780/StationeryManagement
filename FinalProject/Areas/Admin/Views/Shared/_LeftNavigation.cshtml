@@ -57,7 +57,6 @@
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Utilities:</h6>
                 <a class="collapse-item" asp-action="Index" asp-controller="Product" asp-area="Admin">Danh sách sản phẩm</a>
                 <a class="collapse-item" asp-action="AddProduct" asp-controller="Product" asp-area="Admin">Thêm sản phẩm</a>
             </div>
@@ -71,12 +70,12 @@
         </a>
         <div id="orderManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Utilities:</h6>
                 <a class="collapse-item" asp-action="Index" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng</a>
                 <a class="collapse-item" asp-action="OrderWaitComfirm" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />chờ xác nhận</a>
                 <a class="collapse-item" asp-action="OrderWaitExportWarehouse" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />chờ chuẩn bị</a>
                 <a class="collapse-item" asp-action="OrderWaitToPick" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />chờ giao / đang giao</a>
                 <a class="collapse-item" asp-action="OrderDelivery" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />đang giao</a>
+                <a class="collapse-item" asp-action="OrderDelivered" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />đã giao</a>
             </div>
         </div>
     </li>
@@ -88,7 +87,6 @@
         </a>
         <div id="recommendationManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Utilities:</h6>
                 <a class="collapse-item" asp-action="ViewRecommendation" asp-controller="Warehouse" asp-area="Admin">Danh sách sản phẩm <br /> khuyến nghị</a>
             </div>
         </div>
@@ -101,7 +99,6 @@
         </a>
         <div id="accountManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Utilities:</h6>
                 <a class="collapse-item" asp-action="Index" asp-controller="Account" asp-area="Admin">Danh sách tài khoản</a>
                 <a class="collapse-item" asp-action="CreateEmployeeAccount" asp-controller="Account" asp-area="Admin">Thêm tài khoản</a>
             </div>

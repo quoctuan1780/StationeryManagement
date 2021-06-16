@@ -1058,7 +1058,13 @@ namespace Entities.Migrations
                     b.Property<string>("RecordId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("WorkflowHistoryId");

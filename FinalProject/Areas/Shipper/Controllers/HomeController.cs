@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Entities.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Common.RoleConstant;
-using static Common.Constant;
-using System.Threading.Tasks;
+using X.PagedList;
 using Services.Interfacies;
-using Entities.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using static Common.Constant;
+using static Common.RoleConstant;
 
 namespace FinalProject.Areas.Shipper.Controllers
 {
@@ -14,15 +17,28 @@ namespace FinalProject.Areas.Shipper.Controllers
     {
         private readonly IHubShipperService _hubShipperService;
         private readonly IAccountService _accountService;
+        private readonly IWorkflowHistoryService _workflowHistoryService;
 
-        public HomeController(IHubShipperService hubShipperService, IAccountService accountService)
+        public HomeController(IHubShipperService hubShipperService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService)
         {
             _hubShipperService = hubShipperService;
             _accountService = accountService;
+            _workflowHistoryService = workflowHistoryService;
         }
         public IActionResult Dashboard()
         {
             return View();
+        }
+
+        public async Task<IActionResult> ActivityLog(int? page = 1)
+        {
+            var user = await _accountService.GetUserAsync(User);
+
+            var workFlow = await _workflowHistoryService.GetWorkflowHistoriesAsync(user.Id);
+
+            var model = new PagedList<WorkflowHistory>(workFlow, page.Value, 10);
+
+            return View(model);
         }
 
         public async Task<IActionResult> GetOrderWaitForPick()
