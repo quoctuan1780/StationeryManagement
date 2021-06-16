@@ -214,7 +214,7 @@
                                                             if (item.Quantity > 0)
                                                             {
                                                                 <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
-                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">
+                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin')">
                                                                     @item.Color
                                                                 </button>
 
@@ -225,7 +225,7 @@
                                                             else
                                                             {
                                                                 <button type="button" class="btn btn-default btn-outline-warning disabled" value="@item.ProductDetailId"
-                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin', '@string.Concat(item.Length, "x", item.Width, "x", item.Height)')">
+                                                                        onclick="setSizeQuantity(@item.Quantity, @item.ProductDetailId, '@item.Color', '@item.Origin')">
                                                                     @item.Color
                                                                 </button>
 
@@ -234,17 +234,6 @@
                                                                 price = product.Price;
                                                             }
                                                         }
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="pl-0 w-25" scope="row"><strong>Kích thước (mm)</strong></th>
-                                                    <td>
-                                                        <div id="product-detail-size" style="padding-left: 2px; display: inline-block;">
-                                                            @foreach (var item in product.ProductDetails)
-                                                            {
-                                                                @string.Concat(item.Length, "x", item.Width, "x", item.Height, " ")
-                                                            }
-                                                        </div>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -310,7 +299,6 @@
                                     <thead>
                                         <tr>
                                             <th>Màu sắc</th>
-                                            <th>Kích thước</th>
                                             <th>Xuất xứ</th>
                                         </tr>
                                     </thead>
@@ -319,7 +307,6 @@
                                         {
                                             <tr>
                                                 <td class="value">@item.Color</td>
-                                                <td class="value">@string.Concat(item.Width, "x", item.Height, "x", item.Length)</td>
                                                 <td class="value">@item.Origin</td>
                                             </tr>
                                         }

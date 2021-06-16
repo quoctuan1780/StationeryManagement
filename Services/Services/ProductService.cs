@@ -5,7 +5,6 @@ using Services.Interfacies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -47,7 +46,7 @@ namespace Services.Services
         {
             var product = await _context.Products.FindAsync(productId);
 
-            if(!(product is null))
+            if (!(product is null))
             {
                 product.IsDeleted = true;
 
@@ -126,7 +125,7 @@ namespace Services.Services
         public async Task<IList<Product>> SearchByPriceAsync(string text)
         {
             return await _context.Products.Where(x => x.ProductName.Contains(text)).OrderBy(x => x.Price)
-                .Union(_context.Products.Include(x=>x.Category).Where(x=> x.Category.CategoryName.Contains(text))).ToListAsync();
+                .Union(_context.Products.Include(x => x.Category).Where(x => x.Category.CategoryName.Contains(text))).ToListAsync();
         }
 
         public async Task<Product> UpdateProductAsync(Product product)
