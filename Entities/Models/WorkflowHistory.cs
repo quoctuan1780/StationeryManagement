@@ -15,6 +15,8 @@ namespace Entities.Models
         public string NextStatus { get; set; }
         public string UserEmail { get; set; }
         public string FullName { get; set; }
+        public string  UserRole { get; set; }
+        public string Type { get; set; } = "Đặt hàng";
         public bool IsDeleted { get; set; } = false;
     }
 }

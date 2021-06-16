@@ -23,17 +23,9 @@ namespace Services.Services
         {
             await _context.AddAsync(order);
 
-            if( await _context.SaveChangesAsync() > 0)
-            {
-                _context.SavedChanges += new EventHandler<SavedChangesEventArgs>(OrderedSignal);
-            }
+            await _context.SaveChangesAsync();
 
             return order;
-        }
-
-        public void OrderedSignal(object sender, EventArgs e)
-        {
-            
         }
 
         public async Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress)
@@ -82,6 +74,7 @@ namespace Services.Services
             }
 
             order.Status = STATUS_PREPARING_GOODS;
+            order.ModifiedDate = DateTime.Now;
 
             _context.Orders.Update(order);
 
@@ -149,6 +142,7 @@ namespace Services.Services
             }
 
             order.Status = STATUS_ON_DELIVERY_GOODS;
+            order.ModifiedDate = DateTime.Now;
 
             _context.Orders.Update(order);
 
@@ -170,6 +164,8 @@ namespace Services.Services
             }
 
             order.Status = STATUS_RECEIVED_GOODS;
+            order.ReceivedDate = DateTime.Now;
+            order.ModifiedDate = DateTime.Now;
 
             _context.Orders.Update(order);
 
@@ -216,6 +212,9 @@ namespace Services.Services
             foreach(var item in orders)
             {
                 item.ShipperId = userId;
+                item.ModifiedBy = userId;
+                item.ModifiedDate = DateTime.Now;
+                item.ShipperPickOrderDate = DateTime.Now;
             }
 
             _context.Orders.UpdateRange(orders);
@@ -253,6 +252,111 @@ namespace Services.Services
         public async Task<IList<Order>> GetOrdersWaitToConfirmAsync()
         {
             return await _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM)).OrderBy(x => x.OrderDate).ToListAsync();
+        }
+
+        public async Task<IList<Order>> GetOrdersDeliveredAsync(string userId)
+        {
+            return await _context.Orders.Include(x => x.User).Where(x => x.ShipperId == userId && x.Status.Equals(STATUS_RECEIVED_GOODS)).ToListAsync();
+        }
+
+        public async Task<IList<WorkflowHistory>> GetOrderHistoryAsync(int orderId)
+        {
+            return await _context.WorkflowHistories.Where(x => x.RecordId == orderId.ToString()).OrderBy(x => x.CreatedDate).ToListAsync();
+        }
+
+        public IList<OrderHelper.OrderJoinHelper> GetOrderDelivered()
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join user in _context.Users
+                            on order.ShipperId equals user.Id
+                         where order.Status.Equals(STATUS_RECEIVED_GOODS) orderby order.ReceivedDate descending
+                         select new
+                         {
+                             Order = order,
+                             ShipperName = user.FullName
+                         };
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+            if (result.Any())
+            {
+                foreach (var item in result)
+                {
+                    var temp = new OrderHelper.OrderJoinHelper
+                    {
+                        order = item.Order,
+                        Name = item.ShipperName
+                    };
+
+                    orders.Add(temp);
+                }
+            }
+
+            return orders;
+        }
+
+        public IList<DateTime> GetDateTimeDelivered()
+        {
+            var result = from o in _context.Orders
+                         group o by o.ReceivedDate.Date
+                         into g
+                         select new
+                         {
+                             ReceivedDate = g.Key
+                         };
+            var receivedDates = new List<DateTime>();
+            foreach(var item in result)
+            {
+                receivedDates.Add(item.ReceivedDate);
+            }
+            return receivedDates;
+        }
+
+        public IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate)
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join user in _context.Users
+                            on order.ShipperId equals user.Id
+                         where order.Status.Equals(STATUS_RECEIVED_GOODS)
+                         orderby order.ReceivedDate descending
+                         select new
+                         {
+                             Order = order,
+                             ShipperName = user.FullName
+                         };
+            if(customerId != "null")
+            {
+                result = result.Where(x => x.Order.UserId == customerId);
+            }
+
+            if (shipperName != "null")
+            {
+                result = result.Where(x => x.ShipperName == shipperName);
+            }
+
+            if (receivedDate != "null")
+            {
+                bool resultParse = DateTime.TryParse(receivedDate, out DateTime receivedDateParsed);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.ReceivedDate.Date.Equals(receivedDateParsed.Date));
+                }
+            }
+
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+            if (result.Any())
+            {
+                foreach (var item in result)
+                {
+                    var temp = new OrderHelper.OrderJoinHelper
+                    {
+                        order = item.Order,
+                        Name = item.ShipperName
+                    };
+
+                    orders.Add(temp);
+                }
+            }
+
+            return orders;
         }
     }
 }

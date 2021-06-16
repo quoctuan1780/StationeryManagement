@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+    Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
+    var orderHistory = ViewBag.OrderHistory as IList<Entities.Models.WorkflowHistory>;
+    var str = "r";
+}
+@section Styles {
+    <link href="~/style/css/timeline/timeline.css" rel="stylesheet" type="text/css" />
+}
+<div class="container-fluid">
+    <ul class="timeline">
+        @if (orderHistory != null && orderHistory.Any())
+        {
+            foreach (var item in orderHistory)
+            {
+                <li>
+                    <div class="@string.Concat("direction-", str)">
+                        <div class="flag-wrapper">
+                            <span class="flag">@item.NextStatus</span>
+                            <span class="time-wrapper"><span class="time">@item.CreatedDate</span></span>
+                        </div>
+                        <div class="desc">Trạng thái chuyển đổi: @item.CurrentStatus -> @item.NextStatus</div>
+                        <div class="desc">Người thực hiện: @item.FullName</div>
+                    </div>
+                </li>
+                if (str.Equals("r"))
+                {
+                    str = "l";
+                }
+                else
+                {
+                    str = "r";
+                }
+            }
+        }
+    </ul>
+</div>

@@ -216,5 +216,20 @@ namespace Services.Services
         {
             return await _userManager.IsInRoleAsync(user, role);
         }
+
+        public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
+        {
+            return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        }
+
+        public async Task<IList<User>> GetAllShippersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_SHIPPER);
+        }
+
+        public async Task<IList<User>> GetAllCustomersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_CUSTOMER);
+        }
     }
 }

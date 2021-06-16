@@ -37,6 +37,27 @@ namespace FinalProject.Areas.Shipper.Controllers
             return View();
         }
 
+        public async Task<IActionResult> OrderHistory(int? orderId)
+        {
+            if(orderId is null)
+            {
+                return PartialView(ERROR_404_PAGE_SHIPPER);
+            }
+
+            ViewBag.OrderHistory = await _orderService.GetOrderHistoryAsync(orderId.Value);
+
+            return View();
+        }
+
+        public async Task<IActionResult> OrderDelivered()
+        {
+            var user = await _accountService.GetUserAsync(User);
+
+            ViewBag.Orders = await _orderService.GetOrdersDeliveredAsync(user.Id);
+
+            return View();
+        }
+
         [HttpPut]
         public async Task<int> ConfirmOrder(IList<int> ordersPicked)
         {
@@ -125,6 +146,8 @@ namespace FinalProject.Areas.Shipper.Controllers
                         FullName = user.FullName,
                         UserEmail = user.Email,
                         RecordId = orderId.Value.ToString(),
+                        Type = TYPE_ORDER,
+                        UserRole = ROLE_SHIPPER
                     };
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
@@ -175,6 +198,8 @@ namespace FinalProject.Areas.Shipper.Controllers
                         FullName = user.FullName,
                         UserEmail = user.Email,
                         RecordId = orderId.Value.ToString(),
+                        Type = TYPE_ORDER,
+                        UserRole = ROLE_SHIPPER
                     };
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);

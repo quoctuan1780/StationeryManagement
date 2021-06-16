@@ -34,11 +34,12 @@ namespace FinalProject.Controllers
         private readonly IAddressService _addressService;
         private readonly IDeliveryAddressService _deliveryAddressService;
         private readonly IHubContext<SignalServer> _hubContext;
+        private readonly IWorkflowHistoryService _workflowHistoryService;
 
         public OrderController(IAccountService accountService, ICartService cartService, IConfiguration configuration,
             IPayPalService payPalService, IMoMoService moMoService, IOrderDetailService orderDetailService,
             IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService,
-            IHubContext<SignalServer> hubContext)
+            IHubContext<SignalServer> hubContext, IWorkflowHistoryService workflowHistoryService)
         {
             _accountService = accountService;
             _cartService = cartService;
@@ -50,33 +51,24 @@ namespace FinalProject.Controllers
             _addressService = addressService;
             _deliveryAddressService = deliveryAddressService;
             _hubContext = hubContext;
+            _workflowHistoryService = workflowHistoryService;
         }
         public async Task<IActionResult> Order()
         {
-            try
-            {
-                string userId = _accountService.GetUserId(User);
+            string userId = _accountService.GetUserId(User);
 
-                ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
+            ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
 
-                ViewBag.Carts = await _cartService.GetCartsByUserIdAsync(userId);
+            ViewBag.Carts = await _cartService.GetCartsByUserIdAsync(userId);
 
-                ViewBag.TotalOfCart = _cartService.GetCartTotalByUserId(userId);
+            ViewBag.TotalOfCart = _cartService.GetCartTotalByUserId(userId);
 
-                ViewBag.Provinces = await _addressService.GetProvincesAsync();
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
 
-                ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
-                    await _deliveryAddressService.GetDeliveryAddressesAsync(userId));
-
-            }
-            catch
-            {
-
-            }
+            ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
+                await _deliveryAddressService.GetDeliveryAddressesAsync(userId));
 
             return View();
-
-
         }
 
         [HttpPost]
@@ -181,6 +173,21 @@ namespace FinalProject.Controllers
 
             if (!(order is null))
             {
+                var workFlowHistory = new WorkflowHistory()
+                {
+                    CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                    NextStatus = STATUS_WAITING_CONFIRM,
+                    CreatedBy = order.UserId,
+                    CreatedDate = DateTime.Now,
+                    FullName = user.FullName,
+                    RecordId = order.OrderId.ToString(),
+                    UserEmail = user.Email,
+                    Type = TYPE_ORDER,
+                    UserRole = ROLE_CUSTOMER
+                };
+
+                await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
                 int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                 if(result > 0)
@@ -246,6 +253,73 @@ namespace FinalProject.Controllers
             }
         }
 
+        public async Task<IActionResult> PayPalSuccess(string deliveryAddress, string token, string PayerID)
+        {
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                var user = await _accountService.GetUserAsync(User);
+
+                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+
+                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+
+                var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
+
+                if (!(captureOrderResponse is null))
+                {
+
+                    var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
+
+                    if (!(order is null))
+                    {
+                        var workFlowHistory = new WorkflowHistory()
+                        {
+                            CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                            NextStatus = STATUS_WAITING_CONFIRM,
+                            CreatedBy = order.UserId,
+                            CreatedDate = DateTime.Now,
+                            FullName = user.FullName,
+                            RecordId = order.OrderId.ToString(),
+                            UserEmail = user.Email,
+                            Type = TYPE_ORDER,
+                            UserRole = ROLE_CUSTOMER
+                        };
+
+                        await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
+                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+
+                        if (result > 0)
+                        {
+                            result = await _payPalService
+                                .AddPayPalPaymentAsync(order.OrderId, token, PayerID, captureOrderResult.Links.FirstOrDefault().Href);
+
+                            if (result > 0)
+                            {
+                                transaction.Complete();
+
+                                ViewBag.OrderId = order.OrderId;
+
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                            }
+                        }
+                    }
+
+                    return View();
+                }
+
+                else throw new Exception();
+            }
+            catch
+            {
+                return PartialView(ERROR_PAYMENT_PAGE);
+            }
+        }
+
         public IActionResult MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
         {
             string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
@@ -283,6 +357,21 @@ namespace FinalProject.Controllers
 
                     if (!(order is null))
                     {
+                        var workFlowHistory = new WorkflowHistory()
+                        {
+                            CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                            NextStatus = STATUS_WAITING_CONFIRM,
+                            CreatedBy = order.UserId,
+                            CreatedDate = DateTime.Now,
+                            FullName = user.FullName,
+                            RecordId = order.OrderId.ToString(),
+                            UserEmail = user.Email,
+                            Type = TYPE_ORDER,
+                            UserRole = ROLE_CUSTOMER
+                        };
+
+                        await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
                         int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
                         if (result > 0)
@@ -310,59 +399,6 @@ namespace FinalProject.Controllers
             }
 
             return PartialView(ERROR_PAYMENT_PAGE);
-        }
-
-        public async Task<IActionResult> PayPalSuccess(string deliveryAddress, string token, string PayerID)
-        {
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-            try
-            {
-                var user = await _accountService.GetUserAsync(User);
-
-                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
-
-                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
-
-                var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
-
-                if (!(captureOrderResponse is null))
-                {
-
-                    var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
-
-                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
-
-                    if (!(order is null))
-                    {
-                        int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
-
-                        if (result > 0)
-                        {
-                            result = await _payPalService
-                                .AddPayPalPaymentAsync(order.OrderId, token, PayerID, captureOrderResult.Links.FirstOrDefault().Href);
-
-                            if (result > 0)
-                            {
-                                transaction.Complete();
-
-                                ViewBag.OrderId = order.OrderId;
-
-                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
-                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
-                            }
-                        }
-                    }
-
-
-                    return View();
-                }
-
-                else throw new Exception();
-            }
-            catch
-            {
-                return PartialView(ERROR_PAYMENT_PAGE);
-            }
         }
 
         //public async Task<string> GetDeliveryFeeShip()
