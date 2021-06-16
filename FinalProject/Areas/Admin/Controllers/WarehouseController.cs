@@ -1,4 +1,5 @@
 ﻿using static Common.Constant;
+using static Common.SignalRConstant;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,6 +9,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using static Common.RoleConstant;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -15,14 +18,16 @@ namespace FinalProject.Areas.Admin.Controllers
     [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class WarehouseController : Controller
     {
+        private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
         private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
 
         public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
-            IRecommendationService recommendationService)
+            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
         {
+            _hubContext = hubContext;
             _productService = productService;
             _providerService = providerService;
             _receiptService = receiptService;
@@ -99,7 +104,7 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             if (await _receiptService.RejectReceiptRequestAsync(id) > 0)
                 ViewBag.Message = "Xóa thành công!";
-            return Redirect("~Area/Admin/Warehouse/ListReceiptRequest");
+            return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
 
         
@@ -107,11 +112,12 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             if (await _receiptService.ApproveReceiptRequestAsync(id) > 0)
             {
+                await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
                 await _receiptService.AddReceiptAsync(id);
                 ViewBag.Message = "Đã duyệt!";
             }
                 
-            return Redirect("~Area/Admin/Warehouse/ListReceiptRequest");
+            return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
       
 

@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Services.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,9 +12,12 @@ namespace Services.Interfacies
         Task<bool> AddReceiptDetailAsync(ImportWarehouseDetail importWarehouseDetail);
 
         Task<bool> AddReceiptRequestAsync(ReceiptRequest receiptRequest);
-        Task<int> AddReceiptRequestDetailAsync(ReceiptRequestDetail receiptRequest);
+        Task<int> AddReceiptRequestDetailAsync(List<ReceiptRequestDetail> receiptRequest);
         Task<IList<ReceiptRequest>> GetReceiptRequestsAsync();
-        Task<int> DeleteReceiptRequest(int requesrID);
+        Task<int> DeleteReceiptRequestAsync(int requesrID);
+        Task<int> CountAcceptedRequestReceiptAsync();
+        Task<IList<PercentProcess>> GetListProcessReceiptAsync();
+        Task<int> GetNumberOfProcessingReceiptAsync();
         Task<bool> AddReceiptDetailRequestsAsync(IList<ReceiptRequestDetail> receiptRequestDetails);
         Task<ReceiptRequest> GetReceiptRequestAsync(int id);
         Task<int> ApproveReceiptRequestAsync(int id);

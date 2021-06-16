@@ -7,7 +7,7 @@
     var productJson = Newtonsoft.Json.JsonConvert.SerializeObject(products);
     var user = await userManager.GetUserAsync(User);
 }
-
+    
 <div class="container-fluid">
 
     <h1 align="center">PHIẾU YÊU CẦU NHẬP KHO</h1>
@@ -27,23 +27,10 @@
     }
 
 
-    @using (Html.BeginForm("CreateReceiptRequest", "Warehouse", FormMethod.Post, new { role = "form", area = "Admin", id = "form-receipt-request" }))
+    @using (Html.BeginForm("CreateReceiptRequest", "Home", FormMethod.Post, new { role = "form", area = "Warehouse", id = "form-receipt-request" }))
     {
         @Html.AntiForgeryToken()
 
-        @*<div class="form-group">
-                 @html.labelfor(m => m.userid)
-                 @html.textboxfor(m => m.userid, new
-            {
-                @class = "form-control",
-                @name = "user",
-                @id = "user",
-                @type = "text",
-                @value = user.fullname,
-                @readonly = true
-            })
-                 @html.validationmessagefor(m => m.userid, "", new { @class = "text-danger" })
-             </div>*@
 
         <div class="form-group">
             @Html.LabelFor(m => m.CreateDate)
@@ -65,41 +52,47 @@
             <div class="form-group" id="product-detail">
                 @for (int i = 0; i < Model.Quantity.Count; i++)
                 {
-                    <div class="row">
-                        <div class="col-8">
-                            <select class="selectpicker show-tick form-control"
-                                    id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
-                                <option value="0">Chọn sản phẩm</option>
-                                @if (!(products is null))
+                <div class="row">
+                    <div class="col-4">
+                        <select class="selectpicker show-tick form-control" id="Id"
+                                data-live-search="true" onchange="GetSize()">
+                            <option value="0">Chọn sản phẩm</option>
+                            @if (!(products is null))
+                            {
+                                foreach (var item in products)
                                 {
-                                    foreach (var item in products)
+                                    if (item.Value.Equals(Model.ProductDetailId[i]))
                                     {
-                                        if (item.Value.Equals(Model.ProductDetailId[i]))
-                                        {
-                                            <option value="@item.Value" selected>@item.Text </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@item.Value">@item.Text </option>
-                                        }
-
+                                        <option value="@item.Value" selected>@item.Text </option>
                                     }
-                                }
-                            </select>
-                        </div>
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text </option>
+                                    }
 
-                        <div class="col-2">
-                            <div class="row">
-                                @Html.LabelFor(m => m.Quantity)
-                                <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
-                                <i class="fa fa-minus"></i>
-                            </button>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <select class="selectpicker show-tick form-control"
+                                id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
+                            <option value="0">Chọn kích thước</option>
+                           
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <div class="row">
+                            @Html.LabelFor(m => m.Quantity)
+                            <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
                         </div>
                     </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
                 }
 
             </div>
@@ -109,9 +102,9 @@
         {
             <div class="form-group" id="product-detail">
                 <div class="row">
-                    <div class="col-8">
+                    <div class="col-4">
                         <select class="selectpicker show-tick form-control"
-                                id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
+                                id="Id" data-live-search="true" onchange="GetSize()">
                             <option value="0">Chọn sản phẩm</option>
                             @if (!(products is null))
                             {
@@ -122,7 +115,13 @@
                             }
                         </select>
                     </div>
-
+                    <div class="col-4">
+                        <select class="selectpicker show-tick form-control"
+                                id="ProductDetailId" name="ProductDetailId">
+                            <option value="0">Chọn kích thước</option>
+                            
+                        </select>
+                    </div>
                     <div class="col-2">
                         <div class="row">
                             @Html.LabelFor(m => m.Quantity)
@@ -168,6 +167,38 @@
             });
         });
 
+        function GetSize() {
+            var product = $('#Id').val();
+            $.ajax({
+                url: '/Warehouse/Home/GetProductSize',
+                method: 'GET',
+                async: true,
+                data: { productdetail: product },
+                success: function (data) {
+                    json = JSON.parse(data);
+                    console.log(json);
+                    var selection = document.getElementById('ProductDetailId');
+                    //selection.children().remove();
+                    $.each(json, function (k, v) {
+                        console.log(v);
+                        var opt = document.createElement('option');
+                        opt.value = v.Value;
+                        opt.text = v.Text;
+                        opt.innerHTML = v.Text;
+                        selection.appendChild(opt);
+                        
+                    })
+                    $('.selectpicker').selectpicker({
+                        liveSearch: true,
+                        showSubtext: true,
+                        Size: 10
+                    });
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            })
+        }
         function CheckProductId(e) {
             var product = $(e).val();
             for (var i = 0; i < Products.length; i++)
@@ -177,8 +208,10 @@
                 }
                 if (count == 2) {
                     alert("Sản phẩm đã tồn tại trong danh sách phiếu yêu cầu nhập hàng");
+                    return 0;
                 }
             }
+            
             return 0;
         }
 

@@ -1,6 +1,7 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helpers;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
@@ -109,9 +110,9 @@ namespace Services.Services
                 return false;
         }
 
-        public async Task<int> AddReceiptRequestDetailAsync(ReceiptRequestDetail receiptRequest)
+        public async Task<int> AddReceiptRequestDetailAsync(List<ReceiptRequestDetail> receiptRequest)
         {
-            _context.Add(receiptRequest);
+            await _context.ReceiptRequestDetails.AddRangeAsync(receiptRequest);
             return await _context.SaveChangesAsync();
         }
 
@@ -122,11 +123,23 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<int> DeleteReceiptRequest(int requesrID)
+        public async Task<int> CountAcceptedRequestReceiptAsync()
+        {
+            var result = await _context.ReceiptRequests.Where(x => x.Status == RECEIPT_REQUEST_STATUS_APPROVED).ToListAsync();
+            return result.Count;
+        }
+
+        public async Task<int> DeleteReceiptRequestAsync(int requesrID)
         {
             var rr = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == requesrID).FirstOrDefaultAsync();
             _context.ReceiptRequests.Remove(rr);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetNumberOfProcessingReceiptAsync()
+        {
+            var result = await _context.ImportWarehouses.Where(x => x.Status == RECEIPT_STATUS_PROCESSING).ToListAsync();
+            return result.Count;
         }
 
         public async Task<ReceiptRequest> GetReceiptRequestAsync(int id)
@@ -139,9 +152,26 @@ namespace Services.Services
             return await _context.ReceiptRequests.OrderBy(x => x.CreateDate).ToListAsync();
         }
 
-        public Task<int> RejectReceiptRequestAsync(int id)
+        public async Task<IList<PercentProcess>> GetListProcessReceiptAsync()
         {
-            throw new NotImplementedException();
+            var result = await _context.ImportWarehouses.Include(x => x.ImportWarehouseDetails).Where(x => x.Status == RECEIPT_STATUS_PROCESSING).ToListAsync();
+            var list = new List<PercentProcess>();
+            foreach(var receipt in result)
+            {
+                var percentProcess = new PercentProcess
+                {
+                    RequestId = receipt.ImportWarehouseId,
+                    Percent = receipt.ImportWarehouseDetails.Sum(x => x.ActualQuantity) * 100 / receipt.ImportWarehouseDetails.Sum(x => x.Quantity)
+                };
+                list.Add(percentProcess);
+            }
+            return list;
+        }
+
+        public async Task<int> RejectReceiptRequestAsync(int id)
+        {
+            var result = await _context.ImportWarehouses.Where(x => x.Status == RECEIPT_STATUS_PROCESSING).ToListAsync();
+            return result.Count();
         }
     }
 }

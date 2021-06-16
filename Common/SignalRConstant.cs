@@ -7,5 +7,7 @@
         public const string SIGNAL_COUNT_NEW_RECEPT = "newWarehouse";
         public const string SIGNAL_TOP_PRODUCT = "topProduct";
         public const string SIGNAL_GROUP_ADMIN = "Admin";
+
+        public const string SIGNAL_GROUP_WAREHOUSE = "WarehouseManager";
     }
 }

@@ -8,9 +8,9 @@ namespace Services.Interfacies
     public interface IProductService
     {
         Task<IList<Product>> GetAllProductsAsync();
-
+        Task<string> GetSizeAsync(ProductDetail product);
         Task<Product> AddProductAsync(Product product);
-
+        Task<ProductDetail> GetProductDetailAsync(int id);
         Task<Product> UpdateProductAsync(Product product);
 
         Task<bool> IsExistsProduct(Product product);

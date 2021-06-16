@@ -1,12 +1,15 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
 using Services.Interfacies;
 using System;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -17,12 +20,15 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly IHubContext<SignalServer> _hubContext;
 
-        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService)
+        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService
+            , IHubContext<SignalServer> hubContext)
         {
             _orderService = orderService;
             _accountService = accountService;
             _workflowHistoryService = workflowHistoryService;
+            _hubContext = hubContext;
         }
 
 
@@ -105,6 +111,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
 
                         return CODE_SUCCESS;
                     }

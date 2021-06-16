@@ -9,5 +9,9 @@ namespace Services.Hubs
         {
             return Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
+        public Task WarehouseManagerJoinGroup(string name)
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, name);
+        }
     }
 }

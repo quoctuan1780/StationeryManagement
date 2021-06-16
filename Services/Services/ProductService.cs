@@ -1,12 +1,15 @@
 ﻿using Entities.Data;
 using Entities.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace Services.Services
 {
@@ -89,6 +92,12 @@ namespace Services.Services
                             .FirstOrDefaultAsync();
         }
 
+        public async Task<ProductDetail> GetProductDetailAsync(int id)
+        {
+            var item = await _context.ProductDetails.FindAsync(id);
+            return item;
+        }
+
         //check deteted item
         public async Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
         {
@@ -104,6 +113,24 @@ namespace Services.Services
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
         {
             return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
+        }
+
+        public async Task<string> GetSizeAsync(ProductDetail product)
+        {
+            var result = await _context.ProductDetails.Where(x => x.ProductId == product.ProductId && x.Color == product.Color)
+                .ToListAsync();
+            List<SelectListItem> list = new();
+            foreach (var item in result)
+            {
+                var pro = new SelectListItem()
+                {
+                    Value = item.ProductDetailId.ToString(),
+                    Text = item.Width.ToString() + 'x' + item.Length + 'x' + item.Height
+                };
+                list.Add(pro);
+                
+            }
+            return (JsonConvert.SerializeObject(list));
         }
 
         public async Task<bool> IsExistsProduct(Product product)
