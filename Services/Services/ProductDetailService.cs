@@ -84,9 +84,6 @@ namespace Services.Services
                 if (!(result is null))
                 {
                     result.Color = item.Color;
-                    result.Height = item.Height;
-                    result.Length = item.Length;
-                    result.Width = item.Width;
                     result.Weight = item.Weight;
                     result.Origin = item.Origin;
                     result.Quantity = item.Quantity;
@@ -97,9 +94,6 @@ namespace Services.Services
                     productsDetailUpdate.Add(new ProductDetail()
                     {
                         Color = item.Color,
-                        Height = item.Height,
-                        Length = item.Length,
-                        Width = item.Width,
                         Weight = item.Weight,
                         Origin = item.Origin,
                         Quantity = item.Quantity,

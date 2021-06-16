@@ -40,9 +40,6 @@ namespace FinalProject.Areas.Admin.ViewModels
         public IList<int> ProductsDetailId { get; set; }
         public IList<string> Origins { get; set; }
         public IList<double> Weights { get; set; }
-        public IList<int> Widths { get; set; }
-        public IList<int> Lengths { get; set; }
-        public IList<int> Heights { get; set; }
         public IList<string> Colors { get; set; }
         public IList<int> Quantities { get; set; }
     }

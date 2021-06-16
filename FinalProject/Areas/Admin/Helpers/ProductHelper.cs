@@ -34,10 +34,7 @@ namespace FinalProject.Areas.Admin.Helpers
 
                 var index = model.ProductsDetailId.IndexOf(resultParse);
 
-                model.Widths.RemoveAt(index);
                 model.Weights.RemoveAt(index);
-                model.Lengths.RemoveAt(index);
-                model.Heights.RemoveAt(index);
                 model.Colors.RemoveAt(index);
                 model.Quantities.RemoveAt(index);
                 model.Origins.RemoveAt(index);
@@ -58,12 +55,9 @@ namespace FinalProject.Areas.Admin.Helpers
                 productsDetail.Add(new ProductDetail()
                 {
                     Color = model.Colors[i],
-                    Height = model.Heights[i],
-                    Length = model.Lengths[i],
                     Weight = model.Weights[i],
                     Origin = model.Origins[i],
                     Quantity = model.Quantities[i],
-                    Width = model.Widths[i],
                     ProductId = productId.Value
                 });
             }
@@ -234,9 +228,6 @@ namespace FinalProject.Areas.Admin.Helpers
             {
                 origins.Add(product.ProductDetails[i].Origin);
                 weights.Add(product.ProductDetails[i].Weight);
-                widths.Add(product.ProductDetails[i].Width);
-                lengths.Add(product.ProductDetails[i].Length);
-                heights.Add(product.ProductDetails[i].Height);
                 color.Add(product.ProductDetails[i].Color);
                 productsDetailId.Add(product.ProductDetails[i].ProductDetailId);
                 quantities.Add(product.ProductDetails[i].Quantity);
@@ -246,9 +237,6 @@ namespace FinalProject.Areas.Admin.Helpers
             model.ImagesString = images;
             model.Origins = origins;
             model.Weights = weights;
-            model.Widths = widths;
-            model.Heights = heights;
-            model.Lengths = lengths;
             model.Colors = color;
             model.Quantities = quantities;
 

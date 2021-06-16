@@ -53,9 +53,6 @@ namespace FinalProject.Areas.Admin.Controllers
                     { "productDetailId", item.ProductDetailId },
                     { "productName", item.Product.ProductName },
                     { "color", item.Color },
-                    { "length", item.Length},
-                    { "height", item.Height },
-                    { "width", item.Width },
                     { "totalQuantity", item.Quantity },
                     { "quantityOrdered", item.QuantityOrdered },
                     { "RemainingQuantity", item.RemainingQuantity }
@@ -80,9 +77,6 @@ namespace FinalProject.Areas.Admin.Controllers
                     { "productDetailId", item.ProductDetailId },
                     { "productName", item.Product.ProductName },
                     { "color", item.Color },
-                    { "length", item.Length},
-                    { "height", item.Height },
-                    { "width", item.Width },
                     { "totalQuantity", item.Quantity },
                     { "quantityOrdered", item.QuantityOrdered },
                     { "RemainingQuantity", item.RemainingQuantity }
@@ -140,7 +134,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
                 {
                     ReceiptRequestDetail receiptRequestDetail;
-                    List<ReceiptRequestDetail> receiptRequestDetails = new List<ReceiptRequestDetail>();
+                    var receiptRequestDetails = new List<ReceiptRequestDetail>();
                     for (var i = 0; i < model.Quantity.Count; i++)
                     {
                         receiptRequestDetail = new ReceiptRequestDetail
@@ -182,37 +176,35 @@ namespace FinalProject.Areas.Admin.Controllers
         {  
             if (ModelState.IsValid)
             {
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                try
                 {
-                    try
+                    var receipt = new ImportWarehouse()
                     {
-                        var receipt = new ImportWarehouse()
-                        {
-                            CreateDate = DateTime.Now,
+                        CreateDate = DateTime.Now,
 
-                            // get from previous view
-                            //ReceiptRequestId = model.,
-                            //UserId = UserManager.getCuurentUser();
-                            Status = "Mới",
-                            Total = model.Total
+                        // get from previous view
+                        //ReceiptRequestId = model.,
+                        //UserId = UserManager.getCuurentUser();
+                        Status = "Mới",
+                        Total = model.Total
+                    };
+                    for (int i = 0; i < model.ProductId.Count; i++)
+                    {
+                        var receiptDetail = new ImportWarehouseDetail()
+                        {
+                            //ImportWarehouseId = 
                         };
-                        for (int i = 0; i < model.ProductId.Count;i++)
-                        {
-                            var receiptDetail = new ImportWarehouseDetail()
-                            {
-                                //ImportWarehouseId = 
-                            };
-                            
-                        }
-                        /*if(_receiptService.AddReceipt(receipt){
-                            
-                        };*/
 
                     }
-                    catch
-                    {
-                        ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
-                    }
+                    /*if(_receiptService.AddReceipt(receipt){
+
+                    };*/
+
+                }
+                catch
+                {
+                    ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
                 }
             }
 

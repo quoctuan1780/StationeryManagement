@@ -19,7 +19,7 @@ $(document).ready(function () {
     });
 });
 
-function setSizeQuantity(max, productId, color, origin, size) {
+function setSizeQuantity(max, productId, color, origin) {
     $("#Quantity").attr({
         "max": max,
         "min": 1
@@ -30,8 +30,6 @@ function setSizeQuantity(max, productId, color, origin, size) {
     $('#detail-quantity').text(max + " sản phẩm sẵn có");
 
     $('#type-choose').text(color);
-
-    document.getElementById('product-detail-size').textContent = size;
 
     document.getElementById('product-detail-origin').textContent = origin;
 
