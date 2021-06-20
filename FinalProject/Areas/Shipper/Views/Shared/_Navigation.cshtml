@@ -162,7 +162,7 @@
                     <span class="mr-2 d-none d-lg-inline text-gray-600 small">@user.FullName</span>
                     @if (user.Image != null)
                     {
-                        <img class="img-profile rounded-circle" src="~/images/user/@user.Email/@user.Image">
+                        <img class="img-profile rounded-circle" src="~/images/user/@user.Email.Replace('+', 'a')/@user.Image">
                     }
                     else
                     {

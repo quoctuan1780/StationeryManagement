@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Models
 {
@@ -31,5 +32,7 @@ namespace Entities.Models
         public virtual IList<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
 
         public bool IsDeleted { get; set; } = false;
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
     }
 }

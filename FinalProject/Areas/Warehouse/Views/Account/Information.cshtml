@@ -1,7 +1,7 @@
-﻿@model FinalProject.Areas.Shipper.ViewModels.InformationViewModel
+﻿@model FinalProject.Areas.Warehouse.ViewModels.InformationViewModel
 @{
     ViewData["Title"] = "Thông tin tài khoản";
-    Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
 
     var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
 
@@ -41,7 +41,7 @@
                 <div class="alert alert-danger">@ViewBag.MessageDanger</div>
             }
             <form class="needs-validation was-validated" enctype="multipart/form-data"
-                  asp-controller="Account" asp-action="Information" asp-area="Shipper" method="post">
+                  asp-controller="Account" asp-action="Information" asp-area="Warehouse" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="UserId" value="@Model.UserId" />
                 <input type="hidden" name="ImageLink" value="@Model.ImageLink" />
@@ -225,7 +225,7 @@
             else
 
                 await $.ajax({
-                    url: '/Shipper/Account/Ward',
+                    url: '/Warehouse/Account/Ward',
                     method: 'GET',
                     async: true,
                     data: { districtId: districtId },
@@ -290,7 +290,7 @@
             }
             else
                 await $.ajax({
-                    url: '/Shipper/Account/District',
+                    url: '/Warehouse/Account/District',
                     method: 'GET',
                     async: true,
                     data: { provinceId: provinceId },

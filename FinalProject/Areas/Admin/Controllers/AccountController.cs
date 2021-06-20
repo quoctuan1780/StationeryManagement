@@ -125,6 +125,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     Gender = model.Gender,
                     Image = image,
                     WardCode = model.WardCode,
+                    EmailConfirmed = true
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -149,7 +150,7 @@ namespace FinalProject.Areas.Admin.Controllers
                         + EMAIL_HEADER_END + "Chúc mừng bạn đã trở thành thành viên của gia đình Stationary Store!" +
                         "\n Đây là tài khoản và mật khẩu của bạn:" +
                         "\n Tài khoản: "+user.UserName+
-                        "\n Mật khẩu: "+password+"\n Vui lòng không chia sẻ với bất cứ ai thông tin đăng nhập của bạn!"+ EMAIL_BODY_END;
+                        "\n Mật khẩu: "+password+"\n Vui lòng không chia sẻ với bất cứ ai thông tin đăng nhập của bạn!";
 
                     await _emailSender.SendEmailAsync(user.Email, subject, body);
                     return RedirectToAction("Index");

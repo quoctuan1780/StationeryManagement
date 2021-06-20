@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Services.Hubs;
 using Services.Interfacies;
 using System;
@@ -30,9 +32,19 @@ namespace FinalProject.Areas.Shipper.Controllers
             _workflowHistoryService = workflowHistoryService;
             _hubContext = hubContext;
         }
-        public IActionResult OrderWaitPick()
+        public async Task<IActionResult> OrderWaitPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY)
         {
-            ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+            ViewBag.Addresses = await _orderService.GetAddressinOrdersAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+
+            if (customer != EMPTY || orderDate !=  EMPTY || address != EMPTY)
+            {
+                ViewBag.Orders = _orderService.GetOrdersWaitToPick(customer, orderDate, address);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+            }
 
             return View();
         }
@@ -49,59 +61,92 @@ namespace FinalProject.Areas.Shipper.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OrderDelivered()
+        public async Task<IActionResult> OrderDelivered(string receivedDate = EMPTY, string customer = EMPTY, string shipper = EMPTY)
         {
             var user = await _accountService.GetUserAsync(User);
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
 
-            ViewBag.Orders = await _orderService.GetOrdersDeliveredAsync(user.Id);
+            if (receivedDate != null && !receivedDate.Equals(EMPTY) || !customer.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.GetDateTimeDeliveredByFilter(customer, shipper, receivedDate, user.Id);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.GetOrderDelivered(user.Id);
+            }
 
             return View();
         }
 
         [HttpPut]
-        public async Task<int> ConfirmOrder(IList<int> ordersPicked)
+        public async Task<string> ConfirmOrder(IList<int> ordersPicked, IList<string> rowVersion)
         {
             if(ordersPicked is null)
             {
-                return ERROR_CODE_NULL;
+                return ERROR_CODE_NULL.ToString();
             }
             try
             {
+                var rowVersionBytes = new List<byte[]>();
+                foreach(var item in rowVersion)
+                {
+                    rowVersionBytes.Add(Convert.FromBase64String(item));
+                }
+
                 var user = await _accountService.GetUserAsync(User);
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                var result = await _orderService.ShipperConfirmPickOrdersAsync(ordersPicked, user.Id);
-                if (result > 0)
+                var result = await _orderService.ShipperConfirmPickOrdersAsync(ordersPicked, user.Id, rowVersionBytes);
+
+                var jsonConvert = JsonConvert.DeserializeObject<JObject>(result);
+
+                if (jsonConvert.Count > 0)
                 {
                     transaction.Complete();
 
                     await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
                     await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_DELIVERY);
 
-                    return CODE_SUCCESS;
+                    return result;
                 }
             }
             catch
             {
             }
 
-            return ERROR_CODE_SYSTEM;
+            return ERROR_CODE_SYSTEM.ToString();
         }
 
-        public async Task<IActionResult> OrderWaitDelivery()
+        public async Task<IActionResult> OrderWaitDelivery(string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
         {
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            ViewBag.Addresses = await _orderService.GetAddressinOrdersAsync();
             var user = await _accountService.GetUserAsync(User);
-
-            ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync(user.Id);
+            if (customer != EMPTY || pickedOrderDate != EMPTY || address != EMPTY)
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync(user.Id, customer, pickedOrderDate, address);
+            }
+            else
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitDeliveryAsync(user.Id);
+            }
 
             return View();
         }
 
-        public async Task<IActionResult> OrderDelivery()
+        public async Task<IActionResult> OrderDelivery(string exportWarehouseDate = EMPTY, string receivedDeliveryDate = EMPTY, string customer = EMPTY, string shipper = EMPTY)
         {
             var user = await _accountService.GetUserAsync(User);
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            ViewBag.Warehouses = await _accountService.GetAllWarehouseManagementsAsync();
 
-            ViewBag.Orders = await _orderService.GetOrdersDeliveryAsync(user.Id);
-
+            if (exportWarehouseDate != null || receivedDeliveryDate != null || !customer.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, receivedDeliveryDate, EMPTY, shipper, user.Id, customer);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.GetOrdersWaitDelivery();
+            }
             return View();
         }
 

@@ -161,7 +161,7 @@
                     <span class="mr-2 d-none d-lg-inline text-gray-600 small">@user.FullName</span>
                     @if (!user.Image.Equals("admin.png"))
                     {
-                        <img class="img-profile rounded-circle" src="~/images/user/@user.Email/@user.Image">
+                        <img class="img-profile rounded-circle" src="~/images/user/@user.Email.Replace("+", "a")/@user.Image">
                     }
                     else
                     {
@@ -170,11 +170,11 @@
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" asp-action="Information" asp-controller="Account" asp-area="Warehouse">
                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Thông tin cá nhân
                     </a>
-                    <a class="dropdown-item" href="#">
-                        <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Cài đặt
+                    <a class="dropdown-item" asp-action="ChangePassword" asp-controller="Account" asp-area="Warehouse">
+                        <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Đổi mật khẩu
                     </a>
                     <a class="dropdown-item" href="#">
                         <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i> Nhật ký hoạt động
