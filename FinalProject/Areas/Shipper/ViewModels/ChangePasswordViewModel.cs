@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FinalProject.Areas.Shipper.ViewModels
 {
@@ -25,5 +21,14 @@ namespace FinalProject.Areas.Shipper.ViewModels
         [DisplayName("Nhập lại mật khẩu")]
         [Compare("NewPass", ErrorMessage = "Mật khẩu không khớp!")]
         public string ConfirmedPass { get; set; }
+        [Required(ErrorMessage = "Mật khẩu cũ không được để trống")]
+        public string OldPassword { get; set; }
+
+        [Required(ErrorMessage = "Mật khẩu mới không được để trống")]
+        public string NewPassword { get; set; }
+
+        [Required(ErrorMessage = "Mật khẩu nhập lại không được để trống")]
+        [Compare("NewPassword", ErrorMessage = "Hai mật khẩu không giống nhau")]
+        public string ConfirmPassword { get; set; }
     }
 }

@@ -13,5 +13,9 @@ namespace Services.Hubs
         {
             return Groups.AddToGroupAsync(Context.ConnectionId, name);
         }
+        public Task ShipperJoinGroup(string groupName)
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
     }
 }

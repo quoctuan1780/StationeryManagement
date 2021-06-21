@@ -1,5 +1,6 @@
 ﻿using Entities.Models;
 using Services.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace Services.Interfacies
         IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick();
         Task<IList<Order>> GetOrdersWaitToConfirmAsync();
         Task<IList<Order>> GetOrdersDeliveryAsync(string userId);
+        Task<IList<Order>> GetOrdersDeliveredAsync(string userId);
         Task<int> AdminConfirmOrderAsync(int orderId);
         Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId);
         Task<int> ShipperConfirmOrderAsync(int orderId);
@@ -31,5 +33,9 @@ namespace Services.Interfacies
         Task<int> CountOrdersDeliveredAsync();
         Task<string> GetTotalSalesPerMonthsAsync();
         Task<string> GetTotalPurchasePerMonthsAsync();
+        Task<IList<WorkflowHistory>> GetOrderHistoryAsync(int orderId);
+        IList<OrderHelper.OrderJoinHelper> GetOrderDelivered();
+        IList<DateTime> GetDateTimeDelivered();
+        IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate);
     }
 }

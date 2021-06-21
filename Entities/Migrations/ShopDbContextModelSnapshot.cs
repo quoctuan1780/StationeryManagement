@@ -612,14 +612,8 @@ namespace Entities.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Height")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<int>("Length")
-                        .HasColumnType("int");
 
                     b.Property<string>("Origin")
                         .HasColumnType("nvarchar(max)");
@@ -638,9 +632,6 @@ namespace Entities.Migrations
 
                     b.Property<double>("Weight")
                         .HasColumnType("float");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("int");
 
                     b.HasKey("ProductDetailId");
 
@@ -1065,7 +1056,13 @@ namespace Entities.Migrations
                     b.Property<string>("RecordId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("WorkflowHistoryId");

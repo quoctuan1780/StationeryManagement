@@ -249,7 +249,21 @@ namespace Services.Services
             userupdate.Image = user.Image;
             _context.Update(user);
             return await _context.SaveChangesAsync();
+        }
 
+        public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
+        {
+            return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        }
+
+        public async Task<IList<User>> GetAllShippersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_SHIPPER);
+        }
+
+        public async Task<IList<User>> GetAllCustomersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_CUSTOMER);
         }
     }
 }

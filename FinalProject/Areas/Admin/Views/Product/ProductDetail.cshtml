@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var productDetail = ViewBag.ProductDetail as IList<Entities.Models.ProductDetail>;
@@ -22,9 +21,6 @@
                             <th>Xuất xứ</th>
                             <th>Trọng lượng (KG)</th>
                             <th>Màu sắc</th>
-                            <th>Chiều dài</th>
-                            <th>Chiều rộng</th>
-                            <th>Chiều cao</th>
                             <th>Số lượng</th>
                             <th>Số lượng đã đặt</th>
                             <th>Số lượng còn lại</th>
@@ -40,9 +36,6 @@
                                     <td>@item.Origin</td>
                                     <td>@item.Weight</td>
                                     <td>@item.Color</td>
-                                    <td>@item.Length</td>
-                                    <td>@item.Width</td>
-                                    <td>@item.Height</td>
                                     <td>@item.Quantity</td>
                                     <td>@item.QuantityOrdered</td>
                                     <td>@item.RemainingQuantity</td>

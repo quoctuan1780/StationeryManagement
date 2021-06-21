@@ -48,13 +48,16 @@ namespace FinalProject
                         UserName = AdminAccountDefaultConstant.USERNAME,
                         Email = AdminAccountDefaultConstant.EMAIL,
                         FullName = AdminAccountDefaultConstant.FULLNAME,
-                        DateOfBirth = AdminAccountDefaultConstant.DATEOFBIRTH
+                        DateOfBirth = AdminAccountDefaultConstant.DATEOFBIRTH,
+                        CreateDate = DateTime.Now,
+                        ModifyDate = DateTime.Now,
+                        IsDeleted = false,
+                        EmailConfirmed = true
                     };
 
                     var result = userManager.
                         CreateAsync(adminUser, AdminAccountDefaultConstant.PASSWORD).GetAwaiter().GetResult();
 
-                    // add role to user
                     userManager.AddToRoleAsync(adminUser, adminRole.Name).GetAwaiter().GetResult();
                 }
             }

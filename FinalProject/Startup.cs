@@ -32,7 +32,7 @@ namespace FinalProject
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<ShopDbContext>(options => 
+            services.AddDbContext<ShopDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString(Constant.CONNECTION_STRING)));
 
             services.AddIdentity<User, IdentityRole>(options =>
@@ -69,6 +69,7 @@ namespace FinalProject
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             services.AddScoped<IBannerService, BannerService>();
             services.AddTransient<IHubService, HubService>();
+            services.AddTransient<IHubShipperService, HubShipperService>();
             #endregion
 
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
@@ -145,6 +146,7 @@ namespace FinalProject
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

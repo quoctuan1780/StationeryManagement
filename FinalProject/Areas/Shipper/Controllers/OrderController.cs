@@ -1,6 +1,8 @@
 ﻿using Entities.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 
 namespace FinalProject.Areas.Shipper.Controllers
 {
@@ -17,17 +20,40 @@ namespace FinalProject.Areas.Shipper.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
-        private IWorkflowHistoryService _workflowHistoryService;
+        private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly IHubContext<SignalServer> _hubContext;
 
-        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService)
+        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext)
         {
             _orderService = orderService;
             _accountService = accountService;
             _workflowHistoryService = workflowHistoryService;
+            _hubContext = hubContext;
         }
         public IActionResult OrderWaitPick()
         {
             ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+
+            return View();
+        }
+
+        public async Task<IActionResult> OrderHistory(int? orderId)
+        {
+            if(orderId is null)
+            {
+                return PartialView(ERROR_404_PAGE_SHIPPER);
+            }
+
+            ViewBag.OrderHistory = await _orderService.GetOrderHistoryAsync(orderId.Value);
+
+            return View();
+        }
+
+        public async Task<IActionResult> OrderDelivered()
+        {
+            var user = await _accountService.GetUserAsync(User);
+
+            ViewBag.Orders = await _orderService.GetOrdersDeliveredAsync(user.Id);
 
             return View();
         }
@@ -47,6 +73,9 @@ namespace FinalProject.Areas.Shipper.Controllers
                 if (result > 0)
                 {
                     transaction.Complete();
+
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
+                    await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_DELIVERY);
 
                     return CODE_SUCCESS;
                 }
@@ -85,6 +114,8 @@ namespace FinalProject.Areas.Shipper.Controllers
 
             ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
 
+            ViewBag.User = await _accountService.GetUserAsync(User);
+
             return View();
         }
 
@@ -115,6 +146,8 @@ namespace FinalProject.Areas.Shipper.Controllers
                         FullName = user.FullName,
                         UserEmail = user.Email,
                         RecordId = orderId.Value.ToString(),
+                        Type = TYPE_ORDER,
+                        UserRole = ROLE_SHIPPER
                     };
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
@@ -122,6 +155,10 @@ namespace FinalProject.Areas.Shipper.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
+                        await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_DELIVERY);
+                        await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_DELIVERING);
 
                         return CODE_SUCCESS;
                     }
@@ -161,6 +198,8 @@ namespace FinalProject.Areas.Shipper.Controllers
                         FullName = user.FullName,
                         UserEmail = user.Email,
                         RecordId = orderId.Value.ToString(),
+                        Type = TYPE_ORDER,
+                        UserRole = ROLE_SHIPPER
                     };
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
@@ -168,6 +207,10 @@ namespace FinalProject.Areas.Shipper.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+
+                        await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_DELIVERING);
+
+                        await _hubContext.Clients.User(user.Id).SendAsync(SIGNAL_COUNT_ORDER_DELIVERED);
 
                         return CODE_SUCCESS;
                     }

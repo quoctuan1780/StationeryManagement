@@ -110,7 +110,7 @@
                 }
             }
             
-            if (countErrorValidate > 0) {
+            if (countErrorValidate > 0 || Quantities.length === 0) {
                 Swal.fire({
                     title: 'Thông báo',
                     text: "Số lượng không được để trống! ",

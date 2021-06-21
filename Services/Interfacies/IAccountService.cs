@@ -30,6 +30,7 @@ namespace Services.Interfacies
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);
         Task<IdentityResult> CreateAccountAsync(User user, string role,string password);
         Task<IdentityResult> AddRoleAsync(User user, string role);
+        Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword);
 
         Task<IList<User>> GetAllEmployeesByRoleAync(string role);
         Task<int> CountAccountContainsTextAsync(string text);
@@ -38,5 +39,7 @@ namespace Services.Interfacies
         Task<bool> IsInRoleAsync(User user, string role);
         Task<int> DeleteUser(string id);
         Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass);
+        Task<IList<User>> GetAllShippersAsync();
+        Task<IList<User>> GetAllCustomersAsync();
     }
 }

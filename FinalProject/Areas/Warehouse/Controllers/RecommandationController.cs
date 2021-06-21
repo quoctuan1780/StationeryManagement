@@ -57,9 +57,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     { "productDetailId", item.ProductDetailId },
                     { "productName", item.Product.ProductName },
                     { "color", item.Color },
-                    { "length", item.Length},
-                    { "height", item.Height },
-                    { "width", item.Width },
                     { "totalQuantity", item.Quantity },
                     { "quantityOrdered", item.QuantityOrdered },
                     { "RemainingQuantity", item.RemainingQuantity }

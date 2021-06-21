@@ -1,6 +1,9 @@
 ﻿using Entities.Data;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -20,6 +23,11 @@ namespace Services.Services
             await _context.SaveChangesAsync();
 
             return workflowHistory;
+        }
+
+        public async Task<IList<WorkflowHistory>> GetWorkflowHistoriesAsync(string userId)
+        {
+            return await _context.WorkflowHistories.Where(x => x.CreatedBy == userId && x.IsDeleted == false).ToListAsync();
         }
     }
 }

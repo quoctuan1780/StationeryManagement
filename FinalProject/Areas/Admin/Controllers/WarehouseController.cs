@@ -1,5 +1,7 @@
 ﻿using static Common.Constant;
 using static Common.SignalRConstant;
+using static Common.RoleConstant;
+using static Common.MessageConstant;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,9 +10,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using static Common.RoleConstant;
 using Microsoft.AspNetCore.SignalR;
 using Services.Hubs;
+using System.Transactions;
+using Entities.Models;
+using FinalProject.Areas.Admin.ViewModels;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -52,9 +56,6 @@ namespace FinalProject.Areas.Admin.Controllers
                     { "productDetailId", item.ProductDetailId },
                     { "productName", item.Product.ProductName },
                     { "color", item.Color },
-                    { "length", item.Length},
-                    { "height", item.Height },
-                    { "width", item.Width },
                     { "totalQuantity", item.Quantity },
                     { "quantityOrdered", item.QuantityOrdered },
                     { "RemainingQuantity", item.RemainingQuantity }
@@ -69,8 +70,6 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
             return await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
-
-            
         }
 
 
@@ -101,6 +100,50 @@ namespace FinalProject.Areas.Admin.Controllers
         }
       
 
+        [HttpPost]
+        public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
+        {
+            using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)) { 
+            var receiptRequest = new ReceiptRequest
+            {
+                CreateDate = model.CreateDate,
+                Status = model.Status,
+                //UserId = model.UserId
+            };
+
+                if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
+                {
+                    ReceiptRequestDetail receiptRequestDetail;
+                    var receiptRequestDetails = new List<ReceiptRequestDetail>();
+                    for (var i = 0; i < model.Quantity.Count; i++)
+                    {
+                        receiptRequestDetail = new ReceiptRequestDetail
+                        {
+                            ReceiptRequestId = receiptRequest.ReceiptRequestId,
+                            ProductDetailId = model.ProductDetailId[i],
+                            Quantity = model.Quantity[i],
+                            Status = "Chờ xử lý"
+
+                        };
+                        receiptRequestDetails.Add(receiptRequestDetail);
+                    }
+
+                    if (await _receiptService.AddReceiptDetailRequestsAsync(receiptRequestDetails))
+                    {
+                        transaction.Complete();
+                        Redirect("/Admin/Warehouse/Index");
+
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Thêm phiếu nhập lỗi";
+                       
+                    }
+                }
+            }
+            return View(model);
+
+        }
 
         public async Task<string> GetColor(int productID)
         {
@@ -114,7 +157,45 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
+        [HttpPost]
+        public IActionResult CreateReceipt(ReceiptViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                try
+                {
+                    var receipt = new ImportWarehouse()
+                    {
+                        CreateDate = DateTime.Now,
 
+                        // get from previous view
+                        //ReceiptRequestId = model.,
+                        //UserId = UserManager.getCuurentUser();
+                        Status = "Mới",
+                        Total = model.Total
+                    };
+                    for (int i = 0; i < model.ProductId.Count; i++)
+                    {
+                        var receiptDetail = new ImportWarehouseDetail()
+                        {
+                            //ImportWarehouseId = 
+                        };
+
+                    }
+                    /*if(_receiptService.AddReceipt(receipt){
+
+                    };*/
+
+                }
+                catch
+                {
+                    ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
+                }
+
+            }
+            return View(model);
+        }
         [HttpGet]
         public JsonResult GetProvider(int productId)
         {

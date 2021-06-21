@@ -1,0 +1,242 @@
+﻿@using static Common.Constant
+@{
+    ViewData["Title"] = "Đơn hàng đã giao";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var orders = ViewBag.Orders as IList<Services.Helpers.OrderHelper.OrderJoinHelper>;
+    var shippers = ViewBag.Shippers as IList<Entities.Models.User>;
+    var customers = ViewBag.Customers as IList<Entities.Models.User>;
+    var receivedDates = ViewBag.ReceivedDates as IList<DateTime>;
+    var query = Html.ViewContext.HttpContext.Request.Query;
+    string shipper = null;
+    string customer = null;
+    string receivedDate = null;
+
+    if (query.Keys.Contains("receivedDate"))
+    {
+        receivedDate = query.First(x => x.Key.Equals("receivedDate")).Value;
+    }
+    if (query.Keys.Contains("shipper"))
+    {
+        shipper = query.First(x => x.Key.Equals("shipper")).Value;
+    }
+    if (query.Keys.Contains("customer"))
+    {
+        customer = query.First(x => x.Key.Equals("customer")).Value;
+    }
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hàng đã giao</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+                       role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                        <h6 class="m-0 font-weight-bold text-primary">Bộ lọc</h6>
+                    </a>
+                    <div class="collapse show" id="collapseCardExample">
+                        <div class="card-body">
+                            <div class="row d-flex">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo người giao hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="shipper" data-live-search="true">
+                                            <option value="null">Chọn người giao hàng</option>
+                                            @if (shipper == null)
+                                            {
+                                                foreach (var item in shippers)
+                                                {
+                                                    <option value="@item.FullName">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in shippers)
+                                                {
+                                                    if (item.FullName.Equals(shipper))
+                                                    {
+                                                        <option value="@item.FullName" selected>@item.FullName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.FullName">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo ngày giao hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="received-date" data-live-search="true">
+                                            <option value="null">Chọn ngày giao hàng</option>
+                                            @if (receivedDate == null)
+                                            {
+                                                foreach (var item in receivedDates)
+                                                {
+                                                    <option value="@item">@item.ToShortDateString()</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in receivedDates)
+                                                {
+                                                    if (item.ToString().Equals(receivedDate))
+                                                    {
+                                                        <option value="@item" selected>@item.ToShortDateString()</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@item">@item.ToShortDateString()</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo khách hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="customer" data-live-search="true">
+                                            <option value="null">Chọn khách hàng</option>
+                                            @if (customer == null)
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    <option value="@item.Id">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    if (item.Id.Equals(customer))
+                                                    {
+                                                        <option value="@item.Id" selected>@item.FullName</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@item.Id">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <button class="btn btn-primary" onclick="filter()">Lọc</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Tên khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Ngày giao hàng</th>
+                            <th>Người giao hàng</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Tổng tiền (VNĐ)</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!(orders is null))
+                        {
+                            foreach (var item in orders)
+                            {
+                                <tr>
+                                    <td>@item.order.OrderId</td>
+                                    <td>@item.order.User.FullName</td>
+                                    <td>@item.order.OrderDate.Date.ToShortDateString()</td>
+                                    <td>@item.order.ReceivedDate.Date.ToShortDateString()</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.order.PaymentMethod</td>
+                                    <td>@item.order.Total</td>
+                                    @switch (item.order.Status)
+                                    {
+                                        case STATUS_RECEIVED_GOODS:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                        case STATUS_WAITING_EVALUATE:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                        case STATUS_EVALUATED:
+                                            <td class="alert alert-success">@item.order.Status</td>
+                                            break;
+                                    }
+                                    <td>
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.order.OrderId">
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{ 
+    <script>
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+
+        function filter() {
+            var shipper = $('#shipper').val();
+            var customer = $('#customer').val();
+            var receivedDate = $('#received-date').val();
+            var url = '/Admin/Order/OrderDelivered?receivedDate=' + receivedDate + '&customer=' + customer +
+                '&shipper=' + shipper;
+
+            window.location.href = encodeURI(url);
+        }
+    </script>
+}
+@*@section Scripts{ 
+    <script>
+        $(document).ready(function () {
+            $('#table').DataTable({
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+}*@

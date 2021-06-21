@@ -4,6 +4,7 @@
     ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
     var order = ViewBag.Order as Entities.Models.Order;
+    var user = ViewBag.User as Entities.Models.User;
     string address = "";
 
     if (!(order is null))
@@ -148,12 +149,14 @@
                         }
                         break;
                     case STATUS_ON_DELIVERY_GOODS:
-                        if (User.IsInRole(ROLE_SHIPPER))
+                        if (User.IsInRole(ROLE_SHIPPER) && order.ShipperId == user.Id)
                         {
                             <button class="btn btn-success btn-sm" onclick="shipperConfirmDelivered(@order.OrderId)">Xác nhận đã giao hàng</button>
                         }
                         break;
                 }
+                <a class="btn btn-success btn-sm" asp-action="OrderHistory" asp-controller="Order"
+                   asp-area="Shipper" asp-route-orderId="@order.OrderId">Xem lịch sử</a>
             </div>
         </div>
     </div>

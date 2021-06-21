@@ -180,7 +180,13 @@
         public const string MOMO_JSON_CAPTURE_MOMO_WALLET = "captureMoMoWallet";
         #endregion
 
+        #region Type Workflow History
+        public const string TYPE_ORDER = "Đặt hàng";
+        public const string TYPE_IMPORT_WAREHOUSE = "Nhập kho";
+        #endregion
+
         #region Status
+        public const string STATUS_CONFIRMED_PAYMENT = "xác nhận đã thanh toán";
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
         public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";

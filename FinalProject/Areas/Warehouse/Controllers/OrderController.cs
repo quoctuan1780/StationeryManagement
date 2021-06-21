@@ -23,8 +23,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly IAccountService _accountService;
         private IWorkflowHistoryService _workflowHistoryService;
 
-        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService,
-            IHubContext<SignalServer> hubContext)
+        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext)
         {
             _hubContext = hubContext;
             _orderService = orderService;
@@ -85,6 +84,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     {
                         transaction.Complete();
                         await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
+
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
+
                         return CODE_SUCCESS;
                     }
                 }
