@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210603151306_setdefaultisddeleted")]
+    partial class setdefaultisddeleted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -612,8 +614,14 @@ namespace Entities.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
 
                     b.Property<string>("Origin")
                         .HasColumnType("nvarchar(max)");
@@ -632,6 +640,9 @@ namespace Entities.Migrations
 
                     b.Property<double>("Weight")
                         .HasColumnType("float");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("int");
 
                     b.HasKey("ProductDetailId");
 
@@ -782,13 +793,11 @@ namespace Entities.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ReceiptRequestId");
 
                     b.HasIndex("ReceiptRequestId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ReceiptRequest");
                 });
@@ -835,18 +844,13 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.Property<int>("ProductDetailId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("RecommendationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductDetailId", "RecommendationId");
-
-                    b.HasIndex("ProductDetailId");
+                    b.HasKey("ProductId", "RecommendationId");
 
                     b.HasIndex("ProductId");
 
@@ -919,9 +923,6 @@ namespace Entities.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -952,9 +953,6 @@ namespace Entities.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTime>("ModifyDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -1056,13 +1054,7 @@ namespace Entities.Migrations
                     b.Property<string>("RecordId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserRole")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("WorkflowHistoryId");
@@ -1475,15 +1467,6 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entities.Models.ReceiptRequest", b =>
-                {
-                    b.HasOne("Entities.Models.User", "User")
-                        .WithMany("ReceiptRequests")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entities.Models.ReceiptRequestDetail", b =>
                 {
                     b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
@@ -1505,15 +1488,11 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
+                    b.HasOne("Entities.Models.Product", "Product")
                         .WithMany("RecommendationDetails")
-                        .HasForeignKey("ProductDetailId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Entities.Models.Product", null)
-                        .WithMany("RecommendationDetails")
-                        .HasForeignKey("ProductId");
 
                     b.HasOne("Entities.Models.Recommendation", "Recommendation")
                         .WithMany("RecommendationDetails")
@@ -1521,7 +1500,7 @@ namespace Entities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductDetail");
+                    b.Navigation("Product");
 
                     b.Navigation("Recommendation");
                 });
@@ -1678,8 +1657,6 @@ namespace Entities.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ReceiptRequestDetails");
-
-                    b.Navigation("RecommendationDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Provider", b =>
@@ -1729,8 +1706,6 @@ namespace Entities.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("RatingDetails");
-
-                    b.Navigation("ReceiptRequests");
                 });
 
             modelBuilder.Entity("Entities.Models.Ward", b =>

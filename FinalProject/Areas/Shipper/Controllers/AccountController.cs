@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Shipper.ViewModels;
 using FinalProject.Heplers;
 using Microsoft.AspNetCore.Authentication;
@@ -40,26 +41,71 @@ namespace FinalProject.Areas.Shipper.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            var user = await _accountService.GetUserAsync(User);
+            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
+            if (result.Succeeded)
             {
-                var user = await _accountService.GetUserAsync(User);
-                var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                if (result.Succeeded)
+                ViewBag.Success = "Thay đổi mật khẩu thành công!";
+                return View();
+            }
+            ViewBag.Failed = "Thay đổi mật khẩu không thành công!";
+            return View();
+        }
+
+
+        public async Task<IActionResult> ViewInfor(string id)
+        {
+            try
+            {
+                var userId = _accountService.GetUserId(User);
+
+                if (!(userId is null))
                 {
-                    ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
-                }
-                else
-                {
-                    ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+                    var user = await _accountService.GetUserByUserIdAsync(userId);
+
+                    ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                    if (!(user is null) && !(user.WardCode is null))
+                    {
+                        ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+
+                        ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                    }
+                   
+                    ViewBag.User = user;
+                    
                 }
             }
-
-            return View(model);
+            catch
+            {
+            }
+            return View();
         }
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
+        //public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var user = await _accountService.GetUserAsync(User);
+        //        var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+        //        if (result.Succeeded)
+        //        {
+        //            ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
+        //        }
+        //        else
+        //        {
+        //            ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+        //        }
+        //    }
+
+        //    return View(model);
+        //}
 
         [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> Information()
@@ -114,7 +160,7 @@ namespace FinalProject.Areas.Shipper.Controllers
                 User user = null;
                 if (!(model.Image is null))
                 {
-                    var saveAvatarResult = await ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
+                    var saveAvatarResult = await Heplers.ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
 
                     user = new User()
                     {
@@ -245,5 +291,45 @@ namespace FinalProject.Areas.Shipper.Controllers
         {
             return View();
         }
+
+
+        [HttpPost]
+        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
+        public async Task<IActionResult> ViewInfor(CreateAccountEmployeeViewModel model)
+        {
+
+            try
+            {
+                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+
+                string image = "admin.png";
+
+                if (!(fileName is null))
+                {
+                    image = fileName;
+                }
+                var user = new User
+                {
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName,
+                    Image = image
+
+                };
+                if (await _accountService.UpdateInformationEmployeeAsync(user) > 0)
+                {
+                    ViewBag.Success = "Cập nhật thông tin thành công!";
+                }
+                else
+                {
+                    ViewBag.Failed = "Cập nhật thông tin thất bại!";
+                }
+            }
+            catch { }
+
+            return View(model);
+        }
+
     }
 }

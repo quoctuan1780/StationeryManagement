@@ -8,6 +8,7 @@
         public const string SIGNAL_TOP_PRODUCT = "topProduct";
         public const string SIGNAL_GROUP_ADMIN = "Admin";
 
+        public const string SIGNAL_GROUP_WAREHOUSE = "WarehouseManager";
         public const string SIGNAL_GROUP_SHIPPER = "Shipper";
         public const string SIGNAL_COUNT_ORDER_WAIT_TO_PICK = "orderWaitForPick";
         public const string SIGNAL_COUNT_ORDER_WAIT_TO_DELIVERY = "orderWaitToDelivery";

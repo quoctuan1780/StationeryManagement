@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Sản phẩm khuyến nghị nhập kho";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+
     var ProductOutOfStock = ViewBag.ProductOutOfStock as IList<Entities.Models.ProductDetail>;
 }
 
@@ -89,7 +89,7 @@
                             <th>Mã sản phẩm</th>
                             <th>Tên sản phẩm</th>
                             <th>Màu sắc</th>
-                           
+                            <th>Kích thước</th>
                             <th>Số lượng trong kho</th>
                             <th>Số lượng đã đặt</th>
                             <th>Số lượng còn lại</th>
@@ -101,7 +101,7 @@
             </div>
         </div>
     </div>
-
+    <a href="/Warehouse/Recommandation/AutoCreateReceiptRequest" class="btn btn-primary">Tạo phiếu yêu cầu nhập hàng</a>
 </div>
 @section Scripts
 {
@@ -111,7 +111,7 @@
             $('#buy-together').DataTable();
         });
 
-
+       
         function ShowBestSeller() {
 
             var quantity = $('#quantity').val();
@@ -119,19 +119,17 @@
             var toDate = $('#todate').val();
             var listProduct = [];
             $.ajax({
-                url: '/Admin/Warehouse/GetBestSeller',
+                url: '/Warehouse/Recommandation/GetBestSeller',
                 method: 'GET',
                 async: true,
                 data: { fromDate: fromDate, toDate: toDate, quantity: quantity },
                 success: function (data) {
                     listProduct = JSON.parse(data);
-                    alert(data);
                     var str = '';
                     for (let item of listProduct) {
                         str += '<tr><td>' + item.productDetailId + '</td>' +
                             '<td>' + item.productName + '</td>' +
                             '<td>' + item.color + '</td>' +
-                           
                             '<td>' + item.totalQuantity + '</td>' +
                             '<td>' + item.quantityOrdered + '</td>' +
                             '<td>' + item.RemainingQuantity + '</td></tr>';
@@ -139,7 +137,7 @@
                     $('#BestSeller').html(str);
                     if (listProduct.length > 0) {
                         $.ajax({
-                            url: '/Admin/Warehouse/GetRecommandation',
+                            url: '/Warehouse/Recommandation/GetRecommandation',
                             method: 'GET',
                             async: true,
                             success: function (data) {
@@ -149,19 +147,16 @@
                                     str += '<tr><td>' + item.productDetailId + '</td>' +
                                         '<td>' + item.productName + '</td>' +
                                         '<td>' + item.color + '</td>' +
-                                        
                                         '<td>' + item.totalQuantity + '</td>' +
                                         '<td>' + item.quantityOrdered + '</td>' +
                                         '<td>' + item.RemainingQuantity + '</td></tr>';
                                 }
                                 $('#Rule').html(str);
-                                alert(data);
                             }
                         })
                     }
                 }
             });
-            //var quantity = $('#quantity').val();
         }
     </script>
 }

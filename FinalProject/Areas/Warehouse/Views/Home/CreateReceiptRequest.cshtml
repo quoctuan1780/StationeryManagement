@@ -1,13 +1,13 @@
 ﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
-@model FinalProject.Areas.Admin.ViewModels.ReceiptRequestViewModel
+@model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
 @{
-    ViewData["Title"] = "CreateReceiptRequest";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Tạo phiếu yêu cầu nhập kho";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var products = ViewBag.Products as IList<SelectListItem>;
     var productJson = Newtonsoft.Json.JsonConvert.SerializeObject(products);
     var user = await userManager.GetUserAsync(User);
 }
-
+    
 <div class="container-fluid">
 
     <h1 align="center">PHIẾU YÊU CẦU NHẬP KHO</h1>
@@ -27,23 +27,10 @@
     }
 
 
-    @using (Html.BeginForm("CreateReceiptRequest", "Warehouse", FormMethod.Post, new { role = "form", area = "Admin", id = "form-receipt-request" }))
+    @using (Html.BeginForm("CreateReceiptRequest", "Home", FormMethod.Post, new { role = "form", area = "Warehouse", id = "form-receipt-request" }))
     {
         @Html.AntiForgeryToken()
 
-        @*<div class="form-group">
-                 @html.labelfor(m => m.userid)
-                 @html.textboxfor(m => m.userid, new
-            {
-                @class = "form-control",
-                @name = "user",
-                @id = "user",
-                @type = "text",
-                @value = user.fullname,
-                @readonly = true
-            })
-                 @html.validationmessagefor(m => m.userid, "", new { @class = "text-danger" })
-             </div>*@
 
         <div class="form-group">
             @Html.LabelFor(m => m.CreateDate)
@@ -60,15 +47,15 @@
 
         <h3>Chi tiết sản phẩm</h3>
 
-        @if (!(Model is null) && Model.Quantity.Count>0)
+        @if (!(Model is null) && Model.Quantity.Count > 0)
         {
             <div class="form-group" id="product-detail">
                 @for (int i = 0; i < Model.Quantity.Count; i++)
                 {
                     <div class="row">
-                        <div class="col-8">
-                            <select class="selectpicker show-tick form-control"
-                                    id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
+                        <div class="col-4">
+                            <select class="selectpicker show-tick form-control" id="Id"
+                                    data-live-search="true" onchange="GetSize()">
                                 <option value="0">Chọn sản phẩm</option>
                                 @if (!(products is null))
                                 {
@@ -87,7 +74,13 @@
                                 }
                             </select>
                         </div>
-
+                        <div class="col-4">
+                            <select class="selectpicker show-tick form-control"
+                                    id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
+                                <option value="0">Chọn kích thước</option>
+                           
+                            </select>
+                        </div>
                         <div class="col-2">
                             <div class="row">
                                 @Html.LabelFor(m => m.Quantity)
@@ -109,9 +102,10 @@
         {
             <div class="form-group" id="product-detail">
                 <div class="row">
-                    <div class="col-8">
+                    <div class="col-4">
+                        <label>Chọn một sản phẩm</label>
                         <select class="selectpicker show-tick form-control"
-                                id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
+                                id="Id" data-live-search="true" onchange="GetSize(this)">
                             <option value="0">Chọn sản phẩm</option>
                             @if (!(products is null))
                             {
@@ -122,7 +116,14 @@
                             }
                         </select>
                     </div>
+                    <div class="col-4 choose-size">
+                        <label>Chọn một kích thước</label>
+                        <select class="selectpicker show-tick form-control"
+                                id="ProductDetailId" name="ProductDetailId" onchange="CheckProductId(this)">
+                            <option value="0">Chọn kích thước</option>
 
+                        </select>
+                    </div>
                     <div class="col-2">
                         <div class="row">
                             @Html.LabelFor(m => m.Quantity)
@@ -138,7 +139,7 @@
             </div>
 
         }
-        
+
         <div class="form-group">
             <div class="row">
                 <button type="button" class="btn btn-primary" style="margin-left: auto;" onclick="addDetail('@productJson')"><i class="fa fa-plus"></i></button>
@@ -168,6 +169,41 @@
             });
         });
 
+        function GetSize(e) {
+            var product = $(e).val();
+            var node = `
+                <label>Chọn một kích thước</label>
+                <select class="selectpicker show-tick form-control" name = "ProductDetailId" onchange = "CheckProductId(this)">
+                <option value="0">Chọn kích thước</option>`;
+
+            $.ajax({
+                url: '/Warehouse/Home/GetProductSize',
+                method: 'GET',
+                async: true,
+                data: { productdetail: product },
+                success: function (data) {
+                    json = JSON.parse(data);
+                    var select = $(e).closest(".row").children(".choose-size");
+
+                    select.children().remove();
+
+                    $.each(json, function (k, v) {
+                        node += '<option value="' + v.Value + '">' + v.Text + '</option>';
+                    });
+                    node += '</select>';
+                    select.append(node);
+
+                    $('.selectpicker').selectpicker({
+                        liveSearch: true,
+                        showSubtext: true,
+                        Size: 10
+                    });
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            })
+        }
         function CheckProductId(e) {
             var product = $(e).val();
             for (var i = 0; i < Products.length; i++)
@@ -177,8 +213,10 @@
                 }
                 if (count == 2) {
                     alert("Sản phẩm đã tồn tại trong danh sách phiếu yêu cầu nhập hàng");
+                    return 0;
                 }
             }
+
             return 0;
         }
 
@@ -204,28 +242,42 @@
 
         }
 
-
-        
-
         function addDetail(productsJson) {
             var products = JSON.parse(productsJson);
-            console.log(products);
-            var node =
-                '<div class="row">' +
-                    '<div class="col-8">' +
-                    '<select class="selectpicker show-tick form-control" id="ProductId" name="ProductId" data-live-search="true"onchange="CheckProductId(this)">' +
-                    '<option>Chọn sản phẩm</option>';
-                    
-                for (let item of products)
-                {
-                    console.log(item)
-                    node += '<option value="' + item.Value + '">' + item.Text + '</option>';
-                }
-                    
-                node += '</select></div><div class="col-2">' +
-                        '<label>Số lượng</label>' +
-                        '<input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress="return event.charCode > 46 && event.charCode < 58" /></div>' +
-                    '<div class="col-2"><button type="button" class="btn btn-danger" onclick="removeDetail(this)"><i class="fa fa-minus"></i></button></div></div>';
+            var node = `<div class="row">
+                    <div class="col-4">
+                        <label>Chọn một sản phẩm</label>
+                        <select class="selectpicker show-tick form-control"
+                                id="Id" data-live-search="true" onchange="GetSize(this)">
+                            <option value="0">Chọn sản phẩm</option>`;
+
+            for (let item of products) {
+                console.log(item)
+                node += '<option value="' + item.Value + '">' + item.Text + '</option>';
+            }
+
+            node += `</select>
+                    </div>
+                    <div class="col-4 choose-size">
+                        <label>Chọn một kích thước</label>
+                        <select class="selectpicker show-tick form-control"
+                                 name="ProductDetailId" onchange="CheckProductId(this)">
+                            <option value="0">Chọn kích thước</option>
+
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <div class="row">
+                            <label>Số lượng</label>
+                            <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>`;
 
             $('#product-detail').append(node);
 
@@ -260,7 +312,8 @@
                         }
                     }
                 }
-  
+                console.log(Products[i].value);
+                console.log(Quantities[i].value)
                 if (Quantities[i].value === '') {
                     var node = Quantities[i];
                     var text = '<span class="field-validation-valid text-danger validate-product-detail">' +

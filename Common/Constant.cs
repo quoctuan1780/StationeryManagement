@@ -190,6 +190,7 @@
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
         public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
+        public const string STATUS_WAITING_FOR_DELIVERING = "Chờ giao hàng";
         public const string STATUS_ON_DELIVERY_GOODS = "Đang giao hàng";
         public const string STATUS_RECEIVED_GOODS = "Đã nhận hàng";
         public const string STATUS_WAITING_EVALUATE = "Chờ đánh giá";
@@ -224,6 +225,16 @@
 
         #region Validation Key
         public const string KEY_IMAGE = "Image";
+        #endregion
+
+        #region Receipt Status
+        public const string RECEIPT_STATUS_WAITING = "Chờ xử lý";
+        public const string RECEIPT_STATUS_PROCESSING = "Đang nhập hàng";
+        public const string RECEIPT_STATUS_COMPLETE = "Hoàn thành";
+        public const string RECEIPT_REQUEST_STATUS_WAITING = "Chờ xác nhận";
+        public const string RECEIPT_REQUEST_STATUS_APPROVED = "Đã duyệt";
+        public const string RECEIPT_REQUEST_REJECT = "Từ chối";
+
         #endregion
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Services.Helpers;
 using Services.Interfacies;
 using System;
@@ -113,7 +115,7 @@ namespace Services.Services
         public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync()
         {
             return await _context.Orders.Where(x => x.Status.Equals(STATUS_PREPARING_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
-        }
+         }
 
         public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId)
         {
@@ -252,6 +254,118 @@ namespace Services.Services
         public async Task<IList<Order>> GetOrdersWaitToConfirmAsync()
         {
             return await _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM)).OrderBy(x => x.OrderDate).ToListAsync();
+        }
+
+        public async Task<int> CountNewAcceptedOrdersAsync()
+        {
+            var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_PREPARING_GOODS)).ToListAsync();
+            return result.Count;        
+        }
+
+        public async Task<int> CountOrdersWaitToPickAsync()
+        {
+            var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).ToListAsync();
+            return result.Count;
+        }
+
+        public async Task<int> CountOrderWaitToDeliveryAsync()
+        {
+            var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_FOR_DELIVERING)).ToListAsync();
+            return result.Count;
+        }
+
+        public async Task<int> CountOrdersDeliveringAsync()
+        {
+            var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_ON_DELIVERY_GOODS)).ToListAsync();
+            return result.Count;
+        }
+
+        public async Task<int> CountOrdersDeliveredAsync()
+        {
+            var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_EVALUATE)).ToListAsync();
+            return result.Count;
+        }
+
+        public async Task<string> ListPercentDeliveryAsync()
+        {
+            var orders = from o in _context.Orders
+                         group o by o.Status
+                         into g
+                         select new
+                         {
+                             Status = g.Key,
+                             CountStatus = g.Select(x => x.OrderId).Count()
+                         };
+            var total = orders.Sum(x => x.CountStatus);
+            var list = new List<DeliveryChart>();
+            if (await orders.AnyAsync())
+            {
+                foreach (var order in orders)
+                {
+                    var obj = new DeliveryChart()
+                    {
+                        y = Math.Round((double)order.CountStatus / total * 100, 2),
+                        name = order.Status
+                    };
+                    list.Add(obj);                }
+            }
+            return JsonConvert.SerializeObject(list);
+        }
+
+        public async Task<string> GetTotalSalesPerMonthsAsync()
+        {
+            var orders = from o in _context.Orders
+                         where o.OrderDate.Year == DateTime.Now.Year
+                         group o by o.OrderDate.Month
+                         into g
+                         select new
+                         {
+                             Month = g.Key,
+                             Total = g.Sum(x => x.Total)
+                         };
+            
+            var list = new List<SalesPurchases>();
+            if (await orders.AnyAsync())
+            {
+                foreach (var order in orders)
+                {
+                    var obj = new SalesPurchases()
+                    {
+                        label = order.Month.ToString(),
+                        y = order.Total
+                    };
+                    list.Add(obj);
+                }
+            }
+            return JsonConvert.SerializeObject(list);
+        }
+
+        public async Task<string> GetTotalPurchasePerMonthsAsync()
+        {
+            var orders = from o in _context.ImportWarehouses
+                         where o.ImportDate.Year == DateTime.Now.Year
+                         group o by o.ImportDate.Month
+                         into g
+                         select new
+                         {
+                             Month = g.Key,
+                             Total = g.Sum(x => x.Total)
+                         };
+
+            var list = new List<SalesPurchases>();
+            if (await orders.AnyAsync())
+            {
+                foreach (var order in orders)
+                {
+                    var obj = new SalesPurchases()
+                    {
+                        label = order.Month.ToString(),
+                        y = order.Total
+                    };
+                    list.Add(obj);
+                }
+            }
+            return JsonConvert.SerializeObject(list);
         }
 
         public async Task<IList<Order>> GetOrdersDeliveredAsync(string userId)
