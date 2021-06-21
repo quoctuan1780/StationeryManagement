@@ -26,5 +26,9 @@ namespace Services.Interfacies
         Task<IList<ProductDetail>> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity);
 
         Task<int> DeleteProductByIdAsync(int productId);
+
+        Task<IList<ProductDetail>> GetTop10ProductHotAsync();
+
+        string GetProductSkip(int skip);
     }
 }
