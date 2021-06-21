@@ -144,12 +144,13 @@ namespace Services.Services
 
         public async Task<ReceiptRequest> GetReceiptRequestAsync(int id)
         {
-            return await _context.ReceiptRequests.Include(x => x.ReceiptRequestDetails).Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
+            return await _context.ReceiptRequests.Include(x => x.ReceiptRequestDetails)
+                .ThenInclude(x =>x.ProductDetail).ThenInclude(x => x.Product).Include(x => x.User).Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
         }
 
         public async Task<IList<ReceiptRequest>> GetReceiptRequestsAsync()
         {
-            return await _context.ReceiptRequests.OrderBy(x => x.CreateDate).ToListAsync();
+            return await _context.ReceiptRequests.Include(x => x.User).Include(x => x.ReceiptRequestDetails).OrderBy(x => x.CreateDate).ToListAsync();
         }
 
         public async Task<IList<PercentProcess>> GetListProcessReceiptAsync()

@@ -26,16 +26,25 @@
                         {
                             <tr>
                                 <td>@item.ReceiptRequestId</td>
-                                <td class="category-name">@item.UserId</td>
+                                @if(item.UserId != null)
+                                {
+                                    <td class="category-name">@item.User.FullName</td>
+                                }
+                                else { 
+                                <td></td>
+                                }
+                                
+
                                 <td class="category-name">@item.CreateDate</td>
+                                <td class="category-name">@item.ReceiptRequestDetails.Count</td>
                                 <td class="category-name">@item.Status</td>
                                 <td>
                                     @if (item.Status.Contains(RECEIPT_REQUEST_STATUS_WAITING))
                                     {
-                                        <a onclick="DeleteReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Xóa</a>
+                                        <a onclick="DeleteReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Xóa</a><br>
                                     }
 
-                                    <a onclick="ViewReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
+                                    <a asp-action="ViewRequestReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@item.ReceiptRequestId" style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
                                 </td>
                             </tr>
                         }

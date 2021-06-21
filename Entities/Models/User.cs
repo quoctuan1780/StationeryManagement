@@ -40,5 +40,6 @@ namespace Entities.Models
         public virtual IList<DeliveryAddress> DeliveryAddresses { get; set; }
 
         public virtual IList<Comment> Comments { get; set; }
+        public  virtual IList<ReceiptRequest> ReceiptRequests { get; set; }
     }
 }

@@ -69,8 +69,8 @@
                 <div class="col-sm-12 row">
                     <div class="col-sm-4 mb-3 mb-sm-0">
                         <select class="selectpicker show-tick form-control" name="ProvinceId"
-                                onchange="getDistricts()" id="province" data-live-search="true">
-                            <option value="null">Tỉnh/Thành phố</option>
+                                 id="province" data-live-search="true">
+                            
                             @if (!(provinces is null))
                             {
                                 foreach (var item in provinces)
@@ -93,17 +93,47 @@
                     <div class="col-sm-4" id="district">
                         <select class="selectpicker show-tick form-control"
                                 name="DistrictId"
-                                id="district-id" onchange="getWards()"
+                                id="district-id"
                                 data-live-search="true">
-                            <option value="null">Quận/Huyện</option>
+                            @if (!(districts is null))
+                            {
+                                foreach (var item in districts)
+                                {
+                                    if (user.Ward.District.DistrictName == item.DistrictName)
+                                    {
+                                        <option value="@item.DistrictId" selected>@item.DistrictName</option>
+                                    }
+
+                                    else
+                                    {
+                                        <option value="@item.DistrictId">@item.DistrictName</option>
+                                    }
+
+                                }
+                            }
                         </select>
                         <span class="text-danger" asp-validation-for="DistrictId"></span>
                     </div>
                     <div class="col-sm-4" id="ward">
                         <select name="WardCode" id="ward-id"
                                 class="selectpicker show-tick form-control" data-live-search="true">
-                            <option value="null">Phường/Xã</option>
+                            
+                            @if (!(wards is null))
+                            {
+                                foreach (var item in wards)
+                                {
+                                    if (user.Ward.WardName == item.WardName)
+                                    {
+                                        <option value="@item.WardCode" selected>@item.WardName</option>
+                                    }
 
+                                    else
+                                    {
+                                        <option value="@item.WardCode">@item.WardName</option>
+                                    }
+
+                                }
+                            }
                         </select>
                         <span class="text-danger" asp-validation-for="WardCode"></span>
                     </div>
@@ -152,125 +182,6 @@
             });
 
             return loading;
-        }
-
-        async function getWards() {
-            var loading = await verticalTextColor();
-
-            loading;
-
-            var districtId = $("#district-id").val();
-
-            var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
-                + 'data-live-search="true"><option value="null">Phường/Xã</option>';
-
-            $($('#street-name').children()).val('');
-
-            if (districtId === 'null') {
-                node += '</select>';
-                $('#ward').children().remove();
-                $('#ward').append(node);
-
-                $('#ward').children().selectpicker({
-                    liveSearch: true,
-                    showSubtext: true,
-                    Size: 10
-                });
-            }
-            else
-
-                await $.ajax({
-                    url: '/Account/Ward',
-                    method: 'GET',
-                    async: true,
-                    data: { districtId: districtId },
-                    success: async function (data) {
-                        for (let i of JSON.parse(data)) {
-                            node += '<option value="' + i.WardCode + '">' + i.WardName + '</option>'
-                        }
-                        node += '</select>';
-
-                        $('#ward').children().remove();
-                        $('#ward').append(node);
-
-                        $('#ward').children().selectpicker({
-                            liveSearch: true,
-                            showSubtext: true,
-                            Size: 10
-                        });
-                    }
-                })
-            loading.out();
-        }
-
-        async function getDistricts() {
-
-            var loading = await verticalTextColor();
-
-            loading;
-
-            var provinceId = $('#province').val();
-
-            var node = '<select class="selectpicker show-tick form-control" name="DistrictId" id="district-id"' + 'onchange="getWards()"'
-                + 'data-live-search="true"><option value="null">Quận/Huyện</option>';
-
-            var nodeWard = '<select name="WardCode" id="ward-id"' +
-                'class="selectpicker show-tick form-control" data - live - search="true" >' +
-                '<option value="null">Phường/Xã</option</select>';
-            '<option value="null">Phường/Xã</option</select>';
-
-            $('#ward').children().remove();
-            $('#ward').append(nodeWard);
-
-            $('#ward').children().selectpicker({
-                liveSearch: true,
-                showSubtext: true,
-                Size: 10
-            });
-
-            $($('#street-name').children()).val('');
-
-            if (provinceId === 'null') {
-                node += '</select>';
-
-                $('#district').children().remove();
-                $('#district').append(node);
-
-
-                $('#district').children().selectpicker({
-                    liveSearch: true,
-                    showSubtext: true,
-                    Size: 10
-                });
-            }
-            else
-                await $.ajax({
-                    url: '/Account/District',
-                    method: 'GET',
-                    async: true,
-                    data: { provinceId: provinceId },
-                    success: async function (data) {
-                        for (let i of JSON.parse(data)) {
-                            node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
-                        }
-
-                        node += '</select>';
-
-                        $('#district').children().remove();
-                        $('#district').append(node);
-
-                        $('#district').children().selectpicker({
-                            liveSearch: true,
-                            showSubtext: true,
-                            Size: 10
-                        });
-                    }
-                });
-            loading.out();
-        }
-
-        function clearStreetName() {
-            $($('#street-name').children()).val('');
         }
 
         $(document).ready(function () {

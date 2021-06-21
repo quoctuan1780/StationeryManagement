@@ -304,14 +304,14 @@ namespace Entities.Data
             //Entity RecommendationDetail
             modelBuilder.Entity<RecommendationDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductId, x.RecommendationId });
+                e.HasKey(x => new { x.ProductDetailId, x.RecommendationId });
 
-                e.HasIndex(x => x.ProductId);
+                e.HasIndex(x => x.ProductDetailId);
                 e.HasIndex(x => x.RecommendationId);
 
-                e.HasOne(x => x.Product)
+                e.HasOne(x => x.ProductDetail)
                 .WithMany(x => x.RecommendationDetails)
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductDetailId);
 
                 e.HasOne(x => x.Recommendation)
                 .WithMany(x => x.RecommendationDetails)
@@ -405,6 +405,10 @@ namespace Entities.Data
             {
                 e.HasKey(x => x.ReceiptRequestId);
                 e.HasIndex(x => x.ReceiptRequestId);
+
+                e.HasOne(x => x.User)
+                .WithMany(x => x.ReceiptRequests)
+                .HasForeignKey(x => x.UserId);
             });
 
             //Entity Receipt Request Detail

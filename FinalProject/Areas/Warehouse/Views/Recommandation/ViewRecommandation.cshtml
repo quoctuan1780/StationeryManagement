@@ -1,0 +1,170 @@
+﻿@{
+    ViewData["Title"] = "Sản phẩm khuyến nghị nhập kho";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+
+    var ProductOutOfStock = ViewBag.ProductOutOfStock as IList<Entities.Models.ProductDetail>;
+}
+
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Gợi ý mua hàng</h1>
+    <h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm còn số lượng ít</h2>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Kích thước</th>
+                            <th>Số lượng trong kho</th>
+                            <th>Số lượng đã đặt</th>
+                            <th>Số lượng còn lại</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ProductOutOfStock is not null)
+                        {
+                            @foreach (var item in ProductOutOfStock)
+                            {
+                                <tr>
+                                    <td>@item.ProductDetailId</td>
+                                    <td>@item.Product.ProductName</td>
+                                    <td>@item.Color</td>
+                                    <td>@item.Length x @item.Width x @item.Height</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.QuantityOrdered</td>
+                                    <td>@item.RemainingQuantity</td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm bán chạy </h2>
+    <span>Từ ngày: </span>
+    <input type="date" id="fromdate" name="fromDate" />
+    <span>Đến ngày: </span>
+    <input type="date" id="todate" name="toDate" />
+    <span>Nhập số lượng sản phẩm: </span>
+    <input type="number" required min="1" id="quantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <button class="btn btn-primary" onclick="ShowBestSeller()">
+                    Xem
+                </button>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="best-seller" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Kích thước</th>
+                            <th>Số lượng trong kho</th>
+                            <th>Số lượng đã đặt</th>
+                            <th>Số lượng còn lại</th>
+                        </tr>
+                    </thead>
+                    <tbody id="BestSeller">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm thường được mua kèm </h2>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="buy-together" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Kích thước</th>
+                            <th>Số lượng trong kho</th>
+                            <th>Số lượng đã đặt</th>
+                            <th>Số lượng còn lại</th>
+                        </tr>
+                    </thead>
+                    <tbody id="Rule">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <a href="/Warehouse/Recommandation/AutoCreateReceiptRequest" class="btn btn-primary">Tạo phiếu yêu cầu nhập hàng</a>
+</div>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $('#best-seller').DataTable();
+            $('#buy-together').DataTable();
+        });
+
+       
+        function ShowBestSeller() {
+
+            var quantity = $('#quantity').val();
+            var fromDate = $('#fromdate').val();
+            var toDate = $('#todate').val();
+            var listProduct = [];
+            $.ajax({
+                url: '/Warehouse/Recommandation/GetBestSeller',
+                method: 'GET',
+                async: true,
+                data: { fromDate: fromDate, toDate: toDate, quantity: quantity },
+                success: function (data) {
+                    listProduct = JSON.parse(data);
+                    //alert(data);
+                    var str = '';
+                    for (let item of listProduct) {
+                        str += '<tr><td>' + item.productDetailId + '</td>' +
+                            '<td>' + item.productName + '</td>' +
+                            '<td>' + item.color + '</td>' +
+                            '<td>' + item.length + 'x' + item.width + 'x' + item.height + '</td>' +
+                            '<td>' + item.totalQuantity + '</td>' +
+                            '<td>' + item.quantityOrdered + '</td>' +
+                            '<td>' + item.RemainingQuantity + '</td></tr>';
+                    }
+                    $('#BestSeller').html(str);
+                    if (listProduct.length > 0) {
+                        $.ajax({
+                            url: '/Warehouse/Recommandation/GetRecommandation',
+                            method: 'GET',
+                            async: true,
+                            success: function (data) {
+                                var listProduct = JSON.parse(data);
+                                var str = '';
+                                for (let item of listProduct) {
+                                    str += '<tr><td>' + item.productDetailId + '</td>' +
+                                        '<td>' + item.productName + '</td>' +
+                                        '<td>' + item.color + '</td>' +
+                                        '<td>' + item.length + 'x' + item.width + 'x' + item.height + '</td>' +
+                                        '<td>' + item.totalQuantity + '</td>' +
+                                        '<td>' + item.quantityOrdered + '</td>' +
+                                        '<td>' + item.RemainingQuantity + '</td></tr>';
+                                }
+                                $('#Rule').html(str);
+                                //alert(data);
+                            }
+                        })
+                    }
+                }
+            });
+            //var quantity = $('#quantity').val();
+        }
+    </script>
+}

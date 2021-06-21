@@ -32,6 +32,7 @@ namespace Entities.Models
 
         public virtual IList<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
         public virtual Product Product { get; set; }
+        public virtual IList<RecommendationDetail> RecommendationDetails { get; set; }
         public virtual IList<CartItem> CartItems { get; set; }
 
         public virtual IList<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }

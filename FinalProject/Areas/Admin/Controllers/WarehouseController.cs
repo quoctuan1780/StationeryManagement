@@ -39,10 +39,10 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public string GetRecommandation()
+        public async Task<string> GetRecommandation()
         {
 
-           var result = _recommendationService.GetRecommandtion(2,0.5);
+           var result = await _recommendationService.GetRecommandtion(2,0.5);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -68,29 +68,9 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
-            var result = await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
+            return await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
 
-            var bestSellerList = new List<JObject>();
-
-            foreach (var item in result)
-            {
-                var obj = new JObject
-                {
-                    { "productDetailId", item.ProductDetailId },
-                    { "productName", item.Product.ProductName },
-                    { "color", item.Color },
-                    { "length", item.Length},
-                    { "height", item.Height },
-                    { "width", item.Width },
-                    { "totalQuantity", item.Quantity },
-                    { "quantityOrdered", item.QuantityOrdered },
-                    { "RemainingQuantity", item.RemainingQuantity }
-                };
-
-                bestSellerList.Add(obj);
-            }
-
-            return JsonConvert.SerializeObject(bestSellerList);
+            
         }
 
 
