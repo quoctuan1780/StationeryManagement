@@ -85,7 +85,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Chi tiết đơn hàng</h6>
             </a>
             <div class="collapse show" id="collapseCardExample">
-                <div class="card-body">
+                <div class="card-body"
                     <div class="table-responsive">
                         <table class="table table-striped" id="dataTable" width="100%" cellspacing="0">
                             <thead>
@@ -148,30 +148,6 @@
                             <button class="btn btn-danger btn-sm">Hủy đơn hàng</button>
                         }
                         break;
-                    case STATUS_PREPARING_GOODS:
-                        if (User.IsInRole(ROLE_ADMIN) || User.IsInRole(ROLE_WAREHOUSE_MANAGER))
-                        {
-                            <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã chuẩn bị hàng</button>
-                        }
-                        break;
-                    case STATUS_WAITING_PICK_GOODS:
-                        if (User.IsInRole(ROLE_SHIPPER))
-                        {
-                            <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã lấy hàng</button>
-                        }
-                        break;
-                    case STATUS_ON_DELIVERY_GOODS:
-                        if (User.IsInRole(ROLE_SHIPPER))
-                        {
-                            <button class="btn btn-success btn-sm">Xác nhận giao hàng</button>
-                        }
-                        break;
-                    case STATUS_RECEIVED_GOODS:
-                        if (User.IsInRole(ROLE_SHIPPER))
-                        {
-                            <button class="btn btn-success btn-sm">Xác nhận đã giao</button>
-                        }
-                        break;
                 }
                 <a class="btn btn-success btn-sm" asp-action="OrderHistory" asp-controller="Order"
                    asp-area="Admin" asp-route-orderId="@order.OrderId">Xem lịch sử</a>
@@ -194,7 +170,7 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: `Xóa`,
+                confirmButtonText: `Đồng ý`,
                 cancelButtonText: `Hủy`,
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -222,48 +198,6 @@
                     });
                 }
             })
-        }
-
-        function warehouseManagementConfirm(orderId) {
-            if (orderId === '') {
-                showError("Không tồn tại đơn hàng này");
-            }
-            else
-                Swal.fire({
-                    title: 'Xác nhận chuẩn bị hàng xong!',
-                    text: "Bạn đã chuẩn bị hàng xong cho đơn hàng này ?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: `Xóa`,
-                    cancelButtonText: `Hủy`,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/Admin/Order/WarehouseManagementComfirmOrder',
-                            method: 'PUT',
-                            async: true,
-                            data: { orderId: orderId },
-                            success: function (data) {
-                                switch (data) {
-                                    case 1:
-                                        window.location.reload();
-                                        break;
-                                    case -4:
-                                        showError('Lỗi không tìm thấy đơn hàng này');
-                                        break;
-                                    case -99:
-                                        showErrorSystem();
-                                        break;
-                                }
-                            },
-                            error: function (code, err) {
-
-                            }
-                        });
-                    }
-                })
         }
     </script>
 }

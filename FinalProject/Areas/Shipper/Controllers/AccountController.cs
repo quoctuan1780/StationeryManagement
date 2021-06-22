@@ -1,12 +1,15 @@
 ﻿using Entities.Models;
+using FinalProject.Areas.Shipper.Helpers;
 using FinalProject.Areas.Shipper.ViewModels;
-using FinalProject.Heplers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
@@ -20,11 +23,13 @@ namespace FinalProject.Areas.Shipper.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IAddressService _addressService;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(IAccountService accountService, IAddressService addressService)
+        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender)
         {
             _accountService = accountService;
             _addressService = addressService;
+            _emailSender = emailSender;
         }
 
         
@@ -40,26 +45,71 @@ namespace FinalProject.Areas.Shipper.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            var user = await _accountService.GetUserAsync(User);
+            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
+            if (result.Succeeded)
             {
-                var user = await _accountService.GetUserAsync(User);
-                var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                if (result.Succeeded)
+                ViewBag.Success = "Thay đổi mật khẩu thành công!";
+                return View();
+            }
+            ViewBag.Failed = "Thay đổi mật khẩu không thành công!";
+            return View();
+        }
+
+
+        public async Task<IActionResult> ViewInfor(string id)
+        {
+            try
+            {
+                var userId = _accountService.GetUserId(User);
+
+                if (!(userId is null))
                 {
-                    ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
-                }
-                else
-                {
-                    ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+                    var user = await _accountService.GetUserByUserIdAsync(userId);
+
+                    ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                    if (!(user is null) && !(user.WardCode is null))
+                    {
+                        ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+
+                        ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                    }
+                   
+                    ViewBag.User = user;
+                    
                 }
             }
-
-            return View(model);
+            catch
+            {
+            }
+            return View();
         }
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
+        //public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var user = await _accountService.GetUserAsync(User);
+        //        var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+        //        if (result.Succeeded)
+        //        {
+        //            ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
+        //        }
+        //        else
+        //        {
+        //            ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+        //        }
+        //    }
+
+        //    return View(model);
+        //}
 
         [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> Information()
@@ -114,7 +164,7 @@ namespace FinalProject.Areas.Shipper.Controllers
                 User user = null;
                 if (!(model.Image is null))
                 {
-                    var saveAvatarResult = await ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
+                    var saveAvatarResult = await Heplers.ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
 
                     user = new User()
                     {
@@ -169,7 +219,7 @@ namespace FinalProject.Areas.Shipper.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(Admin.ViewModels.LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -181,7 +231,7 @@ namespace FinalProject.Areas.Shipper.Controllers
                         var user = await _accountService.GetUserByEmailAsync(model.Email);
                         if (await _accountService.IsInRoleAsync(user, ROLE_SHIPPER))
                         {
-                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
+                            await Heplers.SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
                         }
                         return Redirect("/Shipper/Home/Dashboard");
 
@@ -241,9 +291,135 @@ namespace FinalProject.Areas.Shipper.Controllers
             return Redirect("/Shipper/Account/Login");
         }
 
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            if (email is null)
+            {
+                ViewBag.Message = "Địa chỉ email không được để trống";
+                return View();
+            }
+
+            var user = await _accountService.GetUserByEmailAsync(email);
+
+            if (user is null)
+            {
+                ViewBag.Message = "Tài khoản không tồn tại trong hệ thống";
+                return View();
+            }
+
+            bool checkRoleWarehouse = await _accountService.IsInRoleAsync(user, ROLE_SHIPPER);
+
+            if (!checkRoleWarehouse)
+            {
+                ViewBag.Message = "Tài khoản này không phải tài khoản của người giao hàng";
+                return View();
+            }
+
+            var token = await _accountService.GeneratePasswordResetTokenAsync(user);
+            var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var callbackUrl =
+                        Url.ActionLink("ConfirmForgotPassword", CONTROLLER_ACCOUNT,
+                            new { Area = AREA_SHIPPER, Email = email, Token = tokenEncoded },
+                            Request.Scheme);
+
+            var subject = "Quên mật khẩu!";
+
+            var body = "<h2>Xin chào bạn: " + email + "</h2>" + "<p>Bạn đã có một yêu cầu khôi phục mật khẩu \n " +
+                "vui lòng nhấn vào link sau để khôi phục mật khẩu của bạn</p>" +
+                "<a href='" + callbackUrl + "'>Nhấn vào đây</a>";
+
+            await _emailSender.SendEmailAsync(email, subject, body);
+            ViewBag.MessageSuccess = "Vui lòng mở email để khôi phục mật khẩu";
+            return View();
+        }
+
+        public IActionResult ConfirmForgotPassword(string email, string token)
+        {
+            var model = new ForgotPasswordViewModel()
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _accountService.GetUserByEmailAsync(model.Email);
+
+                var tokenDecoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+
+                var result = await _accountService.ForgotPasswordAsync(user, tokenDecoded, model.Password);
+
+                if (result.Succeeded)
+                {
+                    TempData[KEY_CONFIRM_EMAIL_SUCCESS] = "Khôi phục mật khẩu thành công";
+
+                    return Redirect("/Shipper/Account/Login");
+                }
+
+                ViewBag.Message = "Token đã hết hạn";
+            }
+
+            return View(model);
+        }
+
         public IActionResult AccessDenied()
         {
             return View();
         }
+
+
+        [HttpPost]
+        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
+        public async Task<IActionResult> ViewInfor(CreateAccountEmployeeViewModel model)
+        {
+
+            try
+            {
+                var fileName = await Helpers.ImageHelper.SaveImageAsync(model.Image, 1920, 1080, model.Email);
+
+                string image = "admin.png";
+
+                if (!(fileName is null))
+                {
+                    image = fileName;
+                }
+                var user = new User
+                {
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName,
+                    Image = image
+
+                };
+                if (await _accountService.UpdateInformationEmployeeAsync(user) > 0)
+                {
+                    ViewBag.Success = "Cập nhật thông tin thành công!";
+                }
+                else
+                {
+                    ViewBag.Failed = "Cập nhật thông tin thất bại!";
+                }
+            }
+            catch { }
+
+            return View(model);
+        }
+
     }
 }

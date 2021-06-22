@@ -1,5 +1,6 @@
 ﻿using Entities.Data;
 using Entities.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace Services.Services
 {
@@ -29,19 +31,37 @@ namespace Services.Services
             return product;
         }
 
-        public async Task<IList<ProductDetail>> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity)
+        public async Task<string> BestSellerInMonthAsync(DateTime fromDate, DateTime toDate, int quantity)
         {
             var result = await _context.OrderDetails
                     .Include(x => x.Order)
-                    .Where(x => x.Order.OrderDate.Month >= fromDate.Month && x.Order.OrderDate.Month <= toDdate.Month)
-                    .Where(x => x.Order.OrderDate.Year >= fromDate.Year && x.Order.OrderDate.Year <= toDdate.Year)
+                    .Where(x => x.Order.OrderDate >= fromDate)
+                    .Where(x => x.Order.OrderDate <= toDate)
                     .GroupBy(x => x.ProductDetailId)
                     .OrderByDescending(x => x.Key)
                     .Take(quantity)
                     .Select(x => x.Key)
                     .ToListAsync();
+            
+            var tolist =  await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+            var bestSellerList = new List<JObject>();
 
-            return await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+            foreach (var item in tolist)
+            {
+                var obj = new JObject
+                {
+                    { "productDetailId", item.ProductDetailId },
+                    { "productName", item.Product.ProductName },
+                    { "color", item.Color },
+                    { "totalQuantity", item.Quantity },
+                    { "quantityOrdered", item.QuantityOrdered },
+                    { "RemainingQuantity", item.RemainingQuantity }
+                };
+
+                bestSellerList.Add(obj);
+            }
+
+            return JsonConvert.SerializeObject(bestSellerList);
         }
 
         public async Task<int> DeleteProductByIdAsync(int productId)
@@ -90,6 +110,12 @@ namespace Services.Services
                             .Include(x => x.ProductDetails.Where(y => y.IsDeleted == false))
                             .Where(x => x.IsDeleted == false)
                             .FirstOrDefaultAsync();
+        }
+
+        public async Task<ProductDetail> GetProductDetailAsync(int id)
+        {
+            var item = await _context.ProductDetails.FindAsync(id);
+            return item;
         }
 
         //check deteted item
@@ -147,17 +173,17 @@ namespace Services.Services
         public async Task<IList<ProductDetail>> GetTop10ProductHotAsync()
         {
             var result = (from od in _context.OrderDetails
-                         join
-                         o in _context.Orders on od.OrderId equals o.OrderId
-                         where o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
-                         group od by od.ProductDetailId into g
-                         select new
-                         {
-                             ProductDetailId = g.Key,
-                             Quantity = g.Sum(x => x.Quantity) 
-                         }).OrderByDescending(x => x.Quantity).Select(x => x.ProductDetailId).Take(10);
+                          join
+                          o in _context.Orders on od.OrderId equals o.OrderId
+                          where o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
+                          group od by od.ProductDetailId into g
+                          select new
+                          {
+                              ProductDetailId = g.Key,
+                              Quantity = g.Sum(x => x.Quantity)
+                          }).OrderByDescending(x => x.Quantity).Select(x => x.ProductDetailId).Take(10);
 
-            if(result == null || !result.Any())
+            if (result == null || !result.Any())
             {
                 return null;
             }

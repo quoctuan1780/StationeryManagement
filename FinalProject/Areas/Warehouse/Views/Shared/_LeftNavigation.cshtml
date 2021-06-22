@@ -1,7 +1,7 @@
 ﻿<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
     <li>
         <a class="sidebar-brand d-flex align-items-center justify-content-center"
-           asp-action="Dashboard" asp-controller="Home" asp-area="Shipper">
+           asp-action="Dashboard" asp-controller="Home" asp-area="Warehouse">
             <div class="sidebar-brand-icon rotate-n-15">
                 <i class="fas fa-laugh-wink"></i>
             </div>
@@ -33,6 +33,36 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Custom Utilities:</h6>
                 <a class="collapse-item" asp-action="OrderWaitExportWarehouse" asp-controller="Order" asp-area="Warehouse">Danh sách đơn hàng <br />chờ lấy hàng</a>
+            </div>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#accountManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-file-invoice"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <div id="accountManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="ViewInfor" asp-controller="Account" asp-area="Warehouse">Xem thông tin tài khoản </a>
+            
+                <a class="collapse-item" asp-action="ChangePassword" asp-controller="Account" asp-area="Warehouse">Thay đổi mật khẩu </a>
+            </div>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#receiptManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-file-invoice"></i>
+            <span>Quản lý nhập hàng</span>
+        </a>
+        <div id="receiptManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="CreateReceiptRequest" asp-controller="Home" asp-area="Warehouse">Tạo phiếu yêu cầu <br /> nhập hàng</a>
+           
+                <a class="collapse-item" asp-action="ViewListRequestReceipt" asp-controller="Home" asp-area="Warehouse">Danh sách phiếu <br/> yêu cầu nhập hàng</a>
+            
+                <a class="collapse-item" asp-action="ListReipt" asp-controller="Home" asp-area="Warehouse">Danh sách phiếu<br /> nhập hàng</a>
+            
+                <a class="collapse-item" asp-action="ViewRecommandation" asp-controller="Recommandation" asp-area="Warehouse">Gợi ý nhập hàng</a>
             </div>
         </div>
     </li>

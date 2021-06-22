@@ -24,7 +24,7 @@ namespace Entities.Models
         public DateTime ModifyDate { get; set; }
 
         public string WardCode { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public virtual Ward Ward { get; set; }
 
         public virtual IList<Notification> Notifications { get; set; }
@@ -40,5 +40,6 @@ namespace Entities.Models
         public virtual IList<DeliveryAddress> DeliveryAddresses { get; set; }
 
         public virtual IList<Comment> Comments { get; set; }
+        public  virtual IList<ReceiptRequest> ReceiptRequests { get; set; }
     }
 }

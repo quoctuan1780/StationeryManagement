@@ -3,12 +3,126 @@
     ViewData["Title"] = "Đơn hàng chờ xác nhận";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+
+    var paymentMethods = new List<string>();
+    paymentMethods.Add("COD");
+    paymentMethods.Add("Momo");
+    paymentMethods.Add("Paypal");
+
+    var customers = ViewBag.Customers as IList<Entities.Models.User>;
+
+    var query = Html.ViewContext.HttpContext.Request.Query;
+    string paymentMethod = null;
+    string customer = null;
+    string orderDate = null;
+
+    if (query.Keys.Contains("orderDate"))
+    {
+        orderDate = query.First(x => x.Key.Equals("orderDate")).Value;
+    }
+    if (query.Keys.Contains("paymentMethod"))
+    {
+        paymentMethod = query.First(x => x.Key.Equals("paymentMethod")).Value;
+    }
+    if (query.Keys.Contains("customer"))
+    {
+        customer = query.First(x => x.Key.Equals("customer")).Value;
+    }
 }
 
 <div class="container-fluid">
     <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hàng chờ xác nhận</h1>
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+                       role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                        <h6 class="m-0 font-weight-bold text-primary">Bộ lọc</h6>
+                    </a>
+                    <div class="collapse show" id="collapseCardExample">
+                        <div class="card-body">
+                            <div class="row d-flex">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo phương thức thanh toán</label>
+                                        <select class="form-control selectpicker show-tick" id="paymentmethod" data-live-search="true">
+                                            <option value="null">Chọn phương thức thanh toán</option>
+                                            @if (paymentMethod == null)
+                                            {
+                                                foreach (var item in paymentMethods)
+                                                {
+                                                    <option value="@item">@item</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in paymentMethods)
+                                                {
+                                                    if (item.Equals(paymentMethod))
+                                                    {
+                                                        <option value="@item" selected>@item</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item">@item</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo ngày đặt hàng</label>
+                                        @if (orderDate is null)
+                                        {
+                                            <input class="form-control" type="date" name="orderDate" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" type="date" name="orderDate" value="@orderDate" />
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo khách hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="customer" data-live-search="true">
+                                            <option value="null">Chọn khách hàng</option>
+                                            @if (customer == null)
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    <option value="@item.Id">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    if (item.Id.Equals(customer))
+                                                    {
+                                                        <option value="@item.Id" selected>@item.FullName</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@item.Id">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <button class="btn btn-primary" onclick="filter()">Lọc</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -73,3 +187,18 @@
         </div>
     </div>
 </div>
+@section Scripts{
+    <script>
+        function filter() {
+            var customer = $('#customer').val();
+            var paymentMethod = $('#paymentmethod').val();
+            var orderDate = document.getElementsByName('orderDate')[0].value;
+
+            var url = '/Admin/Order/OrderWaitComfirm?orderDate=' + orderDate +
+                '&paymentMethod=' + paymentMethod +
+                '&customer=' + customer;
+
+            window.location.href = encodeURI(url);
+        }
+    </script>
+}

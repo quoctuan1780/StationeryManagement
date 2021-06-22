@@ -14,6 +14,7 @@ namespace Entities.Models
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public DateTime ReceivedDate { get; set; }
         public DateTime ShipperPickOrderDate { get; set; }
+        public DateTime ExportWarehouseDate { get; set; }
         public string Status { get; set; }
         [Required]
         [StringLength(200, MinimumLength = 10)]
@@ -32,5 +33,7 @@ namespace Entities.Models
         public virtual ExportWarehouse ExportWarehouse { get; set; }
         public IList<OrderDetail> OrderDetails { get; set; }
         public DateTime ModifiedDate { get; set; } = DateTime.Now;
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
     }
 }

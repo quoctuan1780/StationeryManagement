@@ -11,6 +11,7 @@ using static Common.Constant;
 using static Common.RoleConstant;
 using static Common.SignalRConstant;
 
+
 namespace FinalProject.Areas.Warehouse.Controllers
 {
     [Area(AREA_WAREHOUSE)]
@@ -42,9 +43,17 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OrderWaitExportWarehouse()
+        public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY, string orderDate = EMPTY)
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            if (customer != EMPTY || orderDate != EMPTY)
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync(customer, orderDate);
+            }
+            else
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();
+            }
             return View();
         }
 
@@ -82,6 +91,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
 
                         await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
 

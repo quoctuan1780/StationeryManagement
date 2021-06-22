@@ -459,6 +459,9 @@ namespace Entities.Migrations
                     b.Property<string>("AdminId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("ExportWarehouseDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -474,6 +477,11 @@ namespace Entities.Migrations
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("ShipperId")
                         .HasColumnType("nvarchar(max)");
@@ -630,6 +638,11 @@ namespace Entities.Migrations
                     b.Property<int>("RemainingQuantity")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<double>("Weight")
                         .HasColumnType("float");
 
@@ -782,11 +795,13 @@ namespace Entities.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReceiptRequestId");
 
                     b.HasIndex("ReceiptRequestId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ReceiptRequest");
                 });
@@ -833,13 +848,18 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductDetailId")
                         .HasColumnType("int");
 
                     b.Property<int>("RecommendationId")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductId", "RecommendationId");
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductDetailId", "RecommendationId");
+
+                    b.HasIndex("ProductDetailId");
 
                     b.HasIndex("ProductId");
 
@@ -1468,6 +1488,15 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Entities.Models.ReceiptRequest", b =>
+                {
+                    b.HasOne("Entities.Models.User", "User")
+                        .WithMany("ReceiptRequests")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Entities.Models.ReceiptRequestDetail", b =>
                 {
                     b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
@@ -1489,11 +1518,15 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.HasOne("Entities.Models.Product", "Product")
+                    b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
                         .WithMany("RecommendationDetails")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Entities.Models.Product", null)
+                        .WithMany("RecommendationDetails")
+                        .HasForeignKey("ProductId");
 
                     b.HasOne("Entities.Models.Recommendation", "Recommendation")
                         .WithMany("RecommendationDetails")
@@ -1501,7 +1534,7 @@ namespace Entities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductDetail");
 
                     b.Navigation("Recommendation");
                 });
@@ -1658,6 +1691,8 @@ namespace Entities.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ReceiptRequestDetails");
+
+                    b.Navigation("RecommendationDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Provider", b =>
@@ -1707,6 +1742,8 @@ namespace Entities.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("RatingDetails");
+
+                    b.Navigation("ReceiptRequests");
                 });
 
             modelBuilder.Entity("Entities.Models.Ward", b =>

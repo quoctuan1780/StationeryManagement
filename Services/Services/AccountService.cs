@@ -204,17 +204,51 @@ namespace Services.Services
         public async Task<IList<User>> GetAllEmployeesByRoleAync(string role)
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
+
+            users = users.Where(x => x.IsDeleted == false).ToList();
+
             return users;
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _userManager.FindByEmailAsync(email);
+            var users = await _userManager.FindByEmailAsync(email);
+            if(users.IsDeleted == true)
+            {
+                return null;
+            }
+
+            return users;
         }
 
         public async Task<bool> IsInRoleAsync(User user, string role)
         {
             return await _userManager.IsInRoleAsync(user, role);
+        }
+        public async Task<int> DeleteUser(string id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            user.IsDeleted = true;
+            _context.Users.Update(user);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass)
+        {
+            return await _userManager.ChangePasswordAsync(user, currentPass,newPass);
+        }
+
+        public async Task<int> UpdateInformationEmployeeAsync(User user)
+        {
+            var userupdate = await _context.Users.Where(x => x.UserName == user.UserName).FirstOrDefaultAsync();
+            userupdate.WardCode = user.WardCode;
+            userupdate.PhoneNumber = user.PhoneNumber;
+            userupdate.StreetName = user.StreetName;
+            userupdate.Image = user.Image;
+            _context.Update(user);
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
@@ -230,6 +264,21 @@ namespace Services.Services
         public async Task<IList<User>> GetAllCustomersAsync()
         {
             return await _userManager.GetUsersInRoleAsync(ROLE_CUSTOMER);
+        }
+
+        public async Task<IdentityResult> ForgotPasswordAsync(User user, string token, string newPassword)
+        {
+            return await _userManager.ResetPasswordAsync(user, token, newPassword);
+        }
+
+        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
+        }
+
+        public async Task<IList<User>> GetAllWarehouseManagementsAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
         }
     }
 }
