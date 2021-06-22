@@ -1,38 +1,66 @@
-﻿<div class="box-header-02">
+﻿@inject Services.Interfacies.ICategoryService _categoryService
+@inject Services.Interfacies.IProductService _productService
+@{ 
+    var categories = await _categoryService.GetAllCategoriesAsync();
+    var productDetails = await _productService.GetTop10ProductHotAsync();
+}
+<div class="box-header-02">
     <div class="container">
         <div class="row">
             <div class="menu">
                 <div class="box-main-menu">
                     <div class="main-menu">
                         <ul>
-                            <li class="item1 first"><a href="/Home/Index">Home</a></li>
+                            <li class="item1 first"><a asp-action="Index" asp-controller="Home">Trang chủ</a></li>
                             <li class="item2 megamenu-parent">
-                                <a href="grid.html">Tablets</a>
+                                <a href="#">Danh mục sản phẩm</a>
                                 <div class="vt_megamenu_content">
                                     <div class="mega-menu-01">
                                         <div class="menu-01 menu-01-cate">
-                                            <div class="title"><span>Categories</span></div>
+                                            <div class="title"><span>Loại sản phẩm</span></div>
                                             <ul class="content-col">
-                                                <li class="first"><a class="mega-lap" href="#"><span>Laptop</span></a></li>
-                                                <li><a class="mega-tvi" href="#"><span>TV</span></a></li>
-                                                <li><a class="mega-mob" href="#"><span>Mobile</span></a></li>
-                                                <li><a class="mega-tab" href="#"><span>Tablet</span></a></li>
-                                                <li><a class="mega-cam" href="#"><span>Camera</span></a></li>
-                                                <li class="last"><a class="mega-rad" href="#"><span>Radio</span></a></li>
+                                                @if (categories != null && categories.Any())
+                                                {
+                                                    foreach (var item in categories)
+                                                    {
+                                                        <li><a asp-action="Search" asp-controller="Search" asp-route-text="@item.CategoryName"><span>@item.CategoryName</span></a></li>
+                                                    }
+                                                }
                                             </ul>
                                         </div>
                                         <div class="menu-01 menu-01-top">
-                                            <div class="title"><span>Tops</span><span class="hot">Hot</span></div>
+                                            <div class="title"><span>Sản phẩm</span><span class="hot">Hot</span></div>
                                             <ul class="content-col">
-                                                <li class="first"><a href="#"><span>Smartphones</span></a></li>
-                                                <li><a href="#"><span>Accessories</span></a></li>
-                                                <li><a href="#"><span>Headsets</span></a></li>
-                                                <li><a href="#"><span>Batteries</span></a></li>
-                                                <li><a href="#"><span>Screen Protectors</span></a></li>
-                                                <li class="last"><a href="#"><span>Memmory Cards</span></a></li>
+                                                @if (productDetails != null && productDetails.Any())
+                                                {
+                                                    foreach(var item in productDetails.Take(5))
+                                                    {
+                                                        <li>
+                                                            <a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                                                <span>@item.Product.ProductName phân loại @item.Color</span>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                }
                                             </ul>
                                         </div>
-                                        <div id="feature" class="menu-01 menu-01-feature carousel-feature">
+                                        @if(productDetails != null && productDetails.Count > 5)
+                                        {
+                                            <div class="menu-01 menu-01-top">
+                                                <div class="title"><span>Sản phẩm</span><span class="hot">Hot</span></div>
+                                                <ul class="content-col">
+                                                    @foreach(var item in productDetails.Skip(5))
+                                                    {
+                                                        <li>
+                                                            <a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                                                <span>@item.Product.ProductName phân loại @item.Color</span>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                        @*<div id="feature" class="menu-01 menu-01-feature carousel-feature">
                                             <div class="title"><span>Featured</span><span class="new">New</span></div>
                                             <div class="carousel-inner">
                                                 <div class="item active">
@@ -71,12 +99,12 @@
                                                 <p class="description">At vero eos et accusamus et iusto odios un dignissimos ducimus qui blan ditiis prasixer esentium voluptatum</p>
                                                 <div class="shop-now"><a title="Shop now" href="#"><span>Shop now</span></a></div>
                                             </div>
-                                        </div>
+                                        </div>*@
                                     </div>
                                 </div>
                             </li>
-                            <li class="item4"><a href="grid.html">Giới thiệu </a></li>
-                            <li class="item5"><a href="grid.html">Liên hệ </a></li>
+                            <li class="item4"><a href="javascript:void(0)">Giới thiệu </a></li>
+                            <li class="item5"><a href="javascript:void(0)">Liên hệ </a></li>
                         </ul>
                     </div>
                 </div>

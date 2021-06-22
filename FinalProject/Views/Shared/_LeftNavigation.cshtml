@@ -1,16 +1,18 @@
-﻿<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+﻿@inject Services.Interfacies.ICategoryService _categoryService
+@{
+    var categories = await _categoryService.GetAllCategoriesAsync();
+}
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
     <div class="vertical-menu">
-        <div class="all-cate"><span>Categories</span></div>
+        <div class="all-cate"><span>Loại sản phẩm</span></div>
         <ul>
-            <li><a href="./detail.html">Minitors</a></li>
-            <li><a href="#">Printers</a></li>
-            <li><a href="#">Lnk, Toner & Paper</a></li>
-            <li><a href="#">Accessories</a></li>
-            <li><a href="#">Services & apps</a></li>
-            <li><a href="#">Campus networking</a></li>
-            <li><a href="#">Data center</a></li>
-            <li><a href="#">Wireless networking</a></li>
-            <li><a href="#">Workstations</a></li>
+            @if(categories != null && categories.Any())
+            {
+                foreach(var item in categories.Take(10))
+                {
+                    <li><a asp-action="Search" asp-controller="Search" asp-route-text="@item.CategoryName">@item.CategoryName</a></li>
+                }
+            }
         </ul>
     </div>
 </div>

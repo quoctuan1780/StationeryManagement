@@ -42,7 +42,7 @@ namespace Services.Services
                 var index = productDetails.FindIndex(x => x.ProductDetailId == item.ProductDetailId);
 
                 productDetails[index].QuantityOrdered += item.Quantity;
-                productDetails[index].RemainingQuantity += productDetails[index].Quantity - item.Quantity;
+                productDetails[index].RemainingQuantity -= item.Quantity;
 
                 total += item.Quantity * item.Price;
             }

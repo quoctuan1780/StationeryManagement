@@ -86,6 +86,7 @@ namespace Services.Services
                 .Where(x => x.IsDeleted == false)
                 .Include(x => x.Category)
                 .Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .Take(16)
                 .ToListAsync();
         }
 
@@ -107,6 +108,7 @@ namespace Services.Services
                             .Include(x => x.Category)
                             .Include(x => x.ProductImages.Where(y => y.IsDeleted == false))
                             .Include(x => x.ProductDetails.Where(y => y.IsDeleted == false))
+                            .Where(x => x.IsDeleted == false)
                             .FirstOrDefaultAsync();
         }
 
@@ -126,6 +128,41 @@ namespace Services.Services
             return result;
         }
 
+        public string GetProductSkip(int skip)
+        {
+            var result = _context.Products.Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .Where(x => x.IsDeleted == false)
+                .Skip(skip).Take(16);
+
+            var jsonResult = new List<JObject>();
+
+            if(result != null && result.Any())
+            {
+                foreach (var item in result)
+                {
+                    var jObject = new JObject
+                    {
+                        {"ProductId", item.ProductId },
+                        {"ProductName", item.ProductName },
+                        {"Price", item.Price }
+                    };
+
+                    if (item.ProductImages != null && item.ProductImages.Any())
+                    {
+                        jObject.Add("ProductImage", item.ProductImages.FirstOrDefault().Image);
+                    }
+                    else
+                    {
+                        jObject.Add("ProductImage", "");
+                    }
+
+                    jsonResult.Add(jObject);
+                }
+            }
+
+            return JsonConvert.SerializeObject(jsonResult);
+        }
+
 
         //check deteted item
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
@@ -133,22 +170,27 @@ namespace Services.Services
             return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
         }
 
-        public async Task<string> GetSizeAsync(ProductDetail product)
+        public async Task<IList<ProductDetail>> GetTop10ProductHotAsync()
         {
-            var result = await _context.ProductDetails.Where(x => x.ProductId == product.ProductId && x.Color == product.Color)
-                .ToListAsync();
-            List<SelectListItem> list = new();
-            foreach (var item in result)
+            var result = (from od in _context.OrderDetails
+                          join
+                          o in _context.Orders on od.OrderId equals o.OrderId
+                          where o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
+                          group od by od.ProductDetailId into g
+                          select new
+                          {
+                              ProductDetailId = g.Key,
+                              Quantity = g.Sum(x => x.Quantity)
+                          }).OrderByDescending(x => x.Quantity).Select(x => x.ProductDetailId).Take(10);
+
+            if (result == null || !result.Any())
             {
-                var pro = new SelectListItem()
-                {
-                    Value = item.ProductDetailId.ToString(),
-                    Text = ""
-                };
-                list.Add(pro);
-                
+                return null;
             }
-            return (JsonConvert.SerializeObject(list));
+
+            var productDetails = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+
+            return productDetails;
         }
 
         public async Task<bool> IsExistsProduct(Product product)

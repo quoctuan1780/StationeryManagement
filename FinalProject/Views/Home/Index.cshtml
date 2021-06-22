@@ -4,6 +4,8 @@
     var products = ViewBag.Products as IList<Entities.Models.Product>;
 
     string image = null;
+
+    int skip = 16;
 }
 
 <div class="position-01">
@@ -762,116 +764,201 @@
 </div>
 <div class="positive-02">
     <div class="container">
-        <div class="other-pro">
-            @if(products is null)
+        <div class="other-pro" id="product-item">
+            @if (products is null)
             {
                 <div>
                     Không có sản phẩm nào
                 </div>
             }
             else
-            foreach(var item in products)
-            {
-                <div class="col-lg-3">
-                    <div class="products-grid">
-                        <div class="item">
-                            <div class="item-wrap">
-                                <div class="item-image">
-                                    <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                        @if (!(item.ProductImages.FirstOrDefault() is null))
-                                        {
+                foreach (var item in products)
+                {
+                    <div class="col-lg-3">
+                        <div class="products-grid">
+                            <div class="item">
+                                <div class="item-wrap">
+                                    <div class="item-image">
+                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                            @if (!(item.ProductImages.FirstOrDefault() is null))
                                             {
-                                                <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image" 
-                                                 alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                {
+                                                    <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                         alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                }
+                                                image = item.ProductImages.FirstOrDefault().Image;
                                             }
-                                            image = item.ProductImages.FirstOrDefault().Image;
-                                        }
-                                        else
-                                        {
-                                            <img class="first_image" src="~/images/product/img_1.jpg" 
-                                                 alt="Product demo" width="228" height="228" style="width: 100%;" />
-                                        }
-                                    </a>
-                                    <div class="item-btn">
-                                        <div class="box-inner">
-                                            <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
-                                            <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                            <span class="qview">
-                                                <a class="vt_quickview_handler" data-original-title="Quick View"
-                                                   data-placement="left" data-toggle="tooltip" 
-                                                   asp-controller="Product" asp-action="Detail"
-                                                   asp-route-id="@item.ProductId">
-                                                    <span>
-                                                        Quick
-                                                        View
-                                                    </span>
-                                                </a>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="pro-info">
-                                    <div class="pro-inner">
-                                        <div class="pro-title product-name">
-                                            <a href="detail.html">
-                                                @item.ProductName
-                                            </a>
-                                        </div>
-                                        <div class="pro-content">
-                                            <div class="wrap-price">
-                                                <div class="price-box">
-                                                    <span class="regular-price">
-                                                        <span class="price">@item.Price VNĐ</span>
-                                                    </span>
-                                                    @*<p class="special-price">
-                                                        <span class="price">@item.Price VNĐ</span>
-                                                    </p>*@
-                                                </div>
+                                            else
+                                            {
+                                                <img class="first_image" src="~/images/product/img_1.jpg"
+                                                     alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                            }
+                                        </a>
+                                        <div class="item-btn">
+                                            <div class="box-inner">
+                                                <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                                <span class="qview">
+                                                    <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                       data-placement="left" data-toggle="tooltip"
+                                                       asp-controller="Product" asp-action="Detail"
+                                                       asp-route-id="@item.ProductId">
+                                                        <span>
+                                                            Quick
+                                                            View
+                                                        </span>
+                                                    </a>
+                                                </span>
                                             </div>
-                                            <p>Chưa có đánh giá</p>
-                                            @*<div class="ratings" style="margin-bottom: .5rem;">
-                                                <div class="rating-box">
-                                                    
-                                                    <div class="rating" style="width:80%">
+                                        </div>
+
+                                    </div>
+                                    <div class="pro-info">
+                                        <div class="pro-inner">
+                                            <div class="pro-title product-name">
+                                                <a href="detail.html">
+                                                    @item.ProductName
+                                                </a>
+                                            </div>
+                                            <div class="pro-content">
+                                                <div class="wrap-price">
+                                                    <div class="price-box">
+                                                        <span class="regular-price">
+                                                            <span class="price">@item.Price VNĐ</span>
+                                                        </span>
+                                                        @*<p class="special-price">
+                                                                <span class="price">@item.Price VNĐ</span>
+                                                            </p>*@
                                                     </div>
                                                 </div>
-                                            </div>*@
+                                                <p>Chưa có đánh giá</p>
+                                                @*<div class="ratings" style="margin-bottom: .5rem;">
+                                                        <div class="rating-box">
+
+                                                            <div class="rating" style="width:80%">
+                                                            </div>
+                                                        </div>
+                                                    </div>*@
+                                            </div>
                                         </div>
                                     </div>
-                              </div> 
-                                <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
-                                    Chi tiết sản phẩm
-                                </a>
+                                    <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                        Chi tiết sản phẩm
+                                    </a>
+                                </div>
+                                <!--end item wrap -->
                             </div>
-                            <!--end item wrap -->
                         </div>
                     </div>
-                </div>
-            }
-            
+                }
         </div>
+    </div>
+    <div style="display: flex; justify-content: center">
+        <input type="hidden" id="skip-product" value="@skip" />
+        <button type="button" class="btn btn-primary btn-lg button" 
+                data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Tải dữ liệu..."
+                onclick="getProducts(this)">Xem thêm...</button>
     </div>
 </div>
 @section Scripts{ 
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
     <script>
-        function loadingOut(loading) {
-            setTimeout(() => loading.out(), 3000);
-        }
+        function getProducts(e) {
+            var $btn = $(e);
+            var skip = parseInt($("#skip-product").val());
 
-        function verticalTextColor() {
-            var loading = new Loading({
-                title: 'Xin hãy đợi',
-                titleColor: 'rgb(217, 83, 79)',
-                discription: 'Loading...',
-                discriptionColor: 'rgb(77, 150, 223)',
-                animationOriginColor: 'rgb(33, 179, 132)',
-                mask: true,
-                loadingPadding: '20px 50px',
-                defaultApply: true,
-            });
+            $btn.button('loading');
 
-            loadingOut(loading);
+            $.ajax({
+                url: '/Product/GetProductSkip',
+                method: 'GET',
+                async: true,
+                data: { skip: skip },
+                success: function (data) {
+                    $btn.button('reset');
+                    if (data === "-4") {
+                        showError("Bạn đã xem đến sản phẩm cuối cùng");
+                    }
+                    else if (data === "-99") {
+                        showErrorSystem();
+                    }
+                    var json = JSON.parse(data);
+                    var node = ``;
+                    $.each(json, function (k, v) {
+                        node += `<div class="col-lg-3">
+                        <div class="products-grid">
+                            <div class="item">
+                                <div class="item-wrap">
+                                    <div class="item-image">
+                                        <a class="product-image no-touch" href="#" title="">`;
+                        if (v.ProductImage !== '') {
+                                                node += `
+                                                <img class="first_image" src="/images/product/`+ v.ProductImage + `"
+                                                        alt="Product demo" width="228" height="228" style="width: 100%;" />`;
+
+                        }
+                        else {
+                                                node += `
+                                                <img class="first_image" src="/images/product/img_1.jpg"
+                                                     alt="Product demo" width="228" height="228" style="width: 100%;" />`;
+                        }
+                                        node += `
+                                        </a>
+                                        <div class="item-btn">
+                                            <div class="box-inner">
+                                                <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                                <span class="qview">
+                                                    <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                       data-placement="left" data-toggle="tooltip"
+                                                       asp-controller="Product" asp-action="Detail"
+                                                       asp-route-id="`+ v.ProductId + `">
+                                                        <span>
+                                                            Quick
+                                                            View
+                                                        </span>
+                                                    </a>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="pro-info">
+                                        <div class="pro-inner">
+                                            <div class="pro-title product-name">
+                                                <a href="detail.html">
+                                                    `+ v.ProductName + `
+                                                </a>
+                                            </div>
+                                            <div class="pro-content">
+                                                <div class="wrap-price">
+                                                    <div class="price-box">
+                                                        <span class="regular-price">
+                                                            <span class="price">`+ v.Price + ` VNĐ</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <p>Chưa có đánh giá</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="`+ v.ProductId + `">
+                                        Chi tiết sản phẩm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+                    });
+                    skip += 2;
+                    $("#skip-product").val(skip);
+                    $("#product-item").append(node);
+                },
+                error: function (code, err) {
+                    $btn.button('reset');
+                    console.error(err);
+                }
+            })
         }
     </script>
 }

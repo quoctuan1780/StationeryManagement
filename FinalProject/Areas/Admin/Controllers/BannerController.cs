@@ -47,7 +47,7 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 try
                 {
-                    var imageName = await SaveImageAccountAsync(model.Image, 1366, 768, IMAGE_LINK_BANNER);
+                    var imageName = await SaveImageBannerAsync(model.Image, 1366, 768);
 
                     if (!(imageName is null))
                     {
@@ -162,7 +162,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     else if(model.Image != null)
                     {
 
-                        imageName = await SaveImageAccountAsync(model.Image, 1920, 1080, IMAGE_LINK_BANNER);
+                        imageName = await SaveImageBannerAsync(model.Image, 1920, 768);
                     }
                     else if(model.ImageString != null)
                     {

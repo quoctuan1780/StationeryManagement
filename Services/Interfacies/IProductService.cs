@@ -8,7 +8,6 @@ namespace Services.Interfacies
     public interface IProductService
     {
         Task<IList<Product>> GetAllProductsAsync();
-        Task<string> GetSizeAsync(ProductDetail product);
         Task<Product> AddProductAsync(Product product);
         Task<ProductDetail> GetProductDetailAsync(int id);
         Task<Product> UpdateProductAsync(Product product);
@@ -26,5 +25,9 @@ namespace Services.Interfacies
         Task<string> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity);
 
         Task<int> DeleteProductByIdAsync(int productId);
+
+        Task<IList<ProductDetail>> GetTop10ProductHotAsync();
+
+        string GetProductSkip(int skip);
     }
 }
