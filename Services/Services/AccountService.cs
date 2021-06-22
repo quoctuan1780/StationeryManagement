@@ -265,5 +265,20 @@ namespace Services.Services
         {
             return await _userManager.GetUsersInRoleAsync(ROLE_CUSTOMER);
         }
+
+        public async Task<IdentityResult> ForgotPasswordAsync(User user, string token, string newPassword)
+        {
+            return await _userManager.ResetPasswordAsync(user, token, newPassword);
+        }
+
+        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
+        }
+
+        public async Task<IList<User>> GetAllWarehouseManagementsAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
+        }
     }
 }

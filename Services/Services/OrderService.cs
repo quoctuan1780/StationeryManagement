@@ -107,15 +107,49 @@ namespace Services.Services
             return await _context.Orders.Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId)
+        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId, string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
         {
-            return await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS) && x.ShipperId.Equals(userId)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
+            var result = _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS) && x.ShipperId.Equals(userId));
+
+            if(customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId.Equals(customer));
+            }
+            if(address != "null" && address != EMPTY)
+            {
+                result = result.Where(x => x.Address.Contains(address));
+            }
+            if (pickedOrderDate != "null" && pickedOrderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(pickedOrderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.ShipperPickOrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
         }
 
-        public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync()
+        public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync(string customer = EMPTY, string orderDate = EMPTY)
         {
-            return await _context.Orders.Where(x => x.Status.Equals(STATUS_PREPARING_GOODS)).Include(x => x.User).OrderBy(x => x.OrderDate).ToListAsync();
-         }
+            var result = _context.Orders.Include(x => x.OrderDetails).Include(x => x.User).Where(x => x.Status.Equals(STATUS_PREPARING_GOODS));
+
+            if(customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId == customer);
+            }
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
+        }
 
         public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId)
         {
@@ -127,6 +161,9 @@ namespace Services.Services
             }
 
             order.WarehouseId = userId;
+            order.ModifiedBy = userId;
+            order.ModifiedDate = DateTime.Now;
+            order.ExportWarehouseDate = DateTime.Now;
             order.Status = STATUS_WAITING_PICK_GOODS;
 
             _context.Orders.Update(order);
@@ -145,6 +182,7 @@ namespace Services.Services
 
             order.Status = STATUS_ON_DELIVERY_GOODS;
             order.ModifiedDate = DateTime.Now;
+            order.ModifiedBy = order.ShipperId;
 
             _context.Orders.Update(order);
 
@@ -174,7 +212,7 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
-        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick()
+        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY)
         {
             var result = from order in _context.Orders.Include(x => x.User)
                          join
@@ -187,13 +225,28 @@ namespace Services.Services
                          };
 
             var orders = new List<OrderHelper.OrderJoinHelper>();
-
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.Order.UserId == customer);
+            }
+            if (address != "null" && address != EMPTY)
+            {
+                result = result.Where(x => x.Order.Address.Contains(address));
+            }
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.OrderDate.Date.Equals(date.Date));
+                }
+            }
             foreach (var item in result)
             {
                 var temp = new OrderHelper.OrderJoinHelper
                 {
-                    order = item.Order,
-                    Name = item.Name
+                    Order = item.Order,
+                    WarehouseManagementName = item.Name
                 };
 
                 orders.Add(temp);
@@ -202,47 +255,78 @@ namespace Services.Services
             return orders;
         }
 
-        public async Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId)
+        public async Task<string> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId, IList<byte[]> rowVersions)
         {
             var orders = await _context.Orders.Where(x => ordersId.Contains(x.OrderId)).ToListAsync();
             
             if(orders is null)
             {
-                return 0;
+                return EMPTY;
             }
+            string success = EMPTY;
+            string fail = EMPTY;
+            int i = 0;
+            while(i < orders.Count)
+                if (orders[i].RowVersion.SequenceEqual(rowVersions[i]))
+                {
+                    orders[i].ShipperId = userId;
+                    orders[i].ModifiedBy = userId;
+                    orders[i].ModifiedDate = DateTime.Now;
+                    orders[i].ShipperPickOrderDate = DateTime.Now;
+                    success += orders[i].OrderId.ToString() + " ";
+                    i++;
+                }
+                else
+                {
+                    fail += orders[i].OrderId.ToString() + " ";
+                    orders.RemoveAt(i);
+                    rowVersions.RemoveAt(i);
+                }
 
-            foreach(var item in orders)
+            var jsonResult = new JObject 
             {
-                item.ShipperId = userId;
-                item.ModifiedBy = userId;
-                item.ModifiedDate = DateTime.Now;
-                item.ShipperPickOrderDate = DateTime.Now;
+                { SUCCESS, success },
+                { FAIL, fail }
+            };
+
+            if (orders != null && orders.Count > 0)
+            {
+                _context.Orders.UpdateRange(orders);
+
+                await _context.SaveChangesAsync();
             }
 
-            _context.Orders.UpdateRange(orders);
-
-            return await _context.SaveChangesAsync();
+            return JsonConvert.SerializeObject(jsonResult);
         }
 
-        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery()
+        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery(string userId = EMPTY)
         {
             var result = from order in _context.Orders
                          join user in _context.Users
                             on order.ShipperId equals user.Id
+                        join user1 in _context.Users
+                            on order.WarehouseId equals user1.Id
                          where order.Status.Equals(STATUS_ON_DELIVERY_GOODS)
                          select new
                          {
                              Order = order,
-                             ShipperName = user.FullName
+                             ShipperName = user.FullName,
+                             WareHouseManamenentName = user1.FullName
                          };
+            if (!userId.Equals(EMPTY))
+            {
+                result = result.Where(x => x.Order.ShipperId.Equals(userId));
+            }
+
             var orders = new List<OrderHelper.OrderJoinHelper>();
 
             foreach(var item in result)
             {
                 var temp = new OrderHelper.OrderJoinHelper
                 {
-                    order = item.Order,
-                    Name = item.ShipperName
+                    Order = item.Order,
+                    ShipperName = item.ShipperName,
+                    WarehouseManagementName = item.WareHouseManamenentName
                 };
 
                 orders.Add(temp);
@@ -251,9 +335,30 @@ namespace Services.Services
             return orders;
         }
 
-        public async Task<IList<Order>> GetOrdersWaitToConfirmAsync()
+        public async Task<IList<Order>> GetOrdersWaitToConfirmAsync(string orderDate, string paymentMethod, string customer)
         {
-            return await _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM)).OrderBy(x => x.OrderDate).ToListAsync();
+            var result = _context.Orders.Include(x => x.User).Include(x => x.OrderDetails).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM));
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId == customer);
+            }
+
+            if (paymentMethod != "null" && paymentMethod != EMPTY)
+            {
+                result = result.Where(x => x.PaymentMethod == paymentMethod);
+            }
+
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
         }
 
         public async Task<int> CountNewAcceptedOrdersAsync()
@@ -378,7 +483,7 @@ namespace Services.Services
             return await _context.WorkflowHistories.Where(x => x.RecordId == orderId.ToString()).OrderBy(x => x.CreatedDate).ToListAsync();
         }
 
-        public IList<OrderHelper.OrderJoinHelper> GetOrderDelivered()
+        public IList<OrderHelper.OrderJoinHelper> GetOrderDelivered(string userId = EMPTY)
         {
             var result = from order in _context.Orders.Include(x => x.User)
                          join user in _context.Users
@@ -392,12 +497,17 @@ namespace Services.Services
             var orders = new List<OrderHelper.OrderJoinHelper>();
             if (result.Any())
             {
+                if (!userId.Equals(EMPTY))
+                {
+                    result = result.Where(x => x.Order.ShipperId.Equals(userId));
+                }
+
                 foreach (var item in result)
                 {
                     var temp = new OrderHelper.OrderJoinHelper
                     {
-                        order = item.Order,
-                        Name = item.ShipperName
+                        Order = item.Order,
+                        ShipperName = item.ShipperName
                     };
 
                     orders.Add(temp);
@@ -424,7 +534,7 @@ namespace Services.Services
             return receivedDates;
         }
 
-        public IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate)
+        public IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate, string userId = EMPTY)
         {
             var result = from order in _context.Orders.Include(x => x.User)
                          join user in _context.Users
@@ -436,17 +546,22 @@ namespace Services.Services
                              Order = order,
                              ShipperName = user.FullName
                          };
-            if(customerId != "null")
+            if (!userId.Equals(EMPTY))
+            {
+                result = result.Where(x => x.Order.ShipperId.Equals(userId));
+            }
+
+            if(customerId != "null" && customerId != EMPTY)
             {
                 result = result.Where(x => x.Order.UserId == customerId);
             }
 
-            if (shipperName != "null")
+            if (shipperName != "null" && shipperName != EMPTY)
             {
                 result = result.Where(x => x.ShipperName == shipperName);
             }
 
-            if (receivedDate != "null")
+            if (receivedDate != "null" && receivedDate != EMPTY)
             {
                 bool resultParse = DateTime.TryParse(receivedDate, out DateTime receivedDateParsed);
                 if (resultParse)
@@ -462,8 +577,8 @@ namespace Services.Services
                 {
                     var temp = new OrderHelper.OrderJoinHelper
                     {
-                        order = item.Order,
-                        Name = item.ShipperName
+                        Order = item.Order,
+                        ShipperName = item.ShipperName
                     };
 
                     orders.Add(temp);
@@ -472,5 +587,158 @@ namespace Services.Services
 
             return orders;
         }
+
+        public IList<OrderHelper.OrderJoinHelper> FilterOrder(string exportWarehouseDate, string receivedDeliveryDate, string warehouse, string shipper, string userId = EMPTY, string customer = EMPTY)
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join user in _context.Users
+                            on order.ShipperId equals user.Id
+                        join user1 in _context.Users
+                            on order.WarehouseId equals user1.Id
+                         where order.Status.Equals(STATUS_ON_DELIVERY_GOODS)
+                         orderby order.ReceivedDate descending
+                         select new
+                         {
+                             Order = order,
+                             ShipperName = user.FullName,
+                             WarehouseManagementName = user1.FullName
+                         };
+            if (!userId.Equals(EMPTY))
+            {
+                result = result.Where(x => x.Order.ShipperId.Equals(userId));
+            }
+
+            if (warehouse != "null" && warehouse != EMPTY)
+            {
+                result = result.Where(x => x.WarehouseManagementName.Equals(warehouse));
+            }
+
+            if (shipper != "null" && shipper != EMPTY)
+            {
+                result = result.Where(x => x.ShipperName.Equals(shipper));
+            }
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.Order.UserId.Equals(customer));
+            }
+
+            if (exportWarehouseDate != null)
+            {
+                bool resultParse = DateTime.TryParse(exportWarehouseDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.ExportWarehouseDate.Date.Equals(date.Date));
+                }
+            }
+
+            if (receivedDeliveryDate != null)
+            {
+                bool resultParse = DateTime.TryParse(receivedDeliveryDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.ShipperPickOrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+            if (result.Any())
+            {
+                foreach (var item in result)
+                {
+                    var temp = new OrderHelper.OrderJoinHelper
+                    {
+                        Order = item.Order,
+                        ShipperName = item.ShipperName,
+                        WarehouseManagementName = item.WarehouseManagementName
+                    };
+
+                    orders.Add(temp);
+                }
+            }
+
+            return orders;
+        }
+
+        public IList<OrderHelper.OrderJoinHelper> FilterOrder(string exportWarehouseDate, string warehouse, string customer)
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join user in _context.Users
+                            on order.WarehouseId equals user.Id
+                         where order.Status.Equals(STATUS_WAITING_PICK_GOODS)
+                         orderby order.ReceivedDate descending
+                         select new
+                         {
+                             Order = order,
+                             WarehouseManagementName = user.FullName,
+                         };
+            if (warehouse != "null" && warehouse != EMPTY)
+            {
+                result = result.Where(x => x.WarehouseManagementName.Equals(warehouse));
+            }
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.Order.User.Id.Equals(customer));
+            }
+
+            if (exportWarehouseDate != null)
+            {
+                bool resultParse = DateTime.TryParse(exportWarehouseDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.ExportWarehouseDate.Date.Equals(date.Date));
+                }
+            }
+
+
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+            if (result.Any())
+            {
+                foreach (var item in result)
+                {
+                    var temp = new OrderHelper.OrderJoinHelper
+                    {
+                        Order = item.Order,
+                        WarehouseManagementName = item.WarehouseManagementName
+                    };
+
+                    orders.Add(temp);
+                }
+            }
+
+            return orders;
+        }
+
+        public async Task<IList<string>> GetAddressinOrdersAsync()
+        {
+            var result = from order in _context.Orders
+                         group order by order.Address into g
+                         select g.Key;
+
+            return await result.ToListAsync();
+        }
+
+        //public async Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId)
+        //{
+        //    var orders = await _context.Orders.Where(x => ordersId.Contains(x.OrderId)).ToListAsync();
+
+        //    if (orders is null)
+        //    {
+        //        return 0;
+        //    }
+
+        //    foreach (var item in orders)
+        //    {
+        //        item.ShipperId = userId;
+        //        item.ModifiedBy = userId;
+        //        item.ModifiedDate = DateTime.Now;
+        //        item.ShipperPickOrderDate = DateTime.Now;
+        //    }
+
+        //    _context.Orders.UpdateRange(orders);
+
+        //    return await _context.SaveChangesAsync();
+        //}
     }
 }

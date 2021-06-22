@@ -60,28 +60,51 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OrderWaitComfirm()
+        public async Task<IActionResult> OrderWaitComfirm(string orderDate = EMPTY, string paymentMethod = EMPTY, string customer = EMPTY)
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitToConfirmAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            ViewBag.Orders = await _orderService.GetOrdersWaitToConfirmAsync(orderDate, paymentMethod, customer);
 
             return View();
         }
 
-        public async Task<IActionResult> OrderWaitExportWarehouse()
+        public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY)
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync(customer);
+
             return View();
         }
 
-        public IActionResult OrderDelivery()
+        public async Task<IActionResult> OrderDelivery(string exportWarehouseDate = EMPTY, string receivedDeliveryDate = EMPTY, string warehouse = EMPTY, string shipper = EMPTY)
         {
-            ViewBag.Orders = _orderService.GetOrdersWaitDelivery();
+            ViewBag.Shippers = await _accountService.GetAllShippersAsync();
+            ViewBag.Warehouses = await _accountService.GetAllWarehouseManagementsAsync();
+
+            if (exportWarehouseDate != null || receivedDeliveryDate != null || !shipper.Equals(EMPTY) || !warehouse.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, receivedDeliveryDate, warehouse, shipper);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.GetOrdersWaitDelivery();
+            }
             return View();
         }
 
-        public IActionResult OrderWaitToPick()
+        public async Task<IActionResult> OrderWaitToPick(string exportWarehouseDate = EMPTY , string warehouse = EMPTY, string customer = EMPTY)
         {
-            ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+            ViewBag.Warehouses = await _accountService.GetAllWarehouseManagementsAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+
+            if (exportWarehouseDate != null  || !customer.Equals(EMPTY) || !warehouse.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, warehouse, customer);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.GetOrdersWaitToPick();
+            }
 
             return View();
         }
@@ -152,57 +175,5 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return ERROR_CODE_SYSTEM;
         }
-
-        [HttpPut]
-        public async Task<int> WarehouseManagementComfirmOrder(int? orderId)
-        {
-            if (orderId is null)
-            {
-                return ERROR_CODE_NULL;
-            }
-
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            try
-            {
-                var user = await _accountService.GetUserAsync(User);
-
-                var result = await _orderService.WarehouseManagementConfirmOrderAsync(orderId.Value, user.Id);
-
-                if (result > 0)
-                {
-                    var workFlow = new WorkflowHistory()
-                    {
-                        CreatedDate = DateTime.Now,
-                        CreatedBy = user.Id,
-                        CurrentStatus = STATUS_PREPARING_GOODS,
-                        NextStatus = STATUS_WAITING_PICK_GOODS,
-                        FullName = user.FullName,
-                        UserEmail = user.Email,
-                        RecordId = orderId.Value.ToString(),
-                        Type = TYPE_ORDER,
-                        UserRole = ROLE_ADMIN
-                    };
-
-                    var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
-
-                    if (!(resultAddworkflow is null))
-                    {
-                        transaction.Complete();
-
-                        await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
-
-                        return CODE_SUCCESS;
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            return ERROR_CODE_SYSTEM;
-        }
-
-
     }
 }
