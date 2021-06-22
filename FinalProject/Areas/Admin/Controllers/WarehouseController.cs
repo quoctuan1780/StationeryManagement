@@ -1,34 +1,37 @@
 ﻿using static Common.Constant;
+using static Common.SignalRConstant;
+using static Common.RoleConstant;
 using static Common.MessageConstant;
-using Entities.Models;
-using FinalProject.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
 using System.Transactions;
+using Entities.Models;
+using FinalProject.Areas.Admin.ViewModels;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
     [Area(AREA_ADMIN)]
-    //[Authorize(Roles = RoleConstant.ROLE_WAREHOUSE_MANAGER)]
+    [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
     public class WarehouseController : Controller
     {
+        private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
         private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
 
         public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
-            IRecommendationService recommendationService)
+            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
         {
+            _hubContext = hubContext;
             _productService = productService;
             _providerService = providerService;
             _receiptService = receiptService;
@@ -40,10 +43,10 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        public string GetRecomandation()
+        public async Task<string> GetRecommandation()
         {
 
-           var result = _recommendationService.GetRecommandtion(3,0.75);
+           var result = await _recommendationService.GetRecommandtion(2,0.5);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -64,28 +67,9 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(recommandation);
         }
 
-        public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDdate, int quantity)
+        public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
-            var result = await _productService.BestSellerInMonthAsync(fromDate,toDdate,quantity);
-
-            var bestSellerList = new List<JObject>();
-
-            foreach (var item in result)
-            {
-                var obj = new JObject
-                {
-                    { "productDetailId", item.ProductDetailId },
-                    { "productName", item.Product.ProductName },
-                    { "color", item.Color },
-                    { "totalQuantity", item.Quantity },
-                    { "quantityOrdered", item.QuantityOrdered },
-                    { "RemainingQuantity", item.RemainingQuantity }
-                };
-
-                bestSellerList.Add(obj);
-            }
-
-            return JsonConvert.SerializeObject(bestSellerList);
+            return await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
         }
 
 
@@ -93,32 +77,28 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             return View();
         }
+       
 
-        public IActionResult CreateReceipt()
+        public async Task<IActionResult> RejectReceipt(int id)
         {
-            return View();
+            if (await _receiptService.RejectReceiptRequestAsync(id) > 0)
+                ViewBag.Message = "Xóa thành công!";
+            return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
 
-
-        [HttpGet]
-        public async Task<IActionResult> CreateReceiptRequest()
+        
+        public async Task<IActionResult> ApproveReceipt(int id)
         {
-            var products = await _productService.GetProductWithDetailsAsync();
-            var listProduct = new List<SelectListItem>();
-
-            foreach(var product in products)
+            if (await _receiptService.ApproveReceiptRequestAsync(id) > 0)
             {
-                listProduct.Add(new SelectListItem
-                {
-                    Value = product.ProductId.ToString(),
-                    Text = product.Product.ProductName + " " + product.Color + " Xuất xứ " + product.Origin
-                }) ;
+                await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
+                await _receiptService.AddReceiptAsync(id);
+                ViewBag.Message = "Đã duyệt!";
             }
-
-            ViewBag.Products = listProduct;
-
-            return View();
+                
+            return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
+      
 
         [HttpPost]
         public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
@@ -171,9 +151,15 @@ namespace FinalProject.Areas.Admin.Controllers
             return JsonConvert.SerializeObject(listColor);
         }
 
+        public async Task<IActionResult> ListReceiptRequest()
+        {
+            ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
+            return View();
+        }
+
         [HttpPost]
         public IActionResult CreateReceipt(ReceiptViewModel model)
-        {  
+        {
             if (ModelState.IsValid)
             {
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -206,11 +192,10 @@ namespace FinalProject.Areas.Admin.Controllers
                 {
                     ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
                 }
-            }
 
-                return View(model);
             }
-
+            return View(model);
+        }
         [HttpGet]
         public JsonResult GetProvider(int productId)
         {

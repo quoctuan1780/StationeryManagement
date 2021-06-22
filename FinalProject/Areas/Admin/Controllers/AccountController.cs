@@ -12,6 +12,10 @@ using System.Transactions;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication;
 using FinalProject.Heplers;
+using FinalProject.Areas.Admin.Helpers;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+
 using static FinalProject.Areas.Admin.Helpers.ImageHelper;
 
 namespace FinalProject.Areas.Admin.Controllers
@@ -19,12 +23,15 @@ namespace FinalProject.Areas.Admin.Controllers
     [Area(AREA_ADMIN)]
     public class AccountController : Controller
     {
+        private readonly UserManager<User> _userManager;
         private readonly IAccountService _accountService;
         private readonly IAddressService _addressService;
         private readonly IEmailSender _emailSender;
 
-        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender)
+        public AccountController(IAccountService accountService, IAddressService addressService, IEmailSender emailSender,
+            UserManager<User> userManager)
         {
+            _userManager = userManager;
             _accountService = accountService;
             _addressService = addressService;
             _emailSender = emailSender;
@@ -33,18 +40,64 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             return View();
         }
-       
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> Index()
         {
-            ViewBag.Shippers =await _accountService.GetAllEmployeesByRoleAync(ROLE_SHIPPER);
-            ViewBag.WM =await _accountService.GetAllEmployeesByRoleAync(ROLE_WAREHOUSE_MANAGER);
+            ViewBag.Shippers = await _accountService.GetAllEmployeesByRoleAync(ROLE_SHIPPER);
+            ViewBag.WM = await _accountService.GetAllEmployeesByRoleAync(ROLE_WAREHOUSE_MANAGER);
             return View();
         }
-        public async Task<IActionResult> ViewInfor(string id)
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        public async Task<IActionResult> ViewInfor()
+        {
+            string id = _userManager.GetUserId(User);
+            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
+            return View();
+        }
+        public async Task<IActionResult> ViewInforEmployee(string id)
         {
             ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
             return View();
         }
+
+        [HttpPost]
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        public async Task<IActionResult> ViewInfor(CreateAccountEmployeeViewModel model)
+        {
+
+            try
+            {
+                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+
+                string image = "admin.png";
+
+                if (!(fileName is null))
+                {
+                    image = fileName;
+                }
+                var user = new User
+                {
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    WardCode = model.WardCode,
+                    StreetName = model.StreetName,
+                    Image = image
+
+                };
+                if (await _accountService.UpdateInformationEmployeeAsync(user) > 0)
+                {
+                    ViewBag.Success = "Cập nhật thông tin thành công!";
+                }
+                else
+                {
+                    ViewBag.Failed = "Cập nhật thông tin thất bại!";
+                }
+            }
+            catch { }
+           
+            return View(model);
+        }
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> CreateEmployeeAccount()
         {
             ViewBag.Provinces = await _addressService.GetProvincesAsync();
@@ -52,6 +105,26 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return View();
         }
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            var user = await _accountService.GetUserAsync(User);
+            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
+            if(result.Succeeded)
+            {
+                ViewBag.Success = "Thay đổi mật khẩu thành công!";
+                return View();
+            }
+            ViewBag.Failed= "Thay đổi mật khẩu không thành công!";
+            return View();
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -91,7 +164,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return View(model);
         }
-
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> Logout()
         {
             await _accountService.LogoutAsync();
@@ -101,6 +174,8 @@ namespace FinalProject.Areas.Admin.Controllers
             return Redirect("/Admin/Account/Login");
         }
 
+
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
@@ -129,18 +204,16 @@ namespace FinalProject.Areas.Admin.Controllers
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                var rd = new Random();
-                var password = "ab" + rd.Next(100000, 999999);
+            //var rd = new Random();
+            //var password = "ab" + rd.Next(100000, 999999);
+            var password = "Aa*123456";
                 var result = await _accountService.CreateAccountAsync(user, model.Role,password);
                 if (result.Succeeded)
                 {
                     transaction.Complete();
                     string subject = "Chào mừng bạn tới với ngôi nhà chung Stationary Store!";
-                    string area = "Shipper";
-                    if (model.Role.Equals(ROLE_WAREHOUSE_MANAGER))
-                    {
-                        area = "Warehouse";
-                    }
+                    string area = "Warehouse";
+                   
 
                      var callbackUrl =  Url.ActionLink("Login", "Account",
                             new { Area = area },
@@ -168,7 +241,7 @@ namespace FinalProject.Areas.Admin.Controllers
             return View(model);
         }
 
-        
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<string> District(int? provinceId)
         {
             if (provinceId is null)
@@ -195,6 +268,16 @@ namespace FinalProject.Areas.Admin.Controllers
             var result = await _addressService.GetWardsByDistrictIdAsync(districtId.Value);
 
             return JsonConvert.SerializeObject(result);
+        }
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        [HttpDelete]
+        public async Task<int> Delete(string id)
+        {
+            if(await _accountService.DeleteUser(id) > 0)
+            {
+                return 1;
+            }
+            return 0;
         }
     }
 }

@@ -1,0 +1,56 @@
+﻿@using static Common.Constant;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var requests = ViewBag.ListRequests as IList<Entities.Models.ReceiptRequest>;
+}
+
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Danh sách phiếu yêu cầu nhập hàng</h1>
+    @if(ViewBag.Message != null)
+            {
+                <span>@ViewBag.Message</span>
+            }
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người tạo</th>
+                            <th>Ngày tạo</th>
+                            <th>Tổng số sản phẩm</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in requests)
+                        {
+                            <tr>
+                                <td>@item.ReceiptRequestId</td>
+                                <td class="category-name">@item.UserId</td>
+                                <td class="category-name">@item.CreateDate</td>
+                                <td class="status">@item.Status</td>
+                                <td>
+
+                                    <a onclick="ViewReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
+                                    @if (item.Status == RECEIPT_STATUS_WAITING)
+                                    {
+                                        <a onclick="RejectReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Từ chối</a>
+                                        <a onclick="Receipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Duyệt</a>
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
+    }

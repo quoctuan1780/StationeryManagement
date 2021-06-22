@@ -17,6 +17,8 @@ namespace Entities.Models
 
         public string Status { get; set; }
 
+        public virtual User User { get; set; }
+
         public virtual IList<ReceiptRequestDetail> ReceiptRequestDetails { get; set; }
 
         public virtual ImportWarehouse ImportWarehouse { get; set; }

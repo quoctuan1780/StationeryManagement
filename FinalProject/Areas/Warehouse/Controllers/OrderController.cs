@@ -11,6 +11,7 @@ using static Common.Constant;
 using static Common.RoleConstant;
 using static Common.SignalRConstant;
 
+
 namespace FinalProject.Areas.Warehouse.Controllers
 {
     [Area(AREA_WAREHOUSE)]
@@ -90,6 +91,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
 
                         await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
 

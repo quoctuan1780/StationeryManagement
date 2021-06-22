@@ -163,6 +163,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
 
                         return CODE_SUCCESS;
                     }

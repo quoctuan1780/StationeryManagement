@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210621153535_receiptRelationship")]
+    partial class receiptRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -459,9 +461,6 @@ namespace Entities.Migrations
                     b.Property<string>("AdminId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExportWarehouseDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -477,11 +476,6 @@ namespace Entities.Migrations
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<string>("ShipperId")
                         .HasColumnType("nvarchar(max)");
@@ -620,8 +614,14 @@ namespace Entities.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
 
                     b.Property<string>("Origin")
                         .HasColumnType("nvarchar(max)");
@@ -638,13 +638,11 @@ namespace Entities.Migrations
                     b.Property<int>("RemainingQuantity")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<double>("Weight")
                         .HasColumnType("float");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("int");
 
                     b.HasKey("ProductDetailId");
 
@@ -1069,13 +1067,7 @@ namespace Entities.Migrations
                     b.Property<string>("RecordId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserRole")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("WorkflowHistoryId");
