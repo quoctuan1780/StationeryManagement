@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Services.Interfacies;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FinalProject.Controllers
@@ -8,11 +10,12 @@ namespace FinalProject.Controllers
     {
         private readonly IProductService _productService;
 
+        public IRecommendationService _recommandationService;
 
-        public HomeController(IProductService productService)
+        public HomeController(IProductService productService, IRecommendationService recommendationService)
         {
             _productService = productService;
-
+            _recommandationService = recommendationService;
         }
 
         public async Task<IActionResult> Index()
@@ -21,5 +24,7 @@ namespace FinalProject.Controllers
 
             return View();
         }
+
+       
     }
 }

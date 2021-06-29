@@ -304,14 +304,7 @@ namespace Entities.Data
             //Entity RecommendationDetail
             modelBuilder.Entity<RecommendationDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId, x.RecommendationId });
-
-                e.HasIndex(x => x.ProductDetailId);
-                e.HasIndex(x => x.RecommendationId);
-
-                e.HasOne(x => x.ProductDetail)
-                .WithMany(x => x.RecommendationDetails)
-                .HasForeignKey(x => x.ProductDetailId);
+                e.HasKey(x => new {x.RecommandationDetailId });
 
                 e.HasOne(x => x.Recommendation)
                 .WithMany(x => x.RecommendationDetails)

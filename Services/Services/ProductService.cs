@@ -116,6 +116,17 @@ namespace Services.Services
             return item;
         }
 
+        public async Task<List<int>> GetProductDetailByProDuctIdAsync(int id)
+        {
+            var list = await _context.ProductDetails.Where(x => x.ProductId == id).ToListAsync();
+            var listid = new List<int>();
+            foreach(var item in list)
+            {
+                listid.Add(item.ProductDetailId);
+            }
+            return listid;
+        }
+
         //check deteted item
         public async Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
         {
@@ -161,6 +172,27 @@ namespace Services.Services
             }
 
             return true;
+        }
+
+        public async Task<List<int>> ListBestSellerProduct(DateTime fromDate, DateTime toDate, int quantity)
+        {
+            var result = await _context.OrderDetails
+                    .Include(x => x.Order)
+                    .Where(x => x.Order.OrderDate >= fromDate)
+                    .Where(x => x.Order.OrderDate <= toDate)
+                    .GroupBy(x => x.ProductDetailId)
+                    .OrderByDescending(x => x.Key)
+                    .Take(quantity)
+                    .Select(x => x.Key)
+                    .ToListAsync();
+            var listId = new List<int>();
+            var tolist = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+            foreach(var item in tolist)
+            {
+                listId.Add(item.ProductDetailId);
+            }
+            return listId;
+
         }
 
         public async Task<IList<Product>> SearchByPriceAsync(int price)

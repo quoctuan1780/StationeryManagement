@@ -16,6 +16,7 @@
     var user = await userManager.GetUserAsync(User);
 
     var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
+    var suggest = ViewBag.Suggest as IList<Entities.Models.Product>;
 }
 
 <style>
@@ -589,6 +590,73 @@
         </div>
     </div>
     <!--End detail product-->
+    <div>
+        <div class="block vt-slider vt-slider7">
+            <div class="slider-inner">
+                <div class="container-slider">
+                    <div class="products-grid">
+                        @foreach (var item in suggest)
+                        {
+                            <div class="item">
+                                <div class="item-wrap">
+                                    <div class="item-image">
+                                        <a class="product-image no-touch" href="#" title="@item.ProductName">
+                                            @if (item.ProductImages != null)
+                                            {
+                                                <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault()" alt="Product demo" />
+                                            }
+
+                                        </a>
+                                        <div class="item-btn">
+                                            <div class="box-inner">
+                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
+                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                                <span class="qview">
+                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="pro-info">
+                                        <div class="pro-inner">
+                                            <div class="pro-title product-name"><a href="detail.html">@item.ProductName</a></div>
+                                            <div class="pro-content">
+                                                <div class="wrap-price">
+                                                    <div class="price-box">
+                                                        <span class="regular-price">
+                                                            <span class="price">@item.Price</span>
+                                                        </span>
+                                                        <p class="special-price">
+                                                            <span class="price">Sale Price</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="ratings">
+                                                    <div class="rating-box">
+                                                        <div class="rating" style="width:80%"></div>
+                                                    </div>
+                                                    <span class="amount"><a href="#">1(s)</a></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a title="Add to cart" class="add-to-cart" href="#">Thêm vào giỏ</a>
+                                </div>
+                                <!--end item wrap -->
+                            </div>}
+
+
+                    </div>
+                </div>
+                <div class="navslider">
+                    <a class="prev" href="#">Prev</a>
+                    <a class="next" href="#">Next</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 @section Scripts{
     <script src="~/js/product-detail/product-detail.js"></script>

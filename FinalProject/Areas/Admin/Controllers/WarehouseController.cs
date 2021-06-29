@@ -27,6 +27,9 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
+        DateTime FromDate;
+        DateTime ToDate;
+        int Quantity;
 
         public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
@@ -45,8 +48,8 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetRecommandation()
         {
-
-           var result = await _recommendationService.GetRecommandtion(2,0.5);
+            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
+           var result = await _recommendationService.GetRecommandtion(4,0.81,listId);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -69,6 +72,11 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
+            var BestSeller = JsonConvert.DeserializeObject ( await _productService.BestSellerInMonthAsync(fromDate, toDate, quantity));
+            FromDate = fromDate;
+            ToDate = toDate;
+            Quantity = quantity;
+
             return await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
         }
 

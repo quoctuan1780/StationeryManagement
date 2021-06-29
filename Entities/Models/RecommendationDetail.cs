@@ -9,8 +9,8 @@ namespace Entities.Models
     {
         public int RecommendationId { get; set; }
         public virtual Recommendation Recommendation { get; set; }
-
-        public int ProductDetailId { get; set; }
-        public virtual ProductDetail ProductDetail { get; set; }
+        public int RecommandationDetailId { get; set; }
+        public string Input { get; set; }
+        public string Output  { get; set; }
     }
 }
