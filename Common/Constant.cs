@@ -1,7 +1,10 @@
-﻿namespace Common
+﻿using System.Runtime.CompilerServices;
+
+namespace Common
 {
     public class Constant
     {
+        #region Constant 
         public const string CONNECTION_STRING = "DefaultConnection";
 
         public const string EMPTY = "";
@@ -58,6 +61,7 @@
 
         public const string PROVIDER_GOOGLE = "Google";
         public const string PROVIDER_FACEBOOK = "Facebook";
+        #endregion
 
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
@@ -235,6 +239,11 @@
         public const string RECEIPT_REQUEST_STATUS_APPROVED = "Đã duyệt";
         public const string RECEIPT_REQUEST_REJECT = "Từ chối";
 
+        #endregion
+
+        #region Guide Constant
+        public const string GUIDE_BUY_PRODUCT = "Hướng dẫn mua hàng";
+        public const string GUIDE_PAYMENT = "Hướng dẫn thanh toán";
         #endregion
     }
 }

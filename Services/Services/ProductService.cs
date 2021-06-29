@@ -1,6 +1,5 @@
 ﻿using Entities.Data;
 using Entities.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.XPath;
 
 namespace Services.Services
 {
@@ -42,8 +40,8 @@ namespace Services.Services
                     .Take(quantity)
                     .Select(x => x.Key)
                     .ToListAsync();
-            
-            var tolist =  await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+
+            var tolist = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
             var bestSellerList = new List<JObject>();
 
             foreach (var item in tolist)
@@ -136,7 +134,7 @@ namespace Services.Services
 
             var jsonResult = new List<JObject>();
 
-            if(result != null && result.Any())
+            if (result != null && result.Any())
             {
                 foreach (var item in result)
                 {

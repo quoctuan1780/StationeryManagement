@@ -1,4 +1,12 @@
-﻿<div id="box-footer">
+﻿@inject Services.Interfacies.IAccountService _accountService
+@{ 
+    string userId = Guid.Empty.ToString();
+    if(User != null && User.Identity.IsAuthenticated)
+    {
+        userId = _accountService.GetUserId(User);
+    }
+}
+<div id="box-footer">
     <div class="box-footer-top">
         <div class="container">
             <div class="row">
@@ -31,9 +39,9 @@
                         <div class="block-title"><span>Thông tin chung</span></div>
                         <div class="block-content">
                             <ul>
+                                <li><a href="#">Giới thiệu</a></li>
                                 <li><a href="#">Vị trí cửa hàng</a></li>
                                 <li><a href="#">Tìm kiếm nâng cao</a></li>
-                                <li><a href="#">Giới thiệu</a></li>
                             </ul>
                         </div>
                     </div>
@@ -41,9 +49,9 @@
                         <div class="block-title"><span>Dịch vụ khách hàng</span></div>
                         <div class="block-content">
                             <ul>
-                                <li><a href="#">Xem giỏ hàng</a></li>
-                                <li><a href="#">Xem thông tin tài khoản</a></li>
-                                <li><a href="#">Thông tin đơn hàng</a></li>
+                                <li><a asp-action="CheckOut" asp-controller="Cart">Xem giỏ hàng</a></li>
+                                <li><a asp-action="Information" asp-controller="Account">Xem thông tin tài khoản</a></li>
+                                <li><a asp-action="Orders" asp-controller="Order" asp-route-userId="@userId">Thông tin đơn hàng</a></li>
                             </ul>
                         </div>
                     </div>
@@ -52,9 +60,9 @@
 
                         <div class="block-content">
                             <ul>
-                                <li><a href="#">Cách thức mua hàng</a></li>
-                                <li><a href="#">Câu hỏi thường gặp</a></li>
-                                <li><a href="#">Phương thức thanh toán</a></li>
+                                <li><a asp-action="GuideBuyProduct" asp-controller="Guide">Cách thức mua hàng</a></li>
+                                @*<li><a href="#">Câu hỏi thường gặp</a></li>*@
+                                <li><a asp-action="GuidePayment" asp-controller="Guide">Phương thức thanh toán</a></li>
                                 <li><a href="#">Phương thức vận chuyển</a></li>
                             </ul>
                         </div>
