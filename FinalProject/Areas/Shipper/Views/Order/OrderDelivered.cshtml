@@ -2,13 +2,88 @@
 @{
     ViewData["Title"] = "Đơn hàng đã giao";
     Layout = "~/Areas/Shipper/Views/Shared/_Layout.cshtml";
-    var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+    var orders = ViewBag.Orders as IList<Services.Helpers.OrderHelper.OrderJoinHelper>;
+    var customers = ViewBag.Customers as IList<Entities.Models.User>;
+    var query = Html.ViewContext.HttpContext.Request.Query;
+    string shipper = null;
+    string customer = null;
+    string receivedDate = null;
+
+    if (query.Keys.Contains("receivedDate"))
+    {
+        receivedDate = query.First(x => x.Key.Equals("receivedDate")).Value;
+    }
+
+    if (query.Keys.Contains("customer"))
+    {
+        customer = query.First(x => x.Key.Equals("customer")).Value;
+    }
 }
 
 <div class="container-fluid">
-    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hành đã giao</h1>
+    <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hàng đã giao</h1>
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+                       role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                        <h6 class="m-0 font-weight-bold text-primary">Bộ lọc</h6>
+                    </a>
+                    <div class="collapse show" id="collapseCardExample">
+                        <div class="card-body">
+                            <div class="row d-flex">
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo ngày giao hàng</label>
+                                        @if (receivedDate != null)
+                                        {
+                                            <input class="form-control" type="date" name="receivedDate" id="received-date" value="@receivedDate" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" type="date" name="receivedDate" id="received-date" />
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo khách hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="customer" data-live-search="true">
+                                            <option value="null">Chọn khách hàng</option>
+                                            @if (customer == null)
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    <option value="@item.Id">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in customers)
+                                                {
+                                                    if (item.Id.Equals(customer))
+                                                    {
+                                                        <option value="@item.Id" selected>@item.FullName</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@item.Id">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <button class="btn btn-primary" onclick="filter()">Lọc</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -17,8 +92,8 @@
                         <tr>
                             <th>Id</th>
                             <th>Tên khách hàng</th>
-                            <th>Ngày đặt</th>
                             <th>Ngày giao hàng</th>
+                            <th>Người giao hàng</th>
                             <th>Phương thức thanh toán</th>
                             <th>Tổng tiền (VNĐ)</th>
                             <th>Trạng thái</th>
@@ -31,26 +106,26 @@
                             foreach (var item in orders)
                             {
                                 <tr>
-                                    <td>@item.OrderId</td>
-                                    <td>@item.User.FullName</td>
-                                    <td>@item.OrderDate.Date.ToShortDateString()</td>
-                                    <td>@item.ReceivedDate.Date.ToShortDateString()</td>
-                                    <td>@item.PaymentMethod</td>
-                                    <td>@item.Total</td>
-                                    @switch (item.Status)
+                                    <td>@item.Order.OrderId</td>
+                                    <td>@item.Order.User.FullName</td>
+                                    <td>@item.Order.ReceivedDate.Date.ToShortDateString()</td>
+                                    <td>@item.ShipperName</td>
+                                    <td>@item.Order.PaymentMethod</td>
+                                    <td>@item.Order.Total</td>
+                                    @switch (item.Order.Status)
                                     {
                                         case STATUS_RECEIVED_GOODS:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_WAITING_EVALUATE:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_EVALUATED:
-                                            <td class="alert alert-success">@item.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                     }
                                     <td>
-                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Shipper" asp-route-orderId="@item.OrderId">
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Shipper" asp-route-orderId="@item.Order.OrderId">
                                             Xem
                                         </a>
                                     </td>
@@ -63,3 +138,22 @@
         </div>
     </div>
 </div>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+
+        function filter() {
+            var customer = $('#customer').val();
+            var receivedDate = $('#received-date').val();
+            var url = '/Shipper/Order/OrderDelivered?receivedDate=' + receivedDate + '&customer=' + customer;
+
+            window.location.href = encodeURI(url);
+        }
+    </script>
+}

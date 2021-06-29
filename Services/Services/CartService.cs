@@ -80,7 +80,7 @@ namespace Services.Services
 
         public decimal GetCartTotalByUserId(string userId)
         {
-            var result = _context.CartItems.Where(x => x.UserId == userId && x.IsStocking == false);
+            var result = _context.CartItems.Where(x => x.UserId == userId && x.IsStocking == true);
 
             if (!result.Any()) return 0;
 

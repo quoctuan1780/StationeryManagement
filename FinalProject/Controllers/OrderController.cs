@@ -130,14 +130,7 @@ namespace FinalProject.Controllers
                 return PartialView(ERROR_404_PAGE);
             }
 
-            try
-            {
-                ViewBag.Orders = await _orderService.GetOrdersByUserIdAsync(userId);
-            }
-            catch
-            {
-                return PartialView(ERROR_404_PAGE);
-            }
+            ViewBag.Orders = await _orderService.GetOrdersByUserIdAsync(userId);
 
             return View();
         }
@@ -148,14 +141,8 @@ namespace FinalProject.Controllers
             {
                 return PartialView(ERROR_404_PAGE);
             }
-            try
-            {
-                ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
-            }
-            catch
-            {
-                return PartialView(ERROR_404_PAGE);
-            }
+
+            ViewBag.Order = await _orderService.GetOrderByIdAsync(orderId.Value);
 
             return View();
         }
@@ -207,7 +194,8 @@ namespace FinalProject.Controllers
             {
                 return PartialView(ERROR_404_PAGE);
             }
-
+            var user = await _accountService.GetUserAsync(User);
+            await _cartService.RemoveCartItemByUserId(user.Id);
             ViewBag.OrderId = orderId.Value;
 
             await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
@@ -299,6 +287,8 @@ namespace FinalProject.Controllers
 
                             if (result > 0)
                             {
+                                await _cartService.RemoveCartItemByUserId(user.Id);
+
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;
@@ -380,6 +370,8 @@ namespace FinalProject.Controllers
 
                             if (result > 0)
                             {
+                                await _cartService.RemoveCartItemByUserId(user.Id);
+
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;

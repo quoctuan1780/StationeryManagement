@@ -158,27 +158,27 @@
                             foreach (var item in orders)
                             {
                                 <tr>
-                                    <td>@item.order.OrderId</td>
-                                    <td>@item.order.User.FullName</td>
-                                    <td>@item.order.OrderDate.Date.ToShortDateString()</td>
-                                    <td>@item.order.ReceivedDate.Date.ToShortDateString()</td>
-                                    <td>@item.Name</td>
-                                    <td>@item.order.PaymentMethod</td>
-                                    <td>@item.order.Total</td>
-                                    @switch (item.order.Status)
+                                    <td>@item.Order.OrderId</td>
+                                    <td>@item.Order.User.FullName</td>
+                                    <td>@item.Order.OrderDate.Date.ToShortDateString()</td>
+                                    <td>@item.Order.ReceivedDate.Date.ToShortDateString()</td>
+                                    <td>@item.ShipperName</td>
+                                    <td>@item.Order.PaymentMethod</td>
+                                    <td>@item.Order.Total</td>
+                                    @switch (item.Order.Status)
                                     {
                                         case STATUS_RECEIVED_GOODS:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_WAITING_EVALUATE:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_EVALUATED:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                     }
                                     <td>
-                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.order.OrderId">
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.Order.OrderId">
                                             Xem
                                         </a>
                                     </td>
@@ -212,31 +212,3 @@
         }
     </script>
 }
-@*@section Scripts{ 
-    <script>
-        $(document).ready(function () {
-            $('#table').DataTable({
-                initComplete: function () {
-                    this.api().columns().every(function () {
-                        var column = this;
-                        var select = $('<select class="form-control"><option value=""></option></select>')
-                            .appendTo($(column.footer()).empty())
-                            .on('change', function () {
-                                var val = $.fn.dataTable.util.escapeRegex(
-                                    $(this).val()
-                                );
-
-                                column
-                                    .search(val ? '^' + val + '$' : '', true, false)
-                                    .draw();
-                            });
-
-                        column.data().unique().sort().each(function (d, j) {
-                            select.append('<option value="' + d + '">' + d + '</option>')
-                        });
-                    });
-                }
-            });
-        });
-    </script>
-}*@

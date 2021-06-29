@@ -57,5 +57,21 @@ namespace FinalProject.Areas.Admin.Helpers
 
             return resultHash;
         }
+
+        public static async Task<string> SaveImageBannerAsync(IFormFile formFile, int width, int height)
+        {
+            if (formFile is null) return null;
+
+            var image = Image.Load(formFile.OpenReadStream());
+
+            image.Mutate(x =>
+                x.Resize(image.Width > width ? width : image.Width, image.Height > height ? height : image.Height));
+
+            var resultHash = HashNameImage(formFile.FileName);
+
+            await image.SaveAsync(IMAGE_LINK_BANNER + resultHash);
+
+            return resultHash;
+        }
     }
 }

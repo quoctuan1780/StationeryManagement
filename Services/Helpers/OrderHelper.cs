@@ -6,9 +6,11 @@ namespace Services.Helpers
     {
         public struct OrderJoinHelper
         {
-            public Order order;
+            public Order Order;
 
-            public string Name;
+            public string ShipperName;
+
+            public string WarehouseManagementName;
         };
     }
 }

@@ -43,9 +43,17 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OrderWaitExportWarehouse()
+        public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY, string orderDate = EMPTY)
         {
-            ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+            if (customer != EMPTY || orderDate != EMPTY)
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync(customer, orderDate);
+            }
+            else
+            {
+                ViewBag.Orders = await _orderService.GetOrdersWaitExportWarehouseAsync();
+            }
             return View();
         }
 

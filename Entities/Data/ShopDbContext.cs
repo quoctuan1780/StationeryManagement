@@ -115,6 +115,7 @@ namespace Entities.Data
                 .HasForeignKey(x => x.UserId);
 
                 e.Property(x => x.Total).HasPrecision(18, 2);
+                e.Property(x => x.RowVersion).IsRowVersion();
             });
 
 
@@ -334,6 +335,8 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.ProductDetails)
                 .HasForeignKey(x => x.ProductId);
+
+                e.Property(x => x.RowVersion).IsRowVersion();
             });
 
             // Entity Banner

@@ -56,12 +56,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        public async Task<string> GetProductSize(int productdetail)
-        {
-            var productDetail = await _productService.GetProductDetailAsync(productdetail);
-            return await _productService.GetSizeAsync(productDetail);
-        }
-
         public async Task<IActionResult> ViewListRequestReceipt()
         {
             ViewBag.ListRequests = await _receiptService.GetReceiptRequestsAsync();

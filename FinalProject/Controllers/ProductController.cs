@@ -2,6 +2,7 @@
 using Services.Interfacies;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static Common.Constant;
 
 namespace FinalProject.Controllers
 {
@@ -29,6 +30,25 @@ namespace FinalProject.Controllers
             
 
             return View();
+        }
+
+        public string GetProductSkip(int? skip)
+        {
+            if(skip is null)
+            {
+                return ERROR_CODE_NULL.ToString();
+            }
+
+            try
+            {
+                return _productService.GetProductSkip(skip.Value);
+            }
+            catch
+            {
+
+            }
+
+            return ERROR_CODE_SYSTEM.ToString();
         }
     }
 }

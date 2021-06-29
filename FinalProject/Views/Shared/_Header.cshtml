@@ -24,151 +24,173 @@
         }
     }
 }
+@section Styles{ 
+    <style>
+        .size-text-header {
+            padding-left: 10px;
+            font-size: 16px;
+        }
+    </style>
+}
 <div id="box-header">
     <div class="header-container">
         <div class="header">
             <div class="box-header-01">
                 <div class="container">
                     <div class="row">
-                        <div class="logo">
-                            <a href="/Home/Index"><img src="~/images/logo-home-03.png" alt="" /></a>
-                        </div>
-                        <div class="account-and-cart">
-                            <div class="my-account">
-                                <div class="content">
-                                    <ul class="left">
-                                        <li>
-                                            @if (User.Identity.IsAuthenticated && checkUserRole)
-                                            {                                            
-                                                <a class="top-link-checkout" asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">Xem đơn hàng</a>
-                                                <a class="top-link-login" asp-controller="Account" asp-action="Information">
-                                                    @user.FullName
-                                                </a>
-                                                <a class="top-link-login" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                        <div style="display: flex; flex-wrap: wrap; flex-direction: row; align-items: center; justify-content: space-around">
+                            <div class="col-xl-2">
+                                <a href="/Home/Index"><img src="~/images/logo/StationeryStore.png" alt="" width="200" height="200" /></a>
+                            </div>
+                            <div class="col-xl-4" style="margin-left: auto; margin-right: 5px">
+                                <form asp-action="Search" asp-controller="Search" method="post">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search" id="txtSearch" name="text" onchange="Search()" />
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-primary" type="submit">
+                                                <span class="glyphicon glyphicon-search"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-xl-6 account-and-cart" style="display: flex; flex-direction: row; align-items: center">
+                                <div class="my-account">
+                                    <div class="content">
+                                        <ul class="left navbar-nav ml-auto">
+                                            <li class="nav-item dropdown no-arrow">
+                                                @if (User.Identity.IsAuthenticated && checkUserRole)
+                                                {
+                                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <div style="display: flex; flex-direction: row; justify-content: center; padding: 5px">
+                                                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" style="margin: auto; padding-right: 5px; font-size: medium;">@user.FullName</span>
+                                                            @if (user.Image != null)
+                                                            {
+                                                                <img style="border-radius: 50%" src="~/images/user/@user.Email/@user.Image" width="50" height="50">
+                                                            }
+                                                            else
+                                                            {
+                                                                <img style="border-radius: 50%" src="~/images/user/avatar.png" width="50" height="50">
+                                                            }
+                                                        </div>
+                                                    </a>
+
+                                                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                                        <div style="display: flex; flex-direction: column; align-content: center; padding: 5px">
+                                                            <a class="dropdown-item" style="font-size: 16px" asp-controller="Account" asp-action="Information">
+                                                                <i class="glyphicon glyphicon-user"></i> Thông tin cá nhân
+                                                            </a>
+                                                            <a class="dropdown-item" style="font-size: 16px" asp-controller="Account" asp-action="ChangePassword">
+                                                                <i class="glyphicon glyphicon-cog"></i> Đổi mật khẩu
+                                                            </a>
+                                                            <a class="dropdown-item" style="font-size: 16px" asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">
+                                                                <i class="glyphicon glyphicon-list-alt"></i> Thông tin đơn hàng
+                                                            </a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item" style="font-size: 16px" asp-controller="Account" asp-action="Logout">
+                                                                <i class="glyphicon glyphicon-log-out"></i> Đăng xuất
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <a class="top-link-login btn btn-outline-primary" asp-controller="Account" asp-action="Login" asp-route-urlBack="@urlBack">
+                                                        <i class="glyphicon glyphicon-log-in"></i> Đăng nhập
+                                                    </a>
+                                                }
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="box-cart" id="cart">
+                                    <div class="cart-mini">
+                                        <div class="title">
+
+                                            @if (carts is null)
+                                            {
+                                                <span class="item" id="total-item">0 Items</span>
                                             }
                                             else
                                             {
-                                                <a class="top-link-login" asp-controller="Account" asp-action="Login" asp-route-urlBack="@urlBack">Đăng nhập</a>
+                                                <span class="item" id="total-item">@carts.Count items</span>
                                             }
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="box-cart" id="cart">
-                                <div class="cart-mini">
-                                    <div class="title">
 
-                                        @if (carts is null)
-                                        {
-                                            <span class="item" id="total-item">0 Items</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="item" id="total-item">@carts.Count items</span>
-                                        }
-
-                                    </div>
-                                    <div class="block-content">
-                                        <div class="inner">
-                                            <p class="block-subtitle">Giỏ hàng</p>
-                                            <ol id="cart-sidebar" class="mini-products-list">
-                                                @if (!(userId is null) && checkUserRole)
-                                                {
-                                                    if (carts is null || carts.FirstOrDefault() is null)
+                                        </div>
+                                        <div class="block-content">
+                                            <div class="inner">
+                                                <p class="block-subtitle">Giỏ hàng</p>
+                                                <ol id="cart-sidebar" class="mini-products-list">
+                                                    @if (!(userId is null) && checkUserRole)
+                                                    {
+                                                        if (carts is null || carts.FirstOrDefault() is null)
+                                                        {
+                                                            <li class="item" id="nullItem">
+                                                                <h3>Không có sản phẩm nào</h3>
+                                                            </li>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var cartItem in carts)
+                                                            {
+                                                                <li class="item">
+                                                                    <input type="hidden" class="cart" value="@cartItem.ProductDetailId" />
+                                                                    <a href="#" class="product-image">
+                                                                        @if (cartItem.ProductDetail.Product.ProductImages is null || cartItem.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
+                                                                        {
+                                                                            <img src="~/images/product/img_1.jpg"
+                                                                                 width="70" height="70" />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <img src="~/images/product/@cartItem.ProductDetail.Product.ProductImages.FirstOrDefault().Image"
+                                                                                 width="70" height="70" />
+                                                                        }
+                                                                    </a>
+                                                                    <a href="javascript:void(0)" onclick="removeItem(this)" class="btn-remove">Remove This Item</a>
+                                                                    <div class="product-details">
+                                                                        <p class="product-name">
+                                                                            <a asp-controller="Product" asp-action="Detail"
+                                                                               asp-route-id="@cartItem.ProductDetail.Product.ProductId">
+                                                                                @cartItem.ProductDetail.Product.ProductName
+                                                                            </a>
+                                                                            <div class="d-block">
+                                                                                Phân loại hàng: @cartItem.ProductDetail.Color
+                                                                            </div>
+                                                                            <div class="d-block">
+                                                                                Xuất xứ: @cartItem.ProductDetail.Origin
+                                                                            </div>
+                                                                            <div id="@string.Concat("quantityProductDetail", cartItem.ProductDetailId)" class="d-block">
+                                                                                Số lượng: @cartItem.Quantity
+                                                                            </div>
+                                                                            <div class="d-block">Giá: @cartItem.Price VNĐ</div>
+                                                                        </p>
+                                                                    </div>
+                                                                </li>
+                                                            }
+                                                        }
+                                                    }
+                                                    else
                                                     {
                                                         <li class="item" id="nullItem">
                                                             <h3>Không có sản phẩm nào</h3>
                                                         </li>
                                                     }
-                                                    else
-                                                    {
-                                                        foreach (var cartItem in carts)
-                                                        {
-                                                            <li class="item">
-                                                                <input type="hidden" class="cart" value="@cartItem.ProductDetailId" />
-                                                                <a href="#" class="product-image">
-                                                                    @if (cartItem.ProductDetail.Product.ProductImages is null || cartItem.ProductDetail.Product.ProductImages.FirstOrDefault() is null)
-                                                                    {
-                                                                        <img src="~/images/product/img_1.jpg"
-                                                                             width="70" height="70" />
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <img src="~/images/product/@cartItem.ProductDetail.Product.ProductImages.FirstOrDefault().Image"
-                                                                             width="70" height="70" />
-                                                                    }
-                                                                </a>
-                                                                <a href="javascript:void(0)" onclick="removeItem(this)" class="btn-remove">Remove This Item</a>
-                                                                <div class="product-details">
-                                                                    <p class="product-name">
-                                                                        <a asp-controller="Product" asp-action="Detail"
-                                                                           asp-route-id="@cartItem.ProductDetail.Product.ProductId">
-                                                                            @cartItem.ProductDetail.Product.ProductName
-                                                                        </a>
-                                                                        <div class="d-block">
-                                                                            Phân loại hàng: @cartItem.ProductDetail.Color
-                                                                        </div>
-                                                                        <div class="d-block">
-                                                                            Xuất xứ: @cartItem.ProductDetail.Origin
-                                                                        </div>
-                                                                        <div id="@string.Concat("quantityProductDetail", cartItem.ProductDetailId)" class="d-block">
-                                                                            Số lượng: @cartItem.Quantity
-                                                                        </div>
-                                                                        <div class="d-block">Giá: @cartItem.Price VNĐ</div>
-                                                                    </p>
-                                                                </div>
-                                                            </li>
-                                                        }
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <li class="item" id="nullItem">
-                                                        <h3>Không có sản phẩm nào</h3>
-                                                    </li>
-                                                }
-                                            </ol>
-                                            <div class="summary">
-                                                <p class="subtotal">
-                                                    <span class="label">Tổng tiền:</span> <span id="total-price" class="price">@total VNĐ</span>
-                                                </p>
-                                            </div>
-                                            <div class="actions">
-                                                <div class="a-inner">
-                                                    <a asp-action="Checkout" asp-controller="Cart" title="Checkout" class="btn btn-success">Xem giỏ hàng</a>
+                                                </ol>
+                                                <div class="summary">
+                                                    <p class="subtotal">
+                                                        <span class="label">Tổng tiền:</span> <span id="total-price" class="price">@total VNĐ</span>
+                                                    </p>
+                                                </div>
+                                                <div class="actions">
+                                                    <div class="a-inner">
+                                                        <a asp-action="Checkout" asp-controller="Cart" title="Checkout" class="btn btn-success">Xem giỏ hàng</a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="box-header-03">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="col-lg-8"></div>
-                            <div class="col-lg-4" style="text-align: end; margin-bottom: 5px;">
-                                <form asp-action="Search" asp-controller="Search" method="post">
-                                    <div class="row">
-                                        <div class="col-xs-8 col-md-8">
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" placeholder="Search" id="txtSearch" name="text"  onchange="Search()"/>
-                                                <div class="input-group-btn">
-                                                    <button class="btn btn-primary" type="submit">
-                                                        <span class="glyphicon glyphicon-search"></span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-
-                                    </div>
-                                </form>
                             </div>
                         </div>
                     </div>
@@ -179,7 +201,7 @@
     </div>
 </div>
 <a href="/Product/Detail?Id="></a>
-@section Script
+@section Scripts
 {
 <script>
     function Search() {

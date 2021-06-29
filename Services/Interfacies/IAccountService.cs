@@ -16,6 +16,7 @@ namespace Services.Interfacies
         Task<IdentityResult> RegisterAsync(User user, ExternalLoginInfo info);
         Task<IdentityResult> AddRoleAsync(User user);
         Task<string> GenerateEmailConfirmTokenAsync(User user);
+        Task<string> GeneratePasswordResetTokenAsync(User user);
         Task<IdentityResult> ConfirmEmailAsync(string userId, string token);
         Task LogoutAsync();
         string GetUserId(ClaimsPrincipal user);
@@ -40,6 +41,8 @@ namespace Services.Interfacies
         Task<int> DeleteUser(string id);
         Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass);
         Task<IList<User>> GetAllShippersAsync();
+        Task<IList<User>> GetAllWarehouseManagementsAsync();
         Task<IList<User>> GetAllCustomersAsync();
+        Task<IdentityResult> ForgotPasswordAsync(User user, string token, string newPassword);
     }
 }

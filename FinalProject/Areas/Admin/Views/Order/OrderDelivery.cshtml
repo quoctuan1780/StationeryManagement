@@ -3,12 +3,141 @@
     ViewData["Title"] = "Đơn hàng đang giao hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var orders = ViewBag.Orders as IList<Services.Helpers.OrderHelper.OrderJoinHelper>;
+
+    var shippers = ViewBag.Shippers as IList<Entities.Models.User>;
+    var warehouses = ViewBag.Warehouses as IList<Entities.Models.User>;
+
+    var query = Html.ViewContext.HttpContext.Request.Query;
+
+    string shipper = null;
+    string warehouse = null;
+    string receivedDeliveryDate = null;
+    string exportWarehouseDate = null;
+
+    if (query.Keys.Contains("receivedDeliveryDate"))
+    {
+        receivedDeliveryDate = query.First(x => x.Key.Equals("receivedDeliveryDate")).Value;
+    }
+    if (query.Keys.Contains("exportWarehouseDate"))
+    {
+        exportWarehouseDate = query.First(x => x.Key.Equals("exportWarehouseDate")).Value;
+    }
+    if (query.Keys.Contains("shipper"))
+    {
+        shipper = query.First(x => x.Key.Equals("shipper")).Value;
+    }
+    if (query.Keys.Contains("warehouse"))
+    {
+        warehouse = query.First(x => x.Key.Equals("warehouse")).Value;
+    }
 }
 
 <div class="container-fluid">
     <h1 class="h3 mb-2 text-gray-800">Thông tin đơn hàng chờ giao / đang giao</h1>
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+                       role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                        <h6 class="m-0 font-weight-bold text-primary">Bộ lọc</h6>
+                    </a>
+                    <div class="collapse show" id="collapseCardExample">
+                        <div class="card-body">
+                            <div class="row d-flex">
+                                <div class="col-xl-3">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo người giao hàng</label>
+                                        <select class="form-control selectpicker show-tick" id="shipper" data-live-search="true">
+                                            <option value="null">Chọn người giao hàng</option>
+                                            @if (shipper == null)
+                                            {
+                                                foreach (var item in shippers)
+                                                {
+                                                    <option value="@item.FullName">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in shippers)
+                                                {
+                                                    if (item.FullName.Equals(shipper))
+                                                    {
+                                                        <option value="@item.FullName" selected>@item.FullName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.FullName">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo ngày xuất kho</label>
+                                        @if (exportWarehouseDate is null)
+                                        {
+                                            <input class="form-control" type="date" name="exportWarehouseDate" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" type="date" name="exportWarehouseDate" value="@exportWarehouseDate"/>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo ngày nhận giao</label>
+                                        @if (receivedDeliveryDate is null)
+                                        {
+                                            <input class="form-control" type="date" name="receivedDeliveryDate"/>
+                                        }
+                                        else
+                                        {
+                                            <input class="form-control" type="date" name="receivedDeliveryDate" value="@receivedDeliveryDate"/>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="form-group">
+                                        <label for="user">Lọc theo người xuất kho</label>
+                                        <select class="form-control selectpicker show-tick" id="warehouse" data-live-search="true">
+                                            <option value="null">Chọn người xuất kho</option>
+                                            @if (warehouse == null)
+                                            {
+                                                foreach (var item in warehouses)
+                                                {
+                                                    <option value="@item.FullName">@item.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in warehouses)
+                                                {
+                                                    if (item.FullName.Equals(warehouse))
+                                                    {
+                                                        <option value="@item.FullName" selected>@item.FullName</option>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <option value="@item.FullName">@item.FullName</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <button class="btn btn-primary" onclick="filter()">Lọc</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -16,9 +145,10 @@
                     <thead>
                         <tr>
                             <th>Id</th>
+                            <th>Người xuất kho</th>
+                            <th>Ngày xuất kho</th>
                             <th>Người giao hàng</th>
-                            <th>Tên ngày đặt</th>
-                            <th>Phương thức thanh toán</th>
+                            <th>Ngày nhận giao hàng</th>
                             <th>Tổng tiền (VNĐ)</th>
                             <th>Trạng thái</th>
                             <th>Hành động</th>
@@ -30,37 +160,29 @@
                             foreach (var item in orders)
                             {
                                 <tr>
-                                    <td>@item.order.OrderId</td>
-                                    <td>@item.Name</td>
-                                    <td>@item.order.OrderDate.Date.ToShortDateString()</td>
-                                    <td>@item.order.PaymentMethod</td>
-                                    <td>@item.order.Total</td>
-                                    @switch (item.order.Status)
+                                    <td>@item.Order.OrderId</td>
+                                    <td>@item.WarehouseManagementName</td>
+                                    <td>@item.Order.ExportWarehouseDate.ToShortDateString()</td>
+                                    <td>@item.ShipperName</td>
+                                    <td>@item.Order.ShipperPickOrderDate.ToShortDateString()</td>
+                                    <td>@item.Order.Total</td>
+                                    @switch (item.Order.Status)
                                     {
-                                        case STATUS_WAITING_CONFIRM:
-                                            <td class="alert alert-warning">@item.order.Status</td>
-                                            break;
-                                        case STATUS_PREPARING_GOODS:
-                                            <td class="alert alert-warning">@item.order.Status</td>
-                                            break;
-                                        case STATUS_WAITING_PICK_GOODS:
-                                            <td class="alert alert-warning">@item.order.Status</td>
-                                            break;
                                         case STATUS_ON_DELIVERY_GOODS:
-                                            <td class="alert alert-warning">@item.order.Status</td>
+                                            <td class="alert alert-warning">@item.Order.Status</td>
                                             break;
                                         case STATUS_RECEIVED_GOODS:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_WAITING_EVALUATE:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                         case STATUS_EVALUATED:
-                                            <td class="alert alert-success">@item.order.Status</td>
+                                            <td class="alert alert-success">@item.Order.Status</td>
                                             break;
                                     }
                                     <td>
-                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.order.OrderId">
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.Order.OrderId">
                                             Xem
                                         </a>
                                     </td>
@@ -73,3 +195,19 @@
         </div>
     </div>
 </div>
+@section Scripts{ 
+    <script>
+        function filter() {
+            var shipper = $('#shipper').val();
+            var warehouse = $('#warehouse').val();
+            var exportWarehouseDate = document.getElementsByName('exportWarehouseDate')[0].value;
+            var receivedDeliveryDate = document.getElementsByName('receivedDeliveryDate')[0].value;
+            var url = '/Admin/Order/OrderDelivery?exportWarehouseDate=' + exportWarehouseDate +
+                '&receivedDeliveryDate=' + receivedDeliveryDate +
+                '&warehouse=' + warehouse +
+                '&shipper=' + shipper;
+
+            window.location.href = encodeURI(url);
+        }
+    </script>
+}

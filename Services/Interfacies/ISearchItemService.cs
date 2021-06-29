@@ -11,7 +11,6 @@ namespace Services.Interfacies
     {
         Task<IList<Product>> SearchByPriceAsync(int? price);
         Task<IList<Product>> SearchByTextAsync(string text);
-
         Task<IList<Product>> SearchAjaxAsync(string text);
     }
 }
