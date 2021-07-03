@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>1000 - Giỏ hàng trống</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/style/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="~/style/css/error-page.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        .background-body-login {
+            background-image: url(../../images/background/bg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .mg-5 {
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body class="background-body-login">
+    <section id="error">
+        <div class="content">
+            <i class="fa fa-warning"></i>
+            <h1>1000</h1>
+            <p>Lỗi! - Giỏ hàng của bạn đang trống, không thể đặt hàng</p>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-warning mg-5" type="button" onclick="goBack()">Quay lại giỏ hàng</button>
+                <a class="btn btn-success mg-5" asp-action="Index" asp-controller="Home">Quay lại trang chủ</a>
+            </div>
+        </div>
+    </section>
+    <script>
+        function goBack() {
+            window.history.back()
+        }
+    </script>
+</body>
+
+</html>

@@ -4,6 +4,8 @@
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var product = ViewBag.Product as Entities.Models.Product;
+    var ratings = ViewBag.Ratings as IList<Entities.Models.Rating>;
+    var ratingsDetail = ViewBag.RatingsDetail as IList<Entities.Models.RatingDetail>;
 
     int? productDetailId = null;
 
@@ -11,11 +13,13 @@
 
     decimal? price = null;
 
-    var isLogin = User.Identity.IsAuthenticated;
+    var isLogin = User.IsInRole("Customer");
 
     var user = await userManager.GetUserAsync(User);
 
     var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
+
+    var skip = 10;
 }
 @section Styles{
     <style>
@@ -49,58 +53,58 @@
             padding-right: 15%;
         }
 
-            .blog-comment ul {
-                list-style-type: none;
-                padding: 0;
-            }
+        .blog-comment ul {
+            list-style-type: none;
+            padding: 0;
+        }
 
-            .blog-comment img {
-                opacity: 1;
-                filter: Alpha(opacity=100);
-                -webkit-border-radius: 4px;
-                -moz-border-radius: 4px;
-                -o-border-radius: 4px;
-                border-radius: 4px;
-            }
+        .blog-comment img {
+            opacity: 1;
+            filter: Alpha(opacity=100);
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            -o-border-radius: 4px;
+            border-radius: 4px;
+        }
 
-                .blog-comment img.avatar {
-                    position: relative;
-                    float: left;
-                    margin-left: 0;
-                    margin-top: 0;
-                    width: 65px;
-                    height: 65px;
-                }
+        .blog-comment img.avatar {
+            position: relative;
+            float: left;
+            margin-left: 0;
+            margin-top: 0;
+            width: 65px;
+            height: 65px;
+        }
 
-            .blog-comment .post-comments {
-                border: 1px solid #eee;
-                margin-bottom: 20px;
-                margin-left: 85px;
-                margin-right: 0px;
-                padding: 10px 20px;
-                position: relative;
-                -webkit-border-radius: 4px;
-                -moz-border-radius: 4px;
-                -o-border-radius: 4px;
-                border-radius: 4px;
-                background: #fff;
-                color: #6b6e80;
-                position: relative;
-            }
+        .blog-comment .post-comments {
+            border: 1px solid #eee;
+            margin-bottom: 20px;
+            margin-left: 85px;
+            margin-right: 0px;
+            padding: 10px 20px;
+            position: relative;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            -o-border-radius: 4px;
+            border-radius: 4px;
+            background: #fff;
+            color: #6b6e80;
+            position: relative;
+        }
 
-            .blog-comment .meta {
-                font-size: 13px;
-                color: #aaaaaa;
-                padding-bottom: 8px;
-                margin-bottom: 10px !important;
-                border-bottom: 1px solid #eee;
-            }
+        .blog-comment .meta {
+            font-size: 13px;
+            color: #aaaaaa;
+            padding-bottom: 8px;
+            margin-bottom: 10px !important;
+            border-bottom: 1px solid #eee;
+        }
 
-            .blog-comment ul.comments ul {
-                list-style-type: none;
-                padding: 0;
-                margin-left: 85px;
-            }
+        .blog-comment ul.comments ul {
+            list-style-type: none;
+            padding: 0;
+            margin-left: 85px;
+        }
 
         .blog-comment-form {
             padding-left: 15%;
@@ -108,13 +112,13 @@
             padding-top: 40px;
         }
 
-            .blog-comment h3,
-            .blog-comment-form h3 {
-                margin-bottom: 40px;
-                font-size: 26px;
-                line-height: 30px;
-                font-weight: 800;
-            }
+        .blog-comment h3,
+        .blog-comment-form h3 {
+            margin-bottom: 40px;
+            font-size: 26px;
+            line-height: 30px;
+            font-weight: 800;
+        }
     </style>
 }
 
@@ -198,7 +202,20 @@
                                         <i class="fa fa-star fa-sm text-primary"></i>
                                     </li>
                                 </ul>
-                                <p><h3 class="mr-1">Giá bán: <strong style="color: #ee4d2d">@product.Price</strong></h3></p>
+                                <p>
+                                    <h3 class="mr-1">
+                                        Giá bán:
+                                        @if (product.SalePrice > 0)
+                                        {
+                                            <strong style="color: #ee4d2d" class="price"> @product.SalePrice VNĐ</strong>
+                                            <span>Giá gốc: </span><del class="price"> @product.Price VNĐ</del>
+                                        }
+                                        else
+                                        {
+                                            <strong style="color: #ee4d2d" class="price"> @product.Price VNĐ</strong>
+                                        }
+                                    </h3>
+                                </p>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless mb-0">
                                         <tbody>
@@ -221,8 +238,14 @@
                                                                 </button>
 
                                                                 productDetailId = item.ProductDetailId;
-
-                                                                price = product.Price;
+                                                                if (product.SalePrice > 0)
+                                                                {
+                                                                    price = product.SalePrice;
+                                                                }
+                                                                else
+                                                                {
+                                                                    price = product.Price;
+                                                                }
                                                             }
                                                             else
                                                             {
@@ -260,7 +283,7 @@
                                             -
                                         </button>
                                         <input type="text" id="Quantity" name="Quantity" min="1" value="1"
-                                               class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
+                                                class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
                                         <button class="btn btn-danger" style="height: 30px" type="button" onclick="ascending()">
                                             +
                                         </button>
@@ -282,13 +305,14 @@
                             </button>
                         </div>
                     </div>
-                    <!--Tab detail-->
+
                     <div class="tab-detail">
                         <ul class="nav nav-tabs">
                             <li class="active"><a data-toggle="tab" href="#home">Mô tả</a></li>
                             <li><a data-toggle="tab" href="#menu1">Màu sắc / kích thước</a></li>
                             <li><a data-toggle="tab" href="#menu2">Đánh giá</a></li>
                             <li><a data-toggle="tab" href="#menu3">Bình Luận</a></li>
+                            <li><a data-toggle="tab" href="#menu4">Xem đánh giá khác</a></li>
                         </ul>
 
                         <div class="tab-content">
@@ -315,140 +339,75 @@
                                 </table>
                             </div>
                             <div id="menu2" class="tab-pane fade">
-                                <h3>Customer Reviews 1 item(s)</h3>
-                                <p><span tyle="float:left;">1 Item(s)</span> <span style="float:right;">Show <select><option>6</option><option selected>10</option><option>12</option><option>15</option><option>20</option></select>per page</span></p>
-                                <br />
-                                <p><a href="#>">7uptheme</a></p>
-                                <p>At verov eos et accusamus et iusto ods un dignissimos ducimus qui blan ditiis prasixer esentium</p>
-                                <table class="ratings-table">
-                                    <colgroup>
-                                        <col class="review-label" />
-                                        <col class="review-value" />
-                                    </colgroup>
-                                    <tbody>
-                                        <tr>
-                                            <th>Quality</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:80%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Price</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:80%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Value</th>
-                                            <td>
-                                                <div class="rating-box">
-                                                    <div class="rating" style="width:100%;"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p>Review by 7uptheme / (Posted on 4/14/2015)</p>
                                 <div class="form-add">
-                                    <h2>Write Your Own Review</h2>
-                                    <form action="" method="post" id="review-form">
-                                        <input name="form_key" type="hidden" value="JbT1G5uAkBcFDot6" />
-                                        <h3>
-                                            You're reviewing: <span>Ipad Air and iOS7</span>
-                                        </h3>
-                                        <div class="fieldset">
-                                            <h4>How do you rate this product? <em class="required">*</em></h4>
-                                            <span id="input-message-box"></span>
-                                            <table class="data-table review-summary-table ratings" id="product-review-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>&nbsp;</th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:20%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:40%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:60%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:80%;"></span>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="rating-box">
-                                                                <span class="rating nobr" style="width:100%;"></span>
-                                                            </div>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <th>Price</th>
-                                                        <td class="value"><label for="Price_1"><input type="radio" name="ratings[3]" id="Price_1" value="11" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_2"><input type="radio" name="ratings[3]" id="Price_2" value="12" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_3"><input type="radio" name="ratings[3]" id="Price_3" value="13" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_4"><input type="radio" name="ratings[3]" id="Price_4" value="14" class="radio" /></label></td>
-                                                        <td class="value"><label for="Price_5"><input type="radio" name="ratings[3]" id="Price_5" value="15" class="radio" /></label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Value</th>
-                                                        <td class="value"><label for="Value_1"><input type="radio" name="ratings[2]" id="Value_1" value="6" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_2"><input type="radio" name="ratings[2]" id="Value_2" value="7" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_3"><input type="radio" name="ratings[2]" id="Value_3" value="8" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_4"><input type="radio" name="ratings[2]" id="Value_4" value="9" class="radio" /></label></td>
-                                                        <td class="value"><label for="Value_5"><input type="radio" name="ratings[2]" id="Value_5" value="10" class="radio" /></label></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Quality</th>
-                                                        <td class="value"><label for="Quality_1"><input type="radio" name="ratings[1]" id="Quality_1" value="1" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_2"><input type="radio" name="ratings[1]" id="Quality_2" value="2" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_3"><input type="radio" name="ratings[1]" id="Quality_3" value="3" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_4"><input type="radio" name="ratings[1]" id="Quality_4" value="4" class="radio" /></label></td>
-                                                        <td class="value"><label for="Quality_5"><input type="radio" name="ratings[1]" id="Quality_5" value="5" class="radio" /></label></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <input type="hidden" name="validate_rating" class="validate-rating" value="" />
-                                            <ul class="form-list">
-                                                <li>
-                                                    <label for="review_field" class="required"><em>*</em>Let us know your thoughts</label>
-                                                    <div class="input-box">
-                                                        <textarea name="detail" id="review_field" cols="5" rows="3" class="required-entry"></textarea>
-                                                    </div>
-                                                </li>
-                                                <li class="inline-label">
-                                                    <label for="summary_field" class="required"><em>*</em>Summary of Your Review</label>
-                                                    <div class="input-box">
-                                                        <input type="text" name="title" id="summary_field" class="input-text required-entry" value="" />
-                                                    </div>
-                                                </li>
-                                                <li class="inline-label">
-                                                    <label for="nickname_field" class="required"><em>*</em>What's your nickname?</label>
-                                                    <div class="input-box">
-                                                        <input type="text" name="nickname" id="nickname_field" class="input-text required-entry" value="" />
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="buttons-set">
-                                            <button type="submit" title="Submit Review" class="button"><span><span>Submit Review</span></span></button>
-                                        </div>
-                                    </form>
+                                    <h3>Chọn số sao</h3>
+                                    <div class="fieldset">
+                                        <span id="input-message-box"></span>
+                                        <table class="data-table review-summary-table ratings" id="product-review-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>&nbsp;</th>
+                                                    <th>
+                                                        <div class="rating-box">
+                                                            <span class="rating nobr" style="width:20%;"></span>
+                                                        </div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="rating-box">
+                                                            <span class="rating nobr" style="width:40%;"></span>
+                                                        </div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="rating-box">
+                                                            <span class="rating nobr" style="width:60%;"></span>
+                                                        </div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="rating-box">
+                                                            <span class="rating nobr" style="width:80%;"></span>
+                                                        </div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="rating-box">
+                                                            <span class="rating nobr" style="width:100%;"></span>
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Đánh giá</th>
+                                                    @if (ratings != null)
+                                                    {
+                                                        foreach (var item in ratings)
+                                                        {
+                                                            <td class="value"><label for="Rating"><input type="radio" name="ratings" value="@item.RatingId" class="radio" /></label></td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            </tbody>
+                                        </table>
 
+                                        <br />
+                                        <ul class="form-list">
+                                            <li>
+                                                <label for="review_field" class="required"> Nhập nội dung đánh giá của bạn </label>
+                                                <div class="input-box">
+                                                    <textarea name="review-content" id="rating-content" cols="5" rows="3" class="required-entry"></textarea>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="buttons-set">
+                                        <button type="button" title="Gửi đánh giá" class="button" onclick="Rating('@isLogin', @product.ProductId)"><span>Gửi đánh giá</span></button>
+                                    </div>
                                 </div>
+                                @if (!isLogin)
+                                {
+                                    <div style="text-align: center">
+                                        <h1>Vui lòng đăng nhập để đánh giá sản phẩm</h1>
+                                    </div>
+                                }
                             </div>
                             <div id="menu3" class="tab-pane fade">
                                 <div class="container bootstrap snippets bootdey">
@@ -582,17 +541,70 @@
                                     </div>
                                 </div>
                             </div>
+                            <div id="menu4" class="tab-pane fade">
+                                <div class="container bootstrap snippets bootdey">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="blog-comment">
+                                                <h3 class="text-success">Các đánh giá</h3>
+                                                <hr />
+                                                <ul class="rating" id="rating">
+                                                    @if (ratingsDetail != null)
+                                                    {
+                                                        for (int i = 0; i < ratingsDetail.Count; i++)
+                                                        {
+                                                            <li class="clearfix">
+                                                                <div class="comment-block">
+                                                                    @if (ratingsDetail[i].User.Image != null)
+                                                                    {
+                                                                        <img src="~/images/user/@ratingsDetail[i].User.Email/@ratingsDetail[i].User.Image" class="avatar" alt="">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img src="~/images/user/avatar.png" class="avatar" alt="">
+                                                                    }
+                                                                    <div class="post-comments">
+                                                                        @{ 
+                                                                            var rating = Math.Ceiling((double)ratingsDetail[i].Rating.RatingNumber / 5 * 100);
+                                                                        }
+                                                                        <p class="meta">
+                                                                            @ratingsDetail[i].RatingDate.Date.ToShortDateString() <a href="javascript:void(0)">@ratingsDetail[i].User.FullName </a>
+                                                                        </p>
+                                                                        <div class="meta" style="display: inline-block">
+                                                                            <span style="float: left">Đánh giá:</span>
+                                                                            <div class="rating-box"><span class="rating nobr" style="width:@rating%;"></span></div>
+                                                                        </div>
+                                                                        <p>
+                                                                            @ratingsDetail[i].Content
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <div style="display: flex; justify-content: center">
+                                                <input type="hidden" id="skip-product" value="@skip" />
+                                                <button type="button" class="btn btn-primary btn-lg button"
+                                                        data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Tải dữ liệu..."
+                                                        onclick="getMoreRating(@product.ProductId)">
+                                                    Xem thêm...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!--End Upselt product-->
                 </div>
             </div>
         </div>
     </div>
-    <!--End detail product-->
 </div>
 @section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
     <script src="~/js/product-detail/product-detail.js"></script>
     <script src="~/js/product-detail/comment.js"></script>
-    <script src="~/js/notify/notify-helper.js"></script>
 }

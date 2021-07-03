@@ -59,12 +59,7 @@ function verticalTextColor() {
 function submit(price, image, productName, isLogin) {
 
     if (isLogin !== 'True') {
-        $.notiny({
-            position: 'right-top',
-            theme: 'danger',
-            template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-            text: 'Bạn chưa đăng nhập vào hệ thống',
-        });
+        showError('Bạn chưa đăng nhập vào hệ thống');
     }
     else {
         var loading = verticalTextColor();
@@ -74,13 +69,7 @@ function submit(price, image, productName, isLogin) {
         if (productIdOrder === -1) {
             loading.out();
 
-            $.notiny({
-                position: 'right-top',
-                width: '380px',
-                theme: 'danger',
-                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                text: 'Bạn chưa chọn loại sản phẩm muốn đặt',
-            });
+            showError('Bạn chưa chọn loại sản phẩm muốn đặt');
         }
 
         else {
@@ -93,6 +82,7 @@ function submit(price, image, productName, isLogin) {
                     async: true,
                     data: { productDetailId: productIdOrder, quantity: quantity, price: price },
                     success: function (data) {
+
                         switch (data) {
                             case "Miss":
                                 alert("Hệ thống xảy ra lỗi, vui lòng thử lại sau");
@@ -107,13 +97,7 @@ function submit(price, image, productName, isLogin) {
                                         $("#total-price").text(data + " VNĐ");
                                     },
                                     error: function (jqXHR, exception) {
-                                        $.notiny({
-                                            position: 'right-top',
-                                            width: '480px',
-                                            theme: 'danger',
-                                            template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                            text: 'Lỗi hệ thống không cập nhật được tổng tiền, vui lòng tải lại trang',
-                                        });
+                                        showError('Lỗi hệ thống không cập nhật được tổng tiền, vui lòng tải lại trang', '480px');
                                     }
                                 });
 
@@ -125,12 +109,7 @@ function submit(price, image, productName, isLogin) {
 
                                 loading.out();
 
-                                $.notiny({
-                                    position: 'right-top',
-                                    theme: 'success',
-                                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                    text: 'Cập nhật sản phẩm thành công',
-                                });
+                                showSuccess('Cập nhật sản phẩm thành công');
 
                                 break;
 
@@ -166,12 +145,7 @@ function submit(price, image, productName, isLogin) {
 
                                 loading.out();
 
-                                $.notiny({
-                                    position: 'right-top',
-                                    theme: 'success',
-                                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                    text: 'Thêm sản phẩm thành công',
-                                });
+                                showSuccess('Thêm sản phẩm thành công');
 
                                 $("#total-item").text($("#cart-sidebar").children().length + " items");
                                 break;
@@ -180,5 +154,114 @@ function submit(price, image, productName, isLogin) {
                 });
             }
         }
+    }
+}
+
+function Rating(isLogin, productId) {
+    if (isLogin === 'False') {
+        showError('Bạn chưa đăng nhập vào hệ thống');
+    }
+    else {
+        var rating = $("input[type='radio'][name='ratings']:checked").val();
+        var ratingContent = $('#rating-content').val();
+
+        if (rating === undefined) {
+            showError('Bạn chưa chọn số sao đánh giá');
+        }
+        else if (ratingContent === '') {
+            showError('Bạn chưa nhập nội dung đánh giá');
+        }
+        else {
+            var loading = verticalTextColor();
+            loading;
+            $.ajax({
+                url: '/Rating/AddRating',
+                method: 'POST',
+                async: true,
+                data: { productId: productId, content: ratingContent, ratingId: rating },
+                success: function (data) {
+                    loading.out();
+                    switch (data) {
+                        case -4:
+                            showError('Không thêm được đánh giá này');
+                            break;
+                        case -5:
+                            showError('Bạn đã đánh giá sản phẩm này rồi');
+                            break;
+                        case 1:
+                            showSuccess('Thêm đánh giá thành công');
+                            break;
+                        case -99:
+                            showErrorSystem();
+                            break;
+                    }
+                },
+                error: function (code, err) {
+                    loading.out();
+                    showErrorSystem();
+                }
+            });
+        }
+    }
+}
+
+function getMoreRating(productId) {
+    var skip = $('#skip-product').val();
+    if (skip === '') {
+        showError('Lỗi không tải được thêm, vui lòng thử lại sau');
+    }
+    else {
+        $.ajax({
+            url: '/Rating/GetMoreRating',
+            method: 'GET',
+            async: true,
+            data: { skip: skip, productId: productId },
+            success: function (data) {
+                switch (data) {
+                    case "-4":
+                        showError('Lỗi không tải thêm được, vui lòng tải lại trang', '360px');
+                        break;
+                    case "-99":
+                        showErrorSystem();
+                        break;
+                    default:
+                        var json = JSON.parse(data);
+                        var node = ``;
+                        $.each(json, function (k, v) {
+                            node +=
+                                `<li class="clearfix">
+                                            <div class="comment-block">`;
+                            if (v.UserImage != null) {
+                                node += `<img src="/images/user/` + v.Email + `/` + v.UserImage + `" class="avatar" alt="">`;
+                            }
+                            else {
+                                node += `<img src="/images/user/avatar.png" class="avatar" alt="">`;
+                            }
+                            node += `
+                                                <div class="post-comments">
+                                                    <p class="meta"> ` +
+                                v.RatingDate + ` <a href="javascript:void(0)">` + v.FullName + `</a>
+                                                    </p>
+                                                    <div class="meta" style="display: inline-block">
+                                                        <span style="float: left">Đánh giá:</span>
+                                                        <div class="rating-box"><span class="rating nobr" style="width:`+ v.Rating+`%;"></span></div>
+                                                    </div>
+                                                    <p>`+
+                                v.Content + `
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>`;
+                        });
+                        $('#rating').append(node);
+                        skip += 10;
+                        $('#skip-product').val(skip);
+                        break;
+                }
+            },
+            error: function (core, err) {
+                showErrorSystem();
+            }
+        });
     }
 }

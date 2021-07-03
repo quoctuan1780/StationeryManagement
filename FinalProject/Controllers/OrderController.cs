@@ -59,7 +59,7 @@ namespace FinalProject.Controllers
 
             ViewBag.User = await _accountService.GetUserByUserIdAsync(userId);
 
-            ViewBag.Carts = await _cartService.GetCartsByUserIdAsync(userId);
+            var carts = await _cartService.GetCartsByUserIdAsync(userId);
 
             ViewBag.TotalOfCart = _cartService.GetCartTotalByUserId(userId);
 
@@ -68,7 +68,16 @@ namespace FinalProject.Controllers
             ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
                 await _deliveryAddressService.GetDeliveryAddressesAsync(userId));
 
-            return View();
+            ViewBag.Carts = carts;
+
+            if (carts != null && carts.Any())
+            {
+                return View();
+            }
+            else
+            {
+                return PartialView(ERROR_1000_PAGE);
+            }
         }
 
         [HttpPost]

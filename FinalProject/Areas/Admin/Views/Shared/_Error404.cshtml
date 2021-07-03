@@ -5,7 +5,7 @@
     <title>404 - Không tìm thấy trang</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/style/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/style/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="~/style/css/error-page.css"/>
     <style>
@@ -24,8 +24,10 @@
             <i class="fa fa-warning"></i>
             <h1>404</h1>
             <p>Lỗi! - Không tìm thấy trang bạn yêu cầu</p>
-            <button class="btn btn-warning" type="button" onclick="goBack()">Quay lại</button>
-            <a class="back" asp-action="Dashboard" asp-controller="Home" asp-area="Admin">Quay lại trang chủ</a>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-warning mg-5" type="button" onclick="goBack()">Quay lại</button>
+                <a class="btn btn-success mg-5" asp-action="Dashboard" asp-controller="Home" asp-area="Admin">Quay lại trang chủ</a>
+            </div>
         </div>
     </section>
 
@@ -34,7 +36,6 @@
             window.history.back()
         }
     </script>
-    <script src="~/style/bootstrap/js/bootstrap.min.js"></script>
 </body>
 
 </html>

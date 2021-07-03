@@ -93,6 +93,31 @@
     </li>
 
     <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#saleManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-piggy-bank"></i>
+            <span>Quản lý khuyến mại</span>
+        </a>
+        <div id="saleManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="Index" asp-controller="Sale" asp-area="Admin">Danh sách khuyến mại</a>
+                <a class="collapse-item" asp-action="AddSale" asp-controller="Sale" asp-area="Admin">Thêm khuyến mại</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#guideManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-book"></i>
+            <span>Quản lý hướng dẫn</span>
+        </a>
+        <div id="guideManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="Index" asp-controller="Guide" asp-area="Admin">Danh sách các hướng dẫn</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#accountManagement" aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-user"></i>
             <span>Quản lý tài khoản</span>

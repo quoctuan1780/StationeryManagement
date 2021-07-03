@@ -4,6 +4,7 @@
     var categories = await _categoryService.GetAllCategoriesAsync();
     var productDetails = await _productService.GetTop10ProductHotAsync();
 }
+
 <div class="box-header-02">
     <div class="container">
         <div class="row">
@@ -18,12 +19,12 @@
                                     <div class="mega-menu-01">
                                         <div class="menu-01 menu-01-cate">
                                             <div class="title"><span>Loại sản phẩm</span></div>
-                                            <ul class="content-col">
+                                            <ul class="content-col" style="overflow-y: scroll; height: 240px;">
                                                 @if (categories != null && categories.Any())
                                                 {
                                                     foreach (var item in categories)
                                                     {
-                                                        <li><a asp-action="Search" asp-controller="Search" asp-route-text="@item.CategoryName"><span>@item.CategoryName</span></a></li>
+                                                        <li style="padding: 5px"><a asp-action="Search" asp-controller="Search" asp-route-text="@item.CategoryName"><span>@item.CategoryName</span></a></li>
                                                     }
                                                 }
                                             </ul>

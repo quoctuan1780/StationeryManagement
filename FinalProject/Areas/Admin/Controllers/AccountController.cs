@@ -128,7 +128,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
         {
             if (ModelState.IsValid)
             {
@@ -142,7 +142,14 @@ namespace FinalProject.Areas.Admin.Controllers
                         {
                             await SecurityManager.SignInAsync(HttpContext, user, ROLE_ADMIN, ROLE_ADMIN);
                         }
-                        return Redirect("/Admin/Home/Dashboard");
+                        if (urlBack != null && !urlBack.Equals(EMPTY))
+                        {
+                            return Redirect(urlBack);
+                        }
+                        else
+                        {
+                            return Redirect("/Admin/Home/Dashboard");
+                        }
 
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;

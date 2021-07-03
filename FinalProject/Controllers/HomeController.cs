@@ -7,17 +7,19 @@ namespace FinalProject.Controllers
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
+        private readonly ISaleService _saleService;
 
-
-        public HomeController(IProductService productService)
+        public HomeController(IProductService productService, ISaleService saleService)
         {
             _productService = productService;
-
+            _saleService = saleService;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewBag.Products = await _productService.GetAllProductsAsync();
+
+            ViewBag.Sales = await _saleService.GetThreeSalesImageAsync();
 
             return View();
         }

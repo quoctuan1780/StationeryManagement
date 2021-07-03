@@ -25,5 +25,13 @@
         public const string DISPLAY_BANNER_START_DATE = "Ngày bắt đầu";
         public const string DISPLAY_BANNER_END_DATE = "Ngày kết thúc";
         public const string DISPLAY_BANNER_URL = "Liên kết";
+
+        public const string DISPLAY_NAME_SALE = "Tên khuyễn mại";
+        public const string DISPLAY_DISCOUNT = "Phần trăm khuyễn mại";
+        public const string DISPLAY_TYPE_SALE = "Loại khuyễn mại";
+        public const string DISPLAY_SALE_DESCRIPTION = "Mô tả";
+        public const string DISPLAY_START_DATE_SALE = "Ngày khuyến mại";
+        public const string DISPLAY_END_DATE_SALE = "Ngày kết thúc";
+        public const string DISPLAY_IMAGE_SALE = "Hình ảnh khuyến mại";
     }
 }

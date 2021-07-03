@@ -8,7 +8,7 @@
         <ul>
             @if(categories != null && categories.Any())
             {
-                foreach(var item in categories.Take(10))
+                foreach(var item in categories.Take(9))
                 {
                     <li><a asp-action="Search" asp-controller="Search" asp-route-text="@item.CategoryName">@item.CategoryName</a></li>
                 }

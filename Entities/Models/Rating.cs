@@ -13,7 +13,7 @@ namespace Entities.Models
         [Required]
         [StringLength(100, MinimumLength = 10)]
         public string RatingTypeName { get; set; }
-
+        public byte RatingNumber { get; set; }
         public virtual IList<RatingDetail> RatingDetails { get; set; }
     }
 }

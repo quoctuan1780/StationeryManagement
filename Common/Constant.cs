@@ -1,7 +1,10 @@
-﻿namespace Common
+﻿using System.Runtime.CompilerServices;
+
+namespace Common
 {
     public class Constant
     {
+        #region Constant 
         public const string CONNECTION_STRING = "DefaultConnection";
 
         public const string EMPTY = "";
@@ -13,6 +16,8 @@
         public const string IMAGE_LINK_BANNER = "wwwroot/images/banner/";
 
         public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
+
+        public const string IMAGE_SALE_LINK = @"wwwroot\images\sale";
 
         public const string SLASH = "/";
 
@@ -58,9 +63,11 @@
 
         public const string PROVIDER_GOOGLE = "Google";
         public const string PROVIDER_FACEBOOK = "Facebook";
+        #endregion
 
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        public const string ERROR_1000_PAGE = "~/Views/Shared/_Error1000.cshtml";
         public const string ERROR_404_PAGE_ADMIN = "~/Areas/Admin/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_SHIPPER = "~/Areas/Shipper/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_WAREHOUSE = "~/Areas/Warehouse/Views/Shared/_Error404.cshtml";
@@ -69,6 +76,8 @@
 
         #region Error Code
         public const int ERROR_CODE_NULL_ID = -2;
+
+        public const int ERROR_CODE_EXISTS = -5;
 
         public const int ERROR_CODE_NULL = -4;
 
@@ -235,6 +244,16 @@
         public const string RECEIPT_REQUEST_STATUS_APPROVED = "Đã duyệt";
         public const string RECEIPT_REQUEST_REJECT = "Từ chối";
 
+        #endregion
+
+        #region Guide Constant
+        public const string GUIDE_BUY_PRODUCT = "Hướng dẫn mua hàng";
+        public const string GUIDE_PAYMENT = "Hướng dẫn thanh toán";
+        #endregion
+
+        #region Sale constant
+        public const string TYPE_SALE_FOR_PRODUCT = "Khuyến mãi cho sản phẩm";
+        public const string TYPE_SALE_FOR_ORDER = "Khuyến mãi cho đơn hàng";
         #endregion
     }
 }

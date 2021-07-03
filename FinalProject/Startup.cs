@@ -1,6 +1,8 @@
 using Common;
 using Entities.Data;
 using Entities.Models;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Services;
 using Services.Hubs;
 using Services.Interfacies;
 using Services.Services;
@@ -26,6 +29,10 @@ namespace FinalProject
         }
 
         public IConfiguration Configuration { get; }
+
+        private static IProductService productService;
+
+        private readonly BackgroundWork backgroundWork = new(productService);
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -70,8 +77,13 @@ namespace FinalProject
             services.AddScoped<IBannerService, BannerService>();
             services.AddTransient<IHubService, HubService>();
             services.AddTransient<IHubShipperService, HubShipperService>();
+            services.AddTransient<IFileGuideService, FileGuideService>();
+            services.AddTransient<ISaleService, SaleService>();
+            services.AddTransient<ISaleDetailService, SaleDetailService>();
+            services.AddTransient<IRatingService, RatingService>();
             #endregion
 
+            #region Cookie manually
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
             .AddCookie(ROLE_CUSTOMER, options =>
             {
@@ -120,6 +132,7 @@ namespace FinalProject
                 options.LogoutPath = "/Warehouse/Account/Logout";
                 options.AccessDeniedPath = "/Warehouse/Account/AccessDenied";
             });
+            #endregion
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -131,10 +144,26 @@ namespace FinalProject
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(Configuration.GetConnectionString(Constant.CONNECTION_STRING), new SqlServerStorageOptions
+            {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    DisableGlobalLocks = true
+            }));
+
+            services.AddMemoryCache();
+            services.AddHangfireServer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IRecurringJobManager recurringJobManager)
         {
             if (env.IsDevelopment())
             {
@@ -146,7 +175,7 @@ namespace FinalProject
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -156,6 +185,15 @@ namespace FinalProject
             app.UseAuthorization();
 
             app.UseSession();
+
+            #region Hangfire configure
+
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
+
+            recurringJobManager.AddOrUpdate("UpdateSalePriceOfProduct", () => backgroundWork.DoTask(), Cron.Daily());
+
+            #endregion
 
             app.UseEndpoints(endpoints =>
             {
@@ -171,6 +209,7 @@ namespace FinalProject
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
                 endpoints.MapRazorPages();
+                endpoints.MapHangfireDashboard();
             });
         }
     }

@@ -17,8 +17,10 @@ namespace Entities.Models
         public string ProductName { get; set; }
 
         [DataType(DataType.Currency)]
-        [Range(1, 100)]
         public decimal Price { get; set; } = 0;
+
+        [DataType(DataType.Currency)]
+        public decimal SalePrice { get; set; } = 0;
 
         public DateTime DateCreate { get; set; } = DateTime.Now;
 

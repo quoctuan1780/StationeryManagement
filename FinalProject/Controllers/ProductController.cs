@@ -9,18 +9,27 @@ namespace FinalProject.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICommentService _commentService;
+        private readonly IRatingService _rateService;
 
-        public ProductController(IProductService productService, ICommentService commentService)
+        public ProductController(IProductService productService, ICommentService commentService, IRatingService rateService)
         {
             _productService = productService;
             _commentService = commentService;
+            _rateService = rateService;
         }
-        public async Task<IActionResult> Detail(int id)
+        public async Task<IActionResult> Detail(int? id)
         {
+            if(id is null)
+            {
+                return PartialView(ERROR_404_PAGE);
+            }
+            ViewBag.Product = await _productService.GetProductByIdAsync(id.Value);
 
-            ViewBag.Product = await _productService.GetProductByIdAsync(id);
+            ViewBag.Comments = await _commentService.GetAllCommentsByProductIdAsync(id.Value);
 
-            ViewBag.Comments = await _commentService.GetAllCommentsByProductIdAsync(id);
+            ViewBag.Ratings = await _rateService.GetRatingsAsync();
+
+            ViewBag.RatingsDetail = await _rateService.GetRatingsDetailAsync(id.Value);
 
             return View();
         }
