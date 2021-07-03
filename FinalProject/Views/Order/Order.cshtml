@@ -9,6 +9,8 @@
     var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
     var orderInfo = "";
     var addresses = ViewBag.Addresses as IList<SelectListItem>;
+    decimal totalSale = 0;
+    decimal totalOriginal = 0;
 }
 
 <div id="box-content">
@@ -98,6 +100,8 @@
                         <ul class="list-group mb-3 sticky-top">
                             @foreach (var item in carts)
                             {
+                                totalSale += item.ProductDetail.Product.Price * item.Quantity - item.Price * item.Quantity;
+                                totalOriginal += item.ProductDetail.Product.Price * item.Quantity;
                                 <li class="list-group-item d-flex lh-condensed">
                                     <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; align-items: center;">
                                         <div class="col-md-4">
@@ -124,6 +128,8 @@
                                 </li>
                             }
                             <li class="list-group-item d-flex justify-content-between">
+                                <span>Tổng tiền giá gốc: <strong>@totalOriginal.ToString("G29")</strong> (VNĐ)</span><br />
+                                <span>Tổng tiền khuyễn mãi: <strong>@totalSale.ToString("G29")</strong> (VNĐ)</span><br />
                                 <span>Tổng tiền: <strong>@total.ToString("G29")</strong> (VNĐ)</span>
                             </li>
                         </ul>

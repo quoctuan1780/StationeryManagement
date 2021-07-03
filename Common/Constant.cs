@@ -17,6 +17,8 @@ namespace Common
 
         public const string IMAGE_AVATAR_LINK = @"wwwroot\images\user";
 
+        public const string IMAGE_SALE_LINK = @"wwwroot\images\sale";
+
         public const string SLASH = "/";
 
         public const string HYPHEN = " - ";
@@ -65,6 +67,7 @@ namespace Common
 
         #region Error Page
         public const string ERROR_404_PAGE = "~/Views/Shared/_Error404.cshtml";
+        public const string ERROR_1000_PAGE = "~/Views/Shared/_Error1000.cshtml";
         public const string ERROR_404_PAGE_ADMIN = "~/Areas/Admin/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_SHIPPER = "~/Areas/Shipper/Views/Shared/_Error404.cshtml";
         public const string ERROR_404_PAGE_WAREHOUSE = "~/Areas/Warehouse/Views/Shared/_Error404.cshtml";
@@ -73,6 +76,8 @@ namespace Common
 
         #region Error Code
         public const int ERROR_CODE_NULL_ID = -2;
+
+        public const int ERROR_CODE_EXISTS = -5;
 
         public const int ERROR_CODE_NULL = -4;
 
@@ -244,6 +249,11 @@ namespace Common
         #region Guide Constant
         public const string GUIDE_BUY_PRODUCT = "Hướng dẫn mua hàng";
         public const string GUIDE_PAYMENT = "Hướng dẫn thanh toán";
+        #endregion
+
+        #region Sale constant
+        public const string TYPE_SALE_FOR_PRODUCT = "Khuyến mãi cho sản phẩm";
+        public const string TYPE_SALE_FOR_ORDER = "Khuyến mãi cho đơn hàng";
         #endregion
     }
 }

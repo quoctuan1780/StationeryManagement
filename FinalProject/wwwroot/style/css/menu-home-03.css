@@ -49,7 +49,7 @@
 
 .menu .vt_megamenu_content {
     position: absolute;
-    width: 1090px;
+    min-width: 240px;
     left: 0px;
     z-index: 999;
     top: 50px;

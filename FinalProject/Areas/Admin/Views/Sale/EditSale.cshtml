@@ -1,0 +1,284 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.SaleViewModel
+@using static Common.Constant
+@{
+    ViewData["Title"] = "Sửa khuyến mại";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var products = ViewBag.Products as IList<Entities.Models.Product>;
+    var productInSales = ViewBag.ProductInSales as IList<Entities.Models.Product>;
+}
+
+@section Links{
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+}
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Cập nhật khuyến mại</h1>
+    <hr class="hr-end-list" />
+
+    @if (!(ViewBag.MessageSuccess is null))
+    {
+        <div class="alert alert-success">@ViewBag.MessageSuccess</div>
+    }
+    @if (!(TempData["MessageSuccess"] is null))
+    {
+        <div class="alert alert-success">@TempData["MessageSuccess"]</div>
+    }
+    @if (!(ViewBag.MessageError is null))
+    {
+        <div class="alert alert-danger">@ViewBag.MessageError</div>
+    }
+
+    <form asp-action="EditSale" asp-controller="Sale" asp-area="Admin" method="post" role="form" enctype="multipart/form-data"
+          id="form">
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="imagePreviewDeteted" id="image-preview-deleted" />
+        <input type="hidden" asp-for="SaleId" />
+        <input type="hidden" asp-for="SaleType" />
+
+        <div class="form-group">
+            <label asp-for="SaleName"></label>
+            <input type="text" asp-for="SaleName" class="form-control" id="sale-name" />
+            <span class="text-danger" asp-validation-for="SaleName"></span>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="SaleStartDate"></label>
+                    <input type="date" asp-for="SaleStartDate" class="form-control" id="start-date" />
+                    <span class="text-danger" asp-validation-for="SaleStartDate"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label asp-for="SaleEndDate"></label>
+                    <input type="date" asp-for="SaleEndDate" class="form-control" id="end-date" />
+                    <span class="text-danger" asp-validation-for="SaleEndDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+
+        <div class="form-group">
+            <div class="col-lg-6">
+                <label asp-for="Discount"></label>
+                <input type="number" min="0" max="100" asp-for="Discount" class="form-control" placeholder="%" />
+                <span class="text-danger" asp-validation-for="Discount"></span>
+            </div>
+        </div>
+
+        <span>Hình ảnh</span>
+        @if (!(Model.Image is null))
+        {
+            <div class="form-group form-flex" style="text-align: center;">
+                <div class="show-image">
+                    <img src="~/images/sale/@Model.Image" class="image-product" width="200" height="200" />
+                    <i class="delete fa fa-times" onclick="confirmDeleteImageOld(this)">
+                    </i>
+                </div>
+            </div>
+        }
+
+        <div class="form-group form-flex" style="text-align: center;" id="show-image-preview">
+
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ImageFile"></label>
+            <input type="file" class="form-control-file" accept="image/*" asp-for="ImageFile" onchange="previewImage(event)" id="images-file" />
+            <span class="text-danger" asp-validation-for="ImageFile"></span>
+        </div>
+
+        @if (Model.SaleType.Equals(TYPE_SALE_FOR_PRODUCT))
+        {
+            <div class="form-group" id="table-product">
+                <label>Danh sách sản phẩm</label>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Giá bán</th>
+                                <th>Chọn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!(productInSales is null))
+                            {
+                                foreach (var item in productInSales)
+                                {
+                                    <tr>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.Price</td>
+                                        <td><input type="checkbox" name="ProductIds" value="@item.ProductId" checked /></td>
+                                    </tr>
+                                }
+                            }
+                            @if (!(products is null))
+                            {
+                                foreach (var item in products)
+                                {
+                                    <tr>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.Price</td>
+                                        <td><input type="checkbox" name="ProductIds" value="@item.ProductId" /></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <span class="text-danger" asp-validation-for="ProductIds"></span>
+            </div>
+        }
+        else
+        {
+            <div class="form-group" id="from-order-price">
+                <label>Giá trị đơn hàng từ</label>
+                <input type="number" class="form-control" asp-for="FromOrderPrice" />
+                <span class="text-danger" asp-validation-for="FromOrderPrice"></span>
+            </div>
+        }
+    </form>
+
+    <div class="form-group">
+        <input type="button" value="Cập nhật khuyến mại" class="btn btn-success" onclick="submit()" />
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var files = [];
+        //var chooseDelivery = [];
+
+        //function chooseOrder(e, rowVersion) {
+        //    var dom = $(e);
+
+        //    if (dom[0].checked) {
+        //        chooseDelivery.push(dom.val());
+        //    }
+        //    else {
+        //        chooseDelivery.splice(chooseDelivery.indexOf(dom.val()), 1);
+        //    }
+
+        //    console.log(chooseDelivery)
+        //}
+
+        function ShowProduct() {
+            $("#table-product").removeClass("hidden");
+            $("#from-order-price").addClass("hidden");
+        }
+
+        function ShowOrder() {
+            $("#from-order-price").removeClass("hidden");
+            $("#table-product").addClass("hidden");
+        }
+
+        function previewImage(e) {
+            var node = '';
+
+            var imageFiles = e.target.files;
+
+            if (imageFiles.length > 0) {
+                files.push(imageFiles[0].name);
+                node += `<div class="show-image">
+                                        <img src="`+ URL.createObjectURL(imageFiles[0]) + `" class="image-product" width="200" height="200" />
+                                        <i class="delete fa fa-times" onclick="confirmDeleteImage(this)">
+                                        </i>
+                                    </div>`;
+
+                $('#show-image-preview').children().remove();
+                $('#show-image-preview').append(node);
+                $('#image-preview-deleted').val('');
+            }
+        }
+
+        function confirmDeleteImageOld(e) {
+            Swal.fire({
+                title: 'Xóa hình ảnh!',
+                text: "Bạn có muốn xóa hình ảnh này ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Xóa`,
+                cancelButtonText: `Hủy`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(e).closest('.show-image').remove();
+                }
+            })
+        }
+
+        function confirmDeleteImage(e) {
+            Swal.fire({
+                title: 'Xóa hình ảnh!',
+                text: "Bạn có muốn xóa hình ảnh này ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Xóa`,
+                cancelButtonText: `Hủy`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    $('#image-preview-deleted').val(files);
+
+                    $(e).closest('.show-image').remove();
+
+                    files = [];
+                }
+            })
+        }
+
+        function getDateTimeNow() {
+            var dateObj = new Date();
+            var month = dateObj.getUTCMonth() + 1;
+            var day = dateObj.getUTCDate();
+            var year = dateObj.getUTCFullYear
+            newdate = day + "/" + month + "/" + year;
+
+            return newdate;
+        }
+
+        function submit() {
+            var startDate = new Date($("#start-date").val());
+            var endDate = new Date($("#end-date").val());
+
+            var today = new Date(getDateTimeNow());
+
+            if (today.get > startDate.getTime()) {
+                Swal.fire({
+                    title: 'Thông báo',
+                    text: "Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại",
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: `Ok`,
+                });
+            }
+            else if (startDate.getTime() > endDate.getTime()) {
+                Swal.fire({
+                    title: 'Thông báo',
+                    text: "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc",
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: `Ok`,
+                });
+
+            }
+            else {
+                $('#form').submit();
+            }
+        }
+    </script>
+}

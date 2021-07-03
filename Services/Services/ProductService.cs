@@ -7,6 +7,7 @@ using Services.Interfacies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -62,6 +63,19 @@ namespace Services.Services
             return JsonConvert.SerializeObject(bestSellerList);
         }
 
+        public async Task<bool> CheckProductIsInAnySalesAsync(IList<int> productIds)
+        {
+            int result = 0;
+            result = await _context.SaleProducts.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId) && x.SaleEndDate.Date >= DateTime.Now.Date).CountAsync();
+
+            if(result > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public async Task<int> DeleteProductByIdAsync(int productId)
         {
             var product = await _context.Products.FindAsync(productId);
@@ -84,14 +98,20 @@ namespace Services.Services
                 .Where(x => x.IsDeleted == false)
                 .Include(x => x.Category)
                 .Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .Include(x => x.RatingDetails.Where(x => x.IsDeleted == false))
+                .ThenInclude(x => x.Rating)
                 .Take(16)
                 .ToListAsync();
         }
 
-        //check deteted item
+        public async Task<IList<Product>> GetAllProductsAsync(IList<int> productIds)
+        {
+            return await _context.Products.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId)).ToListAsync();
+        }
+
         public async Task<IList<string>> GetColorByIdAsync(int productId)
         {
-            var listDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
+            var listDetails = await _context.ProductDetails.Where(x => x.IsDeleted == false && x.ProductId == productId).ToListAsync();
             var listColor = new List<string>();
             foreach (var item in listDetails)
             {
@@ -126,9 +146,20 @@ namespace Services.Services
             return result;
         }
 
+        public async Task<IList<Product>> GetProductsCanApplySaleAsync()
+        {
+            var productIdInSale = _context.SaleProducts.Where(x => x.IsDeleted == false && x.SaleEndDate.Date >= DateTime.Now.Date).Select(x => x.ProductId);
+
+            var products = await _context.Products.Where(x => x.IsDeleted == false && !productIdInSale.Contains(x.ProductId)).ToListAsync();
+
+            return products;
+        }
+
         public string GetProductSkip(int skip)
         {
             var result = _context.Products.Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .Include(x => x.RatingDetails)
+                .ThenInclude(x => x.Rating)
                 .Where(x => x.IsDeleted == false)
                 .Skip(skip).Take(16);
 
@@ -142,7 +173,8 @@ namespace Services.Services
                     {
                         {"ProductId", item.ProductId },
                         {"ProductName", item.ProductName },
-                        {"Price", item.Price }
+                        {"Price", item.Price },
+                        {"SalePrice", item.SalePrice }
                     };
 
                     if (item.ProductImages != null && item.ProductImages.Any())
@@ -154,6 +186,25 @@ namespace Services.Services
                         jObject.Add("ProductImage", "");
                     }
 
+                    if(item.RatingDetails != null && item.RatingDetails.Any())
+                    {
+                        var rating = from rd in item.RatingDetails
+                                     group rd by rd.RatingId into g
+                                     select new
+                                     {
+                                         RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
+                                         UserRating = g.Count()
+                                     };
+
+                        var ratingTotal = (double) rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
+
+                        jObject.Add("RatingRange", Math.Ceiling(ratingTotal));
+                    }
+                    else
+                    {
+                        jObject.Add("RatingRange", 0);
+                    }
+
                     jsonResult.Add(jObject);
                 }
             }
@@ -161,11 +212,9 @@ namespace Services.Services
             return JsonConvert.SerializeObject(jsonResult);
         }
 
-
-        //check deteted item
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
         {
-            return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
+            return await _context.ProductDetails.Include(x => x.Product.IsDeleted == false).Where(x => x.IsDeleted == false).ToListAsync();
         }
 
         public async Task<IList<ProductDetail>> GetTop10ProductHotAsync()
@@ -205,13 +254,27 @@ namespace Services.Services
 
         public async Task<IList<Product>> SearchByPriceAsync(int price)
         {
-            return await _context.Products.Where(x => x.Price <= price).OrderBy(x => x.Price).ToListAsync();
+            return await _context.Products.Where(x => x.IsDeleted == false && x.Price <= price).OrderBy(x => x.Price).ToListAsync();
         }
 
         public async Task<IList<Product>> SearchByPriceAsync(string text)
         {
             return await _context.Products.Where(x => x.ProductName.Contains(text)).OrderBy(x => x.Price)
-                .Union(_context.Products.Include(x => x.Category).Where(x => x.Category.CategoryName.Contains(text))).ToListAsync();
+                .Union(_context.Products.Include(x => x.Category).Where(x => x.IsDeleted == false && x.Category.CategoryName.Contains(text))).ToListAsync();
+        }
+
+        public async Task<int> UpdatePriceSaleProductsAsync(IList<int> productIds, decimal discount)
+        {
+            var products = await _context.Products.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId)).ToListAsync();
+
+            foreach(var item in products)
+            {
+                item.SalePrice = item.Price - item.Price * discount / 100;
+            }
+
+            _context.UpdateRange(products);
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<Product> UpdateProductAsync(Product product)
@@ -223,6 +286,42 @@ namespace Services.Services
             await _context.SaveChangesAsync();
 
             return product;
+        }
+
+        public async Task UpdateSalePriceAsync()
+        {
+            var sales = await _context.SaleProducts
+                        .Include(x => x.Product)
+                        .Where(x => x.IsDeleted == false && x.SaleEndDate.Date < DateTime.Now.Date && x.Product.SalePrice > 0)
+                        .ToListAsync();
+
+            if(sales != null && sales.Any())
+            {
+                var productIds = new List<int>();
+
+                foreach(var item in sales)
+                {
+                    productIds.Add(item.ProductId);
+                }
+
+                if (productIds.Any())
+                {
+                    var products = await _context.Products.Where(x => productIds.Distinct().Contains(x.ProductId))
+                        .ToListAsync();
+
+                    if(productIds != null && productIds.Any())
+                    {
+                        foreach(var item in products)
+                        {
+                            item.SalePrice = 0;
+                        }
+
+                        _context.UpdateRange(products);
+
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
         }
     }
 }

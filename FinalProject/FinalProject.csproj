@@ -49,6 +49,7 @@
     <Folder Include="Areas\Shipper\Models\" />
     <Folder Include="Areas\Warehouse\Data\" />
     <Folder Include="Areas\Warehouse\Models\" />
+    <Folder Include="wwwroot\images\sale\" />
   </ItemGroup>
 
 </Project>

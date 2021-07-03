@@ -33,6 +33,22 @@ namespace FinalProject.Areas.Admin.Helpers
             return resultHash;
         }
 
+        public static async Task<string> SaveImageAsync(IFormFile formFile, int width, int height, string imageLink)
+        {
+            if (formFile is null) return null;
+
+            var image = Image.Load(formFile.OpenReadStream());
+
+            image.Mutate(x =>
+                x.Resize(image.Width > width ? width : image.Width, image.Height > height ? height : image.Height));
+
+            var resultHash = HashNameImage(formFile.FileName);
+
+            await image.SaveAsync(imageLink + SLASH + resultHash);
+
+            return resultHash;
+        }
+
         public static string HashNameImage(string name)
         {
             byte[] salt;

@@ -30,8 +30,9 @@ namespace FinalProject
 
         public IConfiguration Configuration { get; }
 
-        private static ITestService testService;
-        private readonly BackgroundWork backgroundWork = new BackgroundWork(testService);
+        private static IProductService productService;
+
+        private readonly BackgroundWork backgroundWork = new(productService);
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -77,7 +78,9 @@ namespace FinalProject
             services.AddTransient<IHubService, HubService>();
             services.AddTransient<IHubShipperService, HubShipperService>();
             services.AddTransient<IFileGuideService, FileGuideService>();
-            services.AddTransient<ITestService, TestService>();
+            services.AddTransient<ISaleService, SaleService>();
+            services.AddTransient<ISaleDetailService, SaleDetailService>();
+            services.AddTransient<IRatingService, RatingService>();
             #endregion
 
             #region Cookie manually
@@ -188,7 +191,7 @@ namespace FinalProject
             app.UseHangfireDashboard();
             app.UseHangfireServer();
 
-            //recurringJobManager.AddOrUpdate("Update", () => backgroundWork.DoTask(), Cron.Minutely());
+            recurringJobManager.AddOrUpdate("UpdateSalePriceOfProduct", () => backgroundWork.DoTask(), Cron.Daily());
 
             #endregion
 

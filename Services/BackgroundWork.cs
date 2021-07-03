@@ -9,16 +9,16 @@ namespace Services
 {
     public class BackgroundWork
     {
-        private readonly ITestService _testService;
+        private readonly IProductService _productService;
 
-        public BackgroundWork(ITestService testService)
+        public BackgroundWork(IProductService productService)
         {
-            _testService = testService;
+            _productService = productService;
         }
 
         public Task DoTask()
         {
-            return _testService.UpdateProductTotalAsync();
+            return _productService.UpdateSalePriceAsync();
         }
     }
 }

@@ -163,6 +163,7 @@ namespace Entities.Data
                 .HasForeignKey(x => x.CategoryId);
 
                 e.Property(x => x.Price).HasPrecision(18, 2);
+                e.Property(x => x.SalePrice).HasPrecision(18, 2);
             });
 
             // Entity Rating
@@ -233,6 +234,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.SaleId);
 
                 e.Property(x => x.Discount).HasPrecision(18, 2);
+                e.Property(x => x.FromOrderPrice).HasPrecision(18, 2);
             });
 
             //Entity SaleDetail
