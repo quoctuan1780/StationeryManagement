@@ -93,7 +93,7 @@ namespace Services.Services
                 .Include(x => x.OrderDetails)
                 .ThenInclude(x => x.ProductDetail)
                 .ThenInclude(x => x.Product)
-                .ThenInclude(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .ThenInclude(x => x.ProductImages)
                 .Include(x => x.MoMoPayment)
                 .Include(x => x.PayPalPayment)
                 .FirstOrDefaultAsync();

@@ -1,4 +1,5 @@
 ﻿using static Common.Constant;
+using static Common.RoleConstant;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,25 +12,28 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
     [Area(AREA_WAREHOUSE)]
+    [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class RecommandationController : Controller
     {
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
-        private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
         private readonly UserManager<User> _userManager;
+        static DateTime FromDate;
+        static DateTime ToDate;
+        static int Quantity;
 
-        public RecommandationController(IProductService productService, IProviderService providerService, IReceiptService receiptService,
+        public RecommandationController(IProductService productService, IReceiptService receiptService,
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, UserManager<User> userManager)
         {
             _hubContext = hubContext;
             _productService = productService;
-            _providerService = providerService;
             _receiptService = receiptService;
             _recommendationService = recommendationService;
             _userManager = userManager;
@@ -46,8 +50,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
         public async Task<string> GetRecommandation()
         {
-
-            var result = await _recommendationService.GetRecommandtion(4, 0.81);
+            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
+            var result = await _recommendationService.GetRecommandtion(4, 0.81,listId);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -68,7 +72,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return JsonConvert.SerializeObject(recommandation);
         }
 
-        DateTime FromDate; DateTime ToDate; int Quantity;
+        
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
             FromDate = fromDate;
@@ -80,8 +84,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<IActionResult> AutoCreateReceiptRequest()
         {
             ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
-            ViewBag.BestSeller = await _productService.BestSellerInMonthAsync(FromDate, ToDate, Quantity);            
-            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(4, 0.81);
+            ViewBag.BestSeller = await _productService.BestSellerInMonthAsync(FromDate, ToDate, Quantity);
+            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
+            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(4, 0.81,listId);
            
             
             return View();

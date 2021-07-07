@@ -20,6 +20,7 @@ namespace Services.Interfacies
         Task<IdentityResult> ConfirmEmailAsync(string userId, string token);
         Task LogoutAsync();
         string GetUserId(ClaimsPrincipal user);
+        Task<string> GetUserIdByProviderKeyAsync(string providerKey);
         Task<User> GetUserAsync(ClaimsPrincipal user);
         Task<User> GetUserByUserIdAsync(string userId);
         Task<User> GetUserByEmailAsync(string email);

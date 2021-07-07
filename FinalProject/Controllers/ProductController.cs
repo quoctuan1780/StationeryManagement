@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using static Common.Constant;
 
@@ -10,11 +11,13 @@ namespace FinalProject.Controllers
         private readonly IProductService _productService;
         private readonly ICommentService _commentService;
         private readonly IRatingService _rateService;
+        private readonly IRecommendationService _recommendationService;
 
-        public ProductController(IProductService productService, ICommentService commentService, IRatingService rateService)
+        public ProductController(IProductService productService, ICommentService commentService, IRecommendationService recommendationService, IRatingService rateService)
         {
             _productService = productService;
             _commentService = commentService;
+            _recommendationService = recommendationService;
             _rateService = rateService;
         }
         public async Task<IActionResult> Detail(int? id)
@@ -30,6 +33,10 @@ namespace FinalProject.Controllers
             ViewBag.Ratings = await _rateService.GetRatingsAsync();
 
             ViewBag.RatingsDetail = await _rateService.GetRatingsDetailAsync(id.Value);
+       
+            List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
+            ViewBag.Suggest = await _recommendationService.GetSuggestedProduct(listProductDetailId);
+            
 
             return View();
         }

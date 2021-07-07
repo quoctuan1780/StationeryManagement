@@ -1,12 +1,10 @@
-﻿using Accord.Math;
-using Common;
+﻿using Common;
 using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -180,7 +178,7 @@ namespace Services.Services
 
         public async Task<IdentityResult> CreateAccountAsync(User user, string role, string password)
         {
-            
+
 
             var registerResult = await RegisterAsync(user, password);
             if (registerResult.Succeeded)
@@ -205,7 +203,7 @@ namespace Services.Services
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
 
-            users = users.Where(x => x.IsDeleted == false).ToList();
+            users = users.ToList();
 
             return users;
         }
@@ -213,7 +211,7 @@ namespace Services.Services
         public async Task<User> GetUserByEmailAsync(string email)
         {
             var users = await _userManager.FindByEmailAsync(email);
-            if(users.IsDeleted == true)
+            if (users.IsDeleted == true)
             {
                 return null;
             }
@@ -279,6 +277,13 @@ namespace Services.Services
         public async Task<IList<User>> GetAllWarehouseManagementsAsync()
         {
             return await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
+        }
+
+        public async Task<string> GetUserIdByProviderKeyAsync(string providerKey)
+        {
+            var result = await _context.UserLogins.Where(x => x.ProviderKey == providerKey).FirstOrDefaultAsync();
+
+            return result.UserId;
         }
     }
 }

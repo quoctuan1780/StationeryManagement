@@ -42,7 +42,7 @@ namespace Services.Services
 
         public async Task<IList<Banner>> GetBannerAsync()
         {
-            return await _context.Banners.Where(x => x.IsDeleted == false && x.EndDate >= DateTime.Now).ToListAsync();
+            return await _context.Banners.Where(x => x.EndDate >= DateTime.Now).ToListAsync();
         }
 
         public async Task<Banner> GetBannerByIdAsync(int bannerId)

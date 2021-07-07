@@ -35,7 +35,7 @@ namespace Services.Services
 
         public async Task<IList<Product>> SearchByPriceAsync(int? price)
         {
-            return await _context.Products.Where(x => x.Price <= price && x.IsDeleted == false).OrderBy(x => x.Price).ToListAsync();
+            return await _context.Products.Where(x => x.Price <= price).OrderBy(x => x.Price).ToListAsync();
         }
 
 
@@ -44,7 +44,7 @@ namespace Services.Services
             if(text != null)
             {
                 var listByCategory = await _context.Products.Include(x => x.Category).Include(x => x.ProductImages).
-                    Where(x => x.IsDeleted == false && (x.Category.CategoryName.Contains(text) ||  x.ProductName.Contains(text)))
+                    Where(x => (x.Category.CategoryName.Contains(text) ||  x.ProductName.Contains(text)))
                     .OrderBy(x => x.Price).ToListAsync();
                 
                 
@@ -53,7 +53,7 @@ namespace Services.Services
             }
             else
             {
-                return await _context.Products.Where(x => x.IsDeleted == false).ToListAsync();
+                return await _context.Products.ToListAsync();
             }
         }
     }

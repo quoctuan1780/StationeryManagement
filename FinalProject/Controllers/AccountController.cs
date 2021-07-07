@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using Common;
+using Entities.Models;
 using FinalProject.Heplers;
 using FinalProject.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -200,6 +201,12 @@ namespace FinalProject.Controllers
                 }
             }
 
+            if (model.ProvinceId != null && model.DistrictId != null)
+            {
+                ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(model.ProvinceId.Value);
+                ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(model.DistrictId.Value);
+            }
+
             return View(model);
         }
         #endregion
@@ -241,7 +248,18 @@ namespace FinalProject.Controllers
 
             if (signInResult.Succeeded)
             {
-                var user = await _accountService.GetUserByEmailAsync(email);
+                User user;
+
+                if (email is null)
+                {
+                    var providerKey = await _accountService.GetUserIdByProviderKeyAsync(info.ProviderKey);
+                    user = await _accountService.GetUserByUserIdAsync(providerKey);
+                }
+                else
+                {
+                    user = await _accountService.GetUserByEmailAsync(email);
+                }
+
                 if (await _accountService.IsInRoleAsync(user, ROLE_CUSTOMER))
                 {
                     await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
@@ -298,6 +316,11 @@ namespace FinalProject.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (model.ProvinceId != null && model.DistrictId != null)
+                {
+                    ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(model.ProvinceId.Value);
+                    ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(model.DistrictId.Value);
+                }
                 return View(VIEW_REGISTER_WITH_GOOGLE, model);
             }
 
@@ -342,11 +365,13 @@ namespace FinalProject.Controllers
 
                 if (resultAddRole.Succeeded)
                 {
-                    await _accountService.LoginAsync(user, false);
+                    //await _accountService.LoginAsync(user, false);
 
                     transaction.Complete();
 
                     await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
+
+                    TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS] = "Đăng ký tài khoản thành công";
 
                     return Redirect(model.ReturnUrl);
                 }
@@ -359,7 +384,6 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                // tạm thời
                 return PartialView(ERROR_404_PAGE);
             }
         }
@@ -376,7 +400,12 @@ namespace FinalProject.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                if(model.ProvinceId != null && model.DistrictId != null)
+                {
+                    ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(model.ProvinceId.Value);
+                    ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(model.DistrictId.Value);
+                }
+                return View(VIEW_REGISTER_WITH_FACEBOOK, model);
             }
 
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -395,12 +424,20 @@ namespace FinalProject.Controllers
                     FullName = model.FullName,
                     Gender = model.Gender,
                     UserName = model.Email,
-                    Email = info.Principal.FindFirstValue(ClaimTypes.Email),
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
                     WardCode = model.WardCode,
                     StreetName = model.StreetName
                 };
+
+                if (info.Principal.FindFirstValue(ClaimTypes.Email) != null)
+                {
+                    user.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                }
+                else
+                {
+                    user.Email = model.Email;
+                }
 
                 var result = await _accountService.RegisterAsync(user, info);
 
@@ -408,7 +445,7 @@ namespace FinalProject.Controllers
                 {
                     ViewBag.Message = MESSAGE_ERROR_ACCOUNT_REGISTER;
 
-                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
                 }
 
                 var resultAddRole = await _accountService.AddRoleAsync(user);
@@ -417,7 +454,7 @@ namespace FinalProject.Controllers
                 {
                     ViewBag.Message = MESSAGE_ERROR_STRONG_PASSWORD;
 
-                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
                 }
 
                 var token = await _accountService.GenerateEmailConfirmTokenAsync(user);
@@ -426,11 +463,13 @@ namespace FinalProject.Controllers
 
                 if (resultAddRole.Succeeded)
                 {
-                    await _accountService.LoginAsync(user, false);
+                    //await _accountService.LoginAsync(user, false);
 
                     transaction.Complete();
 
                     await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
+
+                    TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS] = "Đăng ký tài khoản thành công";
 
                     return Redirect(model.ReturnUrl);
                 }
@@ -438,12 +477,11 @@ namespace FinalProject.Controllers
                 {
                     ViewBag.Message = MESSAGE_ERROR_SYSTEM;
 
-                    return View(VIEW_REGISTER_WITH_GOOGLE, model);
+                    return View(VIEW_REGISTER_WITH_FACEBOOK, model);
                 }
             }
             catch
             {
-                // tạm thời
                 return PartialView(ERROR_404_PAGE);
             }
         }

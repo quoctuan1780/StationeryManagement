@@ -20,7 +20,7 @@ namespace Services.Services
             _context = shopDbContext;
         }
 
-        public int AddRecommandation(IList<ProductDetail> list)
+        public int AddRecommandation(AssociationRule<string>[] rules)
         {
             using var transaction = new TransactionScope();
             try
@@ -36,12 +36,13 @@ namespace Services.Services
                 if (_context.SaveChanges() > 0)
                 {
                     List<RecommendationDetail> listRecommandLine = new();
-                    foreach (var item in list)
+                    foreach (var item in rules)
                     {
                         var recommandline = new RecommendationDetail()
                         {
                             RecommendationId = ReccomdHeader.RecommendtionId,
-                            ProductDetailId = item.ProductDetailId
+                            Input = item.X.ToString(),
+                            Output = item.Y.ToString()
 
                         };
                         listRecommandLine.Add(recommandline);
@@ -64,17 +65,32 @@ namespace Services.Services
             return 0;
         }
 
-        public async Task<IList<ProductDetail>> GetRecommandtion(int support, double confident)
+        public async Task<IList<ProductDetail>> GetRecommandtion(int support, double confident, List<int> listInput)
         {
-            var last = _context.Recommendations.OrderBy(x => x.CreateDate).LastOrDefault();
+            var rec =  await _context.Recommendations.Include(x => x.RecommendationDetails).OrderBy(x => x.CreateDate).ToListAsync();
+            var last =rec.LastOrDefault();
             if (last != null)
             {
                 if (last.CreateDate.ToShortDateString().Equals(DateTime.Now.ToShortDateString()))
-
                 {
-                    var listId = (from re in _context.RecommendationDetails
-                                  select re.ProductDetailId).ToList();
-                    var listPro = _context.ProductDetails.Where(p => listId.Contains(p.ProductDetailId)).ToList();
+                    var details = await _context.RecommendationDetails.Where(x => x.RecommendationId == last.RecommendtionId).ToListAsync();
+
+                    var listProductId = new List<string>();
+                    List<string> listConvert = listInput.ConvertAll<string>(x => x.ToString());
+                    var listRecommendationDetail = new List<RecommendationDetail>();
+                    foreach (var num in listInput) {
+
+                        var RecommendationDetail = new List<RecommendationDetail>();
+                        RecommendationDetail = details.Where(x => listConvert.Contains(x.Input)).ToList();
+                        listRecommendationDetail.AddRange(RecommendationDetail);
+
+                    }
+                    foreach(var item in listRecommendationDetail)
+                    {
+                        listProductId.Add(item.Output);
+                    }
+                    
+                    var listPro = _context.ProductDetails.Where(p => listProductId.Contains(p.ProductDetailId.ToString())).ToList();
                     return listPro;
                 }
             }
@@ -86,18 +102,6 @@ namespace Services.Services
             
             if (results != null)
             {
-                //foreach (var item in allProduct)
-                //{
-                //    for (var i = 0; i < results.Length; i++)
-                //    {
-                //        if (results[i].Y.Contains(item.ProductId.ToString()) && !listProduct.Exists(x => x.ProductDetailId == item.ProductDetailId))
-                //        {
-
-                //            listProduct.Add(item);
-                //        }
-                //    }
-                //}-
-
                 var listProductDetailids = new List<string>();
                 foreach(var item in results)
                 {
@@ -110,13 +114,23 @@ namespace Services.Services
                 
                 if (listProducts.Any())
                 {
-                    AddRecommandation(listProducts);
+                    AddRecommandation(results);
                 }
             }
             return listProducts;
         }
 
-
+        public async Task<List<Product>> GetSuggestedProduct(List<int> listId)
+        {
+            var listDetail = await GetRecommandtion(4, 0.81, listId);
+            var ID = new List<int>();
+            foreach(var item in listDetail)
+            {
+                ID.Add(item.ProductId);
+            }
+            ID = ID.Distinct().ToList();
+            return await _context.Products.Include(x => x.ProductImages).Include(x => x.Category).Where(x => ID.Contains(x.ProductId)).ToListAsync();
+        }
 
         public async Task<string[][]> PrepareData()
         {

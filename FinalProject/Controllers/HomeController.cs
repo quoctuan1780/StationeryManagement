@@ -8,11 +8,13 @@ namespace FinalProject.Controllers
     {
         private readonly IProductService _productService;
         private readonly ISaleService _saleService;
+        public IRecommendationService _recommandationService;
 
-        public HomeController(IProductService productService, ISaleService saleService)
+        public HomeController(IProductService productService, ISaleService saleService, IRecommendationService recommendationService)
         {
             _productService = productService;
             _saleService = saleService;
+            _recommandationService = recommendationService;
         }
 
         public async Task<IActionResult> Index()
@@ -23,5 +25,7 @@ namespace FinalProject.Controllers
 
             return View();
         }
+
+
     }
 }

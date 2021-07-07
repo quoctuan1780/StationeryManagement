@@ -1,22 +1,22 @@
+using Entities.Models;
+using FinalProject.Areas.Admin.Helpers;
 using FinalProject.Areas.Admin.ViewModels;
+using FinalProject.Heplers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
 using System.Threading.Tasks;
-using static Common.Constant;
-using static Common.RoleConstant;
-using static Common.MessageConstant;
-﻿using Entities.Models;
 using System.Transactions;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Authentication;
-using FinalProject.Heplers;
-using FinalProject.Areas.Admin.Helpers;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
-
+using static Common.Constant;
+using static Common.MessageConstant;
+using static Common.RoleConstant;
 using static FinalProject.Areas.Admin.Helpers.ImageHelper;
+
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -40,6 +40,7 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             return View();
         }
+
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> Index()
         {
@@ -47,6 +48,7 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.WM = await _accountService.GetAllEmployeesByRoleAync(ROLE_WAREHOUSE_MANAGER);
             return View();
         }
+
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> ViewInfor()
         {
@@ -94,9 +96,10 @@ namespace FinalProject.Areas.Admin.Controllers
                 }
             }
             catch { }
-           
+
             return View(model);
         }
+
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> CreateEmployeeAccount()
         {
@@ -105,6 +108,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return View();
         }
+
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public IActionResult ChangePassword()
         {
@@ -127,7 +131,6 @@ namespace FinalProject.Areas.Admin.Controllers
             }
             return View();
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -174,6 +177,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return View(model);
         }
+
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> Logout()
         {
@@ -184,10 +188,9 @@ namespace FinalProject.Areas.Admin.Controllers
             return Redirect("/Admin/Account/Login");
         }
 
-
-        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<IActionResult> CreateEmployeeAccount(CreateAccountEmployeeViewModel model)
         {
             try
@@ -196,7 +199,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                 string image = "admin.png";
 
-                if(!(fileName is null))
+                if (!(fileName is null))
                 {
                     image = fileName;
                 }
@@ -214,26 +217,26 @@ namespace FinalProject.Areas.Admin.Controllers
                 };
                 using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            //var rd = new Random();
-            //var password = "ab" + rd.Next(100000, 999999);
-            var password = "Aa*123456";
-                var result = await _accountService.CreateAccountAsync(user, model.Role,password);
+                var rd = new Random();
+                var password = "Aa*" + rd.Next(100000, 999999);
+
+                var result = await _accountService.CreateAccountAsync(user, model.Role, password);
                 if (result.Succeeded)
                 {
                     transaction.Complete();
                     string subject = "Chào mừng bạn tới với ngôi nhà chung Stationary Store!";
                     string area = "Warehouse";
-                   
 
-                     var callbackUrl =  Url.ActionLink("Login", "Account",
-                            new { Area = area },
-                            Request.Scheme);
+
+                    var callbackUrl = Url.ActionLink("Login", "Account",
+                           new { Area = area },
+                           Request.Scheme);
 
                     string body = EMAIL_HEADER_START + user.FullName
                         + EMAIL_HEADER_END + "Chúc mừng bạn đã trở thành thành viên của gia đình Stationary Store!" +
                         "\n Đây là tài khoản và mật khẩu của bạn:" +
-                        "\n Tài khoản: "+user.UserName+
-                        "\n Mật khẩu: "+password+"\n Vui lòng không chia sẻ với bất cứ ai thông tin đăng nhập của bạn!";
+                        "\n Tài khoản: " + user.UserName +
+                        "\n Mật khẩu: " + password + "\n Vui lòng không chia sẻ với bất cứ ai thông tin đăng nhập của bạn!";
 
                     await _emailSender.SendEmailAsync(user.Email, subject, body);
                     return RedirectToAction("Index");
@@ -283,7 +286,7 @@ namespace FinalProject.Areas.Admin.Controllers
         [HttpDelete]
         public async Task<int> Delete(string id)
         {
-            if(await _accountService.DeleteUser(id) > 0)
+            if (await _accountService.DeleteUser(id) > 0)
             {
                 return 1;
             }

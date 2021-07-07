@@ -41,7 +41,7 @@ namespace Services.Services
 
         public async Task<IList<int>> GetProductIdInSaleAsync(int saleId)
         {
-            return await _context.SaleProducts.Where(x => x.IsDeleted == false && x.SaleId == saleId).Select(x => x.ProductId).ToListAsync();    
+            return await _context.SaleProducts.Where(x => x.SaleId == saleId).Select(x => x.ProductId).ToListAsync();    
         }
 
         public async Task<int> UpdateSaleDetailsAsync(IList<int> productIds, decimal discount, int saleId, DateTime startSaleDate, DateTime endSaleDate)
@@ -51,7 +51,7 @@ namespace Services.Services
             if (productsInSale != null && productsInSale.Any())
             {
                 var productIdsOld = productsInSale.Select(x => x.ProductId);
-                var products = await _context.Products.Where(x => x.IsDeleted == false && productIdsOld.Contains(x.ProductId)).ToListAsync();
+                var products = await _context.Products.Where(x => productIdsOld.Contains(x.ProductId)).ToListAsync();
 
                 if (products != null && products.Any())
                 {
@@ -83,7 +83,7 @@ namespace Services.Services
 
                 await _context.SaleProducts.AddRangeAsync(saleDetails);
 
-                var productsUpdate = await _context.Products.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId)).ToListAsync();
+                var productsUpdate = await _context.Products.Where(x => productIds.Contains(x.ProductId)).ToListAsync();
 
                 if (productsUpdate != null && productsUpdate.Any())
                 {

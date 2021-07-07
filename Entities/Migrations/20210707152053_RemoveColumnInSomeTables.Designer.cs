@@ -4,14 +4,16 @@ using Entities.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210707152053_RemoveColumnInSomeTables")]
+    partial class RemoveColumnInSomeTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -378,6 +380,9 @@ namespace Entities.Migrations
                     b.Property<int>("ImportWarehouseId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ActualQuantity")
                         .HasColumnType("int");
 
@@ -391,11 +396,13 @@ namespace Entities.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ProductDetailId", "ImportWarehouseId");
+                    b.HasKey("ProductDetailId", "ImportWarehouseId", "ProviderId");
 
                     b.HasIndex("ImportWarehouseId");
 
                     b.HasIndex("ProductDetailId");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("ImportWarehouseDetail");
                 });
@@ -730,6 +737,28 @@ namespace Entities.Migrations
                     b.HasIndex("ProductImageId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("Entities.Models.Provider", b =>
+                {
+                    b.Property<int>("ProviderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("ProviderId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Provider");
                 });
 
             modelBuilder.Entity("Entities.Models.Province", b =>
@@ -1406,9 +1435,17 @@ namespace Entities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Entities.Models.Provider", "Provider")
+                        .WithMany("ImportWarehouseDetails")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ImportWarehouse");
 
                     b.Navigation("ProductDetail");
+
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("Entities.Models.MoMoPayment", b =>
@@ -1741,6 +1778,11 @@ namespace Entities.Migrations
                     b.Navigation("ReceiptRequestDetails");
 
                     b.Navigation("RecommendationDetails");
+                });
+
+            modelBuilder.Entity("Entities.Models.Provider", b =>
+                {
+                    b.Navigation("ImportWarehouseDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Province", b =>

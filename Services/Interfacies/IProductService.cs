@@ -12,9 +12,9 @@ namespace Services.Interfacies
         Task<Product> AddProductAsync(Product product);
         Task<ProductDetail> GetProductDetailAsync(int id);
         Task<Product> UpdateProductAsync(Product product);
-
+        Task<List<int>> ListBestSellerProduct(DateTime fromDate, DateTime toDate, int quantity);
         Task<bool> IsExistsProduct(Product product);
-
+        Task<List<int>> GetProductDetailByProDuctIdAsync(int id);
         Task<Product> GetProductByIdAsync(int id);
 
         Task<IList<ProductDetail>> GetProductWithDetailsAsync();
