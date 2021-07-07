@@ -29,11 +29,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            @if (!(banners is null))
+
+                        @if (!(banners is null))
+                        {
+                            foreach (var item in banners)
                             {
-                                foreach (var item in banners)
-                                {
+                                <tr>
                                     <td>@item.BannerId</td>
                                     <td><img src="~/images/banner/@item.Image" width="100" height="100" alt="Alternate Text" /></td>
                                     <td>@item.StartDate.ToShortDateString()</td>
@@ -44,9 +45,9 @@
                                         <a asp-action="EditBanner" asp-controller="Banner"
                                            asp-area="Admin" asp-route-bannerId="@item.BannerId" style="cursor: pointer; color: #4e73df">Sửa</a>
                                     </td>
-                                }
+                                </tr>
                             }
-                        </tr>
+                        }
                     </tbody>
                 </table>
             </div>

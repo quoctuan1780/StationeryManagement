@@ -1,0 +1,19 @@
+﻿@using static Common.Constant
+@{
+    ViewData["Title"] = "Hướng dẫn mua hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="fa-file-pdf col-lg-12" style="display: flex; flex-direction: row; justify-content: center">
+        <embed style="width: 80%; min-height: 768px" src="@Url.Action("Download", "Guide", new { Type = GUIDE_BUY_PRODUCT })" type="application/pdf" />
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+        });
+    </script>
+}

@@ -11,23 +11,31 @@ namespace FinalProject.Controllers
         private readonly IProductService _productService;
         private readonly ICommentService _commentService;
         private readonly IRecommendationService _recommendationService;
+        private readonly IRatingService _rateService;
 
-        public ProductController(IProductService productService, ICommentService commentService, IRecommendationService recommendationService)
+        public ProductController(IProductService productService, ICommentService commentService, IRatingService rateService,IRecommendationService recommendationService)
         {
             _productService = productService;
             _commentService = commentService;
+            _rateService = rateService;
             _recommendationService = recommendationService;
         }
-        public async Task<IActionResult> Detail(int id)
+        public async Task<IActionResult> Detail(int? id)
         {
+            if(id is null)
+            {
+                return PartialView(ERROR_404_PAGE);
+            }
+            ViewBag.Product = await _productService.GetProductByIdAsync(id.Value);
 
-            ViewBag.Product = await _productService.GetProductByIdAsync(id);
+            ViewBag.Comments = await _commentService.GetAllCommentsByProductIdAsync(id.Value);
 
-            ViewBag.Comments = await _commentService.GetAllCommentsByProductIdAsync(id);
-       
-            List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id);
+            ViewBag.Ratings = await _rateService.GetRatingsAsync();
+
+            List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
             ViewBag.Suggest = await _recommendationService.GetSuggestedProduct(listProductDetailId);
             
+            ViewBag.RatingsDetail = await _rateService.GetRatingsDetailAsync(id.Value);
 
             return View();
         }

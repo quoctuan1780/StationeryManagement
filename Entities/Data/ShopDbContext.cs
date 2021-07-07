@@ -46,6 +46,7 @@ namespace Entities.Data
         public virtual DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<WorkflowHistory> WorkflowHistories { get; set; }
+        public virtual DbSet<FileGuide> FileGuides { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -161,6 +162,7 @@ namespace Entities.Data
                 .HasForeignKey(x => x.CategoryId);
 
                 e.Property(x => x.Price).HasPrecision(18, 2);
+                e.Property(x => x.SalePrice).HasPrecision(18, 2);
             });
 
             // Entity Rating
@@ -231,6 +233,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.SaleId);
 
                 e.Property(x => x.Discount).HasPrecision(18, 2);
+                e.Property(x => x.FromOrderPrice).HasPrecision(18, 2);
             });
 
             //Entity SaleDetail
@@ -478,6 +481,15 @@ namespace Entities.Data
                 e.HasIndex(x => x.WorkflowHistoryId);
                 e.HasIndex(x => x.RecordId);
                 e.HasIndex(x => x.CreatedBy);
+            });
+
+            //Entity File Guide
+            modelBuilder.Entity<FileGuide>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.Id);
+                e.HasIndex(x => x.CreatedBy);
+                e.HasIndex(x => x.ModifiedBy);
             });
         }
     }

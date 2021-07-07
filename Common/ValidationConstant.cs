@@ -41,5 +41,13 @@
         public const string VALIDATION_PHONENUMBER = @"^(\+[0-9]{9})$";
 
         public const string COMPARE_PASSWORD = "Password";
+
+        #region Sale
+        public const string ERROR_SALE_NAME_EMPTY = "Tên khuyến mại không được để trống";
+        public const string ERROR_DISCOUNT_EMPTY = "Phần trăm khuyến mại không được để trống";
+        public const string ERROR_SALE_TYPE_EMPTY = "Loại khuyến mại không được để trống";
+        public const string ERROR_START_SALE_DATE_EMPTY = "Ngày bắt đầu khuyến mại không được để trống";
+        public const string ERROR_END_SALE_DATE_EMPTY = "Ngày kết thúc khuyến mại không được để trống";
+        #endregion
     }
 }

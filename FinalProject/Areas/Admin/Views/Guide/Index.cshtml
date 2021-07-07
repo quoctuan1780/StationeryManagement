@@ -1,0 +1,46 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.UploadViewModel
+@{
+    ViewData["Title"] = "Quản lý hướng dẫn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xl-3">
+            <p class="btn btn-success">Hướng dẫn mua hàng</p>
+            <br />
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success">@ViewBag.Message</div>
+            }
+            <img src="~/images/guide/Guide-buy-product.gif" width="200" height="250" alt="Hướng dẫn mua hàng" />
+            <form asp-action="UploadGuideBuyProduct" asp-controller="Guide" asp-area="Admin" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label for="show">Chọn tài liệu</label>
+                    <input class="form-control-file" type="file" asp-for="File" accept="application/pdf" />
+                    <span class="text-danger" asp-validation-for="File"></span>
+                </div>
+                <input type="submit" name="name" value="Cập nhật tài liệu" class="btn btn-danger" />
+            </form>
+        </div>
+        <div class="col-xl-3">
+            <p class="btn btn-success">Hướng dẫn thanh toán</p>
+            <br />
+            @if (ViewBag.MessageAddPayment != null)
+            {
+                <div class="alert alert-success">@ViewBag.MessageAddPayment</div>
+            }
+            <img src="~/images/guide/Guide-payment.gif" width="200" height="250" alt="Phương thức thanh toán" />
+            <form asp-action="UploadGuidePayment" asp-controller="Guide" asp-area="Admin" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label for="show">Chọn tài liệu</label>
+                    <input class="form-control-file" type="file" asp-for="File" accept="application/pdf" />
+                    <span class="text-danger" asp-validation-for="File"></span>
+                </div>
+                <input type="submit" name="name" value="Cập nhật tài liệu" class="btn btn-danger" />
+            </form>
+        </div>
+    </div>
+</div>

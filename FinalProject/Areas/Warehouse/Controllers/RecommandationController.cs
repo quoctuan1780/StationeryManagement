@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using static Common.Constant;
+using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -7,14 +8,13 @@ using Newtonsoft.Json.Linq;
 using Services.Hubs;
 using Services.Interfacies;
 using System;
-using static Common.Constant;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
-    [Area("Warehouse")]
+    [Area(AREA_WAREHOUSE)]
     public class RecommandationController : Controller
     {
         private readonly IHubContext<SignalServer> _hubContext;
