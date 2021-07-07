@@ -95,13 +95,30 @@ namespace FinalProject.Areas.Admin.Controllers
         
         public async Task<IActionResult> ApproveReceipt(int id)
         {
-            if (await _receiptService.ApproveReceiptRequestAsync(id) > 0)
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
             {
-                await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
-                await _receiptService.AddReceiptAsync(id);
-                ViewBag.Message = "Đã duyệt!";
-            }
+                var result = await _receiptService.ApproveReceiptRequestAsync(id);
+                if (result > 0)
+                {
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
+                    result = await _receiptService.AddReceiptAsync(id);
+                    if(result > 0)
+                    {
+                        transaction.Complete();
+
+                        ViewBag.Message = "Đã duyệt!";
+
+                        return Redirect("/Admin/Warehouse/ListReceiptRequest");
+                    }
+                }
                 
+            }
+            catch
+            {
+
+            }
+
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
       
@@ -162,7 +179,11 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
             return View();
         }
-
+        public async Task<IActionResult> ViewRequestReceipt(int id)
+        {
+            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id);
+            return View();
+        }
         [HttpPost]
         public IActionResult CreateReceipt(ReceiptViewModel model)
         {

@@ -33,6 +33,12 @@ namespace FinalProject.Areas.Warehouse.Controllers
             _productService = productService;
             _orderService = orderService;
         }
+
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
+
         [HttpGet]
         public async Task<IActionResult> CreateReceiptRequest()
         {
@@ -47,8 +53,28 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     Text = product.Product.ProductName + product.Color
                 }) ;
             }
+
             ViewBag.Products = listProduct;
 
+            return View();
+        }
+
+        public async Task<IActionResult> UpdateReceipt(int id)
+        {
+            ViewBag.Receipt = await _receiptService.GetReceiptAsync(id);
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateReceipt(int id, List<int> AddQuantity)
+        {
+            ViewBag.Receipt = await _receiptService.GetReceiptAfterUpdate(id, AddQuantity);
+            return View();
+        }
+
+        public async Task<IActionResult> ListReceipt()
+        {
+            ViewBag.Receipts = await _receiptService.GetReceiptsAsync();
             return View();
         }
 
@@ -114,6 +140,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View(model);
 
         }
+
+        #region Hub service
         public async Task<IActionResult> GetAcceptedRequest()
         {
             return Ok(await _receiptService.CountAcceptedRequestReceiptAsync());
@@ -121,7 +149,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<IActionResult> GetAcceptedOrsers()
         {
             return Ok(await _orderService.CountNewAcceptedOrdersAsync());
-        }      
+        }
         public async Task<IActionResult> GetChartSales()
         {
             return Ok(await _orderService.GetTotalSalesPerMonthsAsync());
@@ -160,9 +188,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
         {
             return Ok(await _orderService.ListPercentDeliveryAsync());
         }
-        public IActionResult Dashboard()
-        {
-            return View();
-        }
+        #endregion
     }
 }

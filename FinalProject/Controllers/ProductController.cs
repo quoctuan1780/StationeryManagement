@@ -36,7 +36,6 @@ namespace FinalProject.Controllers
        
             List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
             ViewBag.Suggest = await _recommendationService.GetSuggestedProduct(listProductDetailId);
-            
 
             return View();
         }

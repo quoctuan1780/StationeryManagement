@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using static Common.Constant;
 
 namespace Services.Services 
@@ -734,7 +735,7 @@ namespace Services.Services
         {
             var result = _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER));
 
-            if(customer != "null" && customer != EMPTY)
+            if (customer != "null" && customer != EMPTY)
             {
                 result = result.Where(x => x.User.Id.Equals(customer));
             }
@@ -745,6 +746,45 @@ namespace Services.Services
             }
 
             return result;
+        }
+        public async Task<int> PrepareOrder(int OrderId, int ProductDetailId)
+        {
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var orderDetail = await _context.OrderDetails.Where(x => x.ProductDetailId == ProductDetailId)
+                    .Where(x=> x.OrderId == OrderId)
+                    .FirstOrDefaultAsync();
+                var productDetail = await _context.ProductDetails.Where(x => x.ProductDetailId == ProductDetailId).FirstOrDefaultAsync();                                         
+                if(productDetail.RemainingQuantity < orderDetail.Quantity )
+                {
+                    return 0;
+                }
+                else
+                {
+                    productDetail.QuantityOrdered += orderDetail.Quantity;
+                    productDetail.RemainingQuantity -= orderDetail.Quantity;
+                    orderDetail.Status = STATUS_WAITING_PICK_GOODS;
+                    _context.Update(productDetail);
+                        
+                }
+                if(await _context.SaveChangesAsync() > 0)
+                {
+                    transaction.Complete();
+                }
+            }
+            return 1;
+        }
+
+        public async Task<int> RejectOrder(int id)
+        {
+            var order = await _context.Orders.Include(x => x.OrderDetails).Where(x =>x.OrderId == id).FirstOrDefaultAsync();
+            order.Status = STATUS_CANCELED;
+            foreach(var item in order.OrderDetails)
+            {
+                item.Status = STATUS_CANCELED;
+            }
+            _context.Orders.Update(order);
+            return await _context.SaveChangesAsync();
         }
 
         //public async Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId)

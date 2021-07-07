@@ -36,6 +36,7 @@ namespace Services.Services
                     .Include(x => x.Order)
                     .Where(x => x.Order.OrderDate >= fromDate)
                     .Where(x => x.Order.OrderDate <= toDate)
+                    //.Where(x => x.IsDeleted == false)
                     .GroupBy(x => x.ProductDetailId)
                     .OrderByDescending(x => x.Key)
                     .Take(quantity)

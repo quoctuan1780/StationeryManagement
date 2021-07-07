@@ -43,6 +43,14 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
+        public async Task<int> PrepareOrder(int OrderId, int ProductId)
+        {
+            return await _orderService.PrepareOrder(OrderId,ProductId);
+        }
+        public async Task<int> RejectOrder(int id)
+        {
+            return await _orderService.RejectOrder(id);
+        }
         public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY, string orderDate = EMPTY)
         {
             ViewBag.Customers = await _accountService.GetAllCustomersAsync();

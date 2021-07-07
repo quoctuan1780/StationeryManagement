@@ -17,5 +17,6 @@ namespace Entities.Models
         public decimal SalePrice { get; set; }
 
         public decimal Price { get; set; }
+        public string Status { get; set; }
     }
 }

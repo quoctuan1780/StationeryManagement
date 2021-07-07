@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    var requests = ViewBag.ListRequests as IList<Entities.Models.ReceiptRequest>;
+    var requests = ViewBag.ListReceipts as IList<Entities.Models.ReceiptRequest>;
 }
 
 <div class="container-fluid">
@@ -23,28 +23,43 @@
                             <th>Ngày tạo</th>
                             <th>Tổng số sản phẩm</th>
                             <th>Trạng thái</th>
+                            <th>Chức năng </th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in requests)
+                        @if (requests != null)
                         {
-                            <tr>
-                                <td>@item.ReceiptRequestId</td>
-                                <td class="category-name">@item.UserId</td>
-                                <td class="category-name">@item.CreateDate</td>
-                                <td class="status">@item.Status</td>
-                                <td>
+                            @foreach (var item in requests)
+                            {
+                        <tr>
+                            <td>@item.ReceiptRequestId</td>
+                            @if (item.UserId != null)
+                            {
+                                <td class="category-name">@item.User.FullName</td>
+                            }
+                    else
+                    {
+                        <td></td>
+                    }
 
-                                    <a onclick="ViewReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
-                                    @if (item.Status == RECEIPT_STATUS_WAITING)
-                                    {
-                                        <a onclick="RejectReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Từ chối</a>
-                                        <a onclick="Receipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Duyệt</a>
-                                    }
+                            <td class="category-name">@item.CreateDate</td>
+                            <td>@item.ReceiptRequestDetails.Count</td>
+                            <td class="status">@item.Status</td>
+                            <td>
 
-                                </td>
-                            </tr>
+                                <a asp-action="ViewRequestReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId"
+                                   style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
+                                @if (item.Status == RECEIPT_STATUS_WAITING || item.Status == "Chờ xác nhận")
+                                {
+                                    <a asp-action="RejectReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId" style="cursor: pointer; color: #4e73df">Từ chối</a>
+                                    <a asp-action="ApproveReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId" style="cursor: pointer; color: #4e73df">Duyệt</a>
+                                }
+
+                            </td>
+                        </tr>
+                            }
                         }
+
                     </tbody>
                 </table>
             </div>

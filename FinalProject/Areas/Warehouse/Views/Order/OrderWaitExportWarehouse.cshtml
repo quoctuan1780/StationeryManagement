@@ -135,11 +135,15 @@
                                             <td class="alert alert-success">@item.Status</td>
                                             break;
                                     }
-                                    <td>
-                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Warehouse" asp-route-orderId="@item.OrderId">
-                                            Xem
-                                        </a>
-                                    </td>
+                                <td>
+                                    <a asp-action="OrderDetail" asp-controller="Order" asp-area="Warehouse" asp-route-orderId="@item.OrderId">
+                                        Xem
+                                    </a>
+                                    
+                                    @*<a asp-action="RejectOrder" asp-controller="Order" asp-area="Warehouse" asp-route-id="@item.OrderId">
+                                        Từ chối
+                                    </a>*@
+                                </td>
                                 </tr>
                             }
                         }

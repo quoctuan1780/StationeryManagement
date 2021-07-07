@@ -10,11 +10,11 @@ namespace FinalProject.Controllers
         private readonly ISaleService _saleService;
         public IRecommendationService _recommandationService;
 
-        public HomeController(IProductService productService, ISaleService saleService, IRecommendationService recommendationService)
+        public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService)
         {
             _productService = productService;
-            _saleService = saleService;
             _recommandationService = recommendationService;
+            _saleService = saleService;
         }
 
         public async Task<IActionResult> Index()
