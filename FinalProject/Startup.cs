@@ -39,7 +39,7 @@ namespace FinalProject
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<ShopDbContext>(options =>
+            services.AddDbContextPool<ShopDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString(Constant.CONNECTION_STRING)));
 
             services.AddIdentity<User, IdentityRole>(options =>
@@ -70,7 +70,6 @@ namespace FinalProject
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<ISearchItemService, SearchItemService>();
             services.AddScoped<IRecommendationService, RecommandationService>();
-            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();

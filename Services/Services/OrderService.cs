@@ -94,6 +94,8 @@ namespace Services.Services
                 .ThenInclude(x => x.ProductDetail)
                 .ThenInclude(x => x.Product)
                 .ThenInclude(x => x.ProductImages.Where(x => x.IsDeleted == false))
+                .Include(x => x.MoMoPayment)
+                .Include(x => x.PayPalPayment)
                 .FirstOrDefaultAsync();
         }
 
@@ -104,7 +106,9 @@ namespace Services.Services
 
         public async Task<IList<Order>> GetOrdersByUserIdAsync(string userId)
         {
-            return await _context.Orders.Where(x => x.UserId == userId).ToListAsync();
+            return await _context.Orders
+                .Include(x => x.MoMoPayment)
+                .Include(x => x.PayPalPayment).Where(x => x.UserId == userId).ToListAsync();
         }
 
         public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId, string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
@@ -448,8 +452,8 @@ namespace Services.Services
         public async Task<string> GetTotalPurchasePerMonthsAsync()
         {
             var orders = from o in _context.ImportWarehouses
-                         where o.ImportDate.Year == DateTime.Now.Year
-                         group o by o.ImportDate.Month
+                         where o.CreateDate.Year == DateTime.Now.Year
+                         group o by o.CreateDate.Month
                          into g
                          select new
                          {
@@ -717,6 +721,30 @@ namespace Services.Services
                          select g.Key;
 
             return await result.ToListAsync();
+        }
+
+        public async Task<int> UpdateOrderAsync(Order order)
+        {
+            _context.Orders.Update(order);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public IEnumerable<Order> FilterOrder(string customer = EMPTY, string paymentMethod = EMPTY)
+        {
+            var result = _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER));
+
+            if(customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.User.Id.Equals(customer));
+            }
+
+            if (paymentMethod != "null" && paymentMethod != EMPTY)
+            {
+                result = result.Where(x => x.PaymentMethod.Equals(paymentMethod));
+            }
+
+            return result;
         }
 
         //public async Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId)

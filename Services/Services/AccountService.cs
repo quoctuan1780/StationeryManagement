@@ -237,7 +237,7 @@ namespace Services.Services
 
         public async Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass)
         {
-            return await _userManager.ChangePasswordAsync(user, currentPass,newPass);
+            return await _userManager.ChangePasswordAsync(user, currentPass, newPass);
         }
 
         public async Task<int> UpdateInformationEmployeeAsync(User user)

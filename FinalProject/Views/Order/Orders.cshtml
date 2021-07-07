@@ -1,9 +1,20 @@
-﻿
+﻿@inject Services.Interfacies.IAccountService _accountService
+@using static Common.Constant
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@model PagedList<Entities.Models.Order>
 @{
     ViewData["Title"] = "Thông tin tất cả đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var orders = ViewBag.Orders as IList<Entities.Models.Order>;
+
+    Entities.Models.User user = null;
+
+    if (User.IsInRole("Customer")) 
+    {
+        user = await _accountService.GetUserAsync(User);
+    }
 }
 
 <div id="box-content">
@@ -11,7 +22,7 @@
         <div class="container">
             <div class="row">
                 <div class="">
-                    <h1>Thông tin giỏ hàng</h1>
+                    <h1>Thông tin tất cả đơn hàng</h1>
                     <div class="table-wrap">
                         <table class="table table-striped">
                             <thead>
@@ -24,44 +35,105 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in orders)
+                                @foreach (var item in Model)
                                 {
-                                <tr>
-                                    <td>@item.OrderId</td>
+                                    <tr>
+                                        <td>@item.OrderId</td>
 
-                                    <td>@item.OrderDate</td>
-                                    <td>
-                                        @item.Address
-                                    </td>
-                                    <td>@item.PaymentMethod</td>
-                                    <td>
-                                        <a class="btn btn-danger" asp-action="OrderInfo" asp-controller="Order" asp-route-orderId="@item.OrderId"> Xem đơn hàng </a>
-                                        <button class="btn btn-danger" type="button"> Hủy đơn hàng </button>
-                                    </td>
-                                </tr>
+                                        <td>@item.OrderDate</td>
+                                        <td>
+                                            @item.Address
+                                        </td>
+                                        <td>@item.PaymentMethod</td>
+                                        <td>
+                                            <div style="display: flex;">
+                                                <a class="btn btn-danger" asp-action="OrderInfo" asp-controller="Order" asp-route-orderId="@item.OrderId"> Xem đơn hàng </a>
+                                                @if (!item.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER) && !item.Status.Equals(STATUS_CANCELED))
+                                                {
+                                                    if (item.Status.Equals(STATUS_WAITING_CONFIRM))
+                                                    {
+                                                        <button class="btn btn-danger px-2" type="button" onclick="rejectOrder(this, @item.OrderId)"> Hủy đơn hàng </button>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
                                 }
                             </tbody>
                         </table>
+                        <div style="text-align: center">
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Orders", new { userId = user.Id, page }),
+                                new X.PagedList.Web.Common.PagedListRenderOptions
+                                {
+                                    DisplayItemSliceAndTotal = false,
+                                    ContainerDivClasses = new[] { "navigation" },
+                                    LiElementClasses = new[] { "page-item" },
+                                    PageClasses = new[] { "page-link" },
+                                })
+                        </div>
                     </div>
-                    @*<div class="col-lg-12">
-                        <div class="col-lg-6 text-left">
-                            <a asp-action="Index" asp-controller="Home" class="btn btn-warning">Tiếp tục mua sắm</a>
-                        </div>
-                        <div class="col-lg-6 text-right">
-                            <a asp-action="Order" asp-controller="Order" class="btn btn-success">Đặt hàng</a>
-                        </div>
-                    </div>*@
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts{ 
+@section Scripts{
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script type="text/javascript" src="~/js/loading/loading.js"></script>
     <script>
         $(document).ready(function () {
             $('#left-nav').remove();
             $('#banner').remove();
         });
+
+        function rejectOrder(e, orderId) {
+            if (orderId === '') {
+                showError('Không tồn tại đơn hàng này');
+            }
+            else {
+                Swal.fire({
+                    title: 'Nhập nội dung',
+                    html: '<textarea class="form-control" rows="5" id="category-input"></textarea>',
+                    showCancelButton: true,
+                    confirmButtonText: 'Hủy đơn hàng',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var content = $("#category-input").val();
+                        if (content === '' || content.trim() === '') {
+                            showError('Bạn chưa nhập lý do hủy hàng')
+                        }
+                        else
+                            var loading = verticalTextColor();
+                        $.ajax({
+                            url: '/Order/RejectOrder',
+                            async: true,
+                            method: 'PUT',
+                            data: { orderId: orderId, content: content },
+                            success: function (data) {
+                                loading.out();
+                                switch (data) {
+                                    case -4:
+                                        showError("Lỗi không tìm thấy đơn hàng này");
+                                        break;
+                                    case 1:
+                                        $(e).remove();
+                                        showSuccess('Hủy đơn hàng thành công');
+                                        break;
+                                    case -99:
+                                        showErrorSystem();
+                                        break;
+                                }
+                            },
+                            error: function (code, err) {
+                                loading.out();
+                                showErrorSystem();
+                            }
+                        });
+                    }
+                })
+            }
+        }
     </script>
 }

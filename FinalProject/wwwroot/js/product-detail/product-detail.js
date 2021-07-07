@@ -25,6 +25,8 @@ function setSizeQuantity(max, productId, color, origin) {
         "min": 1
     });
 
+    $("#Quantity").val(1);
+
     productIdOrder = productId;
 
     $('#detail-quantity').text(max + " sản phẩm sẵn có");
@@ -86,6 +88,7 @@ function submit(price, image, productName, isLogin) {
                         switch (data) {
                             case "Miss":
                                 alert("Hệ thống xảy ra lỗi, vui lòng thử lại sau");
+                                loading.out();
                                 break;
                             case "Updated":
                                 $.ajax({
@@ -121,6 +124,11 @@ function submit(price, image, productName, isLogin) {
                                     data: {},
                                     success: function (data) {
                                         $("#total-price").text(data + " VNĐ");
+                                    },
+                                    error: function (code, err) {
+                                        console.error(err);
+                                        loading.out();
+                                        showErrorSystem();
                                     }
                                 });
                                 var cartItem = JSON.parse(data);
@@ -150,6 +158,11 @@ function submit(price, image, productName, isLogin) {
                                 $("#total-item").text($("#cart-sidebar").children().length + " items");
                                 break;
                         }
+                    }
+                    , error: function (code, err) {
+                        showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+                        loading.out();
+                        console.error(err);
                     }
                 });
             }

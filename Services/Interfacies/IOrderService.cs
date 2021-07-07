@@ -10,6 +10,7 @@ namespace Services.Interfacies
     public interface IOrderService
     {
         Task<Order> AddOrderAsync(Order order);
+        Task<int> UpdateOrderAsync(Order order);
         Task<string> ListPercentDeliveryAsync(); 
         Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress);
         Task<Order> GetOrderByIdAsync(int orderId);
@@ -42,6 +43,7 @@ namespace Services.Interfacies
         IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate, string userId = EMPTY);
         IList<OrderHelper.OrderJoinHelper> FilterOrder(string exportWarehouseDate, string receivedDeliveryDate, string warehouse, string shipper, string userId = EMPTY, string customer = EMPTY);
         IList<OrderHelper.OrderJoinHelper> FilterOrder(string exportWarehouseDate, string warehouse, string customer);
+        IEnumerable<Order> FilterOrder(string customer = EMPTY, string paymentMethod = EMPTY);
 
         //Task<int> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId);
     }

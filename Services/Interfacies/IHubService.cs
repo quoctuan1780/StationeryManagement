@@ -4,6 +4,7 @@ namespace Services.Interfacies
 {
     public interface IHubService
     {
+        Task<int> GetOrderWaitToReject();
         Task<int> GetOrdersAsync();
         Task<int> GetWarehouseAsync();
         Task<string> GetAccountAsync();

@@ -21,6 +21,7 @@ namespace Entities.Models
         public string Address { get; set; }
         [StringLength(10)]
         public string PaymentMethod { get; set; }
+        public string Note { get; set; }
         public string UserId { get; set; }
         public virtual User User { get; set; }
         public string AdminId { get; set; }

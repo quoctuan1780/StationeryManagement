@@ -11,6 +11,7 @@ namespace Entities.Models
         public virtual Order Order { get; set; }
         public string Token { get; set; }
         public string  PayerId { get; set; }
+        public string  CaptureId { get; set; }
         public string LinkDetail { get; set; }
     }
 }

@@ -15,8 +15,6 @@ namespace Entities.Models
 
         public decimal Total { get; set; }
 
-        public decimal PurchaseTotal { get; set; }
-
         public decimal SaleTotal { get; set; }
 
         [StringLength(10)]

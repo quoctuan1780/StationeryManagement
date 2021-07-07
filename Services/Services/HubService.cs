@@ -179,5 +179,13 @@ namespace Services.Services
 
             return JsonConvert.SerializeObject(dataChart);
         }
+
+        public async Task<int> GetOrderWaitToReject()
+        {
+            var result = await _context.Orders
+                .Where(x => x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).ToListAsync();
+
+            return result.Count;
+        }
     }
 }

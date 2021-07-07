@@ -691,6 +691,34 @@ namespace FinalProject.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
+        public async Task<IActionResult> ChangePassword()
+        {
+            ViewBag.User = await _accountService.GetUserAsync(User);
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            var user = await _accountService.GetUserAsync(User);
+            ViewBag.User = user;
+            if (ModelState.IsValid)
+            {
+                var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
+                if (result.Succeeded)
+                {
+                    ViewBag.MessageSuccess = "Thay đổi mật khẩu thành công!";
+                    return View();
+                }
+                ViewBag.MessageDanger = "Thay đổi mật khẩu không thành công!";
+            }
+            return View();
+        }
+
         public IActionResult AccessDenied()
         {
             return View();

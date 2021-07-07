@@ -14,5 +14,6 @@
         public const string SIGNAL_COUNT_ORDER_WAIT_TO_DELIVERY = "orderWaitToDelivery";
         public const string SIGNAL_COUNT_ORDER_DELIVERING = "orderDelivering";
         public const string SIGNAL_COUNT_ORDER_DELIVERED = "orderDelivered";
+        public const string SIGNAL_COUNT_ORDER_WAIT_TO_REJECT = "newOrderWaitReject";
     }
 }

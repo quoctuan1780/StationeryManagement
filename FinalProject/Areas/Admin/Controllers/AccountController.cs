@@ -115,13 +115,16 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             var user = await _accountService.GetUserAsync(User);
-            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
-            if(result.Succeeded)
+            if (ModelState.IsValid)
             {
-                ViewBag.Success = "Thay đổi mật khẩu thành công!";
-                return View();
+                var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
+                if (result.Succeeded)
+                {
+                    ViewBag.Success = "Thay đổi mật khẩu thành công!";
+                    return View();
+                }
+                ViewBag.Failed = "Thay đổi mật khẩu không thành công!";
             }
-            ViewBag.Failed= "Thay đổi mật khẩu không thành công!";
             return View();
         }
 

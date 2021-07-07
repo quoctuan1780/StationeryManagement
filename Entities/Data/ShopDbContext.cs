@@ -6,10 +6,10 @@ namespace Entities.Data
 {
     public class ShopDbContext : IdentityDbContext<User>
     {
-        public ShopDbContext()
-        {
+        //public ShopDbContext()
+        //{
 
-        }
+        //}
 
         public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
         {
@@ -70,7 +70,6 @@ namespace Entities.Data
                 e.HasIndex(x => x.BillId);
 
                 e.Property(x => x.Total).HasPrecision(18, 2);
-                e.Property(x => x.PurchaseTotal).HasPrecision(18, 2);
                 e.Property(x => x.SaleTotal).HasPrecision(18, 2);
 
                 e.HasOne(x => x.User)
