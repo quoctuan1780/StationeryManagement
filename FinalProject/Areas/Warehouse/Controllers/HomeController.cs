@@ -18,7 +18,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
     [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class HomeController : Controller
     {
-        private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IAccountService _accountService;
         private readonly UserManager<User> _userManager;
@@ -26,9 +25,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly IOrderService _orderService;
 
         public HomeController(IProductService productService, IReceiptService receiptService,IAccountService accountService, 
-            UserManager<User> userManager, IOrderService orderService, IProviderService providerService)
+            UserManager<User> userManager, IOrderService orderService)
         {
-            _providerService = providerService;
             _receiptService = receiptService;
             _accountService = accountService;
             _userManager = userManager;
@@ -40,7 +38,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
         {
             var products = await _productService.GetProductWithDetailsAsync();
             var listProduct = new List<SelectListItem>();
-            var provider = await _providerService.GetProviders();
 
             foreach (var product in products)
             {
@@ -50,9 +47,26 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     Text = product.Product.ProductName + product.Color
                 }) ;
             }
-            ViewBag.Providers = provider;
+
             ViewBag.Products = listProduct;
 
+            return View();
+        }
+
+        public async Task<IActionResult> UpdateReceipt(int id)
+        {
+            ViewBag.Receipt = await _receiptService.GetReceiptAsync(id);
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateReceipt(int id, List<int> AddQuantity)
+        {
+            ViewBag.Receipt = await _receiptService.GetReceiptAfterUpdate(id, AddQuantity);
+            return View();
+        }
+        public async Task<IActionResult> ListReceipt()
+        {
+            ViewBag.Receipts = await _receiptService.GetReceiptsAsync();
             return View();
         }
 

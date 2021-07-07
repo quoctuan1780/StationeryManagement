@@ -19,6 +19,8 @@ namespace Services.Interfacies
         Task<IList<Order>> GetOrdersWaitExportWarehouseAsync(string customer = EMPTY, string orderDate = EMPTY);
         IList<OrderHelper.OrderJoinHelper> GetOrdersWaitDelivery(string userId = EMPTY);
         Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId, string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY);
+        Task<int> PrepareOrder(int orderId,int ProductDetailId);
+        Task<int> RejectOrder(int id);
         IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY);
         Task<IList<Order>> GetOrdersWaitToConfirmAsync(string orderDate, string paymentMethod, string customer);
         Task<IList<Order>> GetOrdersDeliveryAsync(string userId);

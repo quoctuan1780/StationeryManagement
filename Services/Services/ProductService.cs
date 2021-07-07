@@ -1,6 +1,5 @@
 ﻿using Entities.Data;
 using Entities.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.XPath;
 
 namespace Services.Services
 {
@@ -37,6 +35,7 @@ namespace Services.Services
                     .Include(x => x.Order)
                     .Where(x => x.Order.OrderDate >= fromDate)
                     .Where(x => x.Order.OrderDate <= toDate)
+                    //.Where(x => x.IsDeleted == false)
                     .GroupBy(x => x.ProductDetailId)
                     .OrderByDescending(x => x.Key)
                     .Take(quantity)

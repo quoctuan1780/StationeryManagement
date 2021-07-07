@@ -19,7 +19,6 @@ namespace FinalProject.Areas.Warehouse.Controllers
     {
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
-        private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
         private readonly UserManager<User> _userManager;
@@ -27,12 +26,11 @@ namespace FinalProject.Areas.Warehouse.Controllers
         static DateTime ToDate;
         static int Quantity;
 
-        public RecommandationController(IProductService productService, IProviderService providerService, IReceiptService receiptService,
+        public RecommandationController(IProductService productService, IReceiptService receiptService,
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, UserManager<User> userManager)
         {
             _hubContext = hubContext;
             _productService = productService;
-            _providerService = providerService;
             _receiptService = receiptService;
             _recommendationService = recommendationService;
             _userManager = userManager;

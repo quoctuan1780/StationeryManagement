@@ -3,8 +3,10 @@
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
 
     var ProductOutOfStock = ViewBag.ProductOutOfStock as IList<Entities.Models.ProductDetail>;
-    var BestSeller = ViewBag.BestSeller as IList<Entities.Models.ProductDetail>;
+    var BestSeller = ViewBag.BestSeller as string;
     var Recommandation = ViewBag.Recommandation as IList<Entities.Models.ProductDetail>;
+
+    var bestSellerConvert = Newtonsoft.Json.JsonConvert.DeserializeObject<IList<Newtonsoft.Json.Linq.JObject>>(BestSeller);
 }
 
 <div class="container-fluid">
@@ -49,20 +51,28 @@
                                     </tr>
                                 }
                             }
-                            @if (BestSeller is not null)
+                            @if (bestSellerConvert is not null)
                             {
-                                @foreach (var item in BestSeller)
+                                @foreach (var item in bestSellerConvert)
                                 {
-                                    <tr>
-                                        <td>@item.ProductDetailId</td>
-                                        <td>@item.Product.ProductName</td>
-                                        <td>@item.Color</td>
-                                        <td>@item.Quantity</td>
-
-                                        <td>@item.RemainingQuantity</td>
-                                        <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
-                                        <td><input type="checkbox" name="selected" value="@item.ProductDetailId" /></td>
-                                    </tr>
+                                    {
+                                        var productDetailId = item.Value<int>("productDetailId");
+                                        var productName = item.Value<string>("productName");
+                                        var color = item.Value<string>("color");
+                                        var totalQuantity = item.Value<int>("totalQuantity");
+                                        var quantityOrdered = item.Value<int>("quantityOrdered");
+                                        var RemainingQuantity = item.Value<int>("RemainingQuantity");
+                                    
+                                        <tr>
+                                            <td>@productDetailId</td>
+                                            <td>@productName</td>
+                                            <td>@color</td>
+                                            <td>@totalQuantity</td>
+                                            <td>@RemainingQuantity</td>
+                                            <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
+                                            <td><input type="checkbox" name="selected" value="@productDetailId" /></td>
+                                        </tr>
+                                    }
                                 }
                             }
                             @if (Recommandation is not null)
@@ -99,6 +109,7 @@
             var countErrorValidate = 0;
             var Quantities = document.getElementsByName('quantity');
             var Selected = document.getElementsByName('selected');
+            var count = Selected.length;
             $('.field-validation-valid').remove();
             for (var i = 0; i < Quantities.length; i++) {
                 if ((Quantities[i].value === '' || Quantities[i] === 0) && Selected[i].checked) {
@@ -108,16 +119,31 @@
                     countErrorValidate++;
                     $(node).parent().append(text);
                 }
+                if ((Quantities[i].value !== '' || Quantities[i] !== 0) && Selected[i].checked) {
+                    count--;
+                }
+                
             }
-            
-            if (countErrorValidate > 0 || Quantities.length === 0) {
-                Swal.fire({
-                    title: 'Thông báo',
-                    text: "Số lượng không được để trống! ",
-                    icon: 'info',
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: `Ok`,
-                });
+        
+            if (countErrorValidate > 0 || Quantities.length === count) {
+                if (Quantities.length === count) {
+                    Swal.fire({
+                        title: 'Thông báo',
+                        text: "Không có sản phẩm nào được chọn! ",
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: `Ok`,
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Thông báo',
+                        text: "Số lượng không được để trống! ",
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: `Ok`,
+                    });
+                }
+                
             } else {
                 $('#form').submit();
             }

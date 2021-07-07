@@ -38,11 +38,20 @@ namespace Services.Services
                     List<RecommendationDetail> listRecommandLine = new();
                     foreach (var item in rules)
                     {
+                        string x = "",y = "";
+                        foreach(var i in item.X)
+                        {
+                            x += i+ " ";
+                        }
+                        foreach(var i in item.Y)
+                        {
+                            y += i + " ";
+                        }
                         var recommandline = new RecommendationDetail()
                         {
                             RecommendationId = ReccomdHeader.RecommendtionId,
-                            Input = item.X.ToString(),
-                            Output = item.Y.ToString()
+                            Input = x,
+                            Output = y
 
                         };
                         listRecommandLine.Add(recommandline);

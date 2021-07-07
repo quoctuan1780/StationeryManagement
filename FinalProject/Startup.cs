@@ -54,7 +54,6 @@ namespace FinalProject
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddSingleton(Configuration);
-            services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IReceiptService, ReceiptService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPayPalService, PayPalService>();

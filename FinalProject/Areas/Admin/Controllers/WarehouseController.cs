@@ -24,19 +24,17 @@ namespace FinalProject.Areas.Admin.Controllers
     {
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
-        private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
         DateTime FromDate;
         DateTime ToDate;
         int Quantity;
 
-        public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
+        public WarehouseController(IProductService productService, IReceiptService receiptService, 
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
         {
             _hubContext = hubContext;
             _productService = productService;
-            _providerService = providerService;
             _receiptService = receiptService;
             _recommendationService = recommendationService;
         }
@@ -97,13 +95,30 @@ namespace FinalProject.Areas.Admin.Controllers
         
         public async Task<IActionResult> ApproveReceipt(int id)
         {
-            if (await _receiptService.ApproveReceiptRequestAsync(id) > 0)
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
             {
-                await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
-                await _receiptService.AddReceiptAsync(id);
-                ViewBag.Message = "Đã duyệt!";
-            }
+                var result = await _receiptService.ApproveReceiptRequestAsync(id);
+                if (result > 0)
+                {
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
+                    result = await _receiptService.AddReceiptAsync(id);
+                    if(result > 0)
+                    {
+                        transaction.Complete();
+
+                        ViewBag.Message = "Đã duyệt!";
+
+                        return Redirect("/Admin/Warehouse/ListReceiptRequest");
+                    }
+                }
                 
+            }
+            catch
+            {
+
+            }
+
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
       
@@ -164,7 +179,11 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
             return View();
         }
-
+        public async Task<IActionResult> ViewRequestReceipt(int id)
+        {
+            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id);
+            return View();
+        }
         [HttpPost]
         public IActionResult CreateReceipt(ReceiptViewModel model)
         {
@@ -203,11 +222,6 @@ namespace FinalProject.Areas.Admin.Controllers
 
             }
             return View(model);
-        }
-        [HttpGet]
-        public JsonResult GetProvider(int productId)
-        {
-            return Json(_providerService.GetProvidersByProduct(productId));
         }
     }
 }

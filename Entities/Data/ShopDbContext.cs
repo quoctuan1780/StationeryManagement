@@ -20,7 +20,6 @@ namespace Entities.Data
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<Provider> Providers { get; set; }
         public virtual DbSet<Sale> Sales { get; set; }
         public virtual DbSet<SaleDetail> SaleProducts { get; set; }
         public virtual DbSet<Bill> Bills { get; set; }
@@ -251,13 +250,6 @@ namespace Entities.Data
                 .HasForeignKey(x => x.ProductId);
             });
 
-            //Entity Provider
-            modelBuilder.Entity<Provider>(e =>
-            {
-                e.HasKey(x => x.ProviderId);
-                e.HasIndex(x => x.ProviderId);
-            });
-
             //Entity ImportWarehouse
             modelBuilder.Entity<ImportWarehouse>(e =>
             {
@@ -274,19 +266,14 @@ namespace Entities.Data
             //Entity ImportWarehouseDetail
             modelBuilder.Entity<ImportWarehouseDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId, x.ProviderId });
+                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId});
 
                 e.HasIndex(x => x.ProductDetailId);
-                e.HasIndex(x => x.ProviderId);
                 e.HasIndex(x => x.ImportWarehouseId);
 
                 e.HasOne(d => d.ProductDetail)
                 .WithMany(p => p.ImportWarehouseDetails)
                 .HasForeignKey(d => d.ProductDetailId);
-
-                e.HasOne(d => d.Provider)
-                .WithMany(p => p.ImportWarehouseDetails)
-                .HasForeignKey(d => d.ProviderId);
 
                 e.HasOne(d => d.ImportWarehouse)
                 .WithMany(p => p.ImportWarehouseDetails)
