@@ -47,7 +47,7 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-           var result = await _recommendationService.GetRecommandtion(4,0.81,listId);
+           var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -70,7 +70,6 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
-            var BestSeller = JsonConvert.DeserializeObject ( await _productService.BestSellerInMonthAsync(fromDate, toDate, quantity));
             FromDate = fromDate;
             ToDate = toDate;
             Quantity = quantity;
@@ -88,7 +87,7 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<IActionResult> RejectReceipt(int id)
         {
             if (await _receiptService.RejectReceiptRequestAsync(id) > 0)
-                ViewBag.Message = "Xóa thành công!";
+                ViewBag.Message = "Từ chối thành công!";
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
 

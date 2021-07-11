@@ -43,6 +43,11 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
+        //public async Task<IActionResult> PrintExportWarehouse(int id)
+        //{
+
+        //}
+
         public async Task<int> PrepareOrder(int OrderId, int ProductId)
         {
             return await _orderService.PrepareOrder(OrderId,ProductId);

@@ -180,8 +180,10 @@ namespace Services.Services
 
         public async Task<int> RejectReceiptRequestAsync(int id)
         {
-            var result = await _context.ImportWarehouses.Where(x => x.Status == RECEIPT_STATUS_PROCESSING).ToListAsync();
-            return result.Count();
+            var rr = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
+            rr.Status = RECEIPT_REQUEST_REJECT;
+            _context.Update(rr);
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<ImportWarehouse> GetReceiptAsync(int id)

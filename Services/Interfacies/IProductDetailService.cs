@@ -15,5 +15,6 @@ namespace Services.Interfacies
         Task<int> DeleteProductsDetailAsync(IList<string> productsDetailId, int productId);
 
         Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId);
+        Task<List<ProductDetail>> GetColorReportAsync(List<int> listId);
     }
 }

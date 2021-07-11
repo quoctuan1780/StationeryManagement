@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{06848640-BFD2-49E2-9842-3FE65F9C614B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp1", "WindowsFormsApp1\WindowsFormsApp1.csproj", "{EEB59BB2-FB45-4604-82B7-D7399AB73241}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{06848640-BFD2-49E2-9842-3FE65F9C614B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06848640-BFD2-49E2-9842-3FE65F9C614B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06848640-BFD2-49E2-9842-3FE65F9C614B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEB59BB2-FB45-4604-82B7-D7399AB73241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB59BB2-FB45-4604-82B7-D7399AB73241}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB59BB2-FB45-4604-82B7-D7399AB73241}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB59BB2-FB45-4604-82B7-D7399AB73241}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

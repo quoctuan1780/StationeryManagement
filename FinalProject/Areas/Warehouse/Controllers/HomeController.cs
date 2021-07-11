@@ -1,6 +1,8 @@
-﻿using Entities.Models;
+﻿using AspNetCore.Reporting;
+using Entities.Models;
 using FinalProject.Areas.Warehouse.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -23,15 +25,19 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IProductDetailService _productDetailService;
 
         public HomeController(IProductService productService, IReceiptService receiptService,IAccountService accountService, 
-            UserManager<User> userManager, IOrderService orderService)
+            UserManager<User> userManager, IOrderService orderService, IWebHostEnvironment webHostEnvironment,IProductDetailService productDetailService)
         {
             _receiptService = receiptService;
             _accountService = accountService;
             _userManager = userManager;
             _productService = productService;
             _orderService = orderService;
+            _webHostEnvironment = webHostEnvironment;
+            _productDetailService = productDetailService;
         }
         [HttpGet]
         public async Task<IActionResult> CreateReceiptRequest()
@@ -68,6 +74,26 @@ namespace FinalProject.Areas.Warehouse.Controllers
         {
             ViewBag.Receipts = await _receiptService.GetReceiptsAsync();
             return View();
+        }
+        public async Task<IActionResult> PrintReceipt(int id)
+        {
+            string mintype = "";
+            int extension = 1;
+            var path = $"{this._webHostEnvironment.WebRootPath}\\Report\\Report2.rdlc";
+            var Receipt = await _receiptService.GetReceiptAsync(id);
+            List<int> listIdProduct = new List<int>();
+            foreach(var item in Receipt.ImportWarehouseDetails)
+            {
+                listIdProduct.Add(item.ProductDetailId);
+            }
+            var products = _productService.GetProductForReportExportAsync(listIdProduct);
+            var details = _productDetailService.GetColorReportAsync(listIdProduct);
+            LocalReport localReport = new LocalReport(path);
+            localReport.AddDataSource("DataSet1",details);
+            localReport.AddDataSource("DataSet2", Receipt);
+            localReport.AddDataSource("DataSet3", products);
+            var result = localReport.Execute(RenderType.Pdf, extension, null,mintype);
+            return File(result.MainStream, "application/pdf");
         }
 
         public async Task<IActionResult> ViewListRequestReceipt()

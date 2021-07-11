@@ -48,7 +48,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            var result = await _recommendationService.GetRecommandtion(4, 0.81,listId);
+            var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             foreach (var item in result)
@@ -83,7 +83,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
             ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
             ViewBag.BestSeller = await _productService.BestSellerInMonthAsync(FromDate, ToDate, Quantity);
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(4, 0.81,listId);
+            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(listId);
            
             
             return View();

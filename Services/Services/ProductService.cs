@@ -158,6 +158,20 @@ namespace Services.Services
             return result;
         }
 
+        public async Task<List<Product>> GetProductForReportExportAsync(List<int> listid)
+        {
+            var listProductDetails = await _context.ProductDetails.ToListAsync();
+            var listProducts = await _context.Products.ToListAsync();
+            var listProduct = new List<Product>();
+            foreach(var item in listid)
+            {
+                var detail = listProductDetails.Where(x => x.ProductDetailId == item).FirstOrDefault();
+                var product = listProducts.Where(x => x.ProductId == detail.ProductId).FirstOrDefault();
+                listProduct.Add(product);
+            }
+            return listProduct;
+        }
+
         public async Task<IList<Product>> GetProductsCanApplySaleAsync()
         {
             var productIdInSale = _context.SaleProducts.Where(x => x.IsDeleted == false && x.SaleEndDate.Date >= DateTime.Now.Date).Select(x => x.ProductId);
