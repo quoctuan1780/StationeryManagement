@@ -3,14 +3,13 @@
 @{
     ViewData["Title"] = "Tạo phiếu yêu cầu nhập kho";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
-    var products = ViewBag.Products as IList<SelectListItem>;
-    var productJson = Newtonsoft.Json.JsonConvert.SerializeObject(products);
+    var products = ViewBag.Products as IList<Entities.Models.ProductDetail>;
     var user = await userManager.GetUserAsync(User);
 }
     
 <div class="container-fluid">
 
-    <h1 align="center">PHIẾU YÊU CẦU NHẬP KHO</h1>
+    <h1 align="center">Phiếu yêu cầu nhập kho</h1>
 
 
     @if (!(ViewBag.MessageSuccess is null))
@@ -26,126 +25,77 @@
         <div class="alert alert-danger">@ViewBag.MessageError</div>
     }
 
-
-    @using (Html.BeginForm("CreateReceiptRequest", "Home", FormMethod.Post, new { role = "form", area = "Warehouse", id = "form-receipt-request" }))
-    {
+    <form asp-action="CreateReceiptRequest" asp-controller="Home" asp-area="Warehouse" role="form" method="post" id="form-receipt-request">
         @Html.AntiForgeryToken()
 
-
         <div class="form-group">
-            @Html.LabelFor(m => m.CreateDate)
-            <input type="datetime" class="form-control" name="CreateDate" value="@DateTime.Now" readonly />
-            @Html.ValidationMessageFor(m => m.CreateDate, "", new { @class = "text-danger" })
+            <label asp-for="CreateDate"></label>
+            <input type="hidden" asp-for="UserId" value="@user.Id" />
+            <input type="text" class="form-control" value="@user.FullName" readonly />
+            <span asp-validation-for="CreateDate" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(m => m.Status)
+            <label asp-for="CreateDate"></label>
+            <input type="hidden" asp-for="CreateDate" value="@DateTime.Now" />
+            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+            <span asp-validation-for="CreateDate" class="text-danger"></span>
+        </div>
 
-            <input type="text" class="form-control" name="Status" value="Chờ duyệt" readonly />
-            @Html.ValidationMessageFor(m => m.CreateDate, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label asp-for="Status"></label>
+            <input type="hidden" asp-for="Status" value="Chờ xác nhận" />
+            <input type="text" class="form-control" value="Chờ xác nhận" readonly />
+            <span asp-validation-for="Status" class="text-danger"></span>
         </div>
 
         <h3>Chi tiết sản phẩm</h3>
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Tên sản phẩm</th>
+                    <th>Màu sắc</th>
+                    <th>Số lượng trong kho</th>
+                    <th>Số lượng đặt thêm</th>
+                    <th>Chọn</th>
 
-        @if (!(Model is null) && Model.Quantity.Count > 0)
-        {
-            <div class="form-group" id="product-detail">
-                @for (int i = 0; i < Model.Quantity.Count; i++)
+                </tr>
+            </thead>
+            <tbody>
+                @if (products != null)
                 {
-                    <div class="row">
-                        <div class="col-4">
-                            <select class="selectpicker show-tick form-control" id="Id"
-                                    data-live-search="true" onchange="GetSize()">
-                                <option value="0">Chọn sản phẩm</option>
-                                @if (!(products is null))
+                    @foreach (var item in products)
+                    {
+                        <tr>
+                            <td>@item.Product.ProductName</td>
+                            <td>@item.Color</td>
+                            <td>@item.Quantity</td>
+                            <td>
+                                <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
+                            </td>
+                            <td>
+                                @if (Model != null && Model.ProductDetailId != null && Model.ProductDetailId.Any())
                                 {
-                                    foreach (var item in products)
+                                    if (Model.ProductDetailId.Contains(item.ProductDetailId))
                                     {
-                                        if (item.Value.Equals(Model.ProductDetailId[i]))
-                                        {
-                                            <option value="@item.Value" selected>@item.Text </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@item.Value">@item.Text </option>
-                                        }
-
+                                        <input type="checkbox" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" />
                                     }
                                 }
-                            </select>
-                        </div>
-                        <div class="col-4">
-                            <select class="selectpicker show-tick form-control"
-                                    id="ProductDetailId" name="ProductDetailId" data-live-search="true" onchange="CheckProductId(this)">
-                                <option value="0">Chọn kích thước</option>
-                           
-                            </select>
-                        </div>
-                        <div class="col-2">
-                            <div class="row">
-                                @Html.LabelFor(m => m.Quantity)
-                                <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                }
-
-            </div>
-
-        }
-        else
-        {
-            <div class="form-group" id="product-detail">
-                <div class="row">
-                    <div class="col-4">
-                        <label>Chọn một sản phẩm</label>
-                        <select class="selectpicker show-tick form-control"
-                                id="Id" data-live-search="true" onchange="GetSize(this)">
-                            <option value="0">Chọn sản phẩm</option>
-                            @if (!(products is null))
-                            {
-                                foreach (var item in products)
+                                else
                                 {
-                                    <option value="@item.Value">@item.Text </option>
+                                    <input type="checkbox" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" />
                                 }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-4 choose-size">
-                        <label>Chọn một kích thước</label>
-                        <select class="selectpicker show-tick form-control"
-                                id="ProductDetailId" name="ProductDetailId" onchange="CheckProductId(this)">
-                            <option value="0">Chọn kích thước</option>
-
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <div class="row">
-                            @Html.LabelFor(m => m.Quantity)
-                            <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        }
-
-        <div class="form-group">
-            <div class="row">
-                <button type="button" class="btn btn-primary" style="margin-left: auto;" onclick="addDetail('@productJson')"><i class="fa fa-plus"></i></button>
-            </div>
-        </div>
-    }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </form>
     <div class="form-group">
         <input type="button" value="Thêm phiếu yêu cầu" class="btn btn-success" onclick="submit()" />
     </div>
@@ -153,14 +103,6 @@
 
 @section Scripts{
     <script>
-        var Products = document.getElementsByName('ProductDetailId');
-        var Quantities = document.getElementsByName('Quantity');
-
-
-        function removeDetail(e) {
-            $(e).parent().parent().remove();
-        }
-
         $(document).ready(function () {
             $('.selectpicker').selectpicker({
                 liveSearch: true,
@@ -169,157 +111,50 @@
             });
         });
 
-        function GetSize(e) {
-            var product = $(e).val();
-            var node = `
-                <label>Chọn một kích thước</label>
-                <select class="selectpicker show-tick form-control" name = "ProductDetailId" onchange = "CheckProductId(this)">
-                <option value="0">Chọn kích thước</option>`;
+        function submit() {
+            var countErrorValidate = validateDetail();
 
-            $.ajax({
-                url: '/Warehouse/Home/GetProductSize',
-                method: 'GET',
-                async: true,
-                data: { productdetail: product },
-                success: function (data) {
-                    json = JSON.parse(data);
-                    var select = $(e).closest(".row").children(".choose-size");
+            var rows = document.getElementsByName("ProductDetailId");
 
-                    select.children().remove();
+            var count = 0;
 
-                    $.each(json, function (k, v) {
-                        node += '<option value="' + v.Value + '">' + v.Text + '</option>';
-                    });
-                    node += '</select>';
-                    select.append(node);
-
-                    $('.selectpicker').selectpicker({
-                        liveSearch: true,
-                        showSubtext: true,
-                        Size: 10
-                    });
-                },
-                error: function (err) {
-                    console.log(err);
-                }
-            })
-        }
-        function CheckProductId(e) {
-            var product = $(e).val();
-            for (var i = 0; i < Products.length; i++)
-            {
-                if (product == Products[i]) {
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].checked === false) {
                     count++;
-                }
-                if (count == 2) {
-                    alert("Sản phẩm đã tồn tại trong danh sách phiếu yêu cầu nhập hàng");
-                    return 0;
                 }
             }
 
-            return 0;
-        }
-
-        function submit() {
-
-            var countErrorValidate = validateDetail();
-            var rows = document.getElementsByName("ProductDetailId");
-            console.log(rows);
-            if (rows.length === 0) {
+            if (rows.length === count) {
                 Swal.fire({
                     title: 'Thông báo',
-                    text: "Bạn phải có chi tiết phiếu yêu cầu! ",
-                    icon: 'info',
+                    text: "Bạn chưa chọn sản phẩm nào! ",
+                    icon: 'warning',
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: `Ok`,
                 });
             }
-            else
-                if (countErrorValidate === 0) {
-                    console.log(countErrorValidate);
+            else if (countErrorValidate === 0) {
                     $('#form-receipt-request').submit();
                 }
 
         }
 
-        function addDetail(productsJson) {
-            var products = JSON.parse(productsJson);
-            var node = `<div class="row">
-                    <div class="col-4">
-                        <label>Chọn một sản phẩm</label>
-                        <select class="selectpicker show-tick form-control"
-                                id="Id" data-live-search="true" onchange="GetSize(this)">
-                            <option value="0">Chọn sản phẩm</option>`;
-
-            for (let item of products) {
-                console.log(item)
-                node += '<option value="' + item.Value + '">' + item.Text + '</option>';
-            }
-
-            node += `</select>
-                    </div>
-                    <div class="col-4 choose-size">
-                        <label>Chọn một kích thước</label>
-                        <select class="selectpicker show-tick form-control"
-                                 name="ProductDetailId" onchange="CheckProductId(this)">
-                            <option value="0">Chọn kích thước</option>
-
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <div class="row">
-                            <label>Số lượng</label>
-                            <input type="number" class="form-control" id="Quantity" name="Quantity" value="1" min="1" onkeypress='return event.charCode > 46 && event.charCode < 58' />
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <button type="button" class="btn btn-danger" onclick="removeDetail(this)">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>`;
-
-            $('#product-detail').append(node);
-
-            $('.selectpicker').selectpicker({
-                liveSearch: true,
-                showSubtext: true,
-                Size: 10
-            });
-        }
-
         function validateDetail() {
+            var quantities = document.getElementsByName('quantity');
+            var selected = document.getElementsByName('ProductDetailId');
             var countErrorValidate = 0;
 
             $('.validate-product-detail').remove();
 
-            for (let i = 0; i < Products.length; i++) {
-                if (Products[i].value == '0') {
-                    var node = Products[i];
-                    var text = '<span class="field-validation-valid text-danger validate-product-detail">' +
-                        'Sản phẩm không được để trống</span>';
-                    countErrorValidate++;
-                    $(node).parent().append(text);
-                }
-                else {
-                    for (let j = 0; j < i; j++) {
-                        if (Products[i] == Products[j]) {
-                            var text = '<span class="field-validation-valid text-danger validate-product-detail">' +
-                                'Sản phẩm đã tồn tại trong danh sách</span>';
-                            countErrorValidate++;
-                            $(node).parent().append(text);
-
-                        }
+            for (let i = 0; i < quantities.length; i++) {
+                if (selected[i].checked === true) {
+                    if (quantities[i].value === '' || quantities[i].value === '0') {
+                        var node = quantities[i];
+                        var text = '<span class="field-validation-valid text-danger validate-product-detail">' +
+                            'Số lượng không hợp lệ</span>';
+                        countErrorValidate++;
+                        $(node).parent().append(text);
                     }
-                }
-                console.log(Products[i].value);
-                console.log(Quantities[i].value)
-                if (Quantities[i].value === '') {
-                    var node = Quantities[i];
-                    var text = '<span class="field-validation-valid text-danger validate-product-detail">' +
-                        'Số lượng không hợp lệ</span>';
-                    countErrorValidate++;
-                    $(node).parent().append(text);
                 }
 
             }

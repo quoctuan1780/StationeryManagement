@@ -3,14 +3,16 @@ using FinalProject.Areas.Warehouse.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Services.Hubs;
 using Services.Interfacies;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
@@ -23,39 +25,20 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
+        private readonly IHubContext<SignalServer> _hubContext;
 
-        public HomeController(IProductService productService, IReceiptService receiptService,IAccountService accountService, 
-            UserManager<User> userManager, IOrderService orderService)
+        public HomeController(IProductService productService, IReceiptService receiptService, IAccountService accountService, UserManager<User> userManager, IOrderService orderService, IHubContext<SignalServer> hubContext)
         {
             _receiptService = receiptService;
             _accountService = accountService;
             _userManager = userManager;
             _productService = productService;
             _orderService = orderService;
+            _hubContext = hubContext;
         }
 
         public IActionResult Dashboard()
         {
-            return View();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> CreateReceiptRequest()
-        {
-            var products = await _productService.GetProductWithDetailsAsync();
-            var listProduct = new List<SelectListItem>();
-
-            foreach (var product in products)
-            {
-                listProduct.Add(new SelectListItem
-                {
-                    Value = product.ProductDetailId.ToString(),
-                    Text = product.Product.ProductName + product.Color
-                }) ;
-            }
-
-            ViewBag.Products = listProduct;
-
             return View();
         }
 
@@ -85,35 +68,67 @@ namespace FinalProject.Areas.Warehouse.Controllers
         }
 
         [HttpDelete]
-        public async Task<int> DeleteRequest(int requestId)
+        public async Task<int> DeleteRequest(int? requestId)
         {
-            return await _receiptService.DeleteReceiptRequestAsync(requestId);
+            if(requestId is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            var result = await _receiptService.DeleteReceiptRequestAsync(requestId.Value);
+
+            if(result > 0)
+            {
+                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_RECEPT);
+
+                return CODE_SUCCESS;
+            }
+
+
+            return ERROR_CODE_SYSTEM;
         }
 
-        public async Task<IActionResult> ViewRequestReceipt(int id)
+        public async Task<IActionResult> ViewRequestReceipt(int? id)
         {
-            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id);
+            if(id is null)
+            {
+                return PartialView(ERROR_404_PAGE_ADMIN);
+            }
+
+            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id.Value);
+
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateReceiptRequest()
+        {
+            ViewBag.Products = await _productService.GetProductWithDetailsAsync();
+
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
         {
-            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
             {
                 var receiptRequest = new ReceiptRequest
                 {
                     CreateDate = model.CreateDate,
-                    Status = model.Status,
-                    UserId = _accountService.GetUserId(User)
+                    Status = RECEIPT_REQUEST_STATUS_WAITING,
+                    UserId = model.UserId,
                 };
 
+                var resultAddRecept = await _receiptService.AddReceiptRequestAsync(receiptRequest);
 
-                if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
+                if (resultAddRecept)
                 {
-                    int count = 0;
-                    List<ReceiptRequestDetail> list = new();
-                    for(int i = 0; i < model.ProductDetailId.Count; i++)
+                    var list = new List<ReceiptRequestDetail>();
+                    for (int i = 0; i < model.ProductDetailId.Count; i++)
                     {
                         var requestDetail = new ReceiptRequestDetail()
                         {
@@ -121,24 +136,30 @@ namespace FinalProject.Areas.Warehouse.Controllers
                             Quantity = model.Quantity[i],
                             ReceiptRequestId = receiptRequest.ReceiptRequestId,
                             Status = RECEIPT_REQUEST_STATUS_WAITING,
-                            
+
                         };
                         list.Add(requestDetail);
-                      count += await  _receiptService.AddReceiptRequestDetailAsync(list);
                     }
-                    if(count == model.ProductDetailId.Count)
+                    var result = await _receiptService.AddReceiptRequestDetailAsync(list);
+
+                    if (result > 0) 
+                    {
                         transaction.Complete();
-                    Redirect("/Warehouse/Home/ListReceipRequest");
-                }
-                else
-                {
-                    ViewBag.Message = "Thêm phiếu nhập lỗi";
 
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_RECEPT);
+
+                        return Redirect("/Warehouse/Home/ViewListRequestReceipt");
+                    }
                 }
-                
             }
-            return View(model);
+            catch
+            {
+                ViewBag.Message = "Thêm phiếu nhập không thành công";
+            }
 
+            ViewBag.Products = await _productService.GetProductWithDetailsAsync();
+
+            return View(model);
         }
 
         #region Hub service

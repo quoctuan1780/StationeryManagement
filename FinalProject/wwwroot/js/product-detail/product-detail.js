@@ -97,7 +97,7 @@ function submit(price, image, productName, isLogin) {
                                     async: false,
                                     data: {},
                                     success: function (data) {
-                                        $("#total-price").text(data + " VNĐ");
+                                        $("#total-price").text(data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ");
                                     },
                                     error: function (jqXHR, exception) {
                                         showError('Lỗi hệ thống không cập nhật được tổng tiền, vui lòng tải lại trang', '480px');
@@ -123,7 +123,7 @@ function submit(price, image, productName, isLogin) {
                                     async: false,
                                     data: {},
                                     success: function (data) {
-                                        $("#total-price").text(data + " VNĐ");
+                                        $("#total-price").text(data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ");
                                     },
                                     error: function (code, err) {
                                         console.error(err);
@@ -146,7 +146,7 @@ function submit(price, image, productName, isLogin) {
                                     '</a><div class="d-block">Phân loại hàng: ' + color + '</div>' +
                                     '<div class="d-block">Xuất xứ: ' + origin + '</div>' +
                                     '<div id="' + cartItemPostive + '" class="d-block">' +
-                                    'Số lượng: ' + quantity + '</div><div class="d-block">Giá: ' + price + ' VNĐ</div></p>' +
+                                    'Số lượng: ' + quantity + '</div><div class="d-block">Giá: ' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' VNĐ</div></p>' +
                                     '</div></li>';
 
                                 $("#cart-sidebar").append(node);

@@ -37,6 +37,8 @@ namespace Common
 
         public const string DOT = ".";
 
+        public const string NULL = "null";
+
         public const string AREA_ADMIN = "Admin";
 
         public const string AREA_SHIPPER = "Shipper";

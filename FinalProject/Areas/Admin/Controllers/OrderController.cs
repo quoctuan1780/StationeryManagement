@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Services.Hubs;
 using Services.Interfacies;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
@@ -25,8 +26,9 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IMoMoService _moMoService;
         private readonly IPayPalService _payPalService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly IProductDetailService _productDetailService;
 
-        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext, IMoMoService moMoService, IPayPalService payPalService)
+        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext, IMoMoService moMoService, IPayPalService payPalService, IProductDetailService productDetailService)
         {
             _hubContext = hubContext;
             _orderService = orderService;
@@ -34,6 +36,7 @@ namespace FinalProject.Areas.Admin.Controllers
             _moMoService = moMoService;
             _payPalService = payPalService;
             _workflowHistoryService = workflowHistoryService;
+            _productDetailService = productDetailService;
         }
 
         public async Task<IActionResult> Index()
@@ -89,7 +92,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (exportWarehouseDate != null || receivedDeliveryDate != null || !shipper.Equals(EMPTY) || !warehouse.Equals(EMPTY))
             {
-                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, receivedDeliveryDate, warehouse, shipper);
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate: exportWarehouseDate, receivedDeliveryDate: receivedDeliveryDate, warehouse: warehouse, shipper: shipper);
             }
             else
             {
@@ -105,7 +108,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (exportWarehouseDate != null  || !customer.Equals(EMPTY) || !warehouse.Equals(EMPTY))
             {
-                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, warehouse, customer);
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate: exportWarehouseDate, warehouse: warehouse, customer: customer);
             }
             else
             {
@@ -188,7 +191,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (!customer.Equals(EMPTY) && !paymentMethod.Equals(EMPTY))
             {
-                ViewBag.Orders =  _orderService.FilterOrder(customer, paymentMethod);
+                ViewBag.Orders =  _orderService.FilterOrder(customer: customer, paymentMethod: paymentMethod, debug: false);
             }
             else
             {
@@ -198,7 +201,6 @@ namespace FinalProject.Areas.Admin.Controllers
             return View();
         }
 
-        [HttpPut]
         public async Task<int> RejectOrder(int? orderId, string content = EMPTY)
         {
             if(orderId is null)
@@ -216,9 +218,29 @@ namespace FinalProject.Areas.Admin.Controllers
                     order.Status = STATUS_CANCELED;
                     order.ModifiedBy = user.Id;
                     order.ModifiedDate = DateTime.Now;
+
                     if(!content.Equals(EMPTY))
                     {
                         order.Note = content;
+                    }
+
+                    var orderDetail = order.OrderDetails;
+
+                    var productDetails = await _productDetailService.GetProductDetailByIdAsync(orderDetail.Select(x => x.ProductDetailId));
+
+                    foreach(var item in productDetails)
+                    {
+                        var itemUpdate = orderDetail.First(x => x.ProductDetailId == item.ProductDetailId);
+
+                        item.RemainingQuantity += itemUpdate.Quantity;
+                        item.QuantityOrdered -= itemUpdate.Quantity;
+                    }
+
+                    var resultUpdateProductDetails = await _productDetailService.UpdateProductsDetailAsync(productDetails);
+                    
+                    if(resultUpdateProductDetails < 0)
+                    {
+                        return ERROR_CODE_SYSTEM;
                     }
 
                     var orderUpdate = await _orderService.UpdateOrderAsync(order);
@@ -294,6 +316,23 @@ namespace FinalProject.Areas.Admin.Controllers
             }
 
             return ERROR_CODE_SYSTEM;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderReject(string customer = EMPTY, string paymentMethod = EMPTY)
+        {
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+
+            if (!customer.Equals(EMPTY) && !paymentMethod.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.FilterOrder(customer: customer, paymentMethod: paymentMethod, status: STATUS_CANCELED);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.FilterOrder(status: STATUS_CANCELED);
+            }
+
+            return View();
         }
     }
 }

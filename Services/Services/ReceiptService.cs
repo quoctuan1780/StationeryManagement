@@ -114,9 +114,11 @@ namespace Services.Services
             int check = await _context.SaveChangesAsync();
 
             if (check > 0)
+            {
                 return true;
-            else
-                return false;
+            }
+            
+            return false;
         }
 
         public async Task<int> AddReceiptRequestDetailAsync(List<ReceiptRequestDetail> receiptRequest)

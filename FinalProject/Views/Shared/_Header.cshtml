@@ -166,7 +166,7 @@
                                                                             <div id="@string.Concat("quantityProductDetail", cartItem.ProductDetailId)" class="d-block">
                                                                                 Số lượng: @cartItem.Quantity
                                                                             </div>
-                                                                            <div class="d-block">Giá: @cartItem.Price VNĐ</div>
+                                                                            <div class="d-block">Giá: @String.Format("{0:n0}", cartItem.Price) VNĐ</div>
                                                                         </p>
                                                                     </div>
                                                                 </li>
@@ -182,7 +182,7 @@
                                                 </ol>
                                                 <div class="summary">
                                                     <p class="subtotal">
-                                                        <span class="label">Tổng tiền:</span> <span id="total-price" class="price">@total VNĐ</span>
+                                                        <span class="label">Tổng tiền:</span> <span id="total-price" class="price">@String.Format("{0:n0}", total) VNĐ</span>
                                                     </p>
                                                 </div>
                                                 <div class="actions">

@@ -15,6 +15,7 @@ namespace Entities.Models
         public DateTime ReceivedDate { get; set; }
         public DateTime ShipperPickOrderDate { get; set; }
         public DateTime ExportWarehouseDate { get; set; }
+        public string Province { get; set; }
         public string Status { get; set; }
         [Required]
         [StringLength(200, MinimumLength = 10)]

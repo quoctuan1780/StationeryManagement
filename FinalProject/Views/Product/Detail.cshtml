@@ -209,12 +209,12 @@
                                         Giá bán:
                                         @if (product.SalePrice > 0)
                                         {
-                                            <strong style="color: #ee4d2d" class="price"> @product.SalePrice VNĐ</strong>
-                                            <span>Giá gốc: </span><del class="price"> @product.Price VNĐ</del>
+                                            <strong style="color: #ee4d2d" class="price"> @String.Format("{0:n0}", product.SalePrice) VNĐ</strong>
+                                            <span>Giá gốc: </span><del class="price"> @String.Format("{0:n0}", product.Price) VNĐ</del>
                                         }
                                         else
                                         {
-                                            <strong style="color: #ee4d2d" class="price"> @product.Price VNĐ</strong>
+                                            <strong style="color: #ee4d2d" class="price"> @String.Format("{0:n0}", product.Price) VNĐ</strong>
                                         }
                                     </h3>
                                 </p>
@@ -487,7 +487,7 @@
                                                                                         @if (isLogin)
                                                                                         {
                                                                                             <i class="pull-right">
-                                                                                                <span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[j].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
+                                                                                                <span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[i].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
                                                                                                     <small>Trả lời</small>
                                                                                                 </span>
                                                                                                 @if (commentReplies[j].UserId == user.Id)
@@ -604,10 +604,7 @@
             </div>
         </div>
     </div>
-<<<<<<< HEAD
-=======
-    <!--End detail product-->
->>>>>>> feature/Account_Management
+
     <div>
         <div class="block vt-slider vt-slider7">
             <div class="slider-inner">

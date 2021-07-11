@@ -769,16 +769,16 @@
                                                         @if (item.SalePrice > 0)
                                                         {
                                                             <span class="regular-price">
-                                                                <span class="price">@item.SalePrice VNĐ</span>
+                                                                <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
                                                             </span>
                                                             <p class="special-price">
-                                                                <span class="price">@item.Price VNĐ</span>
+                                                                <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
                                                             </p>
                                                         }
                                                         else
                                                         {
                                                             <span class="regular-price">
-                                                                <span class="price">@item.Price VNĐ</span>
+                                                                <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
                                                             </span>
                                                         }
                                                     </div>

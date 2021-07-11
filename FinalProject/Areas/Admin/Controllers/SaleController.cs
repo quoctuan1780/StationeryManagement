@@ -156,6 +156,8 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         if(resultUpdate > 0)
                         {
+                            await _productService.UpdateSalePriceAsync();
+
                             transaction.Complete();
 
                             TempData["MessageSuccess"] = "Cập nhật khuyến mại thành công";
@@ -274,6 +276,8 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                     if (resultUpdatePriceSaleProduct > 0)
                                     {
+                                        await _productService.UpdateSalePriceAsync();
+
                                         transaction.Complete();
 
                                         ViewBag.MessageSuccess = "Thêm khuyến mại thành công";

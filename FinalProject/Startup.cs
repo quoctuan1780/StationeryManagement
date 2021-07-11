@@ -3,6 +3,7 @@ using Entities.Data;
 using Entities.Models;
 using Hangfire;
 using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +40,7 @@ namespace FinalProject
         {
             services.AddControllersWithViews();
 
-            services.AddDbContextPool<ShopDbContext>(options =>
+            services.AddDbContext<ShopDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString(Constant.CONNECTION_STRING)));
 
             services.AddIdentity<User, IdentityRole>(options =>
@@ -79,8 +80,10 @@ namespace FinalProject
             services.AddScoped<ISaleService, SaleService>();
             services.AddScoped<ISaleDetailService, SaleDetailService>();
             services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IBillService, BillService>();
+            services.AddScoped<IBillDetailService, BillDetailService>();
             #endregion
-
+            
             #region Cookie manually
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
             .AddCookie(ROLE_CUSTOMER, options =>

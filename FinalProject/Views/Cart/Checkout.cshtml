@@ -83,12 +83,12 @@
                                                 </button>
                                             }
                                         </td>
-                                        <td>@item.Price.ToString("G29") VNĐ</td>
+                                        <td>@String.Format("{0:n0}", item.Price) VNĐ</td>
                                         <td class="total-item">
                                             @{
                                                 var totalItem = item.Price * item.Quantity;
                                             }
-                                            @totalItem.ToString("G29") VNĐ 
+                                            @String.Format("{0:n0}", totalItem) VNĐ
                                         </td>
                                         <td><button class="btn btn-danger" type="button" onclick="removeCartItem(this, @item.ProductDetailId, '@item.Price.ToString("G29")', @item.Quantity)"> - </button></td>
                                     </tr>
@@ -101,7 +101,7 @@
                         <div class="col-lg-4" style="text-align: end;">
                             @*<div><b>Tổng tiền gốc: </b><span id="totalOld">15000</span> VNĐ</div>
                             <div><b>Tổng tiền khuyến mãi: </b><span id="totalSale">15000</span> VNĐ</div>*@
-                            <div><b>Tổng tiền thanh toán: </b><span id="total">@cartTotal.ToString("G29")</span> VNĐ</div>
+                            <div><b>Tổng tiền thanh toán: </b><span id="total">@String.Format("{0:n0}", cartTotal)</span> VNĐ</div>
                         </div>
                     </div>
                     <div class="col-lg-12">
@@ -118,6 +118,8 @@
     </div>
 </div>
 @section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
+    <script src="~/js/loading/loading.js"></script>
     <script>
         $(document).ready(function() {
             $('#left-nav').remove();
@@ -143,21 +145,6 @@
             setInputFilter(e, function (value) {
                 return /^\d*$/.test(value) && ((value === "" || parseInt(value) > 0) && parseInt(value) <= parseInt($(e).attr('max')));
             });
-        }
-
-        function verticalTextColor() {
-            var loading = new Loading({
-                title: 'Xin hãy đợi',
-                titleColor: 'rgb(217, 83, 79)',
-                discription: 'Loading...',
-                discriptionColor: 'rgb(77, 150, 223)',
-                animationOriginColor: 'rgb(33, 179, 132)',
-                mask: true,
-                loadingPadding: '20px 50px',
-                defaultApply: true,
-            });
-
-            return loading;
         }
 
         function decrease(e, productDetailId, maxQuantity, price) {
@@ -193,73 +180,47 @@
         function setPrice(e, productDetailId, maxQuantity, price) {
             var loading = verticalTextColor();
 
-            setTimeout(function () {
+            loading
 
-                loading
+            var node = $(e).parent().children('.input-quantity').get(0);
 
-                var node = $(e).parent().children('.input-quantity').get(0);
+            var quantity = $(node).val();
 
-                var quantity = $(node).val();
+            if (quantity < 0 || quantity > maxQuantity) {
+                loading.out();
 
-                if (quantity < 0 || quantity > maxQuantity) {
-                    loading.out();
+                showError("Số lượng bạn nhập nhỏ hơn 0 hoặc lớn hơn tổng sản phẩm sẵn có!", "500px");
+            }
+            else
+                $.ajax({
+                    url: "/Cart/ChangeQuantityCartItem",
+                    method: "PUT",
+                    async: true,
+                    data: { productDetailId: productDetailId, quantity: quantity },
+                    success: function (data) {
+                        loading.out();
 
-                    $.notiny({
-                        position: 'right-top',
-                        theme: 'danger',
-                        width: '500px',
-                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                        text: 'Số lượng bạn nhập nhỏ hơn 0 hoặc lớn hơn tổng sản phẩm sẵn có!',
-                    });
-                }
-                else
-                    $.ajax({
-                        url: "/Cart/ChangeQuantityCartItem",
-                        method: "PUT",
-                        async: true,
-                        data: { productDetailId: productDetailId, quantity: quantity },
-                        success: function (data) {
-                            loading.out();
-
-                            switch (parseFloat(data)) {
-                                case -99:
-                                    $.notiny({
-                                        position: 'right-top',
-                                        theme: 'danger',
-                                        width: '500px',
-                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                        text: 'Lỗi hệ thống vui lòng tải lại trang!',
-                                    });
-                                    break;
-                                case -4:
-                                    $.notiny({
-                                        position: 'right-top',
-                                        theme: 'danger',
-                                        width: '500px',
-                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                        text: 'Sản phẩm hoặc số lượng bạn nhập không hợp lệ!',
-                                    });
-                                    break;
-                                default:
-                                    $("#total").text(data);
-                                    var total = price * quantity;
-                                    $($(e).parent().parent().children('.total-item').get(0)).text(parseFloat(total) + " VNĐ");
-                                    break;
-                            }
-                        },
-                        error: function (jpXHR, exception) {
-                            loading.out();
-
-                            $.notiny({
-                                position: 'right-top',
-                                theme: 'danger',
-                                width: '400px',
-                                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                text: 'Lỗi hệ thống, vui lòng thử lại sau!',
-                            });
+                        switch (parseFloat(data)) {
+                            case -99:
+                                showError('Lỗi hệ thống vui lòng tải lại trang!');
+                                break;
+                            case -4:
+                                showError('Sản phẩm hoặc số lượng bạn nhập không hợp lệ!', '450px');
+                                break;
+                            default:
+                                $("#total").text(data);
+                                var total = price * quantity;
+                                $($(e).parent().parent().children('.total-item').get(0)).text(total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ");
+                                break;
                         }
-                    })
-            }, 1000);
+                    },
+                    error: function (code, err) {
+                        loading.out();
+
+                        showErrorSystem();
+                    }
+                })
+   
         }
 
         function removeCartItem(e, productDetailId, price, quantity) {
@@ -284,50 +245,26 @@
 
                             switch (data) {
                                 case "Success":
-                                    $.notiny({
-                                        position: 'right-top',
-                                        theme: 'success',
-                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                        text: 'Xóa sản phẩm thành công',
-                                    });
+                                    showSuccess('Xóa sản phẩm thành công');
 
                                     var total = parseFloat($("#total").text()) - parseFloat(price) * quantity
 
                                     $(e).parent().parent().remove();
 
-                                    $("#total").text(total);
+                                    $("#total").text(total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ");
 
                                     break;
                                 case "Fail":
-                                    $.notiny({
-                                        position: 'right-top',
-                                        theme: 'danger',
-                                        width: '400px',
-                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                        text: 'Hệ thống bị lỗi, vui lòng thử lại sau!',
-                                    });
+                                    showErrorSystem();
                                     break;
                                 case "Miss":
-                                    $.notiny({
-                                        position: 'right-top',
-                                        width: '380px',
-                                        theme: 'danger',
-                                        template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                        text: 'Bạn chưa đăng nhập vào hệ thống',
-                                    });
+                                    showError('Bạn chưa đăng nhập vào hệ thống');
                                     break;
                             }
                         },
-                        error: function (err, exception) {
+                        error: function (code, err) {
                             loading.out();
-
-                            $.notiny({
-                                position: 'right-top',
-                                width: '380px',
-                                theme: 'danger',
-                                template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledError MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                                text: 'Hệ thống xảy ra lỗi, vui lòng thủ lại sau',
-                            });
+                            showErrorSystem()
                         }
                     });
                 }

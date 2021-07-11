@@ -1,18 +1,17 @@
-﻿using static Common.Constant;
-using static Common.RoleConstant;
+﻿using Entities.Models;
+using FinalProject.Areas.Admin.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Services.Interfacies;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Transactions;
+using static Common.Constant;
 using static Common.MessageConstant;
+using static Common.RoleConstant;
 using static Common.ValidationConstant;
 using static FinalProject.Areas.Admin.Helpers.BannerHelper;
 using static FinalProject.Areas.Admin.Helpers.ImageHelper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using FinalProject.Areas.Admin.ViewModels;
-using System.Transactions;
-using Entities.Models;
-using FinalProject.Areas.Admin.Helpers;
-using System.Threading.Tasks;
-using Services.Interfacies;
-using System.Linq;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -63,7 +62,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         var result = await _bannerService.AddBannerAsync(banner);
 
-                        if(result > 0)
+                        if (result > 0)
                         {
                             transaction.Complete();
 
@@ -86,7 +85,7 @@ namespace FinalProject.Areas.Admin.Controllers
         [HttpDelete]
         public async Task<int> DeleteBanner(int? bannerId)
         {
-            if(bannerId is null)
+            if (bannerId is null)
             {
                 return ERROR_CODE_NULL;
             }
@@ -96,7 +95,7 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 var result = await _bannerService.DeleteBannerAsync(bannerId.Value);
 
-                if(result > 0)
+                if (result > 0)
                 {
                     transaction.Complete();
 
@@ -110,14 +109,14 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<IActionResult> EditBanner(int? bannerId)
         {
-            if(bannerId is null)
+            if (bannerId is null)
             {
                 return PartialView(ERROR_404_PAGE_ADMIN);
             }
 
             var banner = await _bannerService.GetBannerByIdAsync(bannerId.Value);
 
-            if(banner != null)
+            if (banner != null)
             {
                 var model = ConvertBannerToBannerViewModel(banner);
 
@@ -159,12 +158,12 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         return View(model);
                     }
-                    else if(model.Image != null)
+                    else if (model.Image != null)
                     {
 
                         imageName = await SaveImageBannerAsync(model.Image, 1920, 768);
                     }
-                    else if(model.ImageString != null)
+                    else if (model.ImageString != null)
                     {
                         imageName = model.ImageString;
                     }
@@ -179,7 +178,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                     var result = await _bannerService.UpdateBannerAsync(banner);
 
-                    if(result > 0)
+                    if (result > 0)
                     {
                         transaction.Complete();
 

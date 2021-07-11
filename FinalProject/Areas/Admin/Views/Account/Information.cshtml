@@ -1,0 +1,210 @@
+﻿@model FinalProject.Areas.Admin.ViewModels.InformationViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var provinces = ViewBag.Provinces as IList<Entities.Models.Province>;
+
+    var districts = ViewBag.Districts as IList<Entities.Models.District>;
+
+    var wards = ViewBag.Wards as IList<Entities.Models.Ward>;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 order-md-1">
+            <div class="profiles">
+                <p class="image">
+                    @if (Model.ImageLink is null)
+                    {
+                        <img src="~/images/user/admin.png" height="300" width="300" alt="Avatar">
+                    }
+                    else
+                    {
+                        string email = Model.Email.Replace('+', 'a');
+
+                        <img src="~/images/user/@email/@Model.ImageLink" height="300" width="300" alt="Avatar">
+                    }
+                </p>
+                <p class="name">Tài khoản của</p>
+                <h6>@Model.FullName</h6>
+            </div>
+        </div>
+        <div class="col-md-9 order-md-2">
+            <h4 class="mb-3">Thông tin cá nhân</h4>
+            @if (!(ViewBag.MessageSuccess is null))
+            {
+                <div class="alert alert-success">@ViewBag.MessageSuccess</div>
+            }
+            @if (!(ViewBag.MessageDanger is null))
+            {
+                <div class="alert alert-danger">@ViewBag.MessageDanger</div>
+            }
+            <form class="needs-validation was-validated" enctype="multipart/form-data"
+                  asp-controller="Account" asp-action="Information" asp-area="Admin" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" value="@Model.UserId" />
+                <input type="hidden" name="ImageLink" value="@Model.ImageLink" />
+                <div class="form-group">
+                    <div class="mb-3">
+                        <label for="Fullname">Họ tên</label>
+                        <input type="text" class="form-control" placeholder="Họ tên" value="@Model.FullName" name="FullName" readonly>
+                        <span class="text-danger" asp-validation-for="FullName"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="gender">
+                        <label for="gender">Giới tính</label>
+                    </div>
+                    @if (Model.Gender.Equals("Nam"))
+                    {
+                        <label class="radio-inline"><input type="radio" name="Gender" value="Nam" checked>Nam</label>
+                        <label class="radio-inline"><input type="radio" name="Gender" value="Nữ">Nữ</label>
+                    }
+                    else
+                    {
+                        <label class="radio-inline"><input type="radio" name="Gender" value="Nam">Nam</label>
+                        <label class="radio-inline"><input type="radio" name="Gender" value="Nữ" checked>Nữ</label>
+                    }
+                    <span class="text-danger" asp-validation-for="Gender"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateofbirth">Ngày sinh</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="date-input" asp-for="DateOfBirth" value="@Model.DateOfBirth.ToString("MM-dd-yyyy")" class="form-field-input form-field-input-coupled" readonly />
+                        <button id="date-button" type="button" class="btn btn-small">
+                            <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                 data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                <path fill="currentColor"
+                                      d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="text-danger" asp-validation-for="DateOfBirth"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="mb-3">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" name="Email" placeholder="you@example.com" value="@Model.Email" readonly>
+                        <span class="text-danger" asp-validation-for="Email"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="mb-3">
+                        <label for="phone-number">Số điện thoại</label>
+                        <input type="text" class="form-control" id="phone-number" name="PhoneNumber" value="@Model.PhoneNumber">
+                        <span class="text-danger" asp-validation-for="PhoneNumber"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <div class="col-sm-12 row">
+                        <div class="col-sm-3 mb-3 mb-sm-0">
+                            <select class="selectpicker show-tick form-control" name="ProvinceId"
+                                    onchange="getDistricts()" id="province" data-live-search="true">
+                                <option value="null">Tỉnh/Thành phố</option>
+                                @if (!(provinces is null))
+                                {
+                                    @if (!(provinces is null))
+                                    {
+                                        foreach (var item in provinces)
+                                        {
+                                            if (item.ProvinceId == Model.ProvinceId)
+                                            {
+                                                <option value="@item.ProvinceId" selected>@item.ProvinceName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.ProvinceId">@item.ProvinceName</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-3" id="district">
+                            <select class="selectpicker show-tick form-control"
+                                    name="DistrictId"
+                                    id="district-id" onchange="getWards()"
+                                    data-live-search="true">
+                                <option value="null">Quận/Huyện</option>
+                                @if (!(districts is null))
+                                {
+                                    @foreach (var item in districts)
+                                    {
+                                        if (item.DistrictId == Model.DistrictId)
+                                        {
+                                            <option value="@item.DistrictId" selected>@item.DistrictName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.DistrictId">@item.DistrictName</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-3" id="ward">
+                            <select name="WardCode" id="ward-id"
+                                    class="selectpicker show-tick form-control" data-live-search="true" onchange="clearStreetName()">
+                                <option value="null">Phường/Xã</option>
+                                @if (!(wards is null))
+                                {
+                                    @foreach (var item in wards)
+                                    {
+                                        if (item.WardCode.Equals(Model.WardCode))
+                                        {
+                                            <option value="@item.WardCode" selected>@item.WardName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.WardCode">@item.WardName</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-3" id="street-name">
+                            <input type="text" class="form-control" placeholder="Tên đường/thôn/khu phố" name="StreetName" value="@Model.StreetName">
+                        </div>
+                        <span class="text-danger" asp-validation-for="StreetName"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="mb-3">
+                        <label for="image">Ảnh đại diện</label>
+                        <input type="file" value="Tải ảnh lên" name="Image">
+                    </div>
+                </div>
+                <hr class="mb-4">
+                <button class="btn btn-primary" type="submit">Cập nhật</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
+    <script type="text/javascript" src="~/js/calendar/calendar-date.js"></script>
+    <script type="text/javascript" src="~/js/address/address-helper.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+    </script>
+}

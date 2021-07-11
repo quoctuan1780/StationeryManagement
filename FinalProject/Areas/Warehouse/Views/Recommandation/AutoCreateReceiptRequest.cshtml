@@ -15,7 +15,6 @@
         <div class="alert alert-success">@ViewBag.Message</div>
     }
     <h1 class="h3 mb-2 text-gray-800">Tạo phiếu yêu cầu nhập hàng</h1>
-    @*<h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm</h2>*@
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
@@ -27,7 +26,6 @@
                                 <th>Tên sản phẩm</th>
                                 <th>Màu sắc</th>
                                 <th>Số lượng trong kho</th>
-
                                 <th>Số lượng còn lại</th>
                                 <th>Số lượng cần đặt</th>
                                 <th>Chọn</th>
@@ -84,7 +82,6 @@
                                         <td>@item.Product.ProductName</td>
                                         <td>@item.Color</td>
                                         <td>@item.Quantity</td>
-
                                         <td>@item.RemainingQuantity</td>
                                         <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
                                         <td><input type="checkbox" name="selected" value="@item.ProductDetailId" /></td>
@@ -104,8 +101,12 @@
 @section Scripts
 {
     <script>
-        function submit() {
+        $(document).ready(function () {
+            $('#best-seller').DataTable();
+            $('#buy-together').DataTable();
+        });
 
+        function submit() {
             var countErrorValidate = 0;
             var Quantities = document.getElementsByName('quantity');
             var Selected = document.getElementsByName('selected');
@@ -122,9 +123,9 @@
                 if ((Quantities[i].value !== '' || Quantities[i] !== 0) && Selected[i].checked) {
                     count--;
                 }
-                
+
             }
-        
+
             if (countErrorValidate > 0 || Quantities.length === count) {
                 if (Quantities.length === count) {
                     Swal.fire({
@@ -143,10 +144,59 @@
                         confirmButtonText: `Ok`,
                     });
                 }
-                
+
             } else {
                 $('#form').submit();
             }
+        }
+
+
+
+        function ShowBestSeller() {
+
+            var quantity = $('#quantity').val();
+            var fromDate = $('#fromdate').val();
+            var toDate = $('#todate').val();
+            var listProduct = [];
+            $.ajax({
+                url: '/Warehouse/Recommandation/GetBestSeller',
+                method: 'GET',
+                async: true,
+                data: { fromDate: fromDate, toDate: toDate, quantity: quantity },
+                success: function (data) {
+                    listProduct = JSON.parse(data);
+                    var str = '';
+                    for (let item of listProduct) {
+                        str += '<tr><td>' + item.productDetailId + '</td>' +
+                            '<td>' + item.productName + '</td>' +
+                            '<td>' + item.color + '</td>' +
+                            '<td>' + item.totalQuantity + '</td>' +
+                            '<td>' + item.quantityOrdered + '</td>' +
+                            '<td>' + item.RemainingQuantity + '</td></tr>';
+                    }
+                    $('#BestSeller').html(str);
+                    if (listProduct.length > 0) {
+                        $.ajax({
+                            url: '/Warehouse/Recommandation/GetRecommandation',
+                            method: 'GET',
+                            async: true,
+                            success: function (data) {
+                                var listProduct = JSON.parse(data);
+                                var str = '';
+                                for (let item of listProduct) {
+                                    str += '<tr><td>' + item.productDetailId + '</td>' +
+                                        '<td>' + item.productName + '</td>' +
+                                        '<td>' + item.color + '</td>' +
+                                        '<td>' + item.totalQuantity + '</td>' +
+                                        '<td>' + item.quantityOrdered + '</td>' +
+                                        '<td>' + item.RemainingQuantity + '</td></tr>';
+                                }
+                                $('#Rule').html(str);
+                            }
+                        })
+                    }
+                }
+            });
         }
     </script>
 }

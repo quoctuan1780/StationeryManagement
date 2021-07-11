@@ -6,6 +6,8 @@
         public const string SIGNAL_COUNT_NEW_ACCOUNT = "newAccount";
         public const string SIGNAL_COUNT_NEW_RECEPT = "newWarehouse";
         public const string SIGNAL_TOP_PRODUCT = "topProduct";
+        public const string SIGNAL_TOP_REVENUE = "newRevenue";
+        public const string SIGNAL_TOP_REVENUE_CURRENT_MONTH = "topRevenueCurrentMonth";
         public const string SIGNAL_GROUP_ADMIN = "Admin";
 
         public const string SIGNAL_GROUP_WAREHOUSE = "WarehouseManager";
@@ -15,5 +17,6 @@
         public const string SIGNAL_COUNT_ORDER_DELIVERING = "orderDelivering";
         public const string SIGNAL_COUNT_ORDER_DELIVERED = "orderDelivered";
         public const string SIGNAL_COUNT_ORDER_WAIT_TO_REJECT = "newOrderWaitReject";
+        public const string SIGNAL_COUNT_RECEPT_REQUEST_ACCEPT = "AcceptOrders";
     }
 }

@@ -50,61 +50,97 @@ namespace FinalProject.Areas.Admin.Controllers
         }
 
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
-        public async Task<IActionResult> ViewInfor()
+        public async Task<IActionResult> Information()
         {
-            string id = _userManager.GetUserId(User);
-            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
-            return View();
-        }
-        public async Task<IActionResult> ViewInforEmployee(string id)
-        {
-            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
-            return View();
+            try
+            {
+                var userId = _accountService.GetUserId(User);
+
+                if (!(userId is null))
+                {
+                    var user = await _accountService.GetUserByUserIdAsync(userId);
+
+                    ViewBag.Provinces = await _addressService.GetProvincesAsync();
+
+                    if (!(user is null) && !(user.WardCode is null))
+                    {
+                        ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(user.Ward.District.Province.ProvinceId);
+
+                        ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(user.Ward.District.DistrictId);
+                    }
+
+                    var model = AccountHelper.ConvertFromUserToInformationViewModel(user);
+
+                    return View(model);
+                }
+            }
+            catch
+            {
+            }
+            return PartialView(ERROR_404_PAGE);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
-        public async Task<IActionResult> ViewInfor(CreateAccountEmployeeViewModel model)
+        public async Task<IActionResult> Information(InformationViewModel model)
         {
+
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+            if (model.ProvinceId != null && model.DistrictId != null)
+            {
+                ViewBag.Districts = await _addressService.GetDistrictsByProvinceIdAsync(model.ProvinceId.Value);
+                ViewBag.Wards = await _addressService.GetWardsByDistrictIdAsync(model.DistrictId.Value);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
             try
             {
-                var fileName = await ProductHelper.SaveImageAccountAsync(model.Image, 1920, 1080, model.Email);
+                User user = await _accountService.GetUserAsync(User);
+                user.WardCode = model.WardCode;
+                user.ModifyDate = DateTime.Now;
+                user.Gender = model.Gender;
+                user.PhoneNumber = model.PhoneNumber;
+                user.StreetName = model.StreetName;
 
-                string image = "admin.png";
+                if (!(model.Image is null))
+                {
+                    var saveAvatarResult = await Heplers.ImageHelper.SaveImageAsync(model.Image, 300, 300, model.Email);
 
-                if (!(fileName is null))
-                {
-                    image = fileName;
-                }
-                var user = new User
-                {
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    WardCode = model.WardCode,
-                    StreetName = model.StreetName,
-                    Image = image
+                    user.Image = saveAvatarResult;
 
-                };
-                if (await _accountService.UpdateInformationEmployeeAsync(user) > 0)
-                {
-                    ViewBag.Success = "Cập nhật thông tin thành công!";
+                    model.ImageLink = saveAvatarResult;
                 }
-                else
+
+
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+                var result = await _accountService.UpdateInformationClientAsync(user);
+
+                if (result > 0)
                 {
-                    ViewBag.Failed = "Cập nhật thông tin thất bại!";
+                    transaction.Complete();
+
+                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_ACCOUNT_INFOR;
                 }
+
+                else throw new Exception();
             }
-            catch { }
-
+            catch
+            {
+                ViewBag.MessageDanger = MESSAGE_ERROR_UPDATE_ACCOUNT_INFOR;
+                return View(model);
+            }
             return View(model);
         }
 
-        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
-        public async Task<IActionResult> CreateEmployeeAccount()
+        public async Task<IActionResult> ViewInforEmployee(string id)
         {
-            ViewBag.Provinces = await _addressService.GetProvincesAsync();
-            ViewBag.Role = await _accountService.GetUserRole();
+            ViewBag.Infor = await _accountService.GetUserByUserIdAsync(id);
 
             return View();
         }
@@ -156,7 +192,6 @@ namespace FinalProject.Areas.Admin.Controllers
                         {
                             return Redirect("/Admin/Home/Dashboard");
                         }
-
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
                         break;
@@ -186,6 +221,15 @@ namespace FinalProject.Areas.Admin.Controllers
             await HttpContext.SignOutAsync(scheme: ROLE_ADMIN);
 
             return Redirect("/Admin/Account/Login");
+        }
+
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        public async Task<IActionResult> CreateEmployeeAccount()
+        {
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+            ViewBag.Role = await _accountService.GetUserRole();
+
+            return View();
         }
 
         [HttpPost]
@@ -282,15 +326,29 @@ namespace FinalProject.Areas.Admin.Controllers
 
             return JsonConvert.SerializeObject(result);
         }
-        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+
         [HttpDelete]
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
         public async Task<int> Delete(string id)
         {
-            if (await _accountService.DeleteUser(id) > 0)
+            var result = await _accountService.DeleteUser(id);
+            if (result > 0)
             {
-                return 1;
+                return CODE_SUCCESS;
             }
-            return 0;
+            return CODE_FAIL;
+        }
+
+        [HttpPut]
+        [Authorize(Roles = ROLE_ADMIN, AuthenticationSchemes = ROLE_ADMIN)]
+        public async Task<int> LockAccount(string id, bool isLocked)
+        {
+            var result = await _accountService.SetLockAccountAsync(id, isLocked);
+            if (result != null || result.Succeeded)
+            {
+                return CODE_SUCCESS;
+            }
+            return CODE_FAIL;
         }
     }
 }

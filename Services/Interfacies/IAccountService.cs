@@ -45,5 +45,6 @@ namespace Services.Interfacies
         Task<IList<User>> GetAllWarehouseManagementsAsync();
         Task<IList<User>> GetAllCustomersAsync();
         Task<IdentityResult> ForgotPasswordAsync(User user, string token, string newPassword);
+        Task<IdentityResult> SetLockAccountAsync(string id, bool isLocked);
     }
 }

@@ -6,6 +6,10 @@ namespace Entities.Data
 {
     public class ShopDbContext : IdentityDbContext<User>
     {
+        public ShopDbContext()
+        {
+
+        }
         public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
         {
 
@@ -18,6 +22,7 @@ namespace Entities.Data
         public virtual DbSet<Sale> Sales { get; set; }
         public virtual DbSet<SaleDetail> SaleProducts { get; set; }
         public virtual DbSet<Bill> Bills { get; set; }
+        public virtual DbSet<BillDetail> BillDetails { get; set; }
         public virtual DbSet<ExportWarehouse> ExportWarehouses { get; set; }
         public virtual DbSet<ImportWarehouse> ImportWarehouses { get; set; }
         public virtual DbSet<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
@@ -64,7 +69,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.BillId);
 
                 e.Property(x => x.Total).HasPrecision(18, 2);
-                e.Property(x => x.SaleTotal).HasPrecision(18, 2);
+                //e.Property(x => x.SaleTotal).HasPrecision(18, 2);
 
                 e.HasOne(x => x.User)
                 .WithMany(x => x.Bills)

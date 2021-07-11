@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -284,6 +285,29 @@ namespace Services.Services
             var result = await _context.UserLogins.Where(x => x.ProviderKey == providerKey).FirstOrDefaultAsync();
 
             return result.UserId;
+        }
+
+        public async Task<IdentityResult> SetLockAccountAsync(string id, bool isLocked)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if(user != null)
+            {
+                IdentityResult lockUserTask;
+
+                if (isLocked)
+                {
+                    lockUserTask = await _userManager.SetLockoutEndDateAsync(user, DateTime.MaxValue);
+                }
+                else
+                {
+                    lockUserTask = await _userManager.SetLockoutEndDateAsync(user, null);
+                }
+
+                return lockUserTask;
+            }
+
+            return null;
         }
     }
 }

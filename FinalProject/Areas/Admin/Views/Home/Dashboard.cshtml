@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Bảng điều khiển</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+        @*<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>*@
     </div>
 
     <div class="row">
@@ -30,7 +30,7 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <a asp-action="WarehouseWait" asp-controller="Warehouse" asp-area="Admin" class="text-decoration-none">
+            <a asp-action="ListReceiptRequest" asp-controller="Warehouse" asp-area="Admin" class="text-decoration-none">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
@@ -339,22 +339,28 @@
                         var curr = json.month2;
                         var pre = json.month1;
                         if (curr === parseFloat(0)) {
-                            curr = parseFloat(1);
-                        }
-                        if (pre === parseFloat(0)) {
-                            pre = parseFloat(1);
-                        }
-                        var result = curr / pre * 100;
-                        if (result - 100 < 0) {
-                            result -= 100;
-                            $("#account-percent").removeClass('text-danger');
-                            $("#account-percent").addClass('text-danger');
-                            $("#account-percent").text(result.toFixed(2) + "%")
-                        }
-                        else {
                             $("#account-percent").removeClass('text-success');
                             $("#account-percent").addClass('text-success');
-                            $("#account-percent").text(" + " + result.toFixed(2) + "%")
+                            $("#account-percent").text(0 + "%")
+                        } else {
+                            if (curr === parseFloat(0)) {
+                                curr = parseFloat(1);
+                            }
+                            if (pre === parseFloat(0)) {
+                                pre = parseFloat(1);
+                            }
+                            var result = curr / pre * 100;
+                            if (result - 100 < 0) {
+                                result -= 100;
+                                $("#account-percent").removeClass('text-danger');
+                                $("#account-percent").addClass('text-danger');
+                                $("#account-percent").text(result.toFixed(2) + "%")
+                            }
+                            else {
+                                $("#account-percent").removeClass('text-success');
+                                $("#account-percent").addClass('text-success');
+                                $("#account-percent").text(" + " + result.toFixed(2) + "%")
+                            }
                         }
                     },
                     error: function (code, err) {
