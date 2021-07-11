@@ -67,20 +67,19 @@ namespace Services.Services
 
         public async Task<Sale> GetSaleByIdAsync(int saleId)
         {
-            return await _context.Sales.Include(x => x.SaleDetails.Where(x => x.IsDeleted == false))
-                .Where(x => x.IsDeleted == false && x.SaleId == saleId)
+            return await _context.Sales.Include(x => x.SaleDetails)
+                .Where(x => x.SaleId == saleId)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<IList<Sale>> GetSalesAsync()
         {
-            return await _context.Sales.Where(x => x.IsDeleted == false)
-                .OrderByDescending(x => x.SaleStartDate.Date).ToListAsync();
+            return await _context.Sales.OrderByDescending(x => x.SaleStartDate.Date).ToListAsync();
         }
 
         public async Task<IList<string>> GetThreeSalesImageAsync()
         {
-            return await _context.Sales.Where(x => x.IsDeleted == false && x.SaleEndDate.Date >= DateTime.Now.Date && x.Image != null).Take(3).Select(x => x.Image).ToListAsync();
+            return await _context.Sales.Where(x => x.SaleEndDate.Date >= DateTime.Now.Date && x.Image != null).Take(3).Select(x => x.Image).ToListAsync();
         }
 
         public async Task<Sale> UpdateSaleAsync(Sale sale)

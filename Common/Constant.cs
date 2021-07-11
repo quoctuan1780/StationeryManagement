@@ -37,6 +37,8 @@ namespace Common
 
         public const string DOT = ".";
 
+        public const string NULL = "null";
+
         public const string AREA_ADMIN = "Admin";
 
         public const string AREA_SHIPPER = "Shipper";
@@ -154,6 +156,7 @@ namespace Common
         public const string PAYPAL_HEADER_RETURN = "return=representation";
         public const string PAYPAL_REL_APPROVE = "approve";
         public const string PAYPAL_URL = "payUrl";
+        public const string PAYPAL_REFUND_DESCRIPTION = "Hoàn tiền do vì hủy đặt hàng";
         #endregion
 
         #region MoMo        
@@ -161,7 +164,11 @@ namespace Common
         public const string MOMO_PARTNER_CODE = "MoMo:PartnerCode";
         public const string MOMO_ACCESS_KEY = "MoMo:AccessKey";
         public const string MOMO_SECRET_KEY= "MoMo:Serectkey";
+        public const string MOMO_PUBLIC_KEY= "MoMo:PublicKey";
         public const string MOMO_LINK= "MoMo:MoMoLink";
+        public const string MOMO_REFUND= "MoMo:MomoRefund";
+        public const string MOMO_VERSION = "2.0";
+        public const string MOMO_DESCRIPTION_REFUND = "Hoàn tiền do vì hủy đặt hàng";
 
         // Data HMAC SHA256
         public const string MOMO_SHA_PARTNER_CODE = "partnerCode=";
@@ -205,6 +212,7 @@ namespace Common
         public const string STATUS_WAITING_EVALUATE = "Chờ đánh giá";
         public const string STATUS_EVALUATED = "Đã đánh giá";
         public const string STATUS_CANCELED = "Đã hủy";
+        public const string STATUS_PENDING_ADMIN_CANCED_ORDER = "Chờ người quản trị xác nhận hủy đơn hàng";
         #endregion
 
         #region Fast Delivery

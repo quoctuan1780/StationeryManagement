@@ -12,6 +12,8 @@ namespace Entities.Models
         public virtual Order Order { get; set; }
         public string MoMoOrderId { get; set; }
         public string PayType { get; set; }
+        public string Amount { get; set; }
+        public string TransId { get; set; }
         public DateTime ResponseTime { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Entities.Data;
 using Entities.Models;
 using Hangfire;
 using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -52,6 +53,9 @@ namespace FinalProject
             .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
             #region Register Dependencies
+            services.AddSingleton(Configuration);
+            services.AddTransient<IHubService, HubService>();
+            services.AddTransient<IHubShipperService, HubShipperService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
@@ -60,8 +64,6 @@ namespace FinalProject
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddSingleton(Configuration);
-            services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IReceiptService, ReceiptService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPayPalService, PayPalService>();
@@ -70,19 +72,18 @@ namespace FinalProject
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<ISearchItemService, SearchItemService>();
             services.AddScoped<IRecommendationService, RecommandationService>();
-            services.AddScoped<IFastDeliveryService, FastDeliveryService>();
             services.AddScoped<IDeliveryAddressService, DeliveryAddressService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IWorkflowHistoryService, WorkflowHistoryService>();
             services.AddScoped<IBannerService, BannerService>();
-            services.AddTransient<IHubService, HubService>();
-            services.AddTransient<IHubShipperService, HubShipperService>();
-            services.AddTransient<IFileGuideService, FileGuideService>();
-            services.AddTransient<ISaleService, SaleService>();
-            services.AddTransient<ISaleDetailService, SaleDetailService>();
-            services.AddTransient<IRatingService, RatingService>();
+            services.AddScoped<IFileGuideService, FileGuideService>();
+            services.AddScoped<ISaleService, SaleService>();
+            services.AddScoped<ISaleDetailService, SaleDetailService>();
+            services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IBillService, BillService>();
+            services.AddScoped<IBillDetailService, BillDetailService>();
             #endregion
-
+            
             #region Cookie manually
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
             .AddCookie(ROLE_CUSTOMER, options =>

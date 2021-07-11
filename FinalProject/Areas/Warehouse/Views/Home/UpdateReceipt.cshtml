@@ -1,0 +1,118 @@
+﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
+@model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
+@{
+    ViewData["Title"] = "CreateReceiptRequest";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+    var request = ViewBag.Receipt as Entities.Models.ImportWarehouse;
+    var user = await userManager.FindByIdAsync(request.UserId);
+}
+<div class="container-fluid">
+
+    <h1 align="center">PHIẾU NHẬP KHO</h1>
+    <form method="post" asp-action="UpdateReceipt" asp-controller="Home" asp-area="Warehouse" id="form">
+        <div class="row">
+            <div class="col-6">
+                <label>Mã phiếu: </label>
+                <input type="text" class="form-control" name="ReceiptRequestId" value="@request.ImportWarehouseId" readonly />
+            </div>
+            <div class="col-6">
+                <label>Ngày tạo: </label>
+                <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate" readonly />
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <input type="hidden" name="UserId" value="@request.UserId" readonly />
+                <label>Người tạo: </label>
+                <input type="text" name="name" class="form-control" value="@user.FullName" readonly/>
+
+            </div>
+            <div class="col-6">
+                <label>Mã phiếu yêu cầu: </label>
+                <input type="text" class="form-control" name="Receiptrequest" value="@request.ReceiptRequestId" readonly />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <label>Trạng thái: </label>
+                <input type="text" class="form-control" name="Status" value="@request.Status" readonly />
+            </div>
+        </div>
+
+        <h3>Chi tiết nhập hàng</h3>
+
+        @if (request.ImportWarehouseDetails.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã chi tiết sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Số lượng đã nhập</th>
+                            <th> Số lượng nhập thêm</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in request.ImportWarehouseDetails)
+                        {
+                            <tr>
+                                <td><input type="text" name="ProductDetailID" value="@item.ProductDetailId" readonly></td>
+                                <td>@item.ProductDetail.Product.ProductName</td>
+                                <td><input type="number" readonly value="@item.Quantity" name="Quantity" /></td>
+                                <td><input type="number" readonly value="@item.ActualQuantity" name="ActualQuantity" /></td>
+                                @if (item.Quantity == item.ActualQuantity)
+                                {
+                                    <td>0</td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <input type="number" name="AddQuantity" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                    </td>
+                                }
+                                <td>@item.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        }
+    </form>
+    <input type="button" value="Cập nhật" class="btn btn-primary" onclick="Submit()" />
+</div>
+
+@section Scripts
+{
+    <script>
+
+        function Submit() {
+
+            var Quantity = document.getElementsByName('Quantity');
+            var ActualQuantity = document.getElementsByName('ActualQuantity');
+            var AddQuantity = document.getElementsByName('AddQuantity');
+            var countErrorValidate = 0;
+            $('.field-validation-valid').remove();
+           
+            for (var i = 0; i < Quantity.length; i++) {
+                
+                if (AddQuantity[i].value === '' || AddQuantity[i].value > (Quantity[i].value - ActualQuantity[i].value)) {
+                    var node = AddQuantity[i];
+                    
+                    var text = '<br><span class="field-validation-valid text-danger validate-product-detail">' +
+                        'Số lượng không hợp lệ</span>';
+                    countErrorValidate++;
+                    $(node).parent().append(text);
+                }
+                if (countErrorValidate == 0)
+                    $('#form').submit();
+            }
+        }
+    </script>
+}

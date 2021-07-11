@@ -19,7 +19,7 @@ namespace Entities.Models
 
         public DateTime RatingDate { get; set; }
 
-        public string Image { get; set; }
+        //public string Image { get; set; }
 
         public string Content { get; set; }
 

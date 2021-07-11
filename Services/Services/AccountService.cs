@@ -1,5 +1,4 @@
-﻿using Accord.Math;
-using Common;
+﻿using Common;
 using Entities.Data;
 using Entities.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -180,7 +179,7 @@ namespace Services.Services
 
         public async Task<IdentityResult> CreateAccountAsync(User user, string role, string password)
         {
-            
+
 
             var registerResult = await RegisterAsync(user, password);
             if (registerResult.Succeeded)
@@ -205,7 +204,7 @@ namespace Services.Services
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
 
-            users = users.Where(x => x.IsDeleted == false).ToList();
+            users = users.ToList();
 
             return users;
         }
@@ -213,7 +212,7 @@ namespace Services.Services
         public async Task<User> GetUserByEmailAsync(string email)
         {
             var users = await _userManager.FindByEmailAsync(email);
-            if(users.IsDeleted == true)
+            if (users.IsDeleted == true)
             {
                 return null;
             }
@@ -237,7 +236,7 @@ namespace Services.Services
 
         public async Task<IdentityResult> ChangePassword(User user, string currentPass, string newPass)
         {
-            return await _userManager.ChangePasswordAsync(user, currentPass,newPass);
+            return await _userManager.ChangePasswordAsync(user, currentPass, newPass);
         }
 
         public async Task<int> UpdateInformationEmployeeAsync(User user)
@@ -279,6 +278,36 @@ namespace Services.Services
         public async Task<IList<User>> GetAllWarehouseManagementsAsync()
         {
             return await _userManager.GetUsersInRoleAsync(ROLE_WAREHOUSE_MANAGER);
+        }
+
+        public async Task<string> GetUserIdByProviderKeyAsync(string providerKey)
+        {
+            var result = await _context.UserLogins.Where(x => x.ProviderKey == providerKey).FirstOrDefaultAsync();
+
+            return result.UserId;
+        }
+
+        public async Task<IdentityResult> SetLockAccountAsync(string id, bool isLocked)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if(user != null)
+            {
+                IdentityResult lockUserTask;
+
+                if (isLocked)
+                {
+                    lockUserTask = await _userManager.SetLockoutEndDateAsync(user, DateTime.MaxValue);
+                }
+                else
+                {
+                    lockUserTask = await _userManager.SetLockoutEndDateAsync(user, null);
+                }
+
+                return lockUserTask;
+            }
+
+            return null;
         }
     }
 }

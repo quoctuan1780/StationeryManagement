@@ -15,7 +15,9 @@
     <form asp-area="Admin" asp-controller="Account" asp-action="CreateEmployeeAccount" enctype="multipart/form-data" method="post">
         <div class="row">
             <div class="col-4 align-middle center-block">
-                <img alt="Ảnh đại diện" width="100" id="avatar" />
+                <p class="image">
+                    <img src="~/images/user/admin.png" height="300" width="300" alt="Ảnh đại diện" id="avatar">
+                </p>
                 <input type="file" accept="image/*" class="form-control" asp-for="Image" id="choosedfile" onchange="ChangeAvatar(event)" />
             </div>
 
@@ -36,7 +38,16 @@
                 </div>
                 <div class="form-group">
                     <label for="DoB">Ngày sinh</label>
-                    <input class="form-control" id="DoB" asp-for="DateOfBirth" type="date" />
+                    <div class="input-wrapper">
+                        <input type="text" id="date-input" asp-for="DateOfBirth" class="form-field-input form-field-input-coupled" readonly />
+                        <button id="date-button" type="button" class="btn btn-small">
+                            <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                 data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                <path fill="currentColor"
+                                      d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                            </svg>
+                        </button>
+                    </div>
                     <span class="text-danger" asp-validation-for="DateOfBirth"></span>
                 </div>
                 <div class="form-group">
@@ -111,7 +122,10 @@
     </form>
 
 </div>
-@section Scripts{ 
+@section Scripts{
+    <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
+    <script type="text/javascript" src="~/js/calendar/calendar-date.js"></script>
+    <script type="text/javascript" src="~/js/address/address-helper.js"></script>
     <script>
         function ChangeAvatar(e) {
             var avatar = document.getElementById('avatar');
@@ -119,132 +133,6 @@
             if (fileId) {
                 avatar.src = URL.createObjectURL(fileId)
             }
-        }
-
-        async function verticalTextColor() {
-            var loading = new Loading({
-                title: 'Xin hãy đợi...',
-                titleColor: 'rgb(217, 83, 79)',
-                discription: 'Loading...',
-                discriptionColor: 'rgb(77, 150, 223)',
-                animationOriginColor: 'rgb(33, 179, 132)',
-                mask: true,
-                loadingPadding: '20px 50px',
-                defaultApply: true,
-            });
-
-            return loading;
-        }
-
-        async function getWards() {
-            var loading = await verticalTextColor();
-
-            loading;
-
-            var districtId = $("#district-id").val();
-
-            var node = '<select class="selectpicker show-tick form-control" name="WardCode" id="ward-id"'
-                + 'data-live-search="true"><option value="null">Phường/Xã</option>';
-
-            if (districtId === 'null') {
-                node += '</select>';
-                $('#ward').children().remove();
-                $('#ward').append(node);
-
-                $('#ward').children().selectpicker({
-                    liveSearch: true,
-                    showSubtext: true,
-                    Size: 10
-                });
-            }
-            else
-
-                await $.ajax({
-                    url: '/Account/Ward',
-                    method: 'GET',
-                    async: true,
-                    data: { districtId: districtId },
-                    success: async function (data) {
-                        for (let i of JSON.parse(data)) {
-                            node += '<option value="' + i.WardCode + '">' + i.WardName + '</option>'
-                        }
-                        node += '</select>';
-
-                        $('#ward').children().remove();
-                        $('#ward').append(node);
-
-                        $('#ward').children().selectpicker({
-                            liveSearch: true,
-                            showSubtext: true,
-                            Size: 10
-                        });
-                    }
-                })
-            setTimeout(() => loading.out(), 0);
-        }
-
-        async function getDistricts() {
-
-            var loading = await verticalTextColor();
-
-            loading;
-
-            var provinceId = $('#province').val();
-
-            var node = '<select class="selectpicker show-tick form-control" name="DistrictId" id="district-id"' + 'onchange="getWards()"'
-                + 'data-live-search="true"><option value="null">Quận/Huyện</option>';
-
-            var nodeWard = '<select name="WardCode" id="ward-id"' +
-                'class="selectpicker show-tick form-control" data - live - search="true" >' +
-                '<option value="null">Phường/Xã</option</select>';
-            '<option value="null">Phường/Xã</option</select>';
-
-            $('#ward').children().remove();
-            $('#ward').append(nodeWard);
-
-            $('#ward').children().selectpicker({
-                liveSearch: true,
-                showSubtext: true,
-                Size: 10
-            });
-
-            if (provinceId === 'null') {
-                node += '</select>';
-
-                $('#district').children().remove();
-                $('#district').append(node);
-
-
-                $('#district').children().selectpicker({
-                    liveSearch: true,
-                    showSubtext: true,
-                    Size: 10
-                });
-            }
-            else
-                await $.ajax({
-                    url: '/Account/District',
-                    method: 'GET',
-                    async: true,
-                    data: { provinceId: provinceId },
-                    success: async function (data) {
-                        for (let i of JSON.parse(data)) {
-                            node += '<option value="' + i.DistrictId + '">' + i.DistrictName + '</option>'
-                        }
-
-                        node += '</select>';
-
-                        $('#district').children().remove();
-                        $('#district').append(node);
-
-                        $('#district').children().selectpicker({
-                            liveSearch: true,
-                            showSubtext: true,
-                            Size: 10
-                        });
-                    }
-                });
-            setTimeout(() => loading.out(), 0);
         }
 
         $(document).ready(function () {

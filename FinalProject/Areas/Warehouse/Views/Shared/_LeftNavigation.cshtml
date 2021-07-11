@@ -16,7 +16,7 @@
     <li class="nav-item">
         <a class="nav-link" asp-action="Dashboard" asp-controller="Home" asp-area="Warehouse">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span>
+            <span>Bảng điều khiển</span>
         </a>
     </li>
 
@@ -36,7 +36,7 @@
             </div>
         </div>
     </li>
-    <li class="nav-item">
+    @*<li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#accountManagement" aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-file-invoice"></i>
             <span>Quản lý tài khoản</span>
@@ -48,7 +48,7 @@
                 <a class="collapse-item" asp-action="ChangePassword" asp-controller="Account" asp-area="Warehouse">Thay đổi mật khẩu </a>
             </div>
         </div>
-    </li>
+    </li>*@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#receiptManagement" aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-file-invoice"></i>
@@ -60,7 +60,7 @@
            
                 <a class="collapse-item" asp-action="ViewListRequestReceipt" asp-controller="Home" asp-area="Warehouse">Danh sách phiếu <br/> yêu cầu nhập hàng</a>
             
-                <a class="collapse-item" asp-action="ListReipt" asp-controller="Home" asp-area="Warehouse">Danh sách phiếu<br /> nhập hàng</a>
+                <a class="collapse-item" asp-action="ListReceipt" asp-controller="Home" asp-area="Warehouse">Danh sách phiếu<br /> nhập hàng</a>
             
                 <a class="collapse-item" asp-action="ViewRecommandation" asp-controller="Recommandation" asp-area="Warehouse">Gợi ý nhập hàng</a>
             </div>

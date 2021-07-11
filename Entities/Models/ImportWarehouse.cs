@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Permissions;
 
 namespace Entities.Models
 {
@@ -13,7 +12,7 @@ namespace Entities.Models
 
         public DateTime CreateDate { get; set; }
 
-        public DateTime ImportDate { get; set; }
+        //public DateTime ImportDate { get; set; }
 
         public decimal Total { get; set; }
 

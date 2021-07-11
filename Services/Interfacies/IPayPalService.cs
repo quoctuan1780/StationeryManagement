@@ -21,6 +21,8 @@ namespace Services.Interfacies
 
         Task<HttpResponse> PayPalCaptureOrder(string OrderId, bool debug = false);
 
-        Task<int> AddPayPalPaymentAsync(int orderId, string token, string payerID, string link);
-    }
+        Task<int> AddPayPalPaymentAsync(int orderId, string token, string payerID, string link, string captureId);
+        Task<string> CapturesOrder(string orderId);
+        Task<HttpResponse> CapturesRefund(string CaptureId, string Amount, bool debug = false);
+    }   
 }

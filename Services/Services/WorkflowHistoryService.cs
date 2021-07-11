@@ -27,7 +27,7 @@ namespace Services.Services
 
         public async Task<IList<WorkflowHistory>> GetWorkflowHistoriesAsync(string userId)
         {
-            return await _context.WorkflowHistories.Where(x => x.CreatedBy == userId && x.IsDeleted == false).ToListAsync();
+            return await _context.WorkflowHistories.Where(x => x.CreatedBy == userId).ToListAsync();
         }
     }
 }

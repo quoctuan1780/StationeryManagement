@@ -2,13 +2,13 @@
 using Entities.Data;
 using Entities.Models;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using PayPalCheckoutSdk.Core;
 using PayPalCheckoutSdk.Orders;
 using PayPalHttp;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -160,6 +160,8 @@ namespace Services.Services
             }
         }
 
+
+
         public async Task<HttpResponse> PayPalCaptureOrder(string OrderId, bool debug = false)
         {
             try
@@ -176,19 +178,55 @@ namespace Services.Services
             }
         }
 
-        public async Task<int> AddPayPalPaymentAsync(int orderId, string token, string payerID, string link)
+
+
+        public async Task<int> AddPayPalPaymentAsync(int orderId, string token, string payerID, string link, string captureId)
         {
             var payPlPayment = new PayPalPayment()
             {
                 OrderId = orderId,
                 LinkDetail = link,
                 PayerId = payerID,
-                Token = token
+                Token = token,
+                CaptureId = captureId
             };
 
             await _context.AddAsync(payPlPayment);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> CapturesOrder(string orderId)
+        {
+            var request = new OrdersCaptureRequest(orderId);
+            request.RequestBody(new OrderActionRequest());
+            HttpResponse response = await Client().Execute(request);
+            var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+
+            var json = new JObject
+            {
+                { "CaptureId", result.Id},
+                { "OrderId", orderId}
+            };
+            return json.ToString();
+        }
+
+        public async Task<HttpResponse> CapturesRefund(string captureId, string Amount, bool debug = false)
+        {
+            var request = new PayPalCheckoutSdk.Payments.CapturesRefundRequest(captureId);
+            request.Prefer(Constant.PAYPAL_HEADER_RETURN);
+            var refundRequest = new PayPalCheckoutSdk.Payments.RefundRequest()
+            {
+                Amount = new PayPalCheckoutSdk.Payments.Money
+                {
+                    Value = Amount,
+                    CurrencyCode = Constant.CURRENCY_USE
+                }
+            };
+            request.RequestBody(refundRequest);
+            var response = await Client().Execute(request);
+
+            return response;
         }
     }
 }

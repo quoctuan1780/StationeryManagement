@@ -32,20 +32,25 @@ namespace Services.Services
         public async Task<int> AddReceiptAsync(int id)
         {
             var request = await _context.ReceiptRequests.Include(x => x.ReceiptRequestDetails).Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
-
             try
             {
                 var receipt = new ImportWarehouse
                 {
                     CreateDate = DateTime.Now,
                     ReceiptRequestId = request.ReceiptRequestId,
-                    Status = "Chờ xử lý",
-                    Total = 0
+                    Status = RECEIPT_STATUS_PROCESSING,
+                    Total = 0,
+                    UserId = request.UserId
+
                 };
-                _context.Add(receipt);
-                var count = request.ReceiptRequestDetails.Count;
-                if (await _context.SaveChangesAsync() > 0)
+                await _context.ImportWarehouses.AddAsync(receipt);
+                var countTotal = 0;
+                var result = await _context.SaveChangesAsync();
+
+                if (result > 0)
                 {
+                    var count = request.ReceiptRequestDetails.Count;
+
                     foreach (var item in request.ReceiptRequestDetails)
                     {
                         var detail = new ImportWarehouseDetail
@@ -56,19 +61,23 @@ namespace Services.Services
                             Status = "Chờ xử lý",
                             ImportWarehouseId = receipt.ImportWarehouseId
                         };
-                        _context.Add(detail);
-
+                        countTotal += detail.Quantity;
+                        await _context.ImportWarehouseDetails.AddAsync(detail);
                     }
-                    if (await _context.SaveChangesAsync() == count)
+
+                    var check = await _context.SaveChangesAsync();
+                    receipt.Total = countTotal;
+                    _context.Update(receipt);
+                    await _context.SaveChangesAsync();
+                    if (check == count)
                     {
                         return count;
                     }
-
-
-
                 }
             }
-            catch { return 0; }
+            catch 
+            {
+            }
 
             return 0;
         }
@@ -105,9 +114,11 @@ namespace Services.Services
             int check = await _context.SaveChangesAsync();
 
             if (check > 0)
+            {
                 return true;
-            else
-                return false;
+            }
+            
+            return false;
         }
 
         public async Task<int> AddReceiptRequestDetailAsync(List<ReceiptRequestDetail> receiptRequest)
@@ -173,6 +184,67 @@ namespace Services.Services
         {
             var result = await _context.ImportWarehouses.Where(x => x.Status == RECEIPT_STATUS_PROCESSING).ToListAsync();
             return result.Count();
+        }
+
+        public async Task<ImportWarehouse> GetReceiptAsync(int id)
+        {
+            return await _context.ImportWarehouses.Include(x => x.ImportWarehouseDetails).ThenInclude(x => x.ProductDetail)
+                .ThenInclude(x => x.Product)
+                .Where(x => x.ImportWarehouseId == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<ImportWarehouse>> GetReceiptsAsync()
+        {
+            return await _context.ImportWarehouses.Include(x => x.ImportWarehouseDetails).OrderBy
+                (x => x.Status).ToListAsync();
+        }
+
+        public async Task<ImportWarehouse> GetReceiptAfterUpdate(int id, List<int> AddQuantity)
+        {
+            ImportWarehouse importWarehouse = await _context.ImportWarehouses.
+                Where(x => x.ImportWarehouseId == id)
+                .Include(x => x.ImportWarehouseDetails)
+                .ThenInclude(x => x.ProductDetail)
+                .ThenInclude(x => x.Product)
+                .FirstOrDefaultAsync();
+            int i = 0, count = 0;
+            var products = await _context.ProductDetails.ToListAsync();
+            var listChange = new List<ProductDetail>();
+             importWarehouse.Status = RECEIPT_STATUS_PROCESSING;
+            
+            foreach (var item in importWarehouse.ImportWarehouseDetails)
+            {
+                if(item.ActualQuantity + AddQuantity[i] <= item.Quantity)
+                {
+                    item.ActualQuantity += AddQuantity[i];
+                    var productDetail = new ProductDetail();
+                    productDetail = products.Where(x => x.ProductDetailId == item.ProductDetailId).FirstOrDefault();
+                    productDetail.Quantity += AddQuantity[i];
+                    productDetail.RemainingQuantity += AddQuantity[i];
+                    listChange.Add(productDetail);
+                }
+                if(item.Status == RECEIPT_STATUS_WAITING)
+                {
+                    item.Status = RECEIPT_STATUS_PROCESSING;
+                }
+                
+                if(item.ActualQuantity == item.Quantity)
+                {
+                    item.Status = RECEIPT_STATUS_COMPLETE;
+                    count++;
+                }
+                
+            }
+            if (count == importWarehouse.ImportWarehouseDetails.Count)
+            {
+                importWarehouse.Status = RECEIPT_STATUS_COMPLETE;
+            }
+            _context.ProductDetails.UpdateRange(listChange);
+            _context.ImportWarehouses.Update(importWarehouse);
+            await _context.SaveChangesAsync();
+
+            return importWarehouse;
+
         }
     }
 }

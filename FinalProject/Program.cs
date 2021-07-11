@@ -52,7 +52,11 @@ namespace FinalProject
                         CreateDate = DateTime.Now,
                         ModifyDate = DateTime.Now,
                         IsDeleted = false,
-                        EmailConfirmed = true
+                        EmailConfirmed = true,
+                        Gender = AdminAccountDefaultConstant.GENDER,
+                        WardCode = AdminAccountDefaultConstant.WARD_CODE,
+                        StreetName = AdminAccountDefaultConstant.STREET_NAME,
+                        Image = AdminAccountDefaultConstant.IMAGE
                     };
 
                     var result = userManager.

@@ -15,12 +15,14 @@ namespace Entities.Models
         public DateTime ReceivedDate { get; set; }
         public DateTime ShipperPickOrderDate { get; set; }
         public DateTime ExportWarehouseDate { get; set; }
+        public string Province { get; set; }
         public string Status { get; set; }
         [Required]
         [StringLength(200, MinimumLength = 10)]
         public string Address { get; set; }
         [StringLength(10)]
         public string PaymentMethod { get; set; }
+        public string Note { get; set; }
         public string UserId { get; set; }
         public virtual User User { get; set; }
         public string AdminId { get; set; }

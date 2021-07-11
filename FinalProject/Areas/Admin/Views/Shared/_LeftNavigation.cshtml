@@ -76,6 +76,7 @@
                 <a class="collapse-item" asp-action="OrderWaitToPick" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />chờ giao</a>
                 <a class="collapse-item" asp-action="OrderDelivery" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />đang giao</a>
                 <a class="collapse-item" asp-action="OrderDelivered" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />đã giao</a>
+                <a class="collapse-item" asp-action="OrderReject" asp-controller="Order" asp-area="Admin">Danh sách đơn hàng <br />đã hủy</a>
             </div>
         </div>
     </li>
@@ -91,6 +92,17 @@
             </div>
         </div>
     </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#importWarehouseManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-notes-medical"></i>
+            <span>Quản lý nhập kho</span>
+        </a>
+        <div id="importWarehouseManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="ListReceiptRequest" asp-controller="Warehouse" asp-area="Admin">Danh sách yêu cầu<br /> nhập kho</a>
+            </div>
+        </div>
+    </li>
 
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#saleManagement" aria-expanded="true" aria-controls="collapseUtilities">
@@ -101,6 +113,18 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item" asp-action="Index" asp-controller="Sale" asp-area="Admin">Danh sách khuyến mại</a>
                 <a class="collapse-item" asp-action="AddSale" asp-controller="Sale" asp-area="Admin">Thêm khuyến mại</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#statisticalManagement" aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-stream"></i>
+            <span>Quản lý thống kê</span>
+        </a>
+        <div id="statisticalManagement" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" asp-action="Index" asp-controller="Statistical" asp-area="Admin">Thống kê doanh thu</a>
             </div>
         </div>
     </li>

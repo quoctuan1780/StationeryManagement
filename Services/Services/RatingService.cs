@@ -27,7 +27,7 @@ namespace Services.Services
 
         public async Task<bool> CheckExistsRatingAsync(int productId, string userId)
         {
-            var result = await _context.RatingDetails.Where(x => x.IsDeleted == false && x.ProductId == productId && x.UserId == userId).FirstOrDefaultAsync();
+            var result = await _context.RatingDetails.Where(x => x.ProductId == productId && x.UserId == userId).FirstOrDefaultAsync();
 
             if(result != null)
             {
@@ -44,14 +44,14 @@ namespace Services.Services
 
         public async Task<IList<RatingDetail>> GetRatingsDetailAsync(int productId, int skip = 0)
         {
-            return await _context.RatingDetails.Where(x => x.IsDeleted == false && x.ProductId == productId)
+            return await _context.RatingDetails.Where(x => x.ProductId == productId)
                         .Include(x => x.User)
                         .Include(x => x.Rating).Skip(skip).Take(10).ToListAsync();
         }
 
         public async Task<string> GetRatingsDetailJsonAsync(int productId, int skip = 0)
         {
-            var result =  await _context.RatingDetails.Where(x => x.IsDeleted == false && x.ProductId == productId)
+            var result =  await _context.RatingDetails.Where(x => x.ProductId == productId)
                         .Include(x => x.User)
                         .Include(x => x.Rating).Skip(skip).Take(10).ToListAsync();
 

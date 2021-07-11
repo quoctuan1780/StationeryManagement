@@ -1,20 +1,18 @@
 ﻿using static Common.Constant;
 using static Common.SignalRConstant;
 using static Common.RoleConstant;
-using static Common.MessageConstant;
-using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using Services.Hubs;
 using Newtonsoft.Json;
+using System.Transactions;
 using Newtonsoft.Json.Linq;
 using Services.Interfacies;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Services.Hubs;
-using System.Transactions;
-using Entities.Models;
-using FinalProject.Areas.Admin.ViewModels;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -24,16 +22,17 @@ namespace FinalProject.Areas.Admin.Controllers
     {
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
-        private readonly IProviderService _providerService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
+        private static DateTime FromDate;
+        private static DateTime ToDate;
+        private static int Quantity;
 
-        public WarehouseController(IProductService productService, IProviderService providerService, IReceiptService receiptService, 
+        public WarehouseController(IProductService productService, IReceiptService receiptService, 
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
         {
             _hubContext = hubContext;
             _productService = productService;
-            _providerService = providerService;
             _receiptService = receiptService;
             _recommendationService = recommendationService;
         }
@@ -45,9 +44,14 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetRecommandation()
         {
-
-           var result = await _recommendationService.GetRecommandtion(2,0.5);
+            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
+            var result = await _recommendationService.GetRecommandtion(4, 0.81, listId);
             var recommandation = new List<JObject>();
+
+            if(result is null || !result.Any())
+            {
+                return NULL;
+            }
 
             foreach (var item in result)
             {
@@ -69,82 +73,68 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetBestSeller(DateTime fromDate, DateTime toDate, int quantity)
         {
-            return await _productService.BestSellerInMonthAsync(fromDate,toDate,quantity);
+            FromDate = fromDate;
+            ToDate = toDate;
+            Quantity = quantity;
+            var result = await _productService.BestSellerInMonthAsync(fromDate, toDate, quantity);
+            if(result is null || result.Equals("[]"))
+            {
+                return NULL;
+            }
+
+            return result;
         }
 
-
-        public IActionResult Index()
+               
+        public async Task<IActionResult> RejectReceipt(int? id)
         {
-            return View();
-        }
-       
+            if(id is null)
+            {
+                return PartialView(ERROR_404_PAGE_ADMIN);
+            }
 
-        public async Task<IActionResult> RejectReceipt(int id)
-        {
-            if (await _receiptService.RejectReceiptRequestAsync(id) > 0)
+            var result = await _receiptService.RejectReceiptRequestAsync(id.Value);
+
+            if (result > 0)
+            {
                 ViewBag.Message = "Xóa thành công!";
+            }
+
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
 
         
-        public async Task<IActionResult> ApproveReceipt(int id)
+        public async Task<IActionResult> ApproveReceipt(int? id)
         {
-            if (await _receiptService.ApproveReceiptRequestAsync(id) > 0)
+            if (id is null)
             {
-                await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
-                await _receiptService.AddReceiptAsync(id);
-                ViewBag.Message = "Đã duyệt!";
+                return PartialView(ERROR_404_PAGE_ADMIN);
             }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                var result = await _receiptService.ApproveReceiptRequestAsync(id.Value);
+                if (result > 0)
+                {
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync(SIGNAL_COUNT_RECEPT_REQUEST_ACCEPT);
+                    result = await _receiptService.AddReceiptAsync(id.Value);
+                    if(result > 0)
+                    {
+                        transaction.Complete();
+
+                        ViewBag.Message = "Đã duyệt!";
+                    }
+                }
                 
+            }
+            catch
+            {
+            }
+
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
       
-
-        [HttpPost]
-        public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
-        {
-            using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)) { 
-            var receiptRequest = new ReceiptRequest
-            {
-                CreateDate = model.CreateDate,
-                Status = model.Status,
-                //UserId = model.UserId
-            };
-
-                if (await _receiptService.AddReceiptRequestAsync(receiptRequest))
-                {
-                    ReceiptRequestDetail receiptRequestDetail;
-                    var receiptRequestDetails = new List<ReceiptRequestDetail>();
-                    for (var i = 0; i < model.Quantity.Count; i++)
-                    {
-                        receiptRequestDetail = new ReceiptRequestDetail
-                        {
-                            ReceiptRequestId = receiptRequest.ReceiptRequestId,
-                            ProductDetailId = model.ProductDetailId[i],
-                            Quantity = model.Quantity[i],
-                            Status = "Chờ xử lý"
-
-                        };
-                        receiptRequestDetails.Add(receiptRequestDetail);
-                    }
-
-                    if (await _receiptService.AddReceiptDetailRequestsAsync(receiptRequestDetails))
-                    {
-                        transaction.Complete();
-                        Redirect("/Admin/Warehouse/Index");
-
-                    }
-                    else
-                    {
-                        ViewBag.Message = "Thêm phiếu nhập lỗi";
-                       
-                    }
-                }
-            }
-            return View(model);
-
-        }
-
         public async Task<string> GetColor(int productID)
         {
             var listColor = await _productService.GetColorByIdAsync(productID);
@@ -156,50 +146,16 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
             return View();
         }
-
-        [HttpPost]
-        public IActionResult CreateReceipt(ReceiptViewModel model)
+        public async Task<IActionResult> ViewRequestReceipt(int? id)
         {
-            if (ModelState.IsValid)
+            if(id is null)
             {
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                try
-                {
-                    var receipt = new ImportWarehouse()
-                    {
-                        CreateDate = DateTime.Now,
-
-                        // get from previous view
-                        //ReceiptRequestId = model.,
-                        //UserId = UserManager.getCuurentUser();
-                        Status = "Mới",
-                        Total = model.Total
-                    };
-                    for (int i = 0; i < model.ProductId.Count; i++)
-                    {
-                        var receiptDetail = new ImportWarehouseDetail()
-                        {
-                            //ImportWarehouseId = 
-                        };
-
-                    }
-                    /*if(_receiptService.AddReceipt(receipt){
-
-                    };*/
-
-                }
-                catch
-                {
-                    ViewBag.MessageError = MESSAGE_ERROR_ADD_PRODUCT;
-                }
-
+                return PartialView(ERROR_404_PAGE_ADMIN);
             }
-            return View(model);
-        }
-        [HttpGet]
-        public JsonResult GetProvider(int productId)
-        {
-            return Json(_providerService.GetProvidersByProduct(productId));
+
+            ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id.Value);
+
+            return View();
         }
     }
 }

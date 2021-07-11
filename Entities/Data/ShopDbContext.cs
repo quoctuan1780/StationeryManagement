@@ -10,7 +10,6 @@ namespace Entities.Data
         {
 
         }
-
         public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
         {
 
@@ -20,10 +19,10 @@ namespace Entities.Data
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<Provider> Providers { get; set; }
         public virtual DbSet<Sale> Sales { get; set; }
         public virtual DbSet<SaleDetail> SaleProducts { get; set; }
         public virtual DbSet<Bill> Bills { get; set; }
+        public virtual DbSet<BillDetail> BillDetails { get; set; }
         public virtual DbSet<ExportWarehouse> ExportWarehouses { get; set; }
         public virtual DbSet<ImportWarehouse> ImportWarehouses { get; set; }
         public virtual DbSet<ImportWarehouseDetail> ImportWarehouseDetails { get; set; }
@@ -70,8 +69,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.BillId);
 
                 e.Property(x => x.Total).HasPrecision(18, 2);
-                e.Property(x => x.PurchaseTotal).HasPrecision(18, 2);
-                e.Property(x => x.SaleTotal).HasPrecision(18, 2);
+                //e.Property(x => x.SaleTotal).HasPrecision(18, 2);
 
                 e.HasOne(x => x.User)
                 .WithMany(x => x.Bills)
@@ -129,6 +127,7 @@ namespace Entities.Data
                 e.HasOne(x => x.Ward)
                 .WithMany(x => x.Users)
                 .HasForeignKey(x => x.WardCode);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity OrderDetil
@@ -164,6 +163,8 @@ namespace Entities.Data
 
                 e.Property(x => x.Price).HasPrecision(18, 2);
                 e.Property(x => x.SalePrice).HasPrecision(18, 2);
+
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity Rating
@@ -193,6 +194,7 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.RatingDetails)
                 .HasForeignKey(x => x.ProductId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity NotificationType
@@ -225,6 +227,7 @@ namespace Entities.Data
             {
                 e.HasKey(x => x.CategoryId);
                 e.HasIndex(x => x.CategoryId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity Sale
@@ -235,6 +238,7 @@ namespace Entities.Data
 
                 e.Property(x => x.Discount).HasPrecision(18, 2);
                 e.Property(x => x.FromOrderPrice).HasPrecision(18, 2);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity SaleDetail
@@ -252,13 +256,7 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.SaleDetails)
                 .HasForeignKey(x => x.ProductId);
-            });
-
-            //Entity Provider
-            modelBuilder.Entity<Provider>(e =>
-            {
-                e.HasKey(x => x.ProviderId);
-                e.HasIndex(x => x.ProviderId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity ImportWarehouse
@@ -277,19 +275,14 @@ namespace Entities.Data
             //Entity ImportWarehouseDetail
             modelBuilder.Entity<ImportWarehouseDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId, x.ProviderId });
+                e.HasKey(x => new { x.ProductDetailId, x.ImportWarehouseId});
 
                 e.HasIndex(x => x.ProductDetailId);
-                e.HasIndex(x => x.ProviderId);
                 e.HasIndex(x => x.ImportWarehouseId);
 
                 e.HasOne(d => d.ProductDetail)
                 .WithMany(p => p.ImportWarehouseDetails)
                 .HasForeignKey(d => d.ProductDetailId);
-
-                e.HasOne(d => d.Provider)
-                .WithMany(p => p.ImportWarehouseDetails)
-                .HasForeignKey(d => d.ProviderId);
 
                 e.HasOne(d => d.ImportWarehouse)
                 .WithMany(p => p.ImportWarehouseDetails)
@@ -308,14 +301,7 @@ namespace Entities.Data
             //Entity RecommendationDetail
             modelBuilder.Entity<RecommendationDetail>(e =>
             {
-                e.HasKey(x => new { x.ProductDetailId, x.RecommendationId });
-
-                e.HasIndex(x => x.ProductDetailId);
-                e.HasIndex(x => x.RecommendationId);
-
-                e.HasOne(x => x.ProductDetail)
-                .WithMany(x => x.RecommendationDetails)
-                .HasForeignKey(x => x.ProductDetailId);
+                e.HasKey(x => x.RecommandationDetailId);
 
                 e.HasOne(x => x.Recommendation)
                 .WithMany(x => x.RecommendationDetails)
@@ -332,6 +318,7 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.ProductImages)
                 .HasForeignKey(x => x.ProductId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity ProductDetail
@@ -347,6 +334,7 @@ namespace Entities.Data
                 .HasForeignKey(x => x.ProductId);
 
                 e.Property(x => x.RowVersion).IsRowVersion();
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity Banner
@@ -354,6 +342,7 @@ namespace Entities.Data
             {
                 e.HasKey(x => x.BannerId);
                 e.HasIndex(x => x.BannerId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity CartItem
@@ -474,6 +463,7 @@ namespace Entities.Data
                 e.HasOne(x => x.User)
                 .WithMany(x => x.DeliveryAddresses)
                 .HasForeignKey(x => x.UserId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             // Entity Comment
@@ -492,6 +482,7 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.Comments)
                 .HasForeignKey(x => x.ProductId);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity Workflow History
@@ -501,6 +492,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.WorkflowHistoryId);
                 e.HasIndex(x => x.RecordId);
                 e.HasIndex(x => x.CreatedBy);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity File Guide
@@ -510,6 +502,7 @@ namespace Entities.Data
                 e.HasIndex(x => x.Id);
                 e.HasIndex(x => x.CreatedBy);
                 e.HasIndex(x => x.ModifiedBy);
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
         }
     }

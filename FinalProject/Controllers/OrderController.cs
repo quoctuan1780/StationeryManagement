@@ -18,6 +18,7 @@ using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using X.PagedList;
 
 namespace FinalProject.Controllers
 {
@@ -117,7 +118,7 @@ namespace FinalProject.Controllers
                 switch (model.PaymentMethod)
                 {
                     case MOMO:
-                        return MoMoCheckout(total.ToString(G29), user.FullName, user.Email, deliveryAddressEncoder);
+                        return await MoMoCheckout(total.ToString(G29), user.FullName, user.Email, deliveryAddressEncoder);
                     case PAYPAL:
                         return await PaypalCheckout(deliveryAddressEncoder);
                     case COD:
@@ -132,16 +133,18 @@ namespace FinalProject.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Orders(string userId)
+        public async Task<IActionResult> Orders(string userId, int? page = 1)
         {
-            if (userId is null)
+            if (userId is null || page is null)
             {
                 return PartialView(ERROR_404_PAGE);
             }
 
-            ViewBag.Orders = await _orderService.GetOrdersByUserIdAsync(userId);
+            var result = await _orderService.GetOrdersByUserIdAsync(userId);
 
-            return View();
+            var model = result.ToPagedList(page.Value, 10);
+
+            return View(model);
         }
 
         public async Task<IActionResult> OrderInfo(int? orderId)
@@ -262,11 +265,17 @@ namespace FinalProject.Controllers
                 var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
 
                 var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
-
+                string captureId = EMPTY;
                 if (!(captureOrderResponse is null))
                 {
 
                     var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+
+                    if(captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
+                    {
+                        var data = captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault();
+                        captureId = data.Id;
+                    }
 
                     var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
 
@@ -292,7 +301,7 @@ namespace FinalProject.Controllers
                         if (result > 0)
                         {
                             result = await _payPalService
-                                .AddPayPalPaymentAsync(order.OrderId, token, PayerID, captureOrderResult.Links.FirstOrDefault().Href);
+                                .AddPayPalPaymentAsync(order.OrderId, token, PayerID, captureOrderResult.Links.FirstOrDefault().Href, captureId);
 
                             if (result > 0)
                             {
@@ -319,12 +328,12 @@ namespace FinalProject.Controllers
             }
         }
 
-        public IActionResult MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
+        public async Task<IActionResult> MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
         {
             string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
             try
             {
-                string responseFromMomo = _moMoService.MoMoCheckout(total, orderInfo, email, hostName, deliveryAddress);
+                string responseFromMomo = await _moMoService.MoMoCheckoutAsync(total, orderInfo, email, hostName, deliveryAddress);
 
                 JObject jmessage = JObject.Parse(responseFromMomo);
 
@@ -338,7 +347,7 @@ namespace FinalProject.Controllers
             }
         }
 
-        public async Task<IActionResult> MoMoSuccess(string deliveryAddress, string orderId, string payType, string responseTime, string errorCode)
+        public async Task<IActionResult> MoMoSuccess(string deliveryAddress, string orderId, string payType, string responseTime, string errorCode, string amount, string transId)
         {
             if (errorCode.Equals(ZERO))
             {
@@ -375,7 +384,7 @@ namespace FinalProject.Controllers
 
                         if (result > 0)
                         {
-                            result = await _moMoService.AddMoMoPaymentAsync(order.OrderId, orderId, payType, responseTime);
+                            result = await _moMoService.AddMoMoPaymentAsync(order.OrderId, orderId, payType, responseTime, amount, transId);
 
                             if (result > 0)
                             {
@@ -402,9 +411,63 @@ namespace FinalProject.Controllers
             return PartialView(ERROR_PAYMENT_PAGE);
         }
 
-        //public async Task<string> GetDeliveryFeeShip()
-        //{
-        //    return await _fastDeliveryService.CaculateFeeShipAsync();
-        //}
+        public async Task<int> RejectOrder(int? orderId, string content)
+        {
+            if(orderId is null || content is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                var order = await _orderService.GetOrderByIdAsync(orderId.Value);
+
+                if (order != null)
+                {
+                    var user = await _accountService.GetUserAsync(User);
+
+                    order.Note = content;
+                    order.ModifiedBy = user.Id;
+                    order.ModifiedDate = DateTime.Now;
+                    order.Status = STATUS_PENDING_ADMIN_CANCED_ORDER;
+
+                    var result = await _orderService.UpdateOrderAsync(order);
+
+                    if (result > 0)
+                    {
+                        var workflow = new WorkflowHistory()
+                        {
+                            CurrentStatus = STATUS_WAITING_CONFIRM,
+                            NextStatus = STATUS_PENDING_ADMIN_CANCED_ORDER,
+                            CreatedBy = order.UserId,
+                            CreatedDate = DateTime.Now,
+                            FullName = user.FullName,
+                            RecordId = order.OrderId.ToString(),
+                            UserEmail = user.Email,
+                            Type = TYPE_ORDER,
+                            UserRole = ROLE_CUSTOMER
+                        };
+
+                        var workflowHistory = await _workflowHistoryService.AddWorkflowHistoryAsync(workflow);
+
+                        if (workflowHistory != null)
+                        {
+                            transaction.Complete();
+
+                            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_REJECT);
+
+                            return CODE_SUCCESS;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
     }
 }

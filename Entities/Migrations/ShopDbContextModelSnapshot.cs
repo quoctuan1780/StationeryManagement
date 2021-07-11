@@ -62,14 +62,6 @@ namespace Entities.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<decimal>("PurchaseTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SaleTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("Total")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -104,6 +96,9 @@ namespace Entities.Migrations
                     b.Property<decimal>("SalePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("BillId", "ProductDetailId");
 
@@ -351,9 +346,6 @@ namespace Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ImportDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ReceiptRequestId")
                         .HasColumnType("int");
 
@@ -385,9 +377,6 @@ namespace Entities.Migrations
                     b.Property<int>("ImportWarehouseId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ActualQuantity")
                         .HasColumnType("int");
 
@@ -401,13 +390,11 @@ namespace Entities.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ProductDetailId", "ImportWarehouseId", "ProviderId");
+                    b.HasKey("ProductDetailId", "ImportWarehouseId");
 
                     b.HasIndex("ImportWarehouseId");
 
                     b.HasIndex("ProductDetailId");
-
-                    b.HasIndex("ProviderId");
 
                     b.ToTable("ImportWarehouseDetail");
                 });
@@ -418,6 +405,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Amount")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MoMoOrderId")
                         .HasColumnType("nvarchar(450)");
@@ -430,6 +420,9 @@ namespace Entities.Migrations
 
                     b.Property<DateTime>("ResponseTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("TransId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MoMoPaymentId");
 
@@ -513,12 +506,18 @@ namespace Entities.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaymentMethod")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Province")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
@@ -575,6 +574,9 @@ namespace Entities.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ProductDetailId", "OrderId");
 
                     b.HasIndex("OrderId");
@@ -590,6 +592,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CaptureId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LinkDetail")
                         .HasColumnType("nvarchar(max)");
@@ -732,28 +737,6 @@ namespace Entities.Migrations
                     b.ToTable("ProductImages");
                 });
 
-            modelBuilder.Entity("Entities.Models.Provider", b =>
-                {
-                    b.Property<int>("ProviderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ProviderName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("ProviderId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("Provider");
-                });
-
             modelBuilder.Entity("Entities.Models.Province", b =>
                 {
                     b.Property<int>("ProvinceId")
@@ -811,9 +794,6 @@ namespace Entities.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -900,16 +880,27 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.Property<int>("ProductDetailId")
-                        .HasColumnType("int");
+                    b.Property<int>("RecommandationDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("RecommendationId")
+                    b.Property<string>("Input")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Output")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProductDetailId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductDetailId", "RecommendationId");
+                    b.Property<int>("RecommendationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RecommandationDetailId");
 
                     b.HasIndex("ProductDetailId");
 
@@ -1420,17 +1411,9 @@ namespace Entities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Models.Provider", "Provider")
-                        .WithMany("ImportWarehouseDetails")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ImportWarehouse");
 
                     b.Navigation("ProductDetail");
-
-                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("Entities.Models.MoMoPayment", b =>
@@ -1592,11 +1575,9 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.RecommendationDetail", b =>
                 {
-                    b.HasOne("Entities.Models.ProductDetail", "ProductDetail")
+                    b.HasOne("Entities.Models.ProductDetail", null)
                         .WithMany("RecommendationDetails")
-                        .HasForeignKey("ProductDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductDetailId");
 
                     b.HasOne("Entities.Models.Product", null)
                         .WithMany("RecommendationDetails")
@@ -1607,8 +1588,6 @@ namespace Entities.Migrations
                         .HasForeignKey("RecommendationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ProductDetail");
 
                     b.Navigation("Recommendation");
                 });
@@ -1767,11 +1746,6 @@ namespace Entities.Migrations
                     b.Navigation("ReceiptRequestDetails");
 
                     b.Navigation("RecommendationDetails");
-                });
-
-            modelBuilder.Entity("Entities.Models.Provider", b =>
-                {
-                    b.Navigation("ImportWarehouseDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Province", b =>

@@ -65,5 +65,10 @@ namespace FinalProject.Areas.Admin.Controllers
         {
             return Ok(await _hubService.GetRevenueCurrentMonthAsync());
         }
+
+        public async Task<IActionResult> GetOrderWatiReject()
+        {
+            return Ok(await _hubService.GetOrderWaitToReject());
+        }
     }
 }

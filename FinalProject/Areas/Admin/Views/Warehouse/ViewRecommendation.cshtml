@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Sản phẩm khuyến nghị nhập kho";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    
+
     var ProductOutOfStock = ViewBag.ProductOutOfStock as IList<Entities.Models.ProductDetail>;
 }
 
@@ -46,18 +46,56 @@
         </div>
     </div>
     <h2 class="h3 mb-2 text-gray-800">Danh sách sản phẩm bán chạy </h2>
-    <span>Từ ngày: </span>
-    <input type="date" id="fromdate" name="fromDate" />
-    <span>Đến ngày: </span>
-    <input type="date" id="todate" name="toDate" />
-    <span>Nhập số lượng sản phẩm: </span>
-    <input type="number" required min="1" id="quantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <span>Từ ngày: </span>
+                        <div class="input-wrapper">
+                            <input type="text" id="start-date" name="fromDate" class="form-field-input form-field-input-coupled" readonly />
+                            <button id="start-date-button" type="button" class="btn btn-small">
+                                <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                     data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                    <path fill="currentColor"
+                                          d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <span>Đến ngày: </span>
+                        <div class="input-wrapper">
+                            <input type="text" id="end-date" name="toDate" class="form-field-input form-field-input-coupled" readonly />
+                            <button id="end-date-button" type="button" class="btn btn-small">
+                                <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                     data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                    <path fill="currentColor"
+                                          d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="row d-flex align-items-end">
+                    <div class="form-group">
+                        <span>Nhập số lượng sản phẩm: </span>
+                        <input type="number" class="form-control" required min="1" id="quantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" style="margin-left: .5rem; margin-top: .5rem" onclick="ShowBestSeller()">Xem</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <button class="btn btn-primary" onclick="ShowBestSeller()">
-                    Xem
-                </button>
             </h6>
         </div>
         <div class="card-body">
@@ -89,7 +127,7 @@
                             <th>Mã sản phẩm</th>
                             <th>Tên sản phẩm</th>
                             <th>Màu sắc</th>
-                           
+
                             <th>Số lượng trong kho</th>
                             <th>Số lượng đã đặt</th>
                             <th>Số lượng còn lại</th>
@@ -105,33 +143,55 @@
 </div>
 @section Scripts
 {
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
+    <script type="text/javascript" src="~/js/calendar/calendar-helper.js"></script>
     <script>
         $(document).ready(function () {
             $('#best-seller').DataTable();
             $('#buy-together').DataTable();
         });
 
-
         function ShowBestSeller() {
-
             var quantity = $('#quantity').val();
-            var fromDate = $('#fromdate').val();
-            var toDate = $('#todate').val();
+            var fromDate = $('#start-date').val();
+            var toDate = $('#end-date').val();
             var listProduct = [];
+
+            if (fromDate === '' || toDate === '') {
+                showError("Ngày bắt đầu và ngày kết thúc khồng được để trống", "380px");
+                return undefined;
+            }
+
+            var fromDateJs = new Date(fromDate);
+            var toDateJs = new Date(toDate);
+
+            if (fromDateJs > toDateJs) {
+                showError("Ngày bắt đầu không được lớn hơn ngày kết thúc", "380px");
+                return undefined;
+            }
+
+            if (quantity === '' || parseInt(quantity) <= 0) {
+                showError("Số lượng phải lớn hơn 0");
+                return undefined;
+            }
+
             $.ajax({
                 url: '/Admin/Warehouse/GetBestSeller',
                 method: 'GET',
                 async: true,
                 data: { fromDate: fromDate, toDate: toDate, quantity: quantity },
                 success: function (data) {
+                    if (data === 'null') {
+                        showSuccess("Không có kết quả nào");
+                        return undefined;
+                    }
                     listProduct = JSON.parse(data);
-                    alert(data);
                     var str = '';
                     for (let item of listProduct) {
                         str += '<tr><td>' + item.productDetailId + '</td>' +
                             '<td>' + item.productName + '</td>' +
                             '<td>' + item.color + '</td>' +
-                           
                             '<td>' + item.totalQuantity + '</td>' +
                             '<td>' + item.quantityOrdered + '</td>' +
                             '<td>' + item.RemainingQuantity + '</td></tr>';
@@ -143,25 +203,26 @@
                             method: 'GET',
                             async: true,
                             success: function (data) {
+                                if (data === "null") {
+                                    showSuccess("Không có sản phẩm mua kèm theo", "310px");
+                                    return undefined;
+                                }
                                 var listProduct = JSON.parse(data);
                                 var str = '';
                                 for (let item of listProduct) {
                                     str += '<tr><td>' + item.productDetailId + '</td>' +
                                         '<td>' + item.productName + '</td>' +
                                         '<td>' + item.color + '</td>' +
-                                        
                                         '<td>' + item.totalQuantity + '</td>' +
                                         '<td>' + item.quantityOrdered + '</td>' +
                                         '<td>' + item.RemainingQuantity + '</td></tr>';
                                 }
                                 $('#Rule').html(str);
-                                alert(data);
                             }
                         })
                     }
                 }
             });
-            //var quantity = $('#quantity').val();
         }
     </script>
 }

@@ -88,7 +88,7 @@
                                     <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
                                 }
                                 break;
-                            default:
+                            case Constant.STATUS_EVALUATED:
                                 {
                                     <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
@@ -97,6 +97,22 @@
                                     <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
+                                }
+                                break;
+                            case Constant.STATUS_PENDING_ADMIN_CANCED_ORDER:
+                                {
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận hủy đơn hàng</span> </div>
+                                    <div class="step"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đã hủy</span> </div>
+                                }
+                                break;
+                            case Constant.STATUS_CANCELED:
+                                {
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận hủy đơn hàng</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đã hủy</span> </div>
                                 }
                                 break;
                         }
