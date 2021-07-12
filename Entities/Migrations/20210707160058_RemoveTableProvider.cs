@@ -2,7 +2,7 @@
 
 namespace Entities.Migrations
 {
-    public partial class RemovedTableProvider : Migration
+    public partial class RemoveTableProvider : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

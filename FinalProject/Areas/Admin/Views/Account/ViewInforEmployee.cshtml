@@ -5,20 +5,23 @@
     var User = ViewBag.Infor as Entities.Models.User;
 }
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-3 order-md-1">
             <div class="profiles">
                 <p class="image">
                     @if (User.Image is null)
                     {
-                        <img src="~/images/user/avatar.png" height="50" width="50" alt="Avatar">
+                        <img src="~/images/user/avatar.png" height="250" width="250" alt="Avatar">
                     }
                     else
                     {
-                        <img src="~/images/user/@User.Email/@User.Image" height="50" width="50" alt="Avatar">
+                        string email = User.Email.Replace('+', 'a');
+
+                        <img src="~/images/user/@email/@User.Image" height="250" width="250" alt="Avatar">
                     }
                 </p>
+
                 <p class="name">Tài khoản của</p>
                 <h6>@User.FullName</h6>
             </div>
@@ -78,19 +81,72 @@
             <div class="form-group">
 
                 <div class="col-sm-12 row">
-                    <label for="address">Địa chỉ:</label>
+                    <label for="address">Địa chỉ: </label>
 
                     <span>
-                        @User.StreetName @User.Ward.WardName @User.Ward.District.DistrictName
+                        @User.StreetName - @User.Ward.WardName - @User.Ward.District.DistrictName -
                         @User.Ward.District.Province.ProvinceName
                     </span>
                 </div>
             </div>
 
-
             <hr class="mb-4">
-            <a class="btn btn-primary" asp-action="Delete" asp-controller="Account" asp-area="Admin" asp-route-id="@User.Id">Xóa</a>
-
+            <div id="show-button">
+                @if (User.LockoutEnd is null)
+                {
+                    <button class="btn btn-primary" onclick="confirmLockOrUnlockAccount('@User.Id', true)">Khóa tài khoản</button>
+                }
+                else
+                {
+                    <button class="btn btn-success" onclick="confirmLockOrUnlockAccount('@User.Id', false)">Mở khóa tài khoản</button>
+                }
+            </div>
         </div>
     </div>
 </div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script>
+        function confirmLockOrUnlockAccount(id, isLocked) {
+            if (id === '' || isLocked === '') {
+                showErrorSystem();
+                return undefined;
+            }
+
+            Swal.fire({
+                title: 'Khóa tài khoản!',
+                text: "Bạn có muốn khóa tài khoản này không ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Khóa`,
+                cancelButtonText: `Hủy`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/Account/LockAccount',
+                        method: 'PUT',
+                        async: true,
+                        data: { id: id, isLocked, isLocked },
+                        success: function (data) {
+                            $('#show-button').children().remove();
+                            if (isLocked) {
+                                showSuccess('Khóa tài khoản thành công');
+                                var node = `<button class="btn btn-success" onclick="confirmLockOrUnlockAccount('` + id + `', false)">Mở khóa tài khoản</button>`
+                                $('#show-button').append(node);
+                            } else {
+                                showSuccess('Mở khóa tài khoản thành công');
+                                var node = `<button class="btn btn-primary" onclick="confirmLockOrUnlockAccount('` + id + `', true)">Khóa tài khoản</button>`
+                                $('#show-button').append(node);
+                            }
+                        },
+                        error: function (code, err) {
+                            showErrorSystem();
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

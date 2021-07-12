@@ -16,5 +16,6 @@ namespace Services.Interfacies
 
         Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId);
         Task<List<ProductDetail>> GetColorReportAsync(List<int> listId);
+        Task<IList<ProductDetail>> GetProductDetailByIdAsync(IEnumerable<int> productDetailIds);
     }
 }

@@ -67,7 +67,7 @@ namespace Services.Services
         public async Task<bool> CheckProductIsInAnySalesAsync(IList<int> productIds)
         {
             int result = 0;
-            result = await _context.SaleProducts.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId) && x.SaleEndDate.Date >= DateTime.Now.Date).CountAsync();
+            result = await _context.SaleProducts.Where(x => productIds.Contains(x.ProductId) && x.SaleEndDate.Date >= DateTime.Now.Date).CountAsync();
 
             if(result > 0)
             {
@@ -96,10 +96,9 @@ namespace Services.Services
         public async Task<IList<Product>> GetAllProductsAsync()
         {
             return await _context.Products
-                .Where(x => x.IsDeleted == false)
                 .Include(x => x.Category)
-                .Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
-                .Include(x => x.RatingDetails.Where(x => x.IsDeleted == false))
+                .Include(x => x.ProductImages)
+                .Include(x => x.RatingDetails)
                 .ThenInclude(x => x.Rating)
                 .Take(16)
                 .ToListAsync();
@@ -107,12 +106,12 @@ namespace Services.Services
 
         public async Task<IList<Product>> GetAllProductsAsync(IList<int> productIds)
         {
-            return await _context.Products.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId)).ToListAsync();
+            return await _context.Products.Where(x =>  productIds.Contains(x.ProductId)).ToListAsync();
         }
 
         public async Task<IList<string>> GetColorByIdAsync(int productId)
         {
-            var listDetails = await _context.ProductDetails.Where(x => x.IsDeleted == false && x.ProductId == productId).ToListAsync();
+            var listDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
             var listColor = new List<string>();
             foreach (var item in listDetails)
             {
@@ -125,9 +124,8 @@ namespace Services.Services
         {
             return await _context.Products.Where(x => x.ProductId == id)
                             .Include(x => x.Category)
-                            .Include(x => x.ProductImages.Where(y => y.IsDeleted == false))
-                            .Include(x => x.ProductDetails.Where(y => y.IsDeleted == false))
-                            .Where(x => x.IsDeleted == false)
+                            .Include(x => x.ProductImages)
+                            .Include(x => x.ProductDetails)
                             .FirstOrDefaultAsync();
         }
 
@@ -174,19 +172,18 @@ namespace Services.Services
 
         public async Task<IList<Product>> GetProductsCanApplySaleAsync()
         {
-            var productIdInSale = _context.SaleProducts.Where(x => x.IsDeleted == false && x.SaleEndDate.Date >= DateTime.Now.Date).Select(x => x.ProductId);
+            var productIdInSale = _context.SaleProducts.Where(x => x.SaleEndDate.Date >= DateTime.Now.Date).Select(x => x.ProductId);
 
-            var products = await _context.Products.Where(x => x.IsDeleted == false && !productIdInSale.Contains(x.ProductId)).ToListAsync();
+            var products = await _context.Products.Where(x => !productIdInSale.Contains(x.ProductId)).ToListAsync();
 
             return products;
         }
 
         public string GetProductSkip(int skip)
         {
-            var result = _context.Products.Include(x => x.ProductImages.Where(x => x.IsDeleted == false))
+            var result = _context.Products.Include(x => x.ProductImages)
                 .Include(x => x.RatingDetails)
                 .ThenInclude(x => x.Rating)
-                .Where(x => x.IsDeleted == false)
                 .Skip(skip).Take(16);
 
             var jsonResult = new List<JObject>();
@@ -240,7 +237,7 @@ namespace Services.Services
 
         public async Task<IList<ProductDetail>> GetProductWithDetailsAsync()
         {
-            return await _context.ProductDetails.Include(x => x.Product.IsDeleted == false).Where(x => x.IsDeleted == false).ToListAsync();
+            return await _context.ProductDetails.Include(x => x.Product).ToListAsync();
         }
 
         public async Task<IList<ProductDetail>> GetTop10ProductHotAsync()
@@ -301,18 +298,18 @@ namespace Services.Services
 
         public async Task<IList<Product>> SearchByPriceAsync(int price)
         {
-            return await _context.Products.Where(x => x.IsDeleted == false && x.Price <= price).OrderBy(x => x.Price).ToListAsync();
+            return await _context.Products.Where(x => x.Price <= price).OrderBy(x => x.Price).ToListAsync();
         }
 
         public async Task<IList<Product>> SearchByPriceAsync(string text)
         {
             return await _context.Products.Where(x => x.ProductName.Contains(text)).OrderBy(x => x.Price)
-                .Union(_context.Products.Include(x => x.Category).Where(x => x.IsDeleted == false && x.Category.CategoryName.Contains(text))).ToListAsync();
+                .Union(_context.Products.Include(x => x.Category).Where(x => x.Category.CategoryName.Contains(text))).ToListAsync();
         }
 
         public async Task<int> UpdatePriceSaleProductsAsync(IList<int> productIds, decimal discount)
         {
-            var products = await _context.Products.Where(x => x.IsDeleted == false && productIds.Contains(x.ProductId)).ToListAsync();
+            var products = await _context.Products.Where(x => productIds.Contains(x.ProductId)).ToListAsync();
 
             foreach(var item in products)
             {
@@ -339,7 +336,7 @@ namespace Services.Services
         {
             var sales = await _context.SaleProducts
                         .Include(x => x.Product)
-                        .Where(x => x.IsDeleted == false && x.SaleEndDate.Date < DateTime.Now.Date && x.Product.SalePrice > 0)
+                        .Where(x => x.SaleEndDate.Date < DateTime.Now.Date && x.Product.SalePrice > 0)
                         .ToListAsync();
 
             if(sales != null && sales.Any())

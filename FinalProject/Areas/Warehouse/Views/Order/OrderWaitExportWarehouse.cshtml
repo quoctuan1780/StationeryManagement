@@ -36,14 +36,32 @@
                             <div class="row d-flex">
                                 <div class="col-xl-6">
                                     <div class="form-group">
-                                        <label for="user">Lọc theo ngày nhận đơn</label>
+                                        <label for="user">Lọc theo ngày đặt hàng</label>
                                         @if (orderDate is null)
                                         {
-                                            <input class="form-control" type="date" id="order-date" />
+                                            <div class="input-wrapper">
+                                                <input type="text" id="date-input" name="orderDate" class="form-field-input form-field-input-coupled" readonly />
+                                                <button id="date-button" type="button" class="btn btn-small">
+                                                    <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                                         data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                                        <path fill="currentColor"
+                                                              d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         }
                                         else
                                         {
-                                            <input class="form-control" type="date" id="order-date" value="@orderDate" />
+                                            <div class="input-wrapper">
+                                                <input type="text" id="date-input" value="@orderDate" name="orderDate" class="form-field-input form-field-input-coupled" readonly />
+                                                <button id="date-button" type="button" class="btn btn-small">
+                                                    <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                                         data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                                        <path fill="currentColor"
+                                                              d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         }
                                     </div>
                                 </div>
@@ -135,15 +153,11 @@
                                             <td class="alert alert-success">@item.Status</td>
                                             break;
                                     }
-                                <td>
-                                    <a asp-action="OrderDetail" asp-controller="Order" asp-area="Warehouse" asp-route-orderId="@item.OrderId">
-                                        Xem
-                                    </a>
-                                    
-                                    <a asp-action="RejectOrder" asp-controller="Order" asp-area="Warehouse" asp-route-id="@item.OrderId">
-                                        Từ chối
-                                    </a>
-                                </td>
+                                    <td>
+                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Warehouse" asp-route-orderId="@item.OrderId">
+                                            Xem
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                         }
@@ -154,15 +168,5 @@
     </div>
 </div>
 @section Scripts{ 
-    <script>
-        function filter() {
-            var customer = $('#customer').val();
-            var orderDate = $('#order-date').val();
-
-            var url = '/Warehouse/Order/OrderWaitExportWarehouse?customer=' + customer +
-                '&orderDate=' + orderDate;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/js/warehouse/order/order-detail.js"></script>
 }

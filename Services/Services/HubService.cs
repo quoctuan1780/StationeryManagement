@@ -28,7 +28,7 @@ namespace Services.Services
 
         public async Task<int> GetWarehouseAsync()
         {
-            var result = await _context.ReceiptRequests.Where(x => x.Status.Equals("Chờ duyệt")).ToListAsync();
+            var result = await _context.ReceiptRequests.Where(x => x.Status.Equals(RECEIPT_REQUEST_STATUS_WAITING)).ToListAsync();
 
             return result.Count;
         }
@@ -60,7 +60,6 @@ namespace Services.Services
             return result.ToString();
         }
 
-        // Tempotary
         public async Task<string> GetRevenueAsync()
         {
             var result = new JObject();
@@ -77,8 +76,8 @@ namespace Services.Services
             {
                 preMonth -= 1;
             }
-            //&& x.Status.Contains(STATUS_WAITING_PICK_GOODS)
-            var currentRevenue = await _context.Orders.Where(x => x.OrderDate.Month == DateTime.Now.Month && x.OrderDate.Year == DateTime.Now.Year ).SumAsync(x => x.Total);
+
+            var currentRevenue = await _context.Bills.Where(x => x.CreateDate.Month == DateTime.Now.Month && x.CreateDate.Year == DateTime.Now.Year ).SumAsync(x => x.Total);
 
             var preRevenue = await _context.Orders.Where(x => x.OrderDate.Month == preMonth && x.OrderDate.Year == preYear ).SumAsync(x => x.Total);
 
@@ -88,12 +87,11 @@ namespace Services.Services
             return result.ToString();
         }
 
-        //Temporary
         public async Task<string> GetTopProductAsync()
         {
-            var result = (from od in _context.OrderDetails
-                         join o in _context.Orders on od.OrderId equals o.OrderId
-                         where o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
+            var result = (from od in _context.BillDetails
+                         join o in _context.Bills on od.BillId equals o.BillId
+                         where o.CreateDate.Month == DateTime.Now.Month && o.CreateDate.Year == DateTime.Now.Year
                          group od by od.ProductDetailId into g
                          select new
                          {
@@ -125,12 +123,11 @@ namespace Services.Services
             return JsonConvert.SerializeObject(dataChart);
         }
 
-        //Temporary
         public async Task<string> GetTopCustomerAsync()
         {
             var result = (from c in _context.Users
-                          join o in _context.Orders on c.Id equals o.UserId
-                          where o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
+                          join o in _context.Bills on c.Id equals o.UserId
+                          where o.CreateDate.Month == DateTime.Now.Month && o.CreateDate.Year == DateTime.Now.Year
                           group o by new { o.UserId, c.FullName } into g
                           select new
                           {
@@ -159,10 +156,9 @@ namespace Services.Services
             return JsonConvert.SerializeObject(dataChart);
         }
 
-        //Temporary
         public async Task<string> GetRevenueCurrentMonthAsync()
         {
-            var result = await _context.Orders.Where(x => x.OrderDate.Month == DateTime.Now.Month && x.OrderDate.Year == DateTime.Now.Year).GroupBy(x => x.OrderDate.Day).Select(x => new { Day = x.Key, Total = x.Sum(y => y.Total) }).ToListAsync();
+            var result = await _context.Bills.Where(x => x.CreateDate.Month == DateTime.Now.Month && x.CreateDate.Year == DateTime.Now.Year).GroupBy(x => x.CreateDate.Day).Select(x => new { Day = x.Key, Total = x.Sum(y => y.Total) }).ToListAsync();
 
             var dataChart = new List<JObject>();
 
@@ -178,6 +174,14 @@ namespace Services.Services
             }
 
             return JsonConvert.SerializeObject(dataChart);
+        }
+
+        public async Task<int> GetOrderWaitToReject()
+        {
+            var result = await _context.Orders
+                .Where(x => x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).ToListAsync();
+
+            return result.Count;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Services.Services
             _context = context;
             _configuration = configuration;
         }
-        public  async Task<int> AddMoMoPaymentAsync(int orderId, string moMoOrderId, string payType, string responseTime)
+        public  async Task<int> AddMoMoPaymentAsync(int orderId, string moMoOrderId, string payType, string responseTime, string amount, string transId)
         {
             var checkDatetime = DateTime.TryParse(responseTime, out DateTime responseTimeParse);
             if (checkDatetime) {
@@ -32,7 +32,9 @@ namespace Services.Services
                     MoMoOrderId = moMoOrderId,
                     PayType = payType,
                     ResponseTime = responseTimeParse,
-                    OrderId = orderId
+                    OrderId = orderId,
+                    Amount = amount,
+                    TransId = transId
                 };
 
                 await _context.AddAsync(moMoPayment);
@@ -43,7 +45,7 @@ namespace Services.Services
             return 0;
         }
 
-        public string MoMoCheckout(string total, string orderInfo, string email, string hostName, string deliveryAddress)
+        public async Task<string> MoMoCheckoutAsync(string total, string orderInfo, string email, string hostName, string deliveryAddress)
         {
             
             string endPoint = _configuration[Constant.MOMO_LINK];
@@ -89,12 +91,13 @@ namespace Services.Services
             };
             //Before sign HMAC SHA256 signature
 
-            string responseFromMomo = SendPaymentRequest(endPoint, message.ToString());
+            string responseFromMomo = await SendPaymentRequestAsync(endPoint, message.ToString());
 
             return responseFromMomo;
         }
 
-        public string SendPaymentRequest(string endpoint, string postJsonString)
+
+        public async Task<string> SendPaymentRequestAsync(string endpoint, string postJsonString)
         {
             try
             {
@@ -115,9 +118,9 @@ namespace Services.Services
                 stream.Write(data, 0, data.Length);
                 stream.Close();
 
-                HttpWebResponse response = (HttpWebResponse)httpWReq.GetResponse();
+                var response = (HttpWebResponse)await httpWReq.GetResponseAsync();
 
-                string jsonresponse = "";
+                string jsonresponse = Constant.EMPTY;
 
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
@@ -129,11 +132,7 @@ namespace Services.Services
                     }
                 }
 
-
-                //todo parse it
                 return jsonresponse;
-                //return new MomoResponse(mtid, jsonresponse);
-
             }
             catch (WebException e)
             {
@@ -150,6 +149,66 @@ namespace Services.Services
             string hex = BitConverter.ToString(hashmessage);
             hex = hex.Replace("-", "").ToLower();
             return hex;
+        }
+        public async Task<string> RefundMoneyAsync(string orderMomoId, string transId, string moneyRefund)
+        {
+            string endpoint = _configuration[Constant.MOMO_REFUND];
+            string partnerCode = _configuration[Constant.MOMO_PARTNER_CODE];
+            string merchantRefId = orderMomoId;
+            string momoTransId = transId;
+            string version = Constant.MOMO_VERSION;
+            string publicKey = _configuration[Constant.MOMO_PUBLIC_KEY];
+            string requestId = Guid.NewGuid().ToString();
+            string description = Constant.MOMO_DESCRIPTION_REFUND;
+            long amount = int.Parse(moneyRefund);
+
+            string hash = BuildRefundHash(partnerCode, merchantRefId, momoTransId, amount,
+                description,
+                publicKey);
+
+            string jsonRequest = "{\"partnerCode\":\"" +
+                partnerCode + "\",\"requestId\":\"" +
+                requestId + "\",\"version\":" +
+                version + ",\"hash\":\"" +
+                hash + "\"}";
+
+            string responseFromMomo = await SendPaymentRequestAsync(endpoint, jsonRequest.ToString());
+
+            var jmessage = JObject.Parse(responseFromMomo);
+
+            return jmessage.ToString();
+        }
+
+        private static string BuildRefundHash(string partnerCode, string merchantRefId,
+            string momoTranId, long amount, string description, string publicKey)
+        {
+            string json = "{\"partnerCode\":\"" +
+                partnerCode + "\",\"partnerRefId\":\"" +
+                merchantRefId + "\",\"momoTransId\":\"" +
+                momoTranId + "\",\"amount\":" +
+                amount + ",\"description\":\"" +
+                description + "\"}";
+
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            string result = null;
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                try
+                {
+                    rsa.FromXmlString(publicKey);
+                    var encryptedData = rsa.Encrypt(data, false);
+                    var base64Encrypted = Convert.ToBase64String(encryptedData);
+                    result = base64Encrypted;
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                }
+
+            }
+
+            return result;
+
         }
     }
 }

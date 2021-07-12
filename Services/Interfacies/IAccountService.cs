@@ -20,6 +20,7 @@ namespace Services.Interfacies
         Task<IdentityResult> ConfirmEmailAsync(string userId, string token);
         Task LogoutAsync();
         string GetUserId(ClaimsPrincipal user);
+        Task<string> GetUserIdByProviderKeyAsync(string providerKey);
         Task<User> GetUserAsync(ClaimsPrincipal user);
         Task<User> GetUserByUserIdAsync(string userId);
         Task<User> GetUserByEmailAsync(string email);
@@ -44,5 +45,6 @@ namespace Services.Interfacies
         Task<IList<User>> GetAllWarehouseManagementsAsync();
         Task<IList<User>> GetAllCustomersAsync();
         Task<IdentityResult> ForgotPasswordAsync(User user, string token, string newPassword);
+        Task<IdentityResult> SetLockAccountAsync(string id, bool isLocked);
     }
 }

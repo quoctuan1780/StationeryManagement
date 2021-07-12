@@ -3,7 +3,21 @@
 
     var products = ViewBag.ListProduct as IList<Entities.Models.Product>;
 }
-
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>Kết quả tìm kiếm</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 <div class="position-01">
     <div class="container">
         <div class="row">

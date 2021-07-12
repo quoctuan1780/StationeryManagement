@@ -63,7 +63,8 @@ function repairComment(e, id) {
                     }
                 },
                 error: function (code, err) {
-
+                    showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+                    console.error(err);
                 }
             });
         }
@@ -106,7 +107,8 @@ function deleteComment(e, id) {
                         }
                     },
                     error: function (code, err) {
-
+                        showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+                        console.error(err);
                     }
                 });
             }
@@ -162,7 +164,8 @@ function addComment(e, commentId, productId, email, userId, userName, imageLink)
             }
         },
         error: function (code, err) {
-
+            showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+            console.error(err);
         }
     });
 }
@@ -212,7 +215,8 @@ function addReplyChildrentComment(e, commentId, productId, email, userId, userNa
             }
         },
         error: function (code, err) {
-
+            showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+            console.error(err);
         }
     });
 }
@@ -265,7 +269,8 @@ function addOwnerComment(imageLink, userId, isLogin, email, name, productId) {
                 }
             },
             error: function (code, err) {
-
+                showError('Lỗi! vui lòng đăng xuất và đăng nhập lại hệ thống', '460px');
+                console.error(err);
             }
         });
     }

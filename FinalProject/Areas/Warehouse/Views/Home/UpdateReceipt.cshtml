@@ -4,6 +4,7 @@
     ViewData["Title"] = "CreateReceiptRequest";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var request = ViewBag.Receipt as Entities.Models.ImportWarehouse;
+    var user = await userManager.FindByIdAsync(request.UserId);
 }
 <div class="container-fluid">
 
@@ -13,7 +14,6 @@
             <div class="col-6">
                 <label>Mã phiếu: </label>
                 <input type="text" class="form-control" name="ReceiptRequestId" value="@request.ImportWarehouseId" readonly />
-
             </div>
             <div class="col-6">
                 <label>Ngày tạo: </label>
@@ -23,22 +23,22 @@
         </div>
         <div class="row">
             <div class="col-6">
+                <input type="hidden" name="UserId" value="@request.UserId" readonly />
                 <label>Người tạo: </label>
-                <input type="text" class="form-control" name="UserId" value="@request.UserId" readonly />
+                <input type="text" name="name" class="form-control" value="@user.FullName" readonly/>
 
             </div>
             <div class="col-6">
                 <label>Mã phiếu yêu cầu: </label>
                 <input type="text" class="form-control" name="Receiptrequest" value="@request.ReceiptRequestId" readonly />
-
             </div>
         </div>
 
-        <div class="col-6">
-            <label>Trạng thái: </label>
-
-            <input type="text" class="form-control" name="Status" value="@request.Status" readonly />
-
+        <div class="row">
+            <div class="col-6">
+                <label>Trạng thái: </label>
+                <input type="text" class="form-control" name="Status" value="@request.Status" readonly />
+            </div>
         </div>
 
         <h3>Chi tiết nhập hàng</h3>
@@ -85,8 +85,8 @@
             </div>
         }
     </form>
-    <input type="button" value="Cập nhật" class="btn btn-info" onclick="Submit()" />
     <a asp-action="PrintReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@request.ImportWarehouseId" class="btn btn-success">In báo cáo</a>
+    <input type="button" value="Cập nhật" class="btn btn-primary" onclick="Submit()" />
 </div>
 
 @section Scripts

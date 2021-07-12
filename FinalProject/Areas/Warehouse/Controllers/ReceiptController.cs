@@ -1,11 +1,16 @@
+
 ﻿using Microsoft.AspNetCore.Hosting;
+﻿using static Common.Constant;
+using static Common.RoleConstant;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
+    [Area(AREA_WAREHOUSE)]
+    [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class ReceiptController : Controller
     {
         private readonly IProductService _productService;

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Services.Interfacies;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FinalProject.Controllers
@@ -10,7 +8,6 @@ namespace FinalProject.Controllers
     {
         private readonly IProductService _productService;
         private readonly ISaleService _saleService;
-
         public IRecommendationService _recommandationService;
 
         public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService)
@@ -29,6 +26,6 @@ namespace FinalProject.Controllers
             return View();
         }
 
-       
+
     }
 }

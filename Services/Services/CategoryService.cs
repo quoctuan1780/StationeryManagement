@@ -44,14 +44,12 @@ namespace Services.Services
 
         public async Task<IList<Category>> GetAllCategoriesAsync()
         {
-            return await _context.Categories
-                    .Where(x => x.IsDeleted == false)
-                    .ToListAsync();
+            return await _context.Categories.ToListAsync();
         }
 
         public async Task<bool> IsExistsCategoryAsync(Category category)
         {
-            var result = await _context.Categories.Where(x => x.CategoryName == category.CategoryName && x.IsDeleted == false).FirstOrDefaultAsync();
+            var result = await _context.Categories.Where(x => x.CategoryName == category.CategoryName).FirstOrDefaultAsync();
 
             if (result is null)
             {

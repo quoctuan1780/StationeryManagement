@@ -1,4 +1,6 @@
 ﻿using static Common.Constant;
+using static Common.RoleConstant;
+using static Common.SignalRConstant;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +13,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
     [Area(AREA_WAREHOUSE)]
+    [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class RecommandationController : Controller
     {
         private readonly IHubContext<SignalServer> _hubContext;
@@ -51,6 +56,11 @@ namespace FinalProject.Areas.Warehouse.Controllers
             var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
+            if(result is null || !result.Any())
+            {
+                return NULL;
+            }
+
             foreach (var item in result)
             {
                 var obj = new JObject
@@ -75,7 +85,12 @@ namespace FinalProject.Areas.Warehouse.Controllers
             FromDate = fromDate;
             ToDate = toDate;
             Quantity = quantity;
-            return await _productService.BestSellerInMonthAsync(fromDate, toDate, quantity);
+            var result = await _productService.BestSellerInMonthAsync(fromDate, toDate, quantity);
+            if(result is null || result.Equals("[]"))
+            {
+                return NULL;
+            }
+            return result;
 
         }
         public async Task<IActionResult> AutoCreateReceiptRequest()
@@ -118,6 +133,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
                     if (await _receiptService.AddReceiptRequestDetailAsync(list) > 0)
                     {
                         transaction.Complete();
+
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_RECEPT);
+
                         return Redirect("/Warehouse/Home/ViewListRequestReceipt");
                     }
 
@@ -126,7 +144,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
             catch (Exception)
             {
 
-                ViewBag.Message("Không thể thêm phiếu yêu cầu nhập hàng!");
+                ViewBag.Message = "Không thể thêm phiếu yêu cầu nhập hàng!";
                 return View();
             }
 

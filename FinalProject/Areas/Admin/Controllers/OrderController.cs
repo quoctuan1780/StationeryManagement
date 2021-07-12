@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Services.Hubs;
 using Services.Interfacies;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
@@ -20,14 +23,20 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
+        private readonly IMoMoService _moMoService;
+        private readonly IPayPalService _payPalService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly IProductDetailService _productDetailService;
 
-        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext)
+        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext, IMoMoService moMoService, IPayPalService payPalService, IProductDetailService productDetailService)
         {
             _hubContext = hubContext;
             _orderService = orderService;
             _accountService = accountService;
+            _moMoService = moMoService;
+            _payPalService = payPalService;
             _workflowHistoryService = workflowHistoryService;
+            _productDetailService = productDetailService;
         }
 
         public async Task<IActionResult> Index()
@@ -83,7 +92,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (exportWarehouseDate != null || receivedDeliveryDate != null || !shipper.Equals(EMPTY) || !warehouse.Equals(EMPTY))
             {
-                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, receivedDeliveryDate, warehouse, shipper);
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate: exportWarehouseDate, receivedDeliveryDate: receivedDeliveryDate, warehouse: warehouse, shipper: shipper);
             }
             else
             {
@@ -99,7 +108,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             if (exportWarehouseDate != null  || !customer.Equals(EMPTY) || !warehouse.Equals(EMPTY))
             {
-                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate, warehouse, customer);
+                ViewBag.Orders = _orderService.FilterOrder(exportWarehouseDate: exportWarehouseDate, warehouse: warehouse, customer: customer);
             }
             else
             {
@@ -174,6 +183,156 @@ namespace FinalProject.Areas.Admin.Controllers
             }
 
             return ERROR_CODE_SYSTEM;
+        }
+
+        public async Task<IActionResult> OrderWaitReject(string customer = EMPTY, string paymentMethod = EMPTY)
+        {
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+
+            if (!customer.Equals(EMPTY) && !paymentMethod.Equals(EMPTY))
+            {
+                ViewBag.Orders =  _orderService.FilterOrder(customer: customer, paymentMethod: paymentMethod, debug: false);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.FilterOrder();
+            }
+
+            return View();
+        }
+
+        public async Task<int> RejectOrder(int? orderId, string content = EMPTY)
+        {
+            if(orderId is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                var order = await _orderService.GetOrderByIdAsync(orderId.Value);
+                var user = await _accountService.GetUserAsync(User);
+                if(order != null)
+                {
+                    order.Status = STATUS_CANCELED;
+                    order.ModifiedBy = user.Id;
+                    order.ModifiedDate = DateTime.Now;
+
+                    if(!content.Equals(EMPTY))
+                    {
+                        order.Note = content;
+                    }
+
+                    var orderDetail = order.OrderDetails;
+
+                    var productDetails = await _productDetailService.GetProductDetailByIdAsync(orderDetail.Select(x => x.ProductDetailId));
+
+                    foreach(var item in productDetails)
+                    {
+                        var itemUpdate = orderDetail.First(x => x.ProductDetailId == item.ProductDetailId);
+
+                        item.RemainingQuantity += itemUpdate.Quantity;
+                        item.QuantityOrdered -= itemUpdate.Quantity;
+                    }
+
+                    var resultUpdateProductDetails = await _productDetailService.UpdateProductsDetailAsync(productDetails);
+                    
+                    if(resultUpdateProductDetails < 0)
+                    {
+                        return ERROR_CODE_SYSTEM;
+                    }
+
+                    var orderUpdate = await _orderService.UpdateOrderAsync(order);
+                    if (orderUpdate > 0)
+                    {
+                        var workflow = new WorkflowHistory()
+                        {
+                            CreatedDate = DateTime.Now,
+                            CreatedBy = user.Id,
+                            FullName = user.FullName,
+                            UserEmail = user.Email,
+                            RecordId = orderId.Value.ToString(),
+                            Type = TYPE_ORDER,
+                            UserRole = ROLE_ADMIN
+                        };
+
+                        if (content.Equals(EMPTY))
+                        {
+                            workflow.CurrentStatus = STATUS_WAITING_CONFIRM;
+                            workflow.NextStatus = STATUS_CANCELED;
+                        }
+                        else
+                        {
+                            workflow.CurrentStatus = STATUS_PENDING_ADMIN_CANCED_ORDER;
+                            workflow.NextStatus = STATUS_CANCELED;
+                        }
+
+                        var workflowAdd = await _workflowHistoryService.AddWorkflowHistoryAsync(workflow);
+
+                        if (workflowAdd != null)
+                        {
+                            switch (order.PaymentMethod)
+                            {
+                                case MOMO:
+                                    var result = await _moMoService.RefundMoneyAsync(order.MoMoPayment.MoMoOrderId, order.MoMoPayment.TransId, order.MoMoPayment.Amount);
+
+                                    var json = JsonConvert.DeserializeObject<JObject>(result);
+
+                                    if (json.Value<int>("status") == 0)
+                                    {
+                                        transaction.Complete();
+
+                                        return CODE_SUCCESS;
+                                    }
+
+                                    return CODE_FAIL;
+                                case PAYPAL:
+                                    var total = Math.Round((order.Total / (decimal)EXCHANGE_RATE_USD), 2).ToString().Replace(COMMA, DOT);
+
+                                    var resultPaypal  = await _payPalService.CapturesRefund(order.PayPalPayment.CaptureId, total);
+
+                                    if (resultPaypal != null)
+                                    {
+                                        var captureRefundResult = resultPaypal.Result<PayPalCheckoutSdk.Payments.Refund>();
+
+                                        transaction.Complete();
+
+                                        return CODE_SUCCESS;
+                                    }
+                                    return CODE_FAIL;
+                                case COD:
+                                    transaction.Complete();
+
+                                    return CODE_SUCCESS;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderReject(string customer = EMPTY, string paymentMethod = EMPTY)
+        {
+            ViewBag.Customers = await _accountService.GetAllCustomersAsync();
+
+            if (!customer.Equals(EMPTY) && !paymentMethod.Equals(EMPTY))
+            {
+                ViewBag.Orders = _orderService.FilterOrder(customer: customer, paymentMethod: paymentMethod, status: STATUS_CANCELED);
+            }
+            else
+            {
+                ViewBag.Orders = _orderService.FilterOrder(status: STATUS_CANCELED);
+            }
+
+            return View();
         }
     }
 }

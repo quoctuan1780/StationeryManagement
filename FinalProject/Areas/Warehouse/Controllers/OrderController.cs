@@ -21,13 +21,15 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
+        private readonly IBillService _billService;
         private IWorkflowHistoryService _workflowHistoryService;
 
-        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext)
+        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext, IBillService billService)
         {
             _hubContext = hubContext;
             _orderService = orderService;
             _accountService = accountService;
+            _billService = billService;
             _workflowHistoryService = workflowHistoryService;
         }
 
@@ -43,19 +45,11 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        //public async Task<IActionResult> PrintExportWarehouse(int id)
-        //{
-
-        //}
-
         public async Task<int> PrepareOrder(int OrderId, int ProductId)
         {
             return await _orderService.PrepareOrder(OrderId,ProductId);
         }
-        public async Task<int> RejectOrder(int id)
-        {
-            return await _orderService.RejectOrder(id);
-        }
+
         public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY, string orderDate = EMPTY)
         {
             ViewBag.Customers = await _accountService.GetAllCustomersAsync();
@@ -101,11 +95,15 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
                     var resultAddworkflow = await _workflowHistoryService.AddWorkflowHistoryAsync(workFlow);
 
+                    var resultAddBill = await _billService.AddBillWithOrderIdAsync(orderId.Value);
+
                     if (!(resultAddworkflow is null))
                     {
                         transaction.Complete();
-                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync("AcceptOrders");
 
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_REVENUE);
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_REVENUE_CURRENT_MONTH);
                         await _hubContext.Clients.Group(SIGNAL_GROUP_SHIPPER).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_PICK);
 
                         return CODE_SUCCESS;
@@ -118,5 +116,17 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
             return ERROR_CODE_SYSTEM;
         }
+
+
+        #region Feature Developer
+        //public async Task<int> PrepareOrder(int OrderId, int ProductId)
+        //{
+        //    return await _orderService.PrepareOrder(OrderId,ProductId);
+        //}
+        //public async Task<int> RejectOrder(int id)
+        //{
+        //    return await _orderService.RejectOrder(id);
+        //}
+        #endregion
     }
 }

@@ -1,6 +1,5 @@
-﻿@using static Common.Constant;
-@{
-    ViewData["Title"] = "Index";
+﻿@{
+    ViewData["Title"] = "Danh sách phiếu yêu cầu nhập kho";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var requests = ViewBag.Receipts as IList<Entities.Models.ImportWarehouse>;
 }
@@ -14,12 +13,12 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            
+                            <th>Id</th>
                             <th>Ngày tạo</th>
                             <th>Tổng số sản phẩm</th>
                             <th>Ngày bắt đầu nhập</th>
                             <th>Trạng thái</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>

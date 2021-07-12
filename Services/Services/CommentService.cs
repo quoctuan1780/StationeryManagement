@@ -45,7 +45,7 @@ namespace Services.Services
         {
             return await _context.Comments
                         .Include(x => x.User)
-                        .Where(x => x.ProductId == productId && x.IsDeleted == false)
+                        .Where(x => x.ProductId == productId)
                         .ToListAsync();
         }
 

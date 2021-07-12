@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Doanh thu theo khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var customers = ViewBag.Customers as IList<Entities.Models.User>;
+}
+
+@section Links{
+    <style>
+        .hidden-table {
+            display: none;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card shadow mb-4" style="height: 95%;">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Chọn khoảng thống kê</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <select class="form-control selectpicker show-tick" id="customer" data-live-search="true">
+                                    <option value="null">Chọn khách hàng</option>
+                                    @if (customers != null)
+                                    {
+                                        foreach (var item in customers)
+                                        {
+                                            <option value="@item.Id">@item.FullName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <label>Thời gian bắt đầu</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="start-date" name="StartDate" class="form-field-input form-field-input-coupled" readonly />
+                                        <button id="start-date-button" class="btn btn-small">
+                                            <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                                 data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                                <path fill="currentColor"
+                                                      d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label>Thời gian kết thúc</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="end-date" name="EndDate" class="form-field-input form-field-input-coupled" readonly />
+                                        <button id="end-date-button" class="btn btn-small">
+                                            <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                                 data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                                <path fill="currentColor"
+                                                      d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4" style="height: 95%;">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Chức năng</h6>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; height: 100%">
+                            <button class="btn btn-primary" onclick="getRevenueByCustomer()">Thống kê</button>
+                            <button class="btn btn-success" onclick="exportExcelByCustomer()">Xuất excel</button>
+                            <button class="btn btn-danger">In báo cáo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="show-table" class="col-lg-12 hidden-table">
+        <div class="card shadow mb-4">
+            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+               role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                <h6 class="m-0 font-weight-bold text-primary">Chi tiết</h6>
+            </a>
+            <div class="collapse show" id="collapseCardExample">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng đơn hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Tổng đơn đã thanh toán</th>
+                                    <th>Tổng tiền đã thanh toán</th>
+                                    <th>Tổng số đơn hủy</th>
+                                    <th>Tổng tiền hủy</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8">
+
+                        </div>
+                        <div class="col-lg-4" style="display: flex; flex-direction: column; justify-content: center;" id="show-total-detail">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script type="text/javascript" src="~/js/statistical/calendar-date.js"></script>
+    <script type="text/javascript" src="~/js/statistical/export-statistical.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker({
+                liveSearch: true,
+                showSubtext: true,
+                Size: 10
+            });
+        });
+    </script>
+}

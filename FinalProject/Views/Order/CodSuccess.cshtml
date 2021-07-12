@@ -3,7 +3,21 @@
     ViewData["Title"] = "Đặt hàng thàng công";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>Thông báo đặt hàng thành công</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 <div id="box-content">
     <div class="position-02">
         <div class="container">
@@ -21,6 +35,6 @@
         $(document).ready(function () {
             $('#left-nav').remove();
             $('#banner').remove();
-        }
+        });
     </script>
 }

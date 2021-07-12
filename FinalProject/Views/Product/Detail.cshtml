@@ -18,11 +18,10 @@
     var user = await userManager.GetUserAsync(User);
 
     var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
- 
-    var suggest = ViewBag.Suggest as IList<Entities.Models.Product>;
-
 
     var skip = 10;
+    var suggest = ViewBag.Suggest as IList<Entities.Models.Product>;
+
 }
 @section Styles{
     <style>
@@ -210,12 +209,12 @@
                                         Giá bán:
                                         @if (product.SalePrice > 0)
                                         {
-                                            <strong style="color: #ee4d2d" class="price"> @product.SalePrice VNĐ</strong>
-                                            <span>Giá gốc: </span><del class="price"> @product.Price VNĐ</del>
+                                            <strong style="color: #ee4d2d" class="price"> @String.Format("{0:n0}", product.SalePrice) VNĐ</strong>
+                                            <span>Giá gốc: </span><del class="price"> @String.Format("{0:n0}", product.Price) VNĐ</del>
                                         }
                                         else
                                         {
-                                            <strong style="color: #ee4d2d" class="price"> @product.Price VNĐ</strong>
+                                            <strong style="color: #ee4d2d" class="price"> @String.Format("{0:n0}", product.Price) VNĐ</strong>
                                         }
                                     </h3>
                                 </p>
@@ -488,7 +487,7 @@
                                                                                         @if (isLogin)
                                                                                         {
                                                                                             <i class="pull-right">
-                                                                                                <span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[j].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
+                                                                                                <span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[i].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
                                                                                                     <small>Trả lời</small>
                                                                                                 </span>
                                                                                                 @if (commentReplies[j].UserId == user.Id)
@@ -605,7 +604,7 @@
             </div>
         </div>
     </div>
-    <!--End detail product-->
+
     <div>
         <div class="block vt-slider vt-slider7">
             <div class="slider-inner">
@@ -659,10 +658,8 @@
                                     </div>
                                     <a title="Add to cart" class="add-to-cart" href="#">Thêm vào giỏ</a>
                                 </div>
-                                <!--end item wrap -->
-                            </div>}
-
-
+                            </div>
+                        }
                     </div>
                 </div>
                 <div class="navslider">

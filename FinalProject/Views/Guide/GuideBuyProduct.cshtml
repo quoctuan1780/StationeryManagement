@@ -3,7 +3,21 @@
     ViewData["Title"] = "Hướng dẫn mua hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>Hướng dẫn mua hàng</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 <div class="container-fluid">
     <div class="fa-file-pdf col-lg-12" style="display: flex; flex-direction: row; justify-content: center">
         <embed style="width: 80%; min-height: 768px" src="@Url.Action("Download", "Guide", new { Type = GUIDE_BUY_PRODUCT })" type="application/pdf" />

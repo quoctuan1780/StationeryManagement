@@ -62,14 +62,6 @@ namespace Entities.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<decimal>("PurchaseTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SaleTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("Total")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -354,9 +346,6 @@ namespace Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ImportDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ReceiptRequestId")
                         .HasColumnType("int");
 
@@ -417,6 +406,9 @@ namespace Entities.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Amount")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MoMoOrderId")
                         .HasColumnType("nvarchar(450)");
 
@@ -428,6 +420,9 @@ namespace Entities.Migrations
 
                     b.Property<DateTime>("ResponseTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("TransId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MoMoPaymentId");
 
@@ -511,12 +506,18 @@ namespace Entities.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaymentMethod")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Province")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
@@ -591,6 +592,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CaptureId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LinkDetail")
                         .HasColumnType("nvarchar(max)");
@@ -790,9 +794,6 @@ namespace Entities.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")

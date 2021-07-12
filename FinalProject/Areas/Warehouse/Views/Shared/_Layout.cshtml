@@ -20,7 +20,73 @@
     <link href="~/style/css/snackbar/notiny.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading.css" />
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading-animate.css" />
-    <script type="text/javascript" src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/style/css/calendar/mc-calendar.min.css" />
+    <style>
+        .bootstrap-select.form-control {
+            border: 1px solid !important;
+        }
+
+        .hidden-table {
+            display: none;
+        }
+
+        .form-field-label,
+        .form-field-input {
+            display: block;
+        }
+
+        .form-field-input {
+            padding: 0.5em 0.7em;
+            border: 1px solid #919fae;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .input-wrapper {
+            display: flex;
+        }
+
+        .btn {
+            border: 1px solid #919fae;
+            border-radius: 0;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-large {
+            padding: 0.6em 1em;
+        }
+
+        .btn-small {
+            padding: 0 0.6em;
+        }
+
+        .calendarIcon {
+            height: 1rem;
+        }
+
+        .form-field-input-coupled {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            width: 100%;
+            height: calc(1.5em + .75rem + 2px);
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #6e707e;
+            background-color: #fff;
+            background-clip: padding-box;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+    </style>
+    
 </head>
 
 <body id="page-top">
@@ -74,6 +140,8 @@
     <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/js/loading/loading.js"></script>
+    <script type="text/javascript" src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     @if (User.Identity.IsAuthenticated)
     {
         <script>

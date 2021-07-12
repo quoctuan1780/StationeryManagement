@@ -58,6 +58,12 @@
                                         case STATUS_EVALUATED:
                                             <td class="alert alert-success">@item.Status</td>
                                             break;
+                                        case STATUS_PENDING_ADMIN_CANCED_ORDER:
+                                            <td class="alert alert-danger">@item.Status</td>
+                                        break;
+                                        case STATUS_CANCELED:
+                                            <td class="alert alert-danger">@item.Status</td>
+                                        break;
                                     }
                                     <td>
                                         <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.OrderId">
