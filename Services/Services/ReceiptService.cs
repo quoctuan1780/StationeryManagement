@@ -182,9 +182,12 @@ namespace Services.Services
 
         public async Task<int> RejectReceiptRequestAsync(int id)
         {
-            var rr = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
-            rr.Status = RECEIPT_REQUEST_REJECT;
-            _context.Update(rr);
+
+            var result = await _context.ReceiptRequests.FindAsync(id);
+            result.Status = RECEIPT_REQUEST_REJECT;
+
+            _context.ReceiptRequests.Update(result);
+
             return await _context.SaveChangesAsync();
         }
 
@@ -209,7 +212,9 @@ namespace Services.Services
                 .ThenInclude(x => x.ProductDetail)
                 .ThenInclude(x => x.Product)
                 .FirstOrDefaultAsync();
+
             int i = 0, count = 0;
+
             var products = await _context.ProductDetails.ToListAsync();
             var listChange = new List<ProductDetail>();
              importWarehouse.Status = RECEIPT_STATUS_PROCESSING;
@@ -241,8 +246,11 @@ namespace Services.Services
             {
                 importWarehouse.Status = RECEIPT_STATUS_COMPLETE;
             }
+
             _context.ProductDetails.UpdateRange(listChange);
+
             _context.ImportWarehouses.Update(importWarehouse);
+
             await _context.SaveChangesAsync();
 
             return importWarehouse;

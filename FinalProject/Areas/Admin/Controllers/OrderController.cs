@@ -27,8 +27,9 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IPayPalService _payPalService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
         private readonly IProductDetailService _productDetailService;
+        private readonly INotificationService _notificationService;
 
-        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext, IMoMoService moMoService, IPayPalService payPalService, IProductDetailService productDetailService)
+        public OrderController(IOrderService orderService, IAccountService accountService, IWorkflowHistoryService workflowHistoryService, IHubContext<SignalServer> hubContext, IMoMoService moMoService, IPayPalService payPalService, IProductDetailService productDetailService, INotificationService notificationService)
         {
             _hubContext = hubContext;
             _orderService = orderService;
@@ -37,6 +38,7 @@ namespace FinalProject.Areas.Admin.Controllers
             _payPalService = payPalService;
             _workflowHistoryService = workflowHistoryService;
             _productDetailService = productDetailService;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -257,6 +259,23 @@ namespace FinalProject.Areas.Admin.Controllers
                             UserRole = ROLE_ADMIN
                         };
 
+                        var link = Url.ActionLink("OrderInfo", "Order",
+                                            new { Area = "", OrderId = order.OrderId },
+                                            Request.Scheme);
+                        var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_REJECT_ORDER);
+
+                        var notification = new Notification()
+                        {
+                            CreatedDate = DateTime.Now,
+                            Link = link,
+                            NotificationTypeId = notificationType.NotificationTypeId,
+                            Status = STATUS_NOT_SEEN_NOTIFICATION,
+                            UserId = order.UserId,
+                            RecordId = order.OrderId,
+                            RoleSeen = ROLE_CUSTOMER,
+                            Content = "Quản trị viên đã hủy đơn hàng có mã là #" + order.OrderId + " của bạn"
+                        };
+
                         if (content.Equals(EMPTY))
                         {
                             workflow.CurrentStatus = STATUS_WAITING_CONFIRM;
@@ -281,6 +300,9 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                     if (json.Value<int>("status") == 0)
                                     {
+                                        await _notificationService.AddNotificationAsync(notification);
+
+                                        await _hubContext.Clients.User(order.UserId).SendAsync(SIGNAL_NOTIFICATION_REJECT_ORDER_CUSTOMER);
                                         transaction.Complete();
 
                                         return CODE_SUCCESS;
@@ -296,12 +318,20 @@ namespace FinalProject.Areas.Admin.Controllers
                                     {
                                         var captureRefundResult = resultPaypal.Result<PayPalCheckoutSdk.Payments.Refund>();
 
+                                        await _notificationService.AddNotificationAsync(notification);
+
+                                        await _hubContext.Clients.User(order.UserId).SendAsync(SIGNAL_NOTIFICATION_REJECT_ORDER_CUSTOMER);
+
                                         transaction.Complete();
 
                                         return CODE_SUCCESS;
                                     }
                                     return CODE_FAIL;
                                 case COD:
+                                    await _notificationService.AddNotificationAsync(notification);
+
+                                    await _hubContext.Clients.User(order.UserId).SendAsync(SIGNAL_NOTIFICATION_REJECT_ORDER_CUSTOMER);
+
                                     transaction.Complete();
 
                                     return CODE_SUCCESS;

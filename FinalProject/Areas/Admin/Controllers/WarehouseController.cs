@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Entities.Models;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -24,17 +25,23 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly IReceiptService _receiptService;
         private readonly IRecommendationService _recommendationService;
+        private readonly IAccountService _accountService;
+        private readonly INotificationService _notificationService;
+        private readonly IWorkflowHistoryService _workflowHistoryService;
         private static DateTime FromDate;
         private static DateTime ToDate;
         private static int Quantity;
 
         public WarehouseController(IProductService productService, IReceiptService receiptService, 
-            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext)
+            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, IAccountService accountService, INotificationService notificationService, IWorkflowHistoryService workflowHistoryService)
         {
             _hubContext = hubContext;
             _productService = productService;
             _receiptService = receiptService;
             _recommendationService = recommendationService;
+            _accountService = accountService;
+            _notificationService = notificationService;
+            _workflowHistoryService = workflowHistoryService;
         }
         public async Task<IActionResult> ViewRecommendation()
         {
@@ -93,15 +100,65 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 return PartialView(ERROR_404_PAGE_ADMIN);
             }
-            if (await _receiptService.RejectReceiptRequestAsync(id.Value) > 0)
-                ViewBag.Message = "Từ chối thành công!";
-            var result = await _receiptService.RejectReceiptRequestAsync(id.Value);
 
-            if (result > 0)
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
             {
-                ViewBag.Message = "Xóa thành công!";
-            }
+                var result = await _receiptService.RejectReceiptRequestAsync(id.Value);
 
+                if (result > 0)
+                {
+                    var receiptRequest = await _receiptService.GetReceiptRequestAsync(id.Value);
+
+                    var workflow = new WorkflowHistory()
+                    {
+                        CreatedBy = receiptRequest.UserId,
+                        CreatedDate = DateTime.Now,
+                        FullName = receiptRequest.User.FullName,
+                        CurrentStatus = RECEIPT_REQUEST_STATUS_WAITING,
+                        Type = TYPE_IMPORT_WAREHOUSE,
+                        UserEmail = receiptRequest.User.Email,
+                        UserRole = ROLE_ADMIN,
+                        NextStatus = RECEIPT_REQUEST_REJECT,
+                        RecordId = id.Value.ToString()
+                    };
+
+                    await _workflowHistoryService.AddWorkflowHistoryAsync(workflow);
+
+                    var link = Url.ActionLink("ViewRequestReceipt", "Home",
+                                            new { Area = AREA_WAREHOUSE, Id = id.Value },
+                                            Request.Scheme);
+
+                    var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_REJECT_RECEIPT_IMPORT_WAREHOUSE);
+
+                    var content = "Quản trị viên từ chối đơn nhập hàng có mã đơn là #" + id.Value;
+
+                    var notification = new Notification()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Link = link,
+                        NotificationTypeId = notificationType.NotificationTypeId,
+                        Status = STATUS_NOT_SEEN_NOTIFICATION,
+                        UserId = receiptRequest.UserId,
+                        RecordId = id.Value,
+                        RoleSeen = ROLE_WAREHOUSE_MANAGER,
+                        Content = content,
+                    };
+
+                    await _notificationService.AddNotificationAsync(notification);
+
+                    await _hubContext.Clients.User(receiptRequest.UserId).SendAsync(SIGNAL_NOTIFICATION_REJECT_RECEIPT_REQUEST, link, DateTime.Now.ToShortDateString(), content);
+
+                    transaction.Complete();
+
+                    TempData["MessageSuccess"] = "Từ chối đơn nhập hàng thành công";
+                }
+            }
+            catch
+            {
+                TempData["MessageError"] = "Lỗi hệ thống! từ chối đơn nhập hàng không thàng công";
+            }
+            
             return Redirect("/Admin/Warehouse/ListReceiptRequest");
         }
 
@@ -117,21 +174,68 @@ namespace FinalProject.Areas.Admin.Controllers
             try
             {
                 var result = await _receiptService.ApproveReceiptRequestAsync(id.Value);
+
                 if (result > 0)
                 {
-                    await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync(SIGNAL_COUNT_RECEPT_REQUEST_ACCEPT);
+                    var receiptRequest = await _receiptService.GetReceiptRequestAsync(id.Value);
+
+                    var workflow = new WorkflowHistory()
+                    {
+                        CreatedBy = receiptRequest.UserId,
+                        CreatedDate = DateTime.Now,
+                        FullName = receiptRequest.User.FullName,
+                        CurrentStatus = RECEIPT_REQUEST_STATUS_WAITING,
+                        Type = TYPE_IMPORT_WAREHOUSE,
+                        UserEmail = receiptRequest.User.Email,
+                        UserRole = ROLE_ADMIN,
+                        NextStatus = RECEIPT_REQUEST_STATUS_APPROVED,
+                        RecordId = id.Value.ToString()
+                    };
+
+                    await _workflowHistoryService.AddWorkflowHistoryAsync(workflow);
+
                     result = await _receiptService.AddReceiptAsync(id.Value);
+
                     if(result > 0)
                     {
+                        var link = Url.ActionLink("ViewRequestReceipt", "Home",
+                                            new { Area = AREA_WAREHOUSE, Id = id.Value },
+                                            Request.Scheme);
+
+                        var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_REQUEST_RECEIPT_IMPORT_WAREHOUSE);
+
+                        var content = "Quản trị viên đã duyệt đơn nhập hàng có mã đơn là #" + id.Value;
+
+                        var notification = new Notification()
+                        {
+                            CreatedDate = DateTime.Now,
+                            Link = link,
+                            NotificationTypeId = notificationType.NotificationTypeId,
+                            Status = STATUS_NOT_SEEN_NOTIFICATION,
+                            UserId = receiptRequest.UserId,
+                            RecordId = id.Value,
+                            RoleSeen = ROLE_WAREHOUSE_MANAGER,
+                            Content = content
+                        };
+                           
+
+                        await _notificationService.AddNotificationAsync(notification);
+
+
+                        await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync(SIGNAL_COUNT_RECEPT_REQUEST_ACCEPT);
+
+                        await _hubContext.Clients.User(receiptRequest.UserId).SendAsync(SIGNAL_NOTIFICATION_APPROVED_RECEIPT_REQUEST, link, DateTime.Now.ToShortDateString(), content);
+
                         transaction.Complete();
 
-                        ViewBag.Message = "Đã duyệt!";
+                        TempData["MessageSuccess"] = "Duyệt đơn yêu cầu nhập hàng thành công";
                     }
                 }
                 
             }
             catch
             {
+                TempData["MessageError"] = "Lỗi hệ thống! duyệt đơn nhập hàng không thàng công";
             }
 
             return Redirect("/Admin/Warehouse/ListReceiptRequest");

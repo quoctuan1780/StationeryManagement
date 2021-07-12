@@ -17,5 +17,9 @@ namespace Services.Hubs
         {
             return Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
+        public Task CustomerJoinGroup(string groupName)
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
     }
 }

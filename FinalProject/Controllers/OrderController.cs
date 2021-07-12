@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using X.PagedList;
+using NPOI.XSSF.UserModel;
 
 namespace FinalProject.Controllers
 {
@@ -36,11 +37,12 @@ namespace FinalProject.Controllers
         private readonly IDeliveryAddressService _deliveryAddressService;
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly INotificationService _notificationService;
 
         public OrderController(IAccountService accountService, ICartService cartService, IConfiguration configuration,
             IPayPalService payPalService, IMoMoService moMoService, IOrderDetailService orderDetailService,
             IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService,
-            IHubContext<SignalServer> hubContext, IWorkflowHistoryService workflowHistoryService)
+            IHubContext<SignalServer> hubContext, IWorkflowHistoryService workflowHistoryService, INotificationService notificationService)
         {
             _accountService = accountService;
             _cartService = cartService;
@@ -53,6 +55,7 @@ namespace FinalProject.Controllers
             _deliveryAddressService = deliveryAddressService;
             _hubContext = hubContext;
             _workflowHistoryService = workflowHistoryService;
+            _notificationService = notificationService;
         }
         public async Task<IActionResult> Order()
         {
@@ -206,12 +209,42 @@ namespace FinalProject.Controllers
             {
                 return PartialView(ERROR_404_PAGE);
             }
+
             var user = await _accountService.GetUserAsync(User);
             await _cartService.RemoveCartItemByUserId(user.Id);
             ViewBag.OrderId = orderId.Value;
+            var link = Url.ActionLink("OrderWaitComfirm", "Order",
+                                            new { Area = AREA_ADMIN },
+                                            Request.Scheme);
+            var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
+            var notifications = new List<Notification>();
+            var admins = await _accountService.GetAllAdminsAsync();
+            var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + orderId.Value;
+            if (admins != null)
+            {
+                foreach(var item in admins)
+                {
+                    var nofification = new Notification()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Link = link,
+                        NotificationTypeId = notificationType.NotificationTypeId,
+                        Status = STATUS_NOT_SEEN_NOTIFICATION,
+                        UserId = item.Id,
+                        RecordId = orderId.Value,
+                        RoleSeen = ROLE_ADMIN,
+                        Content = content
+                    };
+
+                    notifications.Add(nofification);
+                }
+            }
+            
+            await _notificationService.AddNotificationAsync(notifications);
 
             await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
             await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), content);
 
             return View();
         }
@@ -268,7 +301,6 @@ namespace FinalProject.Controllers
                 string captureId = EMPTY;
                 if (!(captureOrderResponse is null))
                 {
-
                     var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
                     if(captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
@@ -307,12 +339,46 @@ namespace FinalProject.Controllers
                             {
                                 await _cartService.RemoveCartItemByUserId(user.Id);
 
+                                var link = Url.ActionLink("OrderWaitComfirm", "Order",
+                                            new { Area = AREA_ADMIN },
+                                            Request.Scheme);
+
+                                var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
+
+                                var notifications = new List<Notification>();
+
+                                var admins = await _accountService.GetAllAdminsAsync();
+
+                                var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + order.OrderId;
+                                if (admins != null)
+                                {
+                                    foreach (var item in admins)
+                                    {
+                                        var nofification = new Notification()
+                                        {
+                                            CreatedDate = DateTime.Now,
+                                            Link = link,
+                                            NotificationTypeId = notificationType.NotificationTypeId,
+                                            Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                            UserId = item.Id,
+                                            RecordId = order.OrderId,
+                                            RoleSeen = ROLE_ADMIN,
+                                            Content = content
+                                        };
+
+                                        notifications.Add(nofification);
+                                    }
+                                }
+
+                                await _notificationService.AddNotificationAsync(notifications);
+
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;
 
                                 await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
                                 await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), content);
                             }
                         }
                     }
@@ -390,12 +456,48 @@ namespace FinalProject.Controllers
                             {
                                 await _cartService.RemoveCartItemByUserId(user.Id);
 
+                                var link = Url.ActionLink("OrderWaitComfirm", "Order",
+                                            new { Area = AREA_ADMIN },
+                                            Request.Scheme);
+
+                                var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
+
+                                var notifications = new List<Notification>();
+
+                                var admins = await _accountService.GetAllAdminsAsync();
+
+                                var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + order.OrderId;
+                                if (admins != null)
+                                {
+                                    foreach (var item in admins)
+                                    {
+                                        var nofification = new Notification()
+                                        {
+                                            CreatedDate = DateTime.Now,
+                                            Link = link,
+                                            NotificationTypeId = notificationType.NotificationTypeId,
+                                            Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                            UserId = item.Id,
+                                            RecordId = order.OrderId,
+                                            RoleSeen = ROLE_ADMIN,
+                                            Content = content
+                                        };
+
+                                        notifications.Add(nofification);
+                                    }
+                                }
+
+                                await _notificationService.AddNotificationAsync(notifications);
+
+                                await _notificationService.AddNotificationAsync(notifications);
+
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;
 
                                 await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
                                 await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                                await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), content);
 
                                 return View();
                             }
@@ -453,9 +555,41 @@ namespace FinalProject.Controllers
 
                         if (workflowHistory != null)
                         {
+                            var link = Url.ActionLink("OrderWaitReject", "Order",
+                                            new { Area = AREA_ADMIN },
+                                            Request.Scheme);
+
+                            var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_REJECT_ORDER);
+                            var admins = await _accountService.GetAllAdminsAsync();
+                            var notifications = new List<Notification>();
+                            var contentNotify = "Khách hàng " + user.FullName + " đã yêu cầu hủy đơn hàng với mã đơn hàng là #" + order.OrderId;
+                            if (admins != null)
+                            {
+                                foreach(var item in admins)
+                                {
+                                    var nofification = new Notification()
+                                    {
+                                        CreatedDate = DateTime.Now,
+                                        Link = link,
+                                        NotificationTypeId = notificationType.NotificationTypeId,
+                                        Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                        UserId = item.Id,
+                                        RecordId = order.OrderId,
+                                        RoleSeen = ROLE_ADMIN,
+                                        Content = contentNotify
+                                    };
+
+                                    notifications.Add(nofification);
+                                }
+                            }
+                            
+
+                            var resultAddNotification = await _notificationService.AddNotificationAsync(notifications);
+
                             transaction.Complete();
 
                             await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_ORDER_WAIT_TO_REJECT);
+                            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_REJECT_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), contentNotify);
 
                             return CODE_SUCCESS;
                         }

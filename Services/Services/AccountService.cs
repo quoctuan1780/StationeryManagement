@@ -204,8 +204,6 @@ namespace Services.Services
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
 
-            users = users.ToList();
-
             return users;
         }
 
@@ -308,6 +306,11 @@ namespace Services.Services
             }
 
             return null;
+        }
+
+        public async Task<IList<User>> GetAllAdminsAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(ROLE_ADMIN);
         }
     }
 }

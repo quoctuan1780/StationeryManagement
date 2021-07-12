@@ -1,6 +1,7 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
 using System.Collections.Generic;
@@ -13,15 +14,34 @@ namespace Services.Services
 {
     public class RecommandationService : IRecommendationService
     {
+        private readonly IProductService _productService;
         private readonly ShopDbContext _context;
 
-        public RecommandationService(ShopDbContext shopDbContext)
+
+        public RecommandationService(ShopDbContext shopDbContext, IProductService productService)
         {
+            _productService = productService;
             _context = shopDbContext;
+            
         }
 
+        public async Task<List<ProductDetail>> GetListProductDetailForCreateRR(DateTime fromDate, DateTime toDate, int quantity)
+        {
+            var listUnion = await _productService.GetProductDetailsRunOutOfStockAsync();
+            
+            var listBestSeller = await _productService.GetBestSellerInMonthAsync(fromDate,toDate,quantity);
+            
+            var listId = await _productService.ListBestSellerProduct(fromDate,toDate,quantity);
+            var listRecommandation = await GetRecommandtion(listId);
 
-        public async Task<IList<ProductDetail>> GetRecommandtion(List<int> listInput)
+            listUnion = listUnion.Union(listBestSeller).ToList();
+            listUnion = listUnion.Union(listRecommandation).ToList();
+            listUnion = listUnion.Distinct().ToList();
+
+            return listUnion;
+        }
+
+        public async Task<List<ProductDetail>> GetRecommandtion(List<int> listInput)
         {
             var listPro = new List<ProductDetail>();
             var rec =  await _context.Recommendations.Include(x => x.RecommendationDetails).OrderBy(x => x.CreateDate).FirstOrDefaultAsync();
@@ -46,7 +66,7 @@ namespace Services.Services
                     listProductId.Add(item.Output);
                 }
                     
-                listPro = _context.ProductDetails.Where(p => listProductId.Contains(p.ProductDetailId.ToString())).ToList();
+                listPro = _context.ProductDetails.Include(x => x.Product).Where(p => listProductId.Contains(p.ProductDetailId.ToString())).ToList();
                 
                 
             }

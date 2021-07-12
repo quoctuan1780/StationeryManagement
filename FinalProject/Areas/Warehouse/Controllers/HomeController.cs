@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using NPOI.OpenXmlFormats.Spreadsheet;
 using Services.Hubs;
 using Services.Interfacies;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -30,9 +32,11 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IProductDetailService _productDetailService;
         private readonly IHubContext<SignalServer> _hubContext;
+        private readonly IWorkflowHistoryService _workflowHistoryService;
+        private readonly INotificationService _notificationService;
 
-        public HomeController(IProductService productService, IReceiptService receiptService,IAccountService accountService, 
-            UserManager<User> userManager, IOrderService orderService, IWebHostEnvironment webHostEnvironment,IProductDetailService productDetailService, IHubContext<SignalServer> hubContext)
+        public HomeController(IProductService productService, IReceiptService receiptService, IAccountService accountService, UserManager<User> userManager, IOrderService orderService, IHubContext<SignalServer> hubContext, 
+            IWorkflowHistoryService workflowHistoryService, INotificationService notificationService, IWebHostEnvironment webHostEnvironment, IProductDetailService productDetailService)
         {
             _receiptService = receiptService;
             _accountService = accountService;
@@ -42,6 +46,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
             _webHostEnvironment = webHostEnvironment;
             _productDetailService = productDetailService;
             _hubContext = hubContext;
+            _workflowHistoryService = workflowHistoryService;
+            _notificationService = notificationService;
         }
 
         public IActionResult Dashboard()
@@ -52,13 +58,42 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<IActionResult> UpdateReceipt(int id)
         {
             ViewBag.Receipt = await _receiptService.GetReceiptAsync(id);
+
+            ViewBag.User = await _accountService.GetUserAsync(User);
+
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateReceipt(int id, List<int> AddQuantity)
         {
-            ViewBag.Receipt = await _receiptService.GetReceiptAfterUpdate(id, AddQuantity);
+            ViewBag.User = await _accountService.GetUserAsync(User);
+
+            if (AddQuantity is null)
+            {
+                return View();
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                var result =  await _receiptService.GetReceiptAfterUpdate(id, AddQuantity);
+
+                if(result != null)
+                {
+                    transaction.Complete();
+
+                    ViewBag.Receipt = result;
+
+                    return View();
+                }
+            }
+            catch
+            {
+            }
+
+            ViewBag.Receipt = await _receiptService.GetReceiptAsync(id);
+
             return View();
         }
 
@@ -139,52 +174,113 @@ namespace FinalProject.Areas.Warehouse.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateReceiptRequest(ReceiptRequestViewModel model)
         {
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            try
+            ViewBag.Products = await _productService.GetProductWithDetailsAsync();
+            ModelState.Remove("Quantity");
+            if (ModelState.IsValid)
             {
-                var receiptRequest = new ReceiptRequest
+                if(model.ProductDetailId.Count != model.Quantity.Count)
                 {
-                    CreateDate = model.CreateDate,
-                    Status = RECEIPT_REQUEST_STATUS_WAITING,
-                    UserId = model.UserId,
-                };
+                    return View(model);
+                }
 
-                var resultAddRecept = await _receiptService.AddReceiptRequestAsync(receiptRequest);
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                if (resultAddRecept)
+                try
                 {
-                    var list = new List<ReceiptRequestDetail>();
-                    for (int i = 0; i < model.ProductDetailId.Count; i++)
+                    var user = await _accountService.GetUserByUserIdAsync(model.UserId);
+
+                    var receiptRequest = new ReceiptRequest
                     {
-                        var requestDetail = new ReceiptRequestDetail()
+                        CreateDate = model.CreateDate,
+                        Status = RECEIPT_REQUEST_STATUS_WAITING,
+                        UserId = model.UserId
+                    };
+
+                    var workflow = new WorkflowHistory()
+                    {
+                        CreatedBy = model.UserId,
+                        CreatedDate = DateTime.Now,
+                        FullName = user.FullName,
+                        CurrentStatus = RECEIPT_REQUEST_STATUS_WAITING,
+                        Type = TYPE_IMPORT_WAREHOUSE,
+                        UserEmail = user.Email,
+                        UserRole = ROLE_ADMIN,
+                        NextStatus = RECEIPT_REQUEST_STATUS_APPROVED
+                    };
+
+                    var resultAddRecept = await _receiptService.AddReceiptRequestAsync(receiptRequest);
+
+                    if (resultAddRecept)
+                    {
+                        workflow.RecordId = receiptRequest.ReceiptRequestId.ToString();
+
+                        await _workflowHistoryService.AddWorkflowHistoryAsync(workflow);
+
+                        var list = new List<ReceiptRequestDetail>();
+                        for (int i = 0; i < model.ProductDetailId.Count; i++)
                         {
-                            ProductDetailId = model.ProductDetailId[i],
-                            Quantity = model.Quantity[i],
-                            ReceiptRequestId = receiptRequest.ReceiptRequestId,
-                            Status = RECEIPT_REQUEST_STATUS_WAITING,
+                            var requestDetail = new ReceiptRequestDetail()
+                            {
+                                ProductDetailId = model.ProductDetailId[i],
+                                Quantity = model.Quantity[i],
+                                ReceiptRequestId = receiptRequest.ReceiptRequestId,
+                                Status = RECEIPT_REQUEST_STATUS_WAITING,
 
-                        };
-                        list.Add(requestDetail);
-                    }
-                    var result = await _receiptService.AddReceiptRequestDetailAsync(list);
+                            };
+                            list.Add(requestDetail);
+                        }
+                        var result = await _receiptService.AddReceiptRequestDetailAsync(list);
 
-                    if (result > 0) 
-                    {
-                        transaction.Complete();
+                        if (result > 0)
+                        {
+                            var link = Url.ActionLink("ViewRequestReceipt", "Warehouse",
+                                            new { Area = AREA_ADMIN, Id = receiptRequest.ReceiptRequestId },
+                                            Request.Scheme);
 
-                        await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_RECEPT);
+                            var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_REQUEST_RECEIPT_IMPORT_WAREHOUSE);
 
-                        return Redirect("/Warehouse/Home/ViewListRequestReceipt");
+                            var notifications = new List<Notification>();
+
+                            var admins = await _accountService.GetAllAdminsAsync();
+
+                            var content = "Quản kho " + user.FullName + " đã tạo một yêu cầu nhập hàng mã đơn là #" + receiptRequest.ReceiptRequestId;
+                            if (admins != null)
+                            {
+                                foreach (var item in admins)
+                                {
+                                    var nofification = new Notification()
+                                    {
+                                        CreatedDate = DateTime.Now,
+                                        Link = link,
+                                        NotificationTypeId = notificationType.NotificationTypeId,
+                                        Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                        UserId = item.Id,
+                                        RecordId = receiptRequest.ReceiptRequestId,
+                                        RoleSeen = ROLE_ADMIN,
+                                        Content = content
+                                    };
+
+                                    notifications.Add(nofification);
+                                }
+                            }
+
+                            await _notificationService.AddNotificationAsync(notifications);
+
+                            transaction.Complete();
+
+                            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_RECEPT);
+
+                            await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_RECEIPT_REQUEST, link, DateTime.Now.ToShortDateString(), content);
+
+                            return Redirect("/Warehouse/Home/ViewListRequestReceipt");
+                        }
                     }
                 }
+                catch
+                {
+                    ViewBag.Message = "Thêm phiếu nhập không thành công";
+                }
             }
-            catch
-            {
-                ViewBag.Message = "Thêm phiếu nhập không thành công";
-            }
-
-            ViewBag.Products = await _productService.GetProductWithDetailsAsync();
 
             return View(model);
         }

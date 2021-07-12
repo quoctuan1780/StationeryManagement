@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "SaleProduct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var products = ViewBag.Products as IList<Entities.Models.Product>;
+}
+
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>Sản phẩm khuyến mại</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="position-01">
+    <div class="container">
+        <div class="row">
+            <div class="row">
+                <h2>Các sản phẩm đang được khuyến mại</h2>
+                @if(products != null) { 
+                    foreach (var item in products)
+                    {
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-9">
+                            <div class="products-grid">
+                                <div class="item">
+                                    <div class="item-wrap">
+                                        <div class="item-image">
+                                            <a class="product-image no-touch" href="javascript:void(0)">
+                                                @if (!(item.ProductImages.FirstOrDefault() is null))
+                                                {
+                                                    {
+                                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <img class="first_image" src="~/images/product/img_1.jpg"
+                                                         alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                }
+                                            </a>
+                                            <div class="item-btn">
+                                                <div class="box-inner">
+                                                    <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                    <span class="qview">
+                                                        <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                           data-placement="left" data-toggle="tooltip"
+                                                           asp-controller="Product" asp-action="Detail"
+                                                           asp-route-id="@item.ProductId">
+                                                            <span>
+                                                                Quick
+                                                                View
+                                                            </span>
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="pro-info">
+                                            <div class="pro-inner">
+                                                <div class="pro-title product-name">
+                                                    <a asp-controller="Product" asp-action="Detail"
+                                                       asp-route-id="@item.ProductId">
+                                                        @item.ProductName
+                                                    </a>
+                                                </div>
+                                                <div class="pro-content">
+                                                    <div class="wrap-price">
+                                                        <div class="price-box" style="min-height: 60px">
+                                                            @if (item.SalePrice > 0)
+                                                            {
+                                                                <span class="regular-price">
+                                                                    <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
+                                                                </span>
+                                                                <p class="special-price">
+                                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                                </p>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="regular-price">
+                                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div style="height: 110px">
+                                                        @if (item.RatingDetails != null && item.RatingDetails.Any())
+                                                        {
+                                                            var rating = from rd in item.RatingDetails
+                                                                         group rd by rd.RatingId into g
+                                                                         select new
+                                                                         {
+                                                                             RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
+                                                                             UserRating = g.Count()
+                                                                         };
+
+                                                            var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
+                                                            <span>Đánh giá</span>
+                                                            <div class="ratings" style="margin-bottom: .5rem;">
+                                                                <div class="rating-box">
+                                                                    <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p>Chưa có đánh giá</p>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                            Chi tiết sản phẩm
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                }
+                else
+                {
+                <p>Không có sản phẩm</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#left-nav').remove();
+            $('#banner').remove();
+        });
+    </script>
+}
