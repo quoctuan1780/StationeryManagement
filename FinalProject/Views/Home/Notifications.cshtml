@@ -1,0 +1,177 @@
+﻿@using static Common.Constant
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@model PagedList<Entities.Models.Notification>
+@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var user = ViewBag.User as Entities.Models.User;
+}
+
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li class="home">
+                    <a asp-action="Index" asp-controller="Home" title="Go to Home Page">Trang chủ</a>
+                    <span>|</span>
+                </li>
+                <li class="category3">
+                    <strong>Thông báo</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 order-md-1">
+            <div class="profiles">
+                <p class="image">
+                    @if (user.Image is null)
+                    {
+                        <img src="~/images/user/avatar.png" height="50" width="50" alt="Avatar">
+                    }
+                    else
+                    {
+                        string email = user.Email.Replace('+', 'a');
+
+                        <img src="~/images/user/@email/@user.Image" height="50" width="50" alt="Avatar">
+                    }
+                </p>
+                <p class="name">Tài khoản của</p>
+                <h6>@user.FullName</h6>
+            </div>
+            <div class="menu-user">
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action">
+                        <a asp-action="Information" asp-controller="Account">Thông tin tài khoản</a>
+                    </li>
+                    <li class="list-group-item list-group-item-action">
+                        <a asp-action="ChangePassword" asp-controller="Account">Đổi mật khẩu</a>
+                    </li>
+                    <li class="list-group-item list-group-item-action">
+                        <a asp-action="Notifications" asp-controller="Home">Thông báo</a>
+                    </li>
+                    <li class="list-group-item list-group-item-action">
+                        <a href="#">Sản phẩm đã thích</a>
+                    </li>
+                    <li class="list-group-item list-group-item-action">
+                        <a asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">Đơn hàng đã mua</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-9 order-md-2">
+            <div class="table-wrap">
+                @if (Model != null && Model.Any())
+                {
+                    <table class="table table-striped">
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.CreatedDate.ToShortDateString()</td>
+                                    <td>
+                                        @{
+                                            string onclick = "seenNotify(" + item.NotificationId + ")";
+                                            if (item.Status.Equals(STATUS_SEEN_NOTIFICATION))
+                                            {
+                                                onclick = "javascript:void(0)";
+                                            }
+                                        }
+                                        <a href="@item.Link" onclick="@onclick">
+                                            @item.Content
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
+                                        {
+                                            <img src="~/images/background/icon-status.png" width="30" height="30" />
+                                        }
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div style="text-align: center">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Orders", new { userId = user.Id, page }),
+                            new X.PagedList.Web.Common.PagedListRenderOptions
+                            {
+                                DisplayItemSliceAndTotal = false,
+                                ContainerDivClasses = new[] { "navigation" },
+                                LiElementClasses = new[] { "page-item" },
+                                PageClasses = new[] { "page-link" },
+                            })
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align: center">
+                        Không có thông báo nào
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="~/admin/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="~/js/user/user-information.js"></script>
+    <script>
+        function deleteNotify(el, id) {
+
+        }
+
+        function seenNotify(id) {
+            $.ajax({
+                url: '/Home/SeenNotify',
+                method: 'PUT',
+                async: true,
+                data: { notificationId: id },
+                success: function (data) {
+
+                },
+                error: function (code, err) {
+
+                }
+            });
+        }
+
+        function deleteNotify(el, id) {
+            if (id === '') {
+                showErrorSystem();
+                return undefined;
+            }
+
+            $.ajax({
+                url: '/Home/DeleteNofity',
+                method: 'DELETE',
+                async: true,
+                data: { notificationId: id },
+                success: function (data) {
+                    switch (data) {
+                        case 1:
+                            showSuccess("Xóa thông báo thành công");
+                            $(el).closest('tr').remove();
+                            break;
+                        default:
+                            showError("Hệ thống xảy ra lỗi vui lòng thử lại sau", '360px')
+                            break;
+                    }
+                },
+                error: function (code, err) {
+                    showErrorSystem();
+                }
+            })
+        }
+    </script>
+}

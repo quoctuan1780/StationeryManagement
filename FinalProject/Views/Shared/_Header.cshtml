@@ -1,6 +1,7 @@
 @inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> _userManager
 @inject Services.Interfacies.ICartService _cartService
 @inject Services.Interfacies.IAccountService _accountService
+@inject Services.Interfacies.INotificationService _notificationService
 @{
     IList<Entities.Models.CartItem> carts = null;
     string userId = null;
@@ -10,6 +11,8 @@
     long total = 0;
 
     bool checkUserRole = false;
+
+    int? countNotifications = null;
 
     Entities.Models.User user = null;
     if (!(User is null) && User.Identity.IsAuthenticated)
@@ -21,6 +24,7 @@
             userId = _userManager.GetUserId(User);
             carts = await _cartService.GetCartsByUserIdAsync(userId) as IList<Entities.Models.CartItem>;
             total = (long)_cartService.GetCartTotalByUserId(userId);
+            countNotifications = await _notificationService.CountNotificationsAsync("Customer", userId);
         }
     }
 }
@@ -57,7 +61,19 @@
                             <div class="col-xl-6 account-and-cart" style="display: flex; flex-direction: row; align-items: center">
                                 <div class="my-account">
                                     <div class="content">
-                                        <ul class="left navbar-nav ml-auto">
+                                        <ul class="left navbar-nav ml-auto" style="display: flex; flex-direction: row; align-items: center;">
+                                            <li class="nav-item no-arrow" style="padding: 1.5rem">
+                                                @if (User.Identity.IsAuthenticated && checkUserRole)
+                                                {
+                                                    <a asp-action="Notifications" asp-controller="Home">
+                                                        <i class="glyphicon glyphicon-bell" style="font-size: 20px; position: relative"></i>
+                                                        @if (countNotifications != null)
+                                                        {
+                                                            <span id="count-notification" style="font-weight: 600; position: absolute; font-size: 14px; color: red; ">@countNotifications</span>
+                                                        }
+                                                    </a>
+                                                }
+                                            </li>
                                             <li class="nav-item dropdown no-arrow">
                                                 @if (User.Identity.IsAuthenticated && checkUserRole)
                                                 {

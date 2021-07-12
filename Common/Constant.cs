@@ -213,6 +213,8 @@ namespace Common
         public const string STATUS_EVALUATED = "Đã đánh giá";
         public const string STATUS_CANCELED = "Đã hủy";
         public const string STATUS_PENDING_ADMIN_CANCED_ORDER = "Chờ người quản trị xác nhận hủy đơn hàng";
+        public const string STATUS_SEEN_NOTIFICATION = "Đã xem";
+        public const string STATUS_NOT_SEEN_NOTIFICATION = "Chưa xem";
         #endregion
 
         #region Fast Delivery
@@ -262,6 +264,17 @@ namespace Common
         #region Sale constant
         public const string TYPE_SALE_FOR_PRODUCT = "Khuyến mãi cho sản phẩm";
         public const string TYPE_SALE_FOR_ORDER = "Khuyến mãi cho đơn hàng";
+        #endregion
+
+        #region Notification Type
+        public const string NOTIFICATION_ORDER = "Thông báo đặt hàng";
+        public const string NOTIFICATION_REJECT_ORDER = "Thông báo hủy đơn hàng";
+        public const string NOTIFICATION_SALE = "Thông báo khuyến mại";
+        public const string NOTIFICATION_IMPORT_WAREHOUSE = "Thông báo nhập kho";
+        public const string NOTIFICATION_REQUEST_RECEIPT_IMPORT_WAREHOUSE = "Thông báo yêu cầu nhập kho";
+        public const string NOTIFICATION_REJECT_RECEIPT_IMPORT_WAREHOUSE = "Thông báo từ chối đơn nhập kho";
+        public const string NOTIFICATION_EXPORT_WAREHOUSE = "Thông báo xuất kho";
+        public const string NOTIFICATION_DELETE = "Thông báo xóa";
         #endregion
     }
 }

@@ -1,15 +1,14 @@
-﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
-@model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
-@{
-    ViewData["Title"] = "CreateReceiptRequest";
+﻿@{
+    ViewData["Title"] = "Cập nhật phiếu nhập kho";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var request = ViewBag.Receipt as Entities.Models.ImportWarehouse;
-    var user = await userManager.FindByIdAsync(request.UserId);
+    var user = ViewBag.User as Entities.Models.User;
 }
 <div class="container-fluid">
 
-    <h1 align="center">PHIẾU NHẬP KHO</h1>
+    <h1 align="center">Phiếu nhập kho</h1>
     <form method="post" asp-action="UpdateReceipt" asp-controller="Home" asp-area="Warehouse" id="form">
+        <input type="hidden" name="id" value="@request.ImportWarehouseId" />
         <div class="row">
             <div class="col-6">
                 <label>Mã phiếu: </label>
@@ -53,7 +52,7 @@
                             <th>Tên sản phẩm</th>
                             <th>Số lượng</th>
                             <th>Số lượng đã nhập</th>
-                            <th> Số lượng nhập thêm</th>
+                            <th>Số lượng nhập thêm</th>
                             <th>Trạng thái</th>
                         </tr>
                     </thead>
@@ -61,23 +60,27 @@
 
                         @foreach (var item in request.ImportWarehouseDetails)
                         {
-                            <tr>
-                                <td><input type="text" name="ProductDetailID" value="@item.ProductDetailId" readonly></td>
+                        <tr>
+                            @if (item.Quantity == item.ActualQuantity)
+                            {
+                                <td>@item.ProductDetailId</td>
                                 <td>@item.ProductDetail.Product.ProductName</td>
-                                <td><input type="number" readonly value="@item.Quantity" name="Quantity" /></td>
-                                <td><input type="number" readonly value="@item.ActualQuantity" name="ActualQuantity" /></td>
-                                @if (item.Quantity == item.ActualQuantity)
-                                {
-                                    <td>0</td>
-                                }
-                                else
-                                {
-                                    <td>
-                                        <input type="number" name="AddQuantity" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
-                                    </td>
-                                }
-                                <td>@item.Status</td>
-                            </tr>
+                                <td>@item.Quantity</td>
+                                <td>@item.ActualQuantity</td>
+                                <td>0</td>
+                            }
+                            else
+                            {
+                                <td><input type="text" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" readonly></td>
+                                <td>@item.ProductDetail.Product.ProductName</td>
+                                <td><input type="number" readonly value="@item.Quantity" class="form-control" name="Quantity" /></td>
+                                <td><input type="number" readonly value="@item.ActualQuantity" class="form-control" name="ActualQuantity" /></td>
+                                <td>
+                                    <input type="number" name="AddQuantity" class="form-control" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                </td>
+                            }
+                            <td>@item.Status</td>
+                        </tr>
                         }
                     </tbody>
 
@@ -91,27 +94,33 @@
 @section Scripts
 {
     <script>
-
         function Submit() {
 
-            var Quantity = document.getElementsByName('Quantity');
-            var ActualQuantity = document.getElementsByName('ActualQuantity');
-            var AddQuantity = document.getElementsByName('AddQuantity');
+            var quantity = document.getElementsByName('Quantity');
+            var actualQuantity = document.getElementsByName('ActualQuantity');
+            var addQuantity = document.getElementsByName('AddQuantity');
             var countErrorValidate = 0;
+
             $('.field-validation-valid').remove();
            
-            for (var i = 0; i < Quantity.length; i++) {
-                
-                if (AddQuantity[i].value === '' || AddQuantity[i].value > (Quantity[i].value - ActualQuantity[i].value)) {
-                    var node = AddQuantity[i];
-                    
-                    var text = '<br><span class="field-validation-valid text-danger validate-product-detail">' +
-                        'Số lượng không hợp lệ</span>';
-                    countErrorValidate++;
-                    $(node).parent().append(text);
+            for (var i = 0; i < quantity.length; i++) {
+                if (quantity[i].value - actualQuantity[i].value !== 0) {
+                    if (addQuantity[i].value === '' || addQuantity[i].value > (quantity[i].value - actualQuantity[i].value)) {
+                        var node = addQuantity[i];
+
+                        var text = `<div class="field-validation-valid"><br>
+                                    <span class="field-validation-valid text-danger validate-product-detail">
+                                    Số lượng không hợp lệ</span></div>`;
+
+                        countErrorValidate++;
+
+                        $(node).closest('td').append(text);
+                    }
                 }
-                if (countErrorValidate == 0)
-                    $('#form').submit();
+            }
+
+            if (countErrorValidate == 0) {
+                $('#form').submit();
             }
         }
     </script>

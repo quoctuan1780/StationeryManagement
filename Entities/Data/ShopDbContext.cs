@@ -208,7 +208,7 @@ namespace Entities.Data
             //Entity Notification
             modelBuilder.Entity<Notification>(e =>
             {
-                e.HasKey(x => new { x.NotificationTypeId, x.UserId });
+                e.HasKey(x => x.NotificationId);
 
                 e.HasIndex(x => x.NotificationTypeId);
                 e.HasIndex(x => x.UserId);
@@ -220,6 +220,8 @@ namespace Entities.Data
                 e.HasOne(x => x.User)
                 .WithMany(x => x.Notifications)
                 .HasForeignKey(x => x.UserId);
+
+                e.HasQueryFilter(x => x.IsDeleted == false);
             });
 
             //Entity Category
