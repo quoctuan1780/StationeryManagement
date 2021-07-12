@@ -469,7 +469,7 @@ namespace FinalProject.Controllers
 
                     await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ACCOUNT);
 
-                    TempData[Constant.KEY_CONFIRM_EMAIL_SUCCESS] = "Đăng ký tài khoản thành công";
+                    TempData[KEY_CONFIRM_EMAIL_SUCCESS] = "Đăng ký tài khoản thành công";
 
                     return Redirect(model.ReturnUrl);
                 }

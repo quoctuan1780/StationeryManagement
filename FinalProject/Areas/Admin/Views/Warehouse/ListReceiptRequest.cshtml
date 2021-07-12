@@ -1,6 +1,6 @@
 ﻿@using static Common.Constant;
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Danh sách phiếu yêu cầu nhập hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var requests = ViewBag.ListReceipts as IList<Entities.Models.ReceiptRequest>;
 }
@@ -8,10 +8,14 @@
 <div class="container-fluid">
 
     <h1 class="h3 mb-2 text-gray-800">Danh sách phiếu yêu cầu nhập hàng</h1>
-    @if(ViewBag.Message != null)
-            {
-                <span>@ViewBag.Message</span>
-            }
+    @if(TempData["MessageSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["MessageSuccess"]</div>
+    }    
+    @if(TempData["MessageError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MessageError"]</div>
+    }
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">

@@ -1,5 +1,6 @@
 ﻿using static Common.Constant;
 using static Common.RoleConstant;
+using static Common.SignalRConstant;
 using static FinalProject.Areas.Admin.Helpers.ImageHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,10 @@ using FinalProject.Areas.Admin.ViewModels;
 using System.Transactions;
 using Entities.Models;
 using System.Linq;
+using System;
+using Microsoft.AspNetCore.SignalR;
+using Services.Hubs;
+using System.Collections.Generic;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -19,12 +24,18 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly ISaleDetailService _saleDetailService;
         private readonly ISaleService _saleService;
+        private readonly IHubContext<SignalServer> _hubContext;
+        private readonly INotificationService _notificationService;
+        private readonly IAccountService _accountService;
 
-        public SaleController(IProductService productService, ISaleService saleService, ISaleDetailService saleDetailService)
+        public SaleController(IProductService productService, ISaleService saleService, ISaleDetailService saleDetailService, INotificationService notificationService, IHubContext<SignalServer> hubContext, IAccountService accountService)
         {
             _productService = productService;
             _saleDetailService = saleDetailService;
             _saleService = saleService;
+            _hubContext = hubContext;
+            _notificationService = notificationService;
+            _accountService = accountService;
         }
         public async Task<IActionResult> Index()
         {
@@ -162,7 +173,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                             TempData["MessageSuccess"] = "Cập nhật khuyến mại thành công";
 
-                            return Redirect("/Admin/Sale/EditSale?saleId=" + model.SaleId);
+                            return Redirect("/Admin/Sale/Index");
                         }
                     }
                     else
@@ -171,7 +182,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         TempData["MessageSuccess"] = "Cập nhật khuyến mại thành công";
 
-                        return View("/Admin/Sale/EditSale?saleId=" + model.SaleId);
+                        return View("/Admin/Sale/Index");
                     }
                 }
                 catch
@@ -232,6 +243,9 @@ namespace FinalProject.Areas.Admin.Controllers
                         SaleType = model.SaleType
                     };
 
+                    var listNotifications = new List<Notification>();
+                    var users = await _accountService.GetAllCustomersAsync();
+
                     if (model.SaleType.Equals(TYPE_SALE_FOR_ORDER))
                     {
                         sale.FromOrderPrice = model.FromOrderPrice;
@@ -242,9 +256,9 @@ namespace FinalProject.Areas.Admin.Controllers
                         {
                             transaction.Complete();
 
-                            ViewBag.MessageSuccess = "Thêm khuyến mại thành công";
+                            TempData["MessageSuccess"] = "Thêm khuyến mại thành công";
 
-                            return View(model);
+                            return Redirect("/Admin/Sale/Index");
                         }
                     }
                     else
@@ -278,11 +292,38 @@ namespace FinalProject.Areas.Admin.Controllers
                                     {
                                         await _productService.UpdateSalePriceAsync();
 
+                                        var link = Url.ActionLink("SaleProduct", "Home", new { Area = "" }, Request.Scheme);
+                                        var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_SALE);
+
+                                        if (users != null)
+                                        {
+                                            foreach (var item in users)
+                                            {
+                                                var notification = new Notification()
+                                                {
+                                                    CreatedDate = DateTime.Now,
+                                                    Link = link,
+                                                    NotificationTypeId = notificationType.NotificationTypeId,
+                                                    Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                                    UserId = item.Id,
+                                                    RecordId = sale.SaleId,
+                                                    RoleSeen = ROLE_CUSTOMER,
+                                                    Content = "Quản trị viên đã áp dụng khuyến mãi cho một vài sản phẩm"
+                                                };
+
+                                                listNotifications.Add(notification);
+                                            }
+                                        }
+
+                                        await _notificationService.AddNotificationAsync(notifications: listNotifications);
+
+                                        await _hubContext.Clients.Group(SIGNAL_GROUP_CUSTOMER).SendAsync(SIGNAL_NOTIFICATION_NEW_SALE_CUSTOMER);
+
                                         transaction.Complete();
 
-                                        ViewBag.MessageSuccess = "Thêm khuyến mại thành công";
+                                        TempData["MessageSuccess"] = "Thêm khuyến mại thành công";
 
-                                        return View(model);
+                                        return Redirect("/Admin/Sale/Index");
                                     }
                                 }
                             }

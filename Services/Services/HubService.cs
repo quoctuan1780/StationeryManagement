@@ -14,11 +14,18 @@ namespace Services.Services
     public class HubService : IHubService
     {
         private readonly ShopDbContext _context;
+        private readonly List<string> orderStatusPaid = new()
+        {
+            STATUS_RECEIVED_GOODS,
+            STATUS_EVALUATED,
+            STATUS_WAITING_EVALUATE,
+        };
 
         public HubService(ShopDbContext context)
         {
             _context = context;
         }
+
         public async Task<int> GetOrdersAsync()
         {
             var result = await _context.Orders.Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM)).ToListAsync();
@@ -77,9 +84,9 @@ namespace Services.Services
                 preMonth -= 1;
             }
 
-            var currentRevenue = await _context.Bills.Where(x => x.CreateDate.Month == DateTime.Now.Month && x.CreateDate.Year == DateTime.Now.Year ).SumAsync(x => x.Total);
+            var currentRevenue = await _context.Orders.Where(x => orderStatusPaid.Contains(x.Status) && x.OrderDate.Month == DateTime.Now.Month && x.OrderDate.Year == DateTime.Now.Year ).SumAsync(x => x.Total);
 
-            var preRevenue = await _context.Orders.Where(x => x.OrderDate.Month == preMonth && x.OrderDate.Year == preYear ).SumAsync(x => x.Total);
+            var preRevenue = await _context.Orders.Where(x => orderStatusPaid.Contains(x.Status) && x.OrderDate.Month == preMonth && x.OrderDate.Year == preYear ).SumAsync(x => x.Total);
 
             result.Add("CurrentRevenue", currentRevenue);
             result.Add("PreRevenue", preRevenue);
@@ -89,9 +96,9 @@ namespace Services.Services
 
         public async Task<string> GetTopProductAsync()
         {
-            var result = (from od in _context.BillDetails
-                         join o in _context.Bills on od.BillId equals o.BillId
-                         where o.CreateDate.Month == DateTime.Now.Month && o.CreateDate.Year == DateTime.Now.Year
+            var result = (from od in _context.OrderDetails
+                         join o in _context.Orders on od.OrderId equals o.OrderId
+                         where orderStatusPaid.Contains(o.Status) && o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
                          group od by od.ProductDetailId into g
                          select new
                          {
@@ -126,8 +133,8 @@ namespace Services.Services
         public async Task<string> GetTopCustomerAsync()
         {
             var result = (from c in _context.Users
-                          join o in _context.Bills on c.Id equals o.UserId
-                          where o.CreateDate.Month == DateTime.Now.Month && o.CreateDate.Year == DateTime.Now.Year
+                          join o in _context.Orders on c.Id equals o.UserId
+                          where orderStatusPaid.Contains(o.Status) && o.OrderDate.Month == DateTime.Now.Month && o.OrderDate.Year == DateTime.Now.Year
                           group o by new { o.UserId, c.FullName } into g
                           select new
                           {
@@ -158,7 +165,7 @@ namespace Services.Services
 
         public async Task<string> GetRevenueCurrentMonthAsync()
         {
-            var result = await _context.Bills.Where(x => x.CreateDate.Month == DateTime.Now.Month && x.CreateDate.Year == DateTime.Now.Year).GroupBy(x => x.CreateDate.Day).Select(x => new { Day = x.Key, Total = x.Sum(y => y.Total) }).ToListAsync();
+            var result = await _context.Orders.Where(x => orderStatusPaid.Contains(x.Status) && x.OrderDate.Month == DateTime.Now.Month && x.OrderDate.Year == DateTime.Now.Year).GroupBy(x => x.OrderDate.Day).Select(x => new { Day = x.Key, Total = x.Sum(y => y.Total) }).ToListAsync();
 
             var dataChart = new List<JObject>();
 

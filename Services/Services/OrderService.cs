@@ -17,6 +17,12 @@ namespace Services.Services
     public class OrderService : IOrderService
     {
         private readonly ShopDbContext _context;
+        private readonly List<string> orderStatusPaid = new()
+        {
+            STATUS_RECEIVED_GOODS,
+            STATUS_EVALUATED,
+            STATUS_WAITING_EVALUATE,
+        };
 
         public OrderService(ShopDbContext context)
         {
@@ -115,49 +121,7 @@ namespace Services.Services
                 .Include(x => x.PayPalPayment).Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId, string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
-        {
-            var result = _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS) && x.ShipperId.Equals(userId));
-
-            if(customer != "null" && customer != EMPTY)
-            {
-                result = result.Where(x => x.UserId.Equals(customer));
-            }
-            if(address != "null" && address != EMPTY)
-            {
-                result = result.Where(x => x.Address.Contains(address));
-            }
-            if (pickedOrderDate != "null" && pickedOrderDate != EMPTY)
-            {
-                bool resultParse = DateTime.TryParse(pickedOrderDate, out DateTime date);
-                if (resultParse)
-                {
-                    result = result.Where(x => x.ShipperPickOrderDate.Date.Equals(date.Date));
-                }
-            }
-
-            return await result.OrderBy(x => x.OrderDate).ToListAsync();
-        }
-
-        public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync(string customer = EMPTY, string orderDate = EMPTY)
-        {
-            var result = _context.Orders.Include(x => x.OrderDetails).Include(x => x.User).Where(x => x.Status.Equals(STATUS_PREPARING_GOODS));
-
-            if(customer != "null" && customer != EMPTY)
-            {
-                result = result.Where(x => x.UserId == customer);
-            }
-            if (orderDate != "null" && orderDate != EMPTY)
-            {
-                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
-                if (resultParse)
-                {
-                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
-                }
-            }
-
-            return await result.OrderBy(x => x.OrderDate).ToListAsync();
-        }
+        
 
         public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId)
         {
@@ -218,49 +182,6 @@ namespace Services.Services
             _context.Orders.Update(order);
 
             return await _context.SaveChangesAsync();
-        }
-
-        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY)
-        {
-            var result = from order in _context.Orders.Include(x => x.User)
-                         join
-                            user in _context.Users on order.WarehouseId equals user.Id
-                         where order.Status.Equals(STATUS_WAITING_PICK_GOODS) && order.ShipperId == null
-                         select new
-                         {
-                             Order = order,
-                             Name = user.FullName
-                         };
-
-            var orders = new List<OrderHelper.OrderJoinHelper>();
-            if (customer != "null" && customer != EMPTY)
-            {
-                result = result.Where(x => x.Order.UserId == customer);
-            }
-            if (address != "null" && address != EMPTY)
-            {
-                result = result.Where(x => x.Order.Address.Contains(address));
-            }
-            if (orderDate != "null" && orderDate != EMPTY)
-            {
-                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
-                if (resultParse)
-                {
-                    result = result.Where(x => x.Order.OrderDate.Date.Equals(date.Date));
-                }
-            }
-            foreach (var item in result)
-            {
-                var temp = new OrderHelper.OrderJoinHelper
-                {
-                    Order = item.Order,
-                    WarehouseManagementName = item.Name
-                };
-
-                orders.Add(temp);
-            }
-
-            return orders;
         }
 
         public async Task<string> ShipperConfirmPickOrdersAsync(IList<int> ordersId, string userId, IList<byte[]> rowVersions)
@@ -343,31 +264,6 @@ namespace Services.Services
             return orders;
         }
 
-        public async Task<IList<Order>> GetOrdersWaitToConfirmAsync(string orderDate, string paymentMethod, string customer)
-        {
-            var result = _context.Orders.Include(x => x.User).Include(x => x.OrderDetails).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM));
-
-            if (customer != "null" && customer != EMPTY)
-            {
-                result = result.Where(x => x.UserId == customer);
-            }
-
-            if (paymentMethod != "null" && paymentMethod != EMPTY)
-            {
-                result = result.Where(x => x.PaymentMethod == paymentMethod);
-            }
-
-            if (orderDate != "null" && orderDate != EMPTY)
-            {
-                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
-                if (resultParse)
-                {
-                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
-                }
-            }
-
-            return await result.OrderBy(x => x.OrderDate).ToListAsync();
-        }
 
         public async Task<int> CountNewAcceptedOrdersAsync()
         {
@@ -542,6 +438,117 @@ namespace Services.Services
             return receivedDates;
         }
 
+        #region Filter order
+        public IList<OrderHelper.OrderJoinHelper> GetOrdersWaitToPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY)
+        {
+            var result = from order in _context.Orders.Include(x => x.User)
+                         join
+                            user in _context.Users on order.WarehouseId equals user.Id
+                         where order.Status.Equals(STATUS_WAITING_PICK_GOODS) && order.ShipperId == null
+                         select new
+                         {
+                             Order = order,
+                             Name = user.FullName
+                         };
+
+            var orders = new List<OrderHelper.OrderJoinHelper>();
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.Order.UserId == customer);
+            }
+            if (address != "null" && address != EMPTY)
+            {
+                result = result.Where(x => x.Order.Address.Contains(address));
+            }
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.Order.OrderDate.Date.Equals(date.Date));
+                }
+            }
+            foreach (var item in result)
+            {
+                var temp = new OrderHelper.OrderJoinHelper
+                {
+                    Order = item.Order,
+                    WarehouseManagementName = item.Name
+                };
+
+                orders.Add(temp);
+            }
+
+            return orders;
+        }
+        public async Task<IList<Order>> GetOrdersWaitDeliveryAsync(string userId, string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
+        {
+            var result = _context.Orders.Include(x => x.User).Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS) && x.ShipperId.Equals(userId));
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId.Equals(customer));
+            }
+            if (address != "null" && address != EMPTY)
+            {
+                result = result.Where(x => x.Address.Contains(address));
+            }
+            if (pickedOrderDate != "null" && pickedOrderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(pickedOrderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.ShipperPickOrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
+        }
+
+        public async Task<IList<Order>> GetOrdersWaitExportWarehouseAsync(string customer = EMPTY, string orderDate = EMPTY)
+        {
+            var result = _context.Orders.Include(x => x.OrderDetails).Include(x => x.User).Where(x => x.Status.Equals(STATUS_PREPARING_GOODS));
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId == customer);
+            }
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
+        }
+        public async Task<IList<Order>> GetOrdersWaitToConfirmAsync(string orderDate, string paymentMethod, string customer)
+        {
+            var result = _context.Orders.Include(x => x.User).Include(x => x.OrderDetails).Where(x => x.Status.Equals(STATUS_WAITING_CONFIRM));
+
+            if (customer != "null" && customer != EMPTY)
+            {
+                result = result.Where(x => x.UserId == customer);
+            }
+
+            if (paymentMethod != "null" && paymentMethod != EMPTY)
+            {
+                result = result.Where(x => x.PaymentMethod == paymentMethod);
+            }
+
+            if (orderDate != "null" && orderDate != EMPTY)
+            {
+                bool resultParse = DateTime.TryParse(orderDate, out DateTime date);
+                if (resultParse)
+                {
+                    result = result.Where(x => x.OrderDate.Date.Equals(date.Date));
+                }
+            }
+
+            return await result.OrderBy(x => x.OrderDate).ToListAsync();
+        }
         public IList<OrderHelper.OrderJoinHelper> GetDateTimeDeliveredByFilter(string customerId, string shipperName, string receivedDate, string userId = EMPTY)
         {
             var result = from order in _context.Orders.Include(x => x.User)
@@ -559,7 +566,7 @@ namespace Services.Services
                 result = result.Where(x => x.Order.ShipperId.Equals(userId));
             }
 
-            if(customerId != "null" && customerId != EMPTY)
+            if (customerId != "null" && customerId != EMPTY)
             {
                 result = result.Where(x => x.Order.UserId == customerId);
             }
@@ -601,8 +608,8 @@ namespace Services.Services
             var result = from order in _context.Orders.Include(x => x.User)
                          join user in _context.Users
                             on order.ShipperId equals user.Id
-                        join user1 in _context.Users
-                            on order.WarehouseId equals user1.Id
+                         join user1 in _context.Users
+                             on order.WarehouseId equals user1.Id
                          where order.Status.Equals(STATUS_ON_DELIVERY_GOODS)
                          orderby order.ReceivedDate descending
                          select new
@@ -750,7 +757,9 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
+        #region Revenue by year
         public async Task<string> GetRevenueByYearAsync(int startDate, int endDate)
         {
             var orders = from o in _context.Orders
@@ -761,8 +770,8 @@ namespace Services.Services
                              UserId = g.Key,
                              QuantityOfOrder = g.Count(),
                              TotalOfOrder = g.Sum(x => x.Total),
-                             QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                             TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                             QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                             TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                              QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                              TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -770,10 +779,10 @@ namespace Services.Services
 
             var result = new List<JObject>();
 
-            if(orders != null)
+            if (orders != null)
             {
                 var users = await _context.Users.Where(x => orders.Select(x => x.UserId).Contains(x.Id)).ToListAsync();
-                foreach(var item in orders)
+                foreach (var item in orders)
                 {
                     var fullName = users.Where(x => x.Id == item.UserId).FirstOrDefault().FullName;
                     result.Add(new JObject
@@ -803,8 +812,8 @@ namespace Services.Services
                              UserId = g.Key,
                              QuantityOfOrder = g.Count(),
                              TotalOfOrder = g.Sum(x => x.Total),
-                             QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                             TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                             QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                             TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                              QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                              TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -820,11 +829,11 @@ namespace Services.Services
                     var fullName = users.Where(x => x.Id == item.UserId).FirstOrDefault().FullName;
                     result.Add(new ExcelExportHelper()
                     {
-                        FullName =  fullName,
+                        FullName = fullName,
                         QuantityOfOrder = item.QuantityOfOrder,
                         TotalOfOrder = item.TotalOfOrder,
                         QuantityOfOrderPaid = item.QuantityOfOrderPaid,
-                        TotalOfOrderPaid = item.TotalOfOrderPaid ,
+                        TotalOfOrderPaid = item.TotalOfOrderPaid,
                         QuantityOfOrderRejected = item.QuantityOfOrderRejected,
                         TotalOfOrderRejected = item.TotalOfOrderRejected,
                         Revenue = item.TotalOfOrderPaid
@@ -834,19 +843,21 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
+        #region Revenue by month
         public async Task<string> GetRevenueByMonthAsync(DateTime startDate, DateTime endDate)
         {
             var orders = from o in _context.Orders
-                         where o.OrderDate.Date >= startDate.Date && o.OrderDate.Date <= endDate.Date
+                         where ((o.OrderDate.Year == startDate.Year && o.OrderDate.Month >= startDate.Month) || o.OrderDate.Year > startDate.Year) && ((o.OrderDate.Year == endDate.Year && o.OrderDate.Month <= endDate.Month) || o.OrderDate.Year < endDate.Year)
                          group o by o.UserId into g
                          select new
                          {
                              UserId = g.Key,
                              QuantityOfOrder = g.Count(),
                              TotalOfOrder = g.Sum(x => x.Total),
-                             QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                             TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                             QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                             TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                              QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                              TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -880,15 +891,15 @@ namespace Services.Services
         public async Task<IList<ExcelExportHelper>> GetRevenueExportExcelByMonthAsync(DateTime startDate, DateTime endDate)
         {
             var orders = from o in _context.Orders
-                         where o.OrderDate.Date >= startDate.Date && o.OrderDate.Date <= endDate.Date
+                         where ((o.OrderDate.Year == startDate.Year && o.OrderDate.Month >= startDate.Month) || o.OrderDate.Year > startDate.Year) && ((o.OrderDate.Year == endDate.Year && o.OrderDate.Month <= endDate.Month) || o.OrderDate.Year < endDate.Year)
                          group o by o.UserId into g
                          select new
                          {
                              UserId = g.Key,
                              QuantityOfOrder = g.Count(),
                              TotalOfOrder = g.Sum(x => x.Total),
-                             QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                             TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                             QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                             TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                              QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                              TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -918,29 +929,31 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
+        #region Revenue by customer
         public async Task<string> GetRevenueByCustomerAsync(DateTime startDate, DateTime endDate, string customer)
         {
             var orders = _context.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date);
 
-            if(customer != "null")
+            if (customer != "null")
             {
                 orders = orders.Where(x => x.UserId.Equals(customer));
             }
 
             var orderGroup = from o in orders
-                                 group o by o.UserId into g
-                                 select new
-                                 {
-                                     UserId = g.Key,
-                                     QuantityOfOrder = g.Count(),
-                                     TotalOfOrder = g.Sum(x => x.Total),
-                                     QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                                     TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
-                                     QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
-                                     TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
+                             group o by o.UserId into g
+                             select new
+                             {
+                                 UserId = g.Key,
+                                 QuantityOfOrder = g.Count(),
+                                 TotalOfOrder = g.Sum(x => x.Total),
+                                 QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                                 TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
+                                 QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
+                                 TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
-                                 };
+                             };
 
             var result = new List<JObject>();
 
@@ -977,18 +990,18 @@ namespace Services.Services
             }
 
             var orderGroup = from o in orders
-                         group o by o.UserId into g
-                         select new
-                         {
-                             UserId = g.Key,
-                             QuantityOfOrder = g.Count(),
-                             TotalOfOrder = g.Sum(x => x.Total),
-                             QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                             TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
-                             QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
-                             TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
+                             group o by o.UserId into g
+                             select new
+                             {
+                                 UserId = g.Key,
+                                 QuantityOfOrder = g.Count(),
+                                 TotalOfOrder = g.Sum(x => x.Total),
+                                 QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                                 TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
+                                 QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
+                                 TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
-                         };
+                             };
 
             var result = new List<ExcelExportHelper>();
 
@@ -1014,18 +1027,20 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
+        #region Revenue by product
         public async Task<string> GetRevenueByProductAsync(string startDate, string endDate)
         {
             var conn = _context.Database.GetConnectionString();
             var result = new List<JObject>();
 
-            using(var sqlConnection = new SqlConnection(conn))
+            using (var sqlConnection = new SqlConnection(conn))
             {
                 var query = @"SELECT od.ProductDetailId, p.ProductName, pd.Color, pd.Quantity AS QuantityRemaining, SUM(od.Quantity) AS QuantitySold, SUM(od.Quantity * od.Price) AS TotalOfPrice
                         FROM [dbo].[OrderDetail] od JOIN [dbo].[Order] o ON od.OrderId = o.OrderId JOIN [dbo].[ProductDetails] pd ON od.ProductDetailId = pd.ProductDetailId JOIN [dbo].[Product] p
                         ON pd.ProductId = p.ProductId
-                        WHERE o.OrderDate BETWEEN @startDate AND @endDate AND o.Status = N'Đã nhận hàng'
+                        WHERE o.OrderDate BETWEEN @startDate AND @endDate AND (o.Status = N'Đã nhận hàng' OR o.Status = N'Chờ đánh giá' OR o.Status = N'Đã đánh giá')
                         GROUP BY od.ProductDetailId, pd.Color, p.ProductName, pd.Quantity";
 
 
@@ -1037,7 +1052,7 @@ namespace Services.Services
 
                 var resultQuery = await cmd.ExecuteReaderAsync();
 
-                while(await resultQuery.ReadAsync())
+                while (await resultQuery.ReadAsync())
                 {
                     var obj = new JObject
                     {
@@ -1065,7 +1080,7 @@ namespace Services.Services
                 var query = @"SELECT od.ProductDetailId, p.ProductName, pd.Color, pd.Quantity AS QuantityRemaining, SUM(od.Quantity) AS QuantitySold, SUM(od.Quantity * od.Price) AS TotalOfPrice
                         FROM [dbo].[OrderDetail] od JOIN [dbo].[Order] o ON od.OrderId = o.OrderId JOIN [dbo].[ProductDetails] pd ON od.ProductDetailId = pd.ProductDetailId JOIN [dbo].[Product] p
                         ON pd.ProductId = p.ProductId
-                        WHERE o.OrderDate BETWEEN @startDate AND @endDate AND o.Status = N'Đã nhận hàng'
+                        WHERE o.OrderDate BETWEEN @startDate AND @endDate AND (o.Status = N'Đã nhận hàng' OR o.Status = N'Chờ đánh giá' OR o.Status = N'Đã đánh giá')
                         GROUP BY od.ProductDetailId, pd.Color, p.ProductName, pd.Quantity";
 
 
@@ -1094,7 +1109,9 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
+        #region Revenue by province
         public async Task<string> GetRevenueByProvinceAsync(DateTime startDate, DateTime endDate, string province)
         {
             var orders = _context.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date);
@@ -1111,8 +1128,8 @@ namespace Services.Services
                                  Province = g.Key,
                                  QuantityOfOrder = g.Count(),
                                  TotalOfOrder = g.Sum(x => x.Total),
-                                 QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                                 TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                                 QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                                 TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                                  QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                                  TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -1157,8 +1174,8 @@ namespace Services.Services
                                  Province = g.Key,
                                  QuantityOfOrder = g.Count(),
                                  TotalOfOrder = g.Sum(x => x.Total),
-                                 QuantityOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Count(),
-                                 TotalOfOrderPaid = g.Where(x => x.Status.Equals(STATUS_WAITING_PICK_GOODS)).Sum(x => x.Total),
+                                 QuantityOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Count(),
+                                 TotalOfOrderPaid = g.Where(x => orderStatusPaid.Contains(x.Status)).Sum(x => x.Total),
                                  QuantityOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Count(),
                                  TotalOfOrderRejected = g.Where(x => x.Status.Equals(STATUS_CANCELED) || x.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER)).Sum(x => x.Total)
 
@@ -1186,6 +1203,7 @@ namespace Services.Services
 
             return result;
         }
+        #endregion
 
         #region Feature developer
         //public async Task<int> PrepareOrder(int OrderId, int ProductDetailId)

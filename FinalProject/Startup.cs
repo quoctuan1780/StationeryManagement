@@ -41,7 +41,8 @@ namespace FinalProject
             services.AddControllersWithViews();
 
             services.AddDbContext<ShopDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString(Constant.CONNECTION_STRING)));
+                options.UseSqlServer(Configuration.GetConnectionString(Constant.CONNECTION_STRING),
+                sqlServerOptions => sqlServerOptions.CommandTimeout(300)));
 
             services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -82,6 +83,7 @@ namespace FinalProject
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IBillService, BillService>();
             services.AddScoped<IBillDetailService, BillDetailService>();
+            services.AddScoped<INotificationService, NotificationService>();
             #endregion
             
             #region Cookie manually

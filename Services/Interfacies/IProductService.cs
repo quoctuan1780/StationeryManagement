@@ -35,5 +35,6 @@ namespace Services.Interfacies
         Task<bool> CheckProductIsInAnySalesAsync(IList<int> productIds);
         Task<int> UpdatePriceSaleProductsAsync(IList<int> productIds, decimal discount);
         Task UpdateSalePriceAsync();
+        Task<IList<Product>> GetProductsSaleAsync();
     }
 }

@@ -71,7 +71,7 @@
                             <td>@item.Color</td>
                             <td>@item.Quantity</td>
                             <td>
-                                <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
+                                <input type="number" name="Quantity" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' />
                             </td>
                             <td>
                                 @if (Model != null && Model.ProductDetailId != null && Model.ProductDetailId.Any())
@@ -140,7 +140,7 @@
         }
 
         function validateDetail() {
-            var quantities = document.getElementsByName('quantity');
+            var quantities = document.getElementsByName('Quantity');
             var selected = document.getElementsByName('ProductDetailId');
             var countErrorValidate = 0;
 

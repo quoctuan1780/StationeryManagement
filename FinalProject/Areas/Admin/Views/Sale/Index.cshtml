@@ -7,6 +7,10 @@
 <div class="container-fluid">
 
     <h1 class="h3 mb-2 text-gray-800">Thông tin quảng cáo</h1>
+    @if(TempData["MessageSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["MessageSuccess"] </div>
+    }
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">

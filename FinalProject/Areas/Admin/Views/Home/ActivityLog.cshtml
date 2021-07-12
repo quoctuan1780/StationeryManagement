@@ -24,63 +24,65 @@
                             <div class="row">
                                 <div class="col-xl-12 col-lg-6">
                                     <div class="list list-row block">
-                                        @foreach (var item in Model)
-                                        {
-                                            <div class="list-item" data-id="19">
-                                                <div class="new">
-                                                    <img src="~/images/user/admin.png" class="w-48 avatar gd-warning" alt="Alternate Text" />
-                                                </div>
-                                                <div class="flex">
-                                                    <a href="Javascript:void(0)" class="item-author text-color" data-abc="true">@item.FullName</a>
-                                                    @switch (item.Type)
-                                                    {
-                                                        case TYPE_ORDER:
-                                                            if (item.UserRole.Equals("Admin"))
-                                                            {
-                                                                <div class="item-except text-muted text-sm h-1x">
-                                                                    Bạn đã chuyển trạng thái đơn hàng từ @item.CurrentStatus => @item.NextStatus cho đơn hàng 
-                                                                    <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.RecordId"> #@item.RecordId</a>
-                                                                </div>
-                                                            }
-                                                            else if (item.UserRole.Equals("Shipper"))
-                                                            {
-                                                                <div class="item-except text-muted text-sm h-1x">
-                                                                    @item.FullName đã chuyển trạng thái đơn hàng từ @item.CurrentStatus => @item.NextStatus cho đơn hàng 
-                                                                    <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.RecordId"> #@item.RecordId</a>
-                                                                </div>
-                                                            }
-                                                            break;
-                                                        case TYPE_IMPORT_WAREHOUSE:
-                                                            break;
-                                                    }
+                                        @if(Model != null) { 
+                                            foreach (var item in Model)
+                                            {
+                                                <div class="list-item" data-id="19">
+                                                    <div class="new">
+                                                        <img src="~/images/user/admin.png" class="w-48 avatar gd-warning" alt="Alternate Text" />
+                                                    </div>
+                                                    <div class="flex">
+                                                        <a href="Javascript:void(0)" class="item-author text-color" data-abc="true">@item.FullName</a>
+                                                        @switch (item.Type)
+                                                        {
+                                                            case TYPE_ORDER:
+                                                                if (item.UserRole.Equals("Admin"))
+                                                                {
+                                                                    <div class="item-except text-muted text-sm h-1x">
+                                                                        Bạn đã chuyển trạng thái đơn hàng từ @item.CurrentStatus => @item.NextStatus cho đơn hàng 
+                                                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.RecordId"> #@item.RecordId</a>
+                                                                    </div>
+                                                                }
+                                                                else if (item.UserRole.Equals("Shipper"))
+                                                                {
+                                                                    <div class="item-except text-muted text-sm h-1x">
+                                                                        @item.FullName đã chuyển trạng thái đơn hàng từ @item.CurrentStatus => @item.NextStatus cho đơn hàng 
+                                                                        <a asp-action="OrderDetail" asp-controller="Order" asp-area="Admin" asp-route-orderId="@item.RecordId"> #@item.RecordId</a>
+                                                                    </div>
+                                                                }
+                                                                break;
+                                                            case TYPE_IMPORT_WAREHOUSE:
+                                                                break;
+                                                        }
 
-                                                </div>
-                                                <div class="no-wrap">
-                                                    <div class="item-date text-muted text-sm d-none d-md-block">
-                                                        @{ 
-                                                            var result = DateTime.Now - item.CreatedDate;
-                                                            var str = string.Empty;
-                                                            if(result.Days > 0)
-                                                            {
-                                                                str = string.Concat(result.Days, " ngày trước");
-                                                            }
-                                                            else if(result.Hours > 0)
-                                                            {
-                                                                str = string.Concat(result.Hours, " giờ trước");
-                                                            }
-                                                            else if (result.Minutes > 0)
-                                                            {
-                                                                str = string.Concat(result.Hours, " phút trước");
-                                                            }
-                                                            else if (result.Seconds > 0)
-                                                            {
-                                                                str = "Vài giây trước";
+                                                    </div>
+                                                    <div class="no-wrap">
+                                                        <div class="item-date text-muted text-sm d-none d-md-block">
+                                                            @{ 
+                                                                var result = DateTime.Now - item.CreatedDate;
+                                                                var str = string.Empty;
+                                                                if(result.Days > 0)
+                                                                {
+                                                                    str = string.Concat(result.Days, " ngày trước");
+                                                                }
+                                                                else if(result.Hours > 0)
+                                                                {
+                                                                    str = string.Concat(result.Hours, " giờ trước");
+                                                                }
+                                                                else if (result.Minutes > 0)
+                                                                {
+                                                                    str = string.Concat(result.Hours, " phút trước");
+                                                                }
+                                                                else if (result.Seconds > 0)
+                                                                {
+                                                                    str = "Vài giây trước";
                                                             }
                                                         }
                                                         @str
                                                     </div>
                                                 </div>
                                             </div>
+                                        }
                                         }
                                     </div>
                                 </div>
