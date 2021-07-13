@@ -9,19 +9,20 @@ namespace FinalProject.Areas.Warehouse.Controllers
 {
     public class WarehouseController : Controller
     {
-        private IProductService _productService;
+        private IProductDetailService _productDetailService;
 
-        public WarehouseController(IProductService productService)
+        public WarehouseController(IProductDetailService productDetailService)
         {
-            _productService = productService;
+            _productDetailService = productDetailService;
         }
         public IActionResult Index()
         {
             return View();
         }
-        //public Task<IActionResult> RemainingQuantity()
-        //{
-
-        //}
+        public async Task<IActionResult> RemainingQuantity()
+        {
+            ViewBag.Remaining = await _productDetailService.GetListProductDetailAsync();
+            return View();
+        }
     }
 }

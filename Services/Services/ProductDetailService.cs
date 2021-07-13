@@ -70,6 +70,11 @@ namespace Services.Services
             return listProduct;
         }
 
+        public async Task<List<ProductDetail>> GetListProductDetailAsync()
+        {
+            return await _context.ProductDetails.Include(x => x.Product).ThenInclude(x => x.Category).ToListAsync();
+        }
+
         public async Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId)
         {
             return await _context.ProductDetails.Where(x => x.ProductDetailId == productDetailId).FirstOrDefaultAsync();
