@@ -16,5 +16,6 @@ namespace Services.Interfacies
 
         Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId);
         Task<IList<ProductDetail>> GetProductDetailByIdAsync(IEnumerable<int> productDetailIds);
+        Task<int> UpdateSalePriceProductDetailsAsync(IList<int> productIds, decimal discount);
     }
 }

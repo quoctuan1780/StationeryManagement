@@ -53,7 +53,7 @@
         </li>
 
 
-        <li class="nav-item dropdown no-arrow mx-1">
+        <li class="nav-item dropdown no-arrow mx-1" id="notification-show">
             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
 
@@ -71,7 +71,7 @@
                 <h6 class="dropdown-header">
                     Thông báo
                 </h6>
-                <div id="show-notification">
+                <div id="show-notification" class="scroll-notify">
                     @if (notifications != null)
                     {
                         if (notifications.Any())
@@ -129,6 +129,9 @@
                             }
                         }
                     }
+                </div>
+                <div id="load-component" class="spinner-border text-primary hidden-table" role="status" style="position: absolute;top: 50%;left: 45%">
+                    <span class="sr-only">Loading...</span>
                 </div>
                 <a id="show-add-notification" class="dropdown-item text-center small text-gray-500"
                    asp-controller="Notification" asp-action="Notifications" asp-area="Warehouse">Xem tất cả thông báo</a>

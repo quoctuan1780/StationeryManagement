@@ -246,8 +246,8 @@ namespace Entities.Data
             //Entity SaleDetail
             modelBuilder.Entity<SaleDetail>(e =>
             {
-                e.HasKey(x => new { x.SaleId, x.ProductId });
-
+                e.HasKey(x => x.SaleDetailId);
+                e.HasIndex(x => x.SaleDetailId);
                 e.HasIndex(x => x.SaleId);
                 e.HasIndex(x => x.ProductId);
 
@@ -334,6 +334,9 @@ namespace Entities.Data
                 e.HasOne(x => x.Product)
                 .WithMany(x => x.ProductDetails)
                 .HasForeignKey(x => x.ProductId);
+
+                e.Property(x => x.Price).HasPrecision(18, 2);
+                e.Property(x => x.SalePrice).HasPrecision(18, 2);
 
                 e.Property(x => x.RowVersion).IsRowVersion();
                 e.HasQueryFilter(x => x.IsDeleted == false);
@@ -422,6 +425,8 @@ namespace Entities.Data
                 e.HasOne(x => x.ProductDetail)
                 .WithMany(x => x.ReceiptRequestDetails)
                 .HasForeignKey(x => x.ProductDetailId);
+
+                e.Property(x => x.Price).HasPrecision(18, 2);
             });
 
             // Entity Momo Payment

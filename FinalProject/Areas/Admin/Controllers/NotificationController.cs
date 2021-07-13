@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Services.Interfacies;
 using X.PagedList;
+using NPOI.OpenXmlFormats.Dml;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -65,6 +66,25 @@ namespace FinalProject.Areas.Admin.Controllers
             }
 
             return ERROR_CODE_SYSTEM;
+        }
+
+        public async Task<string> GetMoreNotification(int? skip)
+        {
+            if(skip is null)
+            {
+                return NULL;
+            }
+
+            var user = await _accountService.GetUserAsync(User);
+
+            var json = await _notificationService.GetNotificationsSkipAsync(ROLE_ADMIN, user.Id, skip.Value);
+
+            if(json != "[]")
+            {
+                return json;
+            }
+
+            return NULL;
         }
     }
 }

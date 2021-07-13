@@ -66,9 +66,9 @@ namespace FinalProject.Areas.Admin.Controllers
                         {
                             transaction.Complete();
 
-                            ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_BANNER;
+                            TempData["MessageSuccess"] = MESSAGE_SUCCESS_ADD_BANNER;
 
-                            return View(model);
+                            return Redirect("/Admin/Banner/Index");
                         }
                     }
                 }
@@ -182,11 +182,11 @@ namespace FinalProject.Areas.Admin.Controllers
                     {
                         transaction.Complete();
 
-                        ViewBag.MessageSuccess = MESSAGE_BANNER_UPDATE_SUCCESS;
+                        TempData["MessageSuccess"] = MESSAGE_BANNER_UPDATE_SUCCESS;
 
                         model.ImageString = imageName;
 
-                        return View(model);
+                        return Redirect("/Admin/Banner/Index");
                     }
                 }
 

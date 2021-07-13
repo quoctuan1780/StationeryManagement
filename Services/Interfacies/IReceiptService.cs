@@ -9,7 +9,7 @@ namespace Services.Interfacies
     {
         Task<bool> AddReceiptAsync(ImportWarehouse importWarehouse);
         Task<int> AddReceiptAsync(int id);
-        Task<ImportWarehouse> GetReceiptAfterUpdate(int id, List<int> AddQuantity);
+        Task<ImportWarehouse> GetReceiptAfterUpdate(int id, List<int> AddQuantity, List<int> productDetailIds);
         Task<bool> AddReceiptDetailAsync(ImportWarehouseDetail importWarehouseDetail);
         Task<ImportWarehouse> GetReceiptAsync(int id);
         Task<List<ImportWarehouse>> GetReceiptsAsync();

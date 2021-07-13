@@ -1,7 +1,7 @@
 ﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
 @model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
 @{
-    ViewData["Title"] = "CreateReceiptRequest";
+    ViewData["Title"] = "Phiếu yêu cầu nhập kho";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
     var request = ViewBag.Request as Entities.Models.ReceiptRequest;
 }
@@ -42,7 +42,7 @@
                         <th>Mã chi tiết sản phẩm</th>
                         <th>Tên sản phẩm</th>
                         <th>Số lượng</th>
-                        <th>Trạng thái</th>
+                        <th>Giá nhập</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,7 +53,7 @@
                             <td>@item.ProductDetailId</td>
                             <td>@item.ProductDetail.Product.ProductName</td>
                             <td>@item.Quantity</td>
-                            <td>@item.Status</td>
+                            <td>@String.Format("{0:n0}", item.Price) VNĐ</td>
                         </tr>
                     }
                 </tbody>

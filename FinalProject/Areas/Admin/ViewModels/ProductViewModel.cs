@@ -42,5 +42,6 @@ namespace FinalProject.Areas.Admin.ViewModels
         public IList<double> Weights { get; set; }
         public IList<string> Colors { get; set; }
         public IList<int> Quantities { get; set; }
+        public IList<decimal> Prices { get; set; }
     }
 }

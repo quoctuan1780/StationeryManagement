@@ -2,6 +2,7 @@
 using static Common.RoleConstant;
 using static Common.SignalRConstant;
 using static FinalProject.Areas.Admin.Helpers.ImageHelper;
+using static FinalProject.Areas.Admin.Helpers.SaleHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfacies;
@@ -27,8 +28,9 @@ namespace FinalProject.Areas.Admin.Controllers
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly INotificationService _notificationService;
         private readonly IAccountService _accountService;
+        private readonly IProductDetailService _productDetailService;
 
-        public SaleController(IProductService productService, ISaleService saleService, ISaleDetailService saleDetailService, INotificationService notificationService, IHubContext<SignalServer> hubContext, IAccountService accountService)
+        public SaleController(IProductService productService, ISaleService saleService, ISaleDetailService saleDetailService, INotificationService notificationService, IHubContext<SignalServer> hubContext, IAccountService accountService, IProductDetailService productDetailService)
         {
             _productService = productService;
             _saleDetailService = saleDetailService;
@@ -36,6 +38,7 @@ namespace FinalProject.Areas.Admin.Controllers
             _hubContext = hubContext;
             _notificationService = notificationService;
             _accountService = accountService;
+            _productDetailService = productDetailService;
         }
         public async Task<IActionResult> Index()
         {
@@ -99,18 +102,30 @@ namespace FinalProject.Areas.Admin.Controllers
             if(sale.SaleDetails != null && sale.SaleDetails.Any())
             {
                 model.ProductIds = sale.SaleDetails.Select(x => x.ProductId).ToList();
+
+                ViewBag.ProductInSales = await _productService.GetAllProductsAsync(model.ProductIds);
             }
 
-            ViewBag.ProductInSales = await _productService.GetAllProductsAsync(model.ProductIds);
 
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditSale(SaleViewModel model, string imagePreviewDeteted)
+        public async Task<IActionResult> EditSale(SaleViewModel model, string imagePreviewDeteted, string productIdsStr)
         {
             ViewBag.Products = await _productService.GetProductsCanApplySaleAsync();
+
+            if(productIdsStr is null)
+            {
+                model.ProductIds = await _saleDetailService.GetProductIdInSaleAsync(model.SaleId);
+
+                ViewBag.ProductInSales = await _productService.GetAllProductsAsync(model.ProductIds);
+
+                ViewBag.MessageError = "Lỗi không có sản phẩm nào được chọn";
+
+                return View(model);
+            }
 
             if (model.SaleType.Equals(TYPE_SALE_FOR_ORDER))
             {
@@ -120,7 +135,8 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 ModelState.Remove("FromOrderPrice");
             }
-
+            var productIdsConvert = ConvertStringToListInt(productIdsStr);
+            model.ProductIds = productIdsConvert;
             if (ModelState.IsValid)
             {
                 if (!string.IsNullOrEmpty(imagePreviewDeteted))
@@ -165,7 +181,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     {
                         var resultUpdate = await _saleDetailService.UpdateSaleDetailsAsync(model.ProductIds, model.Discount, model.SaleId, model.SaleStartDate, model.SaleEndDate);
 
-                        if(resultUpdate > 0)
+                        if (resultUpdate > 0)
                         {
                             await _productService.UpdateSalePriceAsync();
 
@@ -191,7 +207,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 }
             }
 
-            model.ProductIds = await _saleDetailService.GetProductIdInSaleAsync(model.SaleId);
+            //model.ProductIds = await _saleDetailService.GetProductIdInSaleAsync(model.SaleId);
 
             ViewBag.ProductInSales = await _productService.GetAllProductsAsync(model.ProductIds);
 
@@ -206,9 +222,16 @@ namespace FinalProject.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddSale(SaleViewModel model, string imagePreviewDeteted)
+        public async Task<IActionResult> AddSale(SaleViewModel model, string imagePreviewDeteted, string productIdsStr)
         {
             ViewBag.Products = await _productService.GetProductsCanApplySaleAsync();
+
+            if(productIdsStr is null)
+            {
+                ViewBag.MessageError = "Lỗi không có sản phẩm nào được chọn";
+
+                return View(model);
+            }
 
             if (model.SaleType.Equals(TYPE_SALE_FOR_ORDER))
             {
@@ -218,6 +241,10 @@ namespace FinalProject.Areas.Admin.Controllers
             {
                 ModelState.Remove("FromOrderPrice");
             }
+
+            var productIdsConvert = ConvertStringToListInt(productIdsStr);
+
+            model.ProductIds = productIdsConvert;
 
             if (ModelState.IsValid)
             {
@@ -244,6 +271,7 @@ namespace FinalProject.Areas.Admin.Controllers
                     };
 
                     var listNotifications = new List<Notification>();
+
                     var users = await _accountService.GetAllCustomersAsync();
 
                     if (model.SaleType.Equals(TYPE_SALE_FOR_ORDER))
@@ -290,6 +318,8 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                     if (resultUpdatePriceSaleProduct > 0)
                                     {
+                                        await _productDetailService.UpdateSalePriceProductDetailsAsync(model.ProductIds, model.Discount);
+
                                         await _productService.UpdateSalePriceAsync();
 
                                         var link = Url.ActionLink("SaleProduct", "Home", new { Area = "" }, Request.Scheme);

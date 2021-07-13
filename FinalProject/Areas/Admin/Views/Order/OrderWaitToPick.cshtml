@@ -202,17 +202,5 @@
 @section Scripts{
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/calendar/calendar-date.js"></script>
-    <script>
-        function filter() {
-            var customer = $('#customer').val();
-            var warehouse = $('#warehouse').val();
-            var exportWarehouseDate = document.getElementsByName('exportWarehouseDate')[0].value;
-
-            var url = '/Admin/Order/OrderWaitToPick?exportWarehouseDate=' + exportWarehouseDate +
-                '&warehouse=' + warehouse +
-                '&customer=' + customer;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/admin/js/order/order-wait-to-pick.js"></script>
 }

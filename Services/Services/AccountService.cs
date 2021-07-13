@@ -179,9 +179,8 @@ namespace Services.Services
 
         public async Task<IdentityResult> CreateAccountAsync(User user, string role, string password)
         {
-
-
             var registerResult = await RegisterAsync(user, password);
+
             if (registerResult.Succeeded)
             {
                 return await AddRoleAsync(user, role);

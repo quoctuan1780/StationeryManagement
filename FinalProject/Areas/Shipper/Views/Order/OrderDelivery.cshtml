@@ -198,16 +198,5 @@
 @section Scripts{
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/calendar/calendar-helper.js"></script>
-    <script>
-        function filter() {
-            var customer = $('#customer').val();
-            var exportWarehouseDate = document.getElementsByName('exportWarehouseDate')[0].value;
-            var receivedDeliveryDate = document.getElementsByName('receivedDeliveryDate')[0].value;
-            var url = '/Shipper/Order/OrderDelivery?exportWarehouseDate=' + exportWarehouseDate +
-                '&receivedDeliveryDate=' + receivedDeliveryDate +
-                '&customer=' + customer;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/shipper/order/order-delivery.js"></script>
 }

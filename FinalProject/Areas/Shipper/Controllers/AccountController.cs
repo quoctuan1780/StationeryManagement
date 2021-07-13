@@ -38,6 +38,7 @@ namespace FinalProject.Areas.Shipper.Controllers
             return View();
         }
 
+
         [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public IActionResult ChangePassword()
         {
@@ -45,17 +46,27 @@ namespace FinalProject.Areas.Shipper.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            var user = await _accountService.GetUserAsync(User);
-            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                ViewBag.Success = "Thay đổi mật khẩu thành công!";
-                return View();
+                var user = await _accountService.GetUserAsync(User);
+
+                var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
+                }
+                else
+                {
+                    ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+                }
             }
-            ViewBag.Failed = "Thay đổi mật khẩu không thành công!";
-            return View();
+
+            return View(model);
         }
 
 

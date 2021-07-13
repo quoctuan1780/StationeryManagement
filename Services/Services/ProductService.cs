@@ -347,8 +347,19 @@ namespace Services.Services
 
                 if (productIds.Any())
                 {
-                    var products = await _context.Products.Where(x => productIds.Distinct().Contains(x.ProductId))
-                        .ToListAsync();
+                    var products = _context.Products.Where(x => productIds.Distinct().Contains(x.ProductId));
+
+                    var productDetails = _context.ProductDetails.Include(x => x.Product)
+                                    .Where(x => productIds.Contains(x.Product.ProductId));
+
+                    foreach (var item in productDetails)
+                    {
+                        item.SalePrice = 0;
+                    }
+
+                    _context.ProductDetails.UpdateRange(productDetails);
+
+                    _context.Products.UpdateRange(products);
 
                     if (productIds != null && productIds.Any())
                     {

@@ -26,6 +26,7 @@ namespace FinalProject.Controllers
             {
                 return PartialView(ERROR_404_PAGE);
             }
+
             ViewBag.Product = await _productService.GetProductByIdAsync(id.Value);
 
             ViewBag.Comments = await _commentService.GetAllCommentsByProductIdAsync(id.Value);
@@ -33,8 +34,9 @@ namespace FinalProject.Controllers
             ViewBag.Ratings = await _rateService.GetRatingsAsync();
 
             ViewBag.RatingsDetail = await _rateService.GetRatingsDetailAsync(id.Value);
-       
+
             List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
+
             ViewBag.Suggest = await _recommendationService.GetSuggestedProduct(listProductDetailId);
 
             return View();

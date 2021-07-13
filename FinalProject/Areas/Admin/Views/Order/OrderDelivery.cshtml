@@ -234,18 +234,5 @@
 @section Scripts{
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/calendar/calendar-helper.js"></script>
-    <script>
-        function filter() {
-            var shipper = $('#shipper').val();
-            var warehouse = $('#warehouse').val();
-            var exportWarehouseDate = document.getElementsByName('exportWarehouseDate')[0].value;
-            var receivedDeliveryDate = document.getElementsByName('receivedDeliveryDate')[0].value;
-            var url = '/Admin/Order/OrderDelivery?exportWarehouseDate=' + exportWarehouseDate +
-                '&receivedDeliveryDate=' + receivedDeliveryDate +
-                '&warehouse=' + warehouse +
-                '&shipper=' + shipper;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/admin/js/order/order-delivery.js"></script>
 }

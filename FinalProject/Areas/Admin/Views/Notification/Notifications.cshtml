@@ -52,7 +52,7 @@
                                                                 </div>
                                                                 <div>
                                                                     <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
-                                                                    <a id="@string.Concat("nofitication-id-", item.NotificationId)" onclick="@onclick" href="@item.Link">
+                                                                    <a onclick="@onclick" href="@item.Link">
                                                                         <span class="font-weight-bold">@item.Content</span>
                                                                     </a>
                                                                 </div>
@@ -79,7 +79,7 @@
                                                                 </div>
                                                                 <div>
                                                                     <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
-                                                                    <a id="@string.Concat("nofitication-id-", item.NotificationId)" onclick="@onclick" href="@item.Link">
+                                                                    <a onclick="@onclick" href="@item.Link">
                                                                         <span class="font-weight-bold">@item.Content</span>
                                                                     </a>
                                                                 </div>
@@ -106,7 +106,7 @@
                                                                 </div>
                                                                 <div>
                                                                     <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
-                                                                    <a id="@string.Concat("nofitication-id-", item.NotificationId)" onclick="@onclick" href="@item.Link">
+                                                                    <a onclick="@onclick" href="@item.Link">
                                                                         <span class="font-weight-bold">@item.Content</span>
                                                                     </a>
                                                                 </div>
@@ -148,36 +148,5 @@
 </div>
 @section Scripts{ 
     <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
-    <script>
-        $(() => {
-            $('#notification-show').remove();
-        })
-        function deleteNotify(el, id) {
-            if (id === '') {
-                showErrorSystem();
-                return undefined;
-            }
-
-            $.ajax({
-                url: '/Admin/Notification/DeleteNofity',
-                method: 'DELETE',
-                async: true,
-                data: { notificationId: id },
-                success: function (data) {
-                    switch (data) {
-                        case 1:
-                            showSuccess("Xóa thông báo thành công");
-                            $(el).closest('.row').remove();
-                            break;
-                        default:
-                            showError("Hệ thống xảy ra lỗi vui lòng thử lại sau", '360px')
-                            break;
-                    }
-                },
-                error: function (code, err) {
-                    showErrorSystem();
-                }
-            })
-        }
-    </script>
+    <script type="text/javascript" src="~/admin/js/notification/index-notification.js"></script>
 }

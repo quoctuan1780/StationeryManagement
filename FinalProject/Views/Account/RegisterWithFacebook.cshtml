@@ -34,6 +34,72 @@
 
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading.css" />
     <link rel="stylesheet" type="text/css" href="~/style/css/loading/modal-loading-animate.css" />
+    <link rel="stylesheet" type="text/css" href="~/style/css/calendar/mc-calendar.min.css" />
+    <style>
+        .bootstrap-select.form-control {
+            border: 1px solid !important;
+        }
+
+        .hidden-table {
+            display: none;
+        }
+
+        .form-field-label,
+        .form-field-input {
+            display: block;
+        }
+
+        .form-field-input {
+            padding: 0.5em 0.7em;
+            border: 1px solid #919fae;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .input-wrapper {
+            display: flex;
+        }
+
+        .btn {
+            border: 1px solid #919fae;
+            border-radius: 0;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-large {
+            padding: 0.6em 1em;
+        }
+
+        .btn-small {
+            padding: 0 0.6em;
+        }
+
+        .calendarIcon {
+            height: 1rem;
+        }
+
+        .form-field-input-coupled {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            width: 100%;
+            height: calc(1.5em + .75rem + 2px);
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #6e707e;
+            background-color: #fff;
+            background-clip: padding-box;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+    </style>
 </head>
 
 <body class="background-body-login">
@@ -58,7 +124,7 @@
                                 @Html.AntiForgeryToken()
                                 <div class="form-group">
                                     <label for="fullname">Họ tên</label>
-                                    <input type="text" asp-for="FullName" class="form-control form-control-user" placeholder="Họ và tên"/>
+                                    <input type="text" asp-for="FullName" class="form-control form-control-user" placeholder="Họ và tên" />
                                     <span asp-validation-for="FullName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
@@ -73,26 +139,35 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="dateofbirth">Ngày sinh</label>
-                                    <input type="date" asp-for="DateOfBirth" class="form-control form-control-user" placeholder="Ngày sinh"/>
-                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="date-of-birth" asp-for="DateOfBirth" value="@Model.DateOfBirth.ToString("MM-dd-yyyy")" class="form-field-input form-field-input-coupled" readonly />
+                                        <button type="button" id="date-of-birth-button" class="btn btn-small">
+                                            <svg class="calendarIcon" aria-hidden="true" focusable="false" data-prefix="far"
+                                                 data-icon="calendar-alt" role="img" viewBox="0 0 448 512">
+                                                <path fill="currentColor"
+                                                      d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span class="text-danger" asp-validation-for="DateOfBirth"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="email">Email</label>
                                     @if (Model.Email is null)
                                     {
-                                        <input type="email" asp-for="Email" placeholder="Email" 
+                                        <input type="email" asp-for="Email" placeholder="Email"
                                                class="form-control form-control-user" id="exampleInputEmail" />
                                     }
                                     else
                                     {
-                                        <input type="email" asp-for="Email" placeholder="Email" 
+                                        <input type="email" asp-for="Email" placeholder="Email"
                                                class="form-control form-control-user" id="exampleInputEmail" readonly />
                                     }
                                     <span asp-validation-for="Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="phone-number">Số điện thoại</label>
-                                    <input type="text" asp-for="PhoneNumber" class="form-control form-control-user" placeholder="Số điện thoại"/>
+                                    <input type="text" asp-for="PhoneNumber" class="form-control form-control-user" placeholder="Số điện thoại" />
                                     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
@@ -201,6 +276,8 @@
 
     <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/js/register/register-with-facebook.js"></script>
+    <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
+    <script type="text/javascript" src="~/js/calendar/calendar-register.js"></script>
 </body>
 
 </html>

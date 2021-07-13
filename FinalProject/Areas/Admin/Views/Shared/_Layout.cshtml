@@ -10,11 +10,11 @@
     <meta name="author" content="">
     <title>@ViewData["Title"]</title>
 
-    <link href="~/Admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="~/Admin/css/sb-admin-2.min.css" rel="stylesheet" type="text/css">
-    <link href="~/Admin/css/image-style.css" rel="stylesheet" type="text/css">
-    <link href="~/Admin/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="~/admin/css/sb-admin-2.min.css" rel="stylesheet" type="text/css">
+    <link href="~/admin/css/image-style.css" rel="stylesheet" type="text/css">
+    <link href="~/admin/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="~/style/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet" type="text/css" />
     <link href="~/admin/bootstrap-select/css/bootstrap-select.min.css" rel="stylesheet" type="text/css">
     <link href="~/style/css/snackbar/notiny.css" rel="stylesheet" type="text/css" />
@@ -28,6 +28,11 @@
 
         .hidden-table {
             display: none;
+        }
+
+        .loading {
+            position: relative;
+            opacity: 0.5;
         }
 
         .form-field-label,
@@ -85,6 +90,27 @@
             background-clip: padding-box;
             transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
         }
+
+        .scroll-notify {
+            overflow-y: scroll;
+            min-height: 320px;
+            max-height: 510px;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #0ae;
+            background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+        }
     </style>
     @await RenderSectionAsync("Links", required: false)
 </head>
@@ -126,206 +152,26 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="~/Admin/vendor/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="~/Admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="~/Admin/vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script type="text/javascript" src="~/Admin/js/sb-admin-2.min.js"></script>
-    <script type="text/javascript" src="~/Admin/vendor/datatables/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="~/Admin/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    <script type="text/javascript" src="~/Admin/js/demo/datatables-demo.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="~/admin/js/sb-admin-2.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="~/admin/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="~/admin/js/demo/datatables-demo.js"></script>
     <script type="text/javascript" src="~/style/sweetalert2/dist/sweetalert2.min.js"></script>
     <script type="text/javascript" src="~/js/snackbar/notiny.js"></script>
-    <script type="text/javascript" src="~/Admin/ckeditor/ckeditor.js"></script>
-    <script type="text/javascript" src="~/js/ProductDetailHelper.js"></script>
+    <script type="text/javascript" src="~/admin/ckeditor/ckeditor.js"></script>
     <script type="text/javascript" src="~/admin/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="~/js/loading/modal-loading.js"></script>
     <script type="text/javascript" src="~/js/loading/loading.js"></script>
     <script type="text/javascript" src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/chartjs/jquery.canvasjs.min.js"></script>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
     {
-        <script>
-            var idleTime = 0;
-            $(document).ready(function () {
-                //Increment the idle time counter every minute.
-                //var idleInterval =
-                setInterval(timerIncrement, 60000); // 1 minute
-
-                //Zero the idle timer on mouse movement.
-                $(this).mousemove(function (e) {
-                    idleTime = 0;
-                });
-                $(this).keypress(function (e) {
-                    idleTime = 0;
-                });
-            });
-
-            function timerIncrement() {
-                idleTime = idleTime + 1;
-                if (idleTime > 29) { // 29 minutes
-                    window.location.href = "/Admin/Account/Logout"
-                }
-            }
-
-            function seenNotify(id) {
-                $.ajax({
-                    url: '/Admin/Notification/SeenNotify',
-                    method: 'PUT',
-                    async: true,
-                    data: { notificationId: id },
-                    success: function (data) {
-
-                    },
-                    error: function (code, err) {
-
-                    }
-                });
-            }
-        </script>
-
-        <script>
-            "use strict";
-
-            let connection = new signalR.HubConnectionBuilder()
-                .withUrl("/signalServer")
-                .withAutomaticReconnect()
-                .build();
-
-            connection.on("newNotification", function (link, createdDate, content) {
-                loadNewNotification(link, createdDate, content);
-            });
-
-            connection.on("rejectNotification", function (link, createdDate, content) {
-                loadRejectNotification(link, createdDate, content);
-            });
-
-            connection.on("newReceiptRequestNotification", function (link, createdDate, content) {
-                loadReceiptRequestNotification(link, createdDate, content);
-            });
-
-            connection.start().then(function () {
-                connection.invoke("AdminJoinGroup", "Admin");
-            }).catch(function (err) {
-                return console.error(err);
-            })
-
-            function loadReceiptRequestNotification(link, createdDate, content) {
-                var node = `<a class="dropdown-item d-flex align-items-center" href="` + link + `">
-                            <div class="mr-3">
-                                <div class="icon-circle bg-success">
-                                    <i class="fas fa-warehouse text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="small text-gray-500">`+ createdDate + `</div>
-                                `+ content +`
-                            </div>
-                            <div>
-                                <img src="/images/background/icon-status.png" width="20" height="20" />
-                            </div>
-                        </a>`;
-
-                var nodeShowAllNotification = `<a id="show-add-notification" class="dropdown-item text-center small text-gray-500"
-                                            href="/Admin/Notification/Notifications">Xem tất cả thông báo</a>`;
-
-                var number = parseInt($('#notification-count').text());
-
-                number++;
-
-                $('#notification-count').text(number + "")
-
-
-                $('#show-notification').append(node);
-                $('#show-add-notification').remove();
-                $('#show-notification').append(nodeShowAllNotification);
-
-                $.notiny({
-                    position: 'right-top',
-                    theme: 'success',
-                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                    text: 'Thông báo yêu cầu nhập kho mới',
-                });
-            }
-
-            function loadNewNotification(link, createdDate, content) {
-                var node = `<a class="dropdown-item d-flex align-items-center" href="` + link +`">
-                    <div class="mr-3">
-                        <div class="icon-circle bg-primary">
-                            <i class="fas fa-file-alt text-white"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small text-gray-500">`+ createdDate + `</div>
-                        <span class="font-weight-bold">`+ content +`</span>
-                    </div>
-                    <div>
-                        <img src="/images/background/icon-status.png" width="20" height="20" />
-                    </div>
-                </a>`;
-
-                var nodeShowAllNotification = `<a id="show-add-notification" class="dropdown-item text-center small text-gray-500"
-                                            href="/Admin/Notification/Notifications">Xem tất cả thông báo</a>`;
-
-                var number = parseInt($('#notification-count').text());
-
-                number++;
-
-                $('#notification-count').text(number + "")
-
-
-                $('#show-notification').append(node);
-                $('#show-add-notification').remove();
-                $('#show-notification').append(nodeShowAllNotification);
-
-                $.notiny({
-                    position: 'right-top',
-                    theme: 'success',
-                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                    text: 'Thông báo đơn hàng mới',
-                });
-
-            }
-
-            function loadRejectNotification(link, createdDate, content) {
-                var node = `<a class="dropdown-item d-flex align-items-center" href="` + link + `">
-                    <div class="mr-3">
-                        <div class="icon-circle bg-warning">
-                            <i class="fas fa-exclamation-triangle text-white"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small text-gray-500">`+ createdDate + `</div>
-                        <span class="font-weight-bold">`+ content + `</span>
-                    </div>
-                    <div>
-                        <img src="/images/background/icon-status.png" width="20" height="20" />
-                    </div>
-                </a>`;
-
-                var nodeShowAllNotification = `<a id="show-add-notification" class="dropdown-item text-center small text-gray-500"
-                                            href="/Admin/Notification/Notifications">Xem tất cả thông báo</a>`;
-
-                var number = parseInt($('#notification-count').text());
-
-                number++;
-
-                $('#notification-count').text(number + "")
-
-
-                $('#show-notification').append(node);
-                $('#show-add-notification').remove();
-                $('#show-notification').append(nodeShowAllNotification);
-
-                $.notiny({
-                    position: 'right-top',
-                    theme: 'danger',
-                    template: '<div class="notiny-base"><div class="MuiPaper-root MuiAlert-root MuiAlert-filledSuccess MuiPaper-elevation6"><div class="MuiAlert-icon"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2, 4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0, 0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path></svg></div><div class="notiny-text MuiAlert-message"></div></div></div>',
-                    text: 'Thông báo có đơn hàng chờ hủy',
-                });
-            }
-        </script>
-
+        <script src="~/admin/js/init-page/init-time.js"></script>
+        <script src="~/admin/js/init-page/init-signal.js"></script>
     }
     @await RenderSectionAsync("Scripts", required: false)
 </body>

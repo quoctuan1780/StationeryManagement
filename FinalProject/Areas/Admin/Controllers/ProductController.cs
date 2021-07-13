@@ -132,9 +132,11 @@ namespace FinalProject.Areas.Admin.Controllers
 
                                 if (result > 0)
                                 {
-                                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_ADD_PRODUCT;
+                                    TempData["MessageSuccess"] = MESSAGE_SUCCESS_ADD_PRODUCT;
 
                                     transaction.Complete();
+
+                                    return Redirect("/Admin/Product/Index");
                                 }
                                 else if (result == ERROR_CODE_NULL)
                                 {
@@ -278,11 +280,11 @@ namespace FinalProject.Areas.Admin.Controllers
                                             ProductHelper.CreateProductImages(imagesName, product.ProductId));
                                     }
 
+                                    TempData["MessageSuccess"] = MESSAGE_SUCCESS_UPDATE_PRODUCT;
+
                                     transaction.Complete();
 
-                                    //ProductHelper.RemoveFile(imageRemove);
-
-                                    ViewBag.MessageSuccess = MESSAGE_SUCCESS_UPDATE_PRODUCT;
+                                    return Redirect("/Admin/Product/Index");
                                 }
                                 else if (result == ERROR_CODE_NULL)
                                 {

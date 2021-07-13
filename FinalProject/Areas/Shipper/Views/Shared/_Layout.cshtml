@@ -85,6 +85,21 @@
             background-clip: padding-box;
             transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
         }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #0ae;
+            background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+        }
     </style>
     @await RenderSectionAsync("Styles", false)
 </head>
@@ -142,31 +157,10 @@
     <script type="text/javascript" src="~/js/loading/loading.js"></script>
     <script type="text/javascript" src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Shipper"))
     {
-        <script>
-            var idleTime = 0;
-            $(document).ready(function () {
-                //Increment the idle time counter every minute.
-                //var idleInterval =
-                setInterval(timerIncrement, 60000); // 1 minute
-
-                //Zero the idle timer on mouse movement.
-                $(this).mousemove(function (e) {
-                    idleTime = 0;
-                });
-                $(this).keypress(function (e) {
-                    idleTime = 0;
-                });
-            });
-
-            function timerIncrement() {
-                idleTime = idleTime + 1;
-                if (idleTime > 29) { // 29 minutes
-                    window.location.href = "/Shipper/Account/Logout"
-                }
-            }
-        </script>
+        <script src="~/shipper/init-data/init.js"></script>
+        <script src="~/shipper/init-data/init-signalr.js"></script>
     }
     @await RenderSectionAsync("Scripts", required: false)
 </body>

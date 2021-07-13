@@ -16,7 +16,7 @@
             </div>
             <div class="col-6">
                 <label>Ngày tạo: </label>
-                <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate" readonly />
+                <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate.ToShortDateString()" readonly />
 
             </div>
         </div>
@@ -48,8 +48,8 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Mã chi tiết sản phẩm</th>
                             <th>Tên sản phẩm</th>
+                            <th>Giá nhập</th>
                             <th>Số lượng</th>
                             <th>Số lượng đã nhập</th>
                             <th>Số lượng nhập thêm</th>
@@ -60,27 +60,32 @@
 
                         @foreach (var item in request.ImportWarehouseDetails)
                         {
-                        <tr>
-                            @if (item.Quantity == item.ActualQuantity)
-                            {
-                                <td>@item.ProductDetailId</td>
-                                <td>@item.ProductDetail.Product.ProductName</td>
-                                <td>@item.Quantity</td>
-                                <td>@item.ActualQuantity</td>
-                                <td>0</td>
-                            }
-                            else
-                            {
-                                <td><input type="text" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" readonly></td>
-                                <td>@item.ProductDetail.Product.ProductName</td>
-                                <td><input type="number" readonly value="@item.Quantity" class="form-control" name="Quantity" /></td>
-                                <td><input type="number" readonly value="@item.ActualQuantity" class="form-control" name="ActualQuantity" /></td>
+                            <tr>
+                                @if (item.Quantity == item.ActualQuantity)
+                                {
+                                    <td>@item.ProductDetail.Product.ProductName</td>
+                                    <td>@item.ImportPrice</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.ActualQuantity</td>
+                                    <td>0</td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <input type="hidden" name="productDetailIds" value="@item.ProductDetailId" />
+                                        @item.ProductDetail.Product.ProductName
+                                    </td>
+                                    <td>@item.ImportPrice</td>
+                                    <td><input type="number" readonly value="@item.Quantity" class="form-control" name="Quantity" /></td>
+                                    <td><input type="number" readonly value="@item.ActualQuantity" class="form-control" name="ActualQuantity" /></td>
+                                    <td>
+                                        <input type="number" name="AddQuantity" class="form-control" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                    </td>
+                                }
                                 <td>
-                                    <input type="number" name="AddQuantity" class="form-control" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                    @item.Status
                                 </td>
-                            }
-                            <td>@item.Status</td>
-                        </tr>
+                            </tr>
                         }
                     </tbody>
 

@@ -51,6 +51,7 @@
     <Folder Include="Areas\Warehouse\Data\" />
     <Folder Include="Areas\Warehouse\Models\" />
     <Folder Include="wwwroot\images\sale\" />
+    <Folder Include="wwwroot\js\cart\" />
   </ItemGroup>
 
 </Project>

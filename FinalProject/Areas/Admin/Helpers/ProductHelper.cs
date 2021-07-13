@@ -58,7 +58,8 @@ namespace FinalProject.Areas.Admin.Helpers
                     Weight = model.Weights[i],
                     Origin = model.Origins[i],
                     Quantity = model.Quantities[i],
-                    ProductId = productId.Value
+                    ProductId = productId.Value,
+                    Price = model.Prices[i]
                 });
             }
 
@@ -201,9 +202,7 @@ namespace FinalProject.Areas.Admin.Helpers
             var images = new List<string>();
             var origins = new List<string>();
             var weights = new List<double>();
-            var widths = new List<int>();
-            var lengths = new List<int>();
-            var heights = new List<int>();
+            var prices = new List<decimal>();
             var color = new List<string>();
             var quantities = new List<int>();
 
@@ -231,6 +230,7 @@ namespace FinalProject.Areas.Admin.Helpers
                 color.Add(product.ProductDetails[i].Color);
                 productsDetailId.Add(product.ProductDetails[i].ProductDetailId);
                 quantities.Add(product.ProductDetails[i].Quantity);
+                prices.Add(product.ProductDetails[i].Price);
             }
 
             model.ProductsDetailId = productsDetailId;
@@ -239,6 +239,7 @@ namespace FinalProject.Areas.Admin.Helpers
             model.Weights = weights;
             model.Colors = color;
             model.Quantities = quantities;
+            model.Prices = prices;
 
             return model;
         }

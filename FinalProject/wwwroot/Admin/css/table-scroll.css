@@ -1,0 +1,24 @@
+﻿table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 8px;
+}
+
+th {
+    text-align: left;
+    background: #eee;
+    position: sticky;
+    top: 0px;
+}
+
+.wrapper {
+    border: 1px solid #ddd;
+    width: 100%;
+    min-height: 320px;
+    max-height: 540px;
+    overflow-y: auto;
+}

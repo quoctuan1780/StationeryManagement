@@ -158,21 +158,5 @@
 @section Scripts{
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/calendar/calendar-date.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.selectpicker').selectpicker({
-                liveSearch: true,
-                showSubtext: true,
-                Size: 10
-            });
-        });
-
-        function filter() {
-            var customer = $('#customer').val();
-            var receivedDate = $('#date-input').val();
-            var url = '/Shipper/Order/OrderDelivered?receivedDate=' + receivedDate + '&customer=' + customer;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/shipper/order/order-delivered.js"></script>
 }

@@ -308,10 +308,10 @@
                             var chart = new CanvasJS.Chart("myAreaChart", {
                                 animationEnabled: true,
                                 title: {
-                                    text: "DOANH THU VÀ CHI PHÍ MUA HÀNG HÀNG THÁNG"
+                                    text: "Chi phí nhập hàng hàng tháng"
                                 },
                                 axisY: {
-                                    title: "Đơn vị : Nghìn đồng",
+                                    title: "Đơn vị : VNĐ",
                                     titleFontColor: "#4F81BC",
                                     lineColor: "#4F81BC",
                                     labelFontColor: "#4F81BC",
@@ -321,15 +321,15 @@
 
                                 data: [{
                                     type: "column",
-                                    name: "Proven Oil Reserves (bn)",
-                                    legendText: "Proven Oil Reserves",
+                                    name: "Số tiền nhập hàng (bn)",
+                                    legendText: "Số tiền nhập hàng",
                                     showInLegend: true,
                                     dataPoints: dataconvert
                                 },
                                 {
                                     type: "column",
 
-                                    legendText: "Oil Production",
+                                    legendText: "Số lượng sản phẩm nhập",
                                     axisYType: "secondary",
                                     showInLegend: true,
                                     dataPoints: data1convert

@@ -1,0 +1,156 @@
+﻿@using X.PagedList.Mvc.Core
+@using X.PagedList
+@using static Common.Constant
+@model PagedList<Entities.Models.Notification>
+@{
+    ViewData["Title"] = "Tất cả thông báo";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+}
+
+@section Links{
+    <style>
+        a {
+            text-decoration: none;
+            color: #858796
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse"
+               role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                <h6 class="m-0 font-weight-bold text-primary">Thông báo</h6>
+            </a>
+            <div class="collapse show" id="collapseCardExample">
+                <div class="card-body">
+                    <div class="page-content page-container" id="page-content">
+                        <div class="padding">
+                            <div class="row">
+                                <div class="col-xl-12 col-lg-6">
+                                    <div id="show-notification" style="padding-left: 0.6rem">
+                                        @if (Model != null)
+                                        {
+                                            foreach (var item in Model)
+                                            {
+                                                string onclick = "seenNotify(" + item.NotificationId + ")";
+                                                if (item.Status.Equals(STATUS_SEEN_NOTIFICATION))
+                                                {
+                                                    onclick = "javascript:void(0)";
+                                                }
+                                                switch (item.NotificationType.NotificationTypeName)
+                                                {
+                                                    case NOTIFICATION_REJECT_RECEIPT_IMPORT_WAREHOUSE:
+
+                                                        <div class="row" style="margin-top: 1rem">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="mr-3">
+                                                                    <div class="icon-circle bg-warning">
+                                                                        <i class="fas fa-exclamation-triangle text-white"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
+                                                                    <a onclick="@onclick" href="@item.Link">
+                                                                        <span class="font-weight-bold">@item.Content</span>
+                                                                    </a>
+                                                                </div>
+                                                                @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
+                                                                {
+                                                                    <div>
+                                                                        <img src="~/images/background/icon-status.png" width="20" height="20" />
+                                                                    </div>
+                                                                }
+                                                                <div style="padding-left: 2rem">
+                                                                    <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        break;
+
+                                                    default:
+                                                        <div class="row" style="margin-top: 1rem">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="mr-3">
+                                                                    <div class="icon-circle bg-success">
+                                                                        <i class="fas fa-warehouse text-white"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
+                                                                    <a  onclick="@onclick" href="@item.Link">
+                                                                        <span class="font-weight-bold">@item.Content</span>
+                                                                    </a>
+                                                                </div>
+                                                                @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
+                                                                {
+                                                                    <div>
+                                                                        <img src="~/images/background/icon-status.png" width="20" height="20" />
+                                                                    </div>
+                                                                }
+                                                                <div style="padding-left: 2rem">
+                                                                    <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        break;
+                                                }
+                                            }
+
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-block" style="margin-top: 1rem">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Notifications", new { page }),
+                        new X.PagedList.Web.Common.PagedListRenderOptions
+                        {
+                            DisplayItemSliceAndTotal = false,
+                            ContainerDivClasses = new[] { "navigation" },
+                            LiElementClasses = new[] { "page-item" },
+                            PageClasses = new[] { "page-link" },
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script>
+        $(() => {
+            $('#notification-show').remove();
+        })
+        function deleteNotify(el, id) {
+            if (id === '') {
+                showErrorSystem();
+                return undefined;
+            }
+
+            $.ajax({
+                url: '/Warehouse/Notification/DeleteNofity',
+                method: 'DELETE',
+                async: true,
+                data: { notificationId: id },
+                success: function (data) {
+                    switch (data) {
+                        case 1:
+                            showSuccess("Xóa thông báo thành công");
+                            $(el).closest('.row').remove();
+                            break;
+                        default:
+                            showError("Hệ thống xảy ra lỗi vui lòng thử lại sau", '360px')
+                            break;
+                    }
+                },
+                error: function (code, err) {
+                    showErrorSystem();
+                }
+            })
+        }
+    </script>
+}

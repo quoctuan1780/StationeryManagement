@@ -53,6 +53,16 @@ namespace Services.Services
                 var productIdsOld = productsInSale.Select(x => x.ProductId);
                 var products = await _context.Products.Where(x => productIdsOld.Contains(x.ProductId)).ToListAsync();
 
+                var productDetailsOld = _context.ProductDetails.Include(x => x.Product)
+                                    .Where(x => productIdsOld.Contains(x.Product.ProductId));
+
+                foreach (var item in productDetailsOld)
+                {
+                    item.SalePrice = 0;
+                }
+
+                _context.ProductDetails.UpdateRange(productDetailsOld);
+
                 if (products != null && products.Any())
                 {
                     foreach (var item in products)
@@ -87,6 +97,16 @@ namespace Services.Services
 
                 if (productsUpdate != null && productsUpdate.Any())
                 {
+                    var productDetails = _context.ProductDetails.Include(x => x.Product)
+                                    .Where(x => productIds.Contains(x.Product.ProductId));
+
+                    foreach (var item in productDetails)
+                    {
+                        item.SalePrice = item.Price - item.Price * discount / 100;
+                    }
+
+                    _context.ProductDetails.UpdateRange(productDetails);
+
                     foreach (var item in productsUpdate)
                     {
                         item.SalePrice = item.Price - item.Price * discount / 100;

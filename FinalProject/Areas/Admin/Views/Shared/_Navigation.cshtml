@@ -70,7 +70,7 @@
                 <h6 class="dropdown-header">
                     Thông báo
                 </h6>
-                <div class="scroll" id="show-notification">
+                <div class="scroll-notify" id="show-notification">
                     @if (notifications != null)
                     {
                         if (notifications.Any())
@@ -150,7 +150,9 @@
                         }
                     }
                 </div>
-               
+                <div id="load-component" class="spinner-border text-primary hidden-table" role="status" style="position: absolute;top: 50%;left: 45%">
+                    <span class="sr-only">Loading...</span>
+                </div>
                 <a id="show-add-notification" class="dropdown-item text-center small text-gray-500" 
                    asp-controller="Notification" asp-action="Notifications" asp-area="Admin">Xem tất cả thông báo</a>
             </div>

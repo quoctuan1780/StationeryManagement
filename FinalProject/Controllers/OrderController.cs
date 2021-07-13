@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Authorization;
 using Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using X.PagedList;
-using NPOI.XSSF.UserModel;
 
 namespace FinalProject.Controllers
 {
@@ -213,8 +212,8 @@ namespace FinalProject.Controllers
             var user = await _accountService.GetUserAsync(User);
             await _cartService.RemoveCartItemByUserId(user.Id);
             ViewBag.OrderId = orderId.Value;
-            var link = Url.ActionLink("OrderWaitComfirm", "Order",
-                                            new { Area = AREA_ADMIN },
+            var link = Url.ActionLink("OrderDetail", "Order",
+                                            new { Area = AREA_ADMIN, OrderId = orderId.Value },
                                             Request.Scheme);
             var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
             var notifications = new List<Notification>();
@@ -288,20 +287,26 @@ namespace FinalProject.Controllers
 
         public async Task<IActionResult> PayPalSuccess(string deliveryAddress, string token, string PayerID)
         {
+            string captureId = EMPTY;
+
+            PayPalCheckoutSdk.Orders.Order captureOrderResult = null;
+
+            var user = await _accountService.GetUserAsync(User);
+
+            var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
-                var user = await _accountService.GetUserAsync(User);
 
                 var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
 
-                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
 
                 var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
-                string captureId = EMPTY;
+                
                 if (!(captureOrderResponse is null))
                 {
-                    var captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+                    captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
                     if(captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
                     {
@@ -339,8 +344,8 @@ namespace FinalProject.Controllers
                             {
                                 await _cartService.RemoveCartItemByUserId(user.Id);
 
-                                var link = Url.ActionLink("OrderWaitComfirm", "Order",
-                                            new { Area = AREA_ADMIN },
+                                var link = Url.ActionLink("OrderDetail", "Order",
+                                            new { Area = AREA_ADMIN, OrderId = order.OrderId },
                                             Request.Scheme);
 
                                 var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
@@ -390,8 +395,19 @@ namespace FinalProject.Controllers
             }
             catch
             {
-                return PartialView(ERROR_PAYMENT_PAGE);
+                if (captureOrderResult != null && captureOrderResult.Status.Equals("COMPLETED"))
+                {
+                    decimal total = 0;
+
+                    foreach (var item in carts)
+                    {
+                        total += Math.Round((item.Price / (decimal)EXCHANGE_RATE_USD), 2) * item.Quantity;
+                    }
+
+                    await _payPalService.CapturesRefund(captureId, total.ToString().Replace(COMMA, DOT));
+                }
             }
+            return PartialView(ERROR_PAYMENT_PAGE);
         }
 
         public async Task<IActionResult> MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
@@ -456,8 +472,8 @@ namespace FinalProject.Controllers
                             {
                                 await _cartService.RemoveCartItemByUserId(user.Id);
 
-                                var link = Url.ActionLink("OrderWaitComfirm", "Order",
-                                            new { Area = AREA_ADMIN },
+                                var link = Url.ActionLink("OrderDetail", "Order",
+                                            new { Area = AREA_ADMIN, OrderId = order.OrderId },
                                             Request.Scheme);
 
                                 var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
@@ -489,8 +505,6 @@ namespace FinalProject.Controllers
 
                                 await _notificationService.AddNotificationAsync(notifications);
 
-                                await _notificationService.AddNotificationAsync(notifications);
-
                                 transaction.Complete();
 
                                 ViewBag.OrderId = order.OrderId;
@@ -506,7 +520,10 @@ namespace FinalProject.Controllers
                 }
                 catch
                 {
-
+                    if (errorCode.Equals(ZERO))
+                    {
+                        await _moMoService.RefundMoneyAsync(orderId, transId, amount);
+                    }
                 }
             }
 

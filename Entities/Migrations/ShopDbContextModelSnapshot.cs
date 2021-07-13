@@ -699,6 +699,10 @@ namespace Entities.Migrations
                     b.Property<string>("Origin")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -715,6 +719,10 @@ namespace Entities.Migrations
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<double>("Weight")
                         .HasColumnType("float");
@@ -865,6 +873,10 @@ namespace Entities.Migrations
                     b.Property<int>("ReceiptRequestId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -980,24 +992,31 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Entities.Models.SaleDetail", b =>
                 {
-                    b.Property<int>("SaleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<int>("SaleDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("SaleEndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("SaleStartDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("SaleId", "ProductId");
+                    b.HasKey("SaleDetailId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleDetailId");
 
                     b.HasIndex("SaleId");
 
