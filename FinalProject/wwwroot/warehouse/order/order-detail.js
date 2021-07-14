@@ -40,6 +40,37 @@
         })
 }
 
+function prepareOrder(orderId, productId) {
+    if (orderId === '' || productId === '') {
+        showError("Không tồn tại đơn hàng này");
+        return undefined;
+    }
+        
+    $.ajax({
+        url: '/Warehouse/Order/PrepareOrder',
+        method: 'PUT',
+        async: true,
+        data: { OrderId: orderId, ProductId: productId },
+        success: function (data) {
+            switch (data) {
+                case 1:
+                    window.location.reload();
+                    break;
+                case -4:
+                    showError('Lỗi không tìm thấy đơn hàng này');
+                    break;
+                case -99:
+                    showErrorSystem();
+                    break;
+            }
+        },
+        error: function (code, err) {
+            showErrorSystem();
+        }
+    });
+            
+}
+
 function filter() {
     var customer = $('#customer').val();
     var orderDate = $('#date-input').val();

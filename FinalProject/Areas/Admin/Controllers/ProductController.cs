@@ -267,7 +267,7 @@ namespace FinalProject.Areas.Admin.Controllers
                             {
 
                                 result = await _productDetailService.UpdateProductsDetailAsync(
-                                    ProductHelper.ConvertModelPrductToProductsDetail(model, product.ProductId));
+                                    ProductHelper.ConvertModelPrductToProductsDetailForUpdate(model, product.ProductId));
 
                                 if (result > 0)
                                 {

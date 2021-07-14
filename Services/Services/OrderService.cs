@@ -78,7 +78,7 @@ namespace Services.Services
 
         public async Task<int> AdminConfirmOrderAsync(int orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders.Include(x => x.OrderDetails).Where(x => x.OrderId == orderId).FirstOrDefaultAsync();
 
             if(order is null)
             {
@@ -88,7 +88,14 @@ namespace Services.Services
             order.Status = STATUS_PREPARING_GOODS;
             order.ModifiedDate = DateTime.Now;
 
+            foreach(var item in order.OrderDetails)
+            {
+                item.Status = STATUS_PREPARING_GOODS;
+            }
+
             _context.Orders.Update(order);
+
+            _context.OrderDetails.UpdateRange(order.OrderDetails);
 
             return await _context.SaveChangesAsync();
         }
@@ -125,7 +132,7 @@ namespace Services.Services
 
         public async Task<int> WarehouseManagementConfirmOrderAsync(int orderId, string userId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders.Include(x => x.OrderDetails).Where(x => x.OrderId == orderId).FirstOrDefaultAsync();
 
             if (order is null)
             {
@@ -139,6 +146,13 @@ namespace Services.Services
             order.Status = STATUS_WAITING_PICK_GOODS;
 
             _context.Orders.Update(order);
+
+            foreach(var item in order.OrderDetails)
+            {
+                item.Status = STATUS_PREPARED_GOODS;
+            }
+
+            _context.OrderDetails.UpdateRange(order.OrderDetails);
 
             return await _context.SaveChangesAsync();
         }
@@ -1204,6 +1218,17 @@ namespace Services.Services
             return result;
         }
         #endregion
+
+        public async Task<int> PrepareOrder(int orderId, int productDetailId)
+        {
+            var orderDetails = await _context.OrderDetails.Where(x => x.OrderId == orderId && x.ProductDetailId == productDetailId && x.Status == STATUS_PREPARING_GOODS).FirstOrDefaultAsync();
+
+            orderDetails.Status = STATUS_PREPARED_GOODS;
+
+            _context.OrderDetails.Update(orderDetails);
+
+            return await _context.SaveChangesAsync();
+        }
 
         #region Feature developer
         //public async Task<int> PrepareOrder(int OrderId, int ProductDetailId)

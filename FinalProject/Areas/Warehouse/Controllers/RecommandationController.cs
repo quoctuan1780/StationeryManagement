@@ -59,7 +59,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            var result = await _recommendationService.GetRecommandtion(4, 0.81,listId);
+            var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             if(result is null || !result.Any())
@@ -81,7 +81,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
                 recommandation.Add(obj);
             }
-
+            recommandation = recommandation.Distinct().ToList();
             return JsonConvert.SerializeObject(recommandation);
         }
 
@@ -101,11 +101,8 @@ namespace FinalProject.Areas.Warehouse.Controllers
         }
         public async Task<IActionResult> AutoCreateReceiptRequest()
         {
-            ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
-            ViewBag.BestSeller = await _productService.BestSellerInMonthAsync(FromDate, ToDate, Quantity);
-            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(4, 0.81,listId);
-           
+            ViewBag.ListProduct = await _recommendationService.GetListProductDetailForCreateRRAsync(FromDate, ToDate,Quantity);
+            
             
             return View();
         }

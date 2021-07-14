@@ -205,6 +205,7 @@ namespace Common
         public const string STATUS_CONFIRMED_PAYMENT = "xác nhận đã thanh toán";
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
         public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
+        public const string STATUS_PREPARED_GOODS = "Đã chuẩn bị xong";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
         public const string STATUS_WAITING_FOR_DELIVERING = "Chờ giao hàng";
         public const string STATUS_ON_DELIVERY_GOODS = "Đang giao hàng";

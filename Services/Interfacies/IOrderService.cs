@@ -35,6 +35,7 @@ namespace Services.Interfacies
         Task<int> CountOrdersDeliveringAsync();
         Task<int> CountOrdersDeliveredAsync();
         Task<string> GetTotalSalesPerMonthsAsync();
+        Task<int> PrepareOrder(int orderId, int prodductDetilId);
         Task<string> GetTotalPurchasePerMonthsAsync();
         Task<IList<WorkflowHistory>> GetOrderHistoryAsync(int orderId);
         IList<OrderHelper.OrderJoinHelper> GetOrderDelivered(string userId = EMPTY);

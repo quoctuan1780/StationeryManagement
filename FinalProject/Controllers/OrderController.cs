@@ -161,9 +161,10 @@ namespace FinalProject.Controllers
             return View();
         }
 
+        #region COD Payment
         public async Task<IActionResult> CodCheckout(OrderViewModel model, User user, decimal? total, IList<CartItem> carts)
         {
-            if(user is null || total is null || carts is null)
+            if (user is null || total is null || carts is null)
             {
                 return PartialView(ERROR_404_PAGE);
             }
@@ -191,7 +192,7 @@ namespace FinalProject.Controllers
 
                 int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
 
-                if(result > 0)
+                if (result > 0)
                 {
                     transaction.Complete();
 
@@ -221,7 +222,7 @@ namespace FinalProject.Controllers
             var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + orderId.Value;
             if (admins != null)
             {
-                foreach(var item in admins)
+                foreach (var item in admins)
                 {
                     var nofification = new Notification()
                     {
@@ -238,7 +239,7 @@ namespace FinalProject.Controllers
                     notifications.Add(nofification);
                 }
             }
-            
+
             await _notificationService.AddNotificationAsync(notifications);
 
             await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
@@ -247,7 +248,9 @@ namespace FinalProject.Controllers
 
             return View();
         }
+        #endregion
 
+        #region Paypal Payment
         public async Task<IActionResult> PaypalCheckout(string deliveryAddress)
         {
             var userId = _accountService.GetUserId(User);
@@ -303,12 +306,12 @@ namespace FinalProject.Controllers
 
 
                 var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
-                
+
                 if (!(captureOrderResponse is null))
                 {
                     captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                    if(captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
+                    if (captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
                     {
                         var data = captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault();
                         captureId = data.Id;
@@ -409,7 +412,9 @@ namespace FinalProject.Controllers
             }
             return PartialView(ERROR_PAYMENT_PAGE);
         }
+        #endregion
 
+        #region Momo Payment
         public async Task<IActionResult> MoMoCheckout(string total, string orderInfo, string email, string deliveryAddress)
         {
             string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
@@ -529,6 +534,7 @@ namespace FinalProject.Controllers
 
             return PartialView(ERROR_PAYMENT_PAGE);
         }
+        #endregion
 
         public async Task<int> RejectOrder(int? orderId, string content)
         {

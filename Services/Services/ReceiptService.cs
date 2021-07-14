@@ -200,6 +200,7 @@ namespace Services.Services
 
         public async Task<int> RejectReceiptRequestAsync(int id)
         {
+
             var result = await _context.ReceiptRequests.FindAsync(id);
             if (result != null)
             {

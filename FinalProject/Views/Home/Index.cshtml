@@ -3,8 +3,9 @@
 
     var products = ViewBag.Products as IList<Entities.Models.Product>;
     var salesImage = ViewBag.Sales as IList<string>;
+    var top10ProductsHot = ViewBag.Top10ProductsHot as IList<Entities.Models.ProductDetail>;
     string image = null;
-
+    var random = new Random();
     int skip = 16;
 }
 
@@ -31,9 +32,7 @@
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="other-pro">
                     <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="#tab1">New arrivals</a></li>
-                        <li><a data-toggle="tab" href="#tab2">POPULAR PRODUCTS</a></li>
-                        <li><a data-toggle="tab" href="#tab3">Specail products</a></li>
+                        <li class="active"><a data-toggle="tab" href="#tab1">10 sản phẩm HOT trong tháng</a></li>
                     </ul>
                     <div class="tab-content">
                         <div id="tab1" class="tab-pane fade in active">
@@ -41,222 +40,88 @@
                                 <div class="slider-inner">
                                     <div class="container-slider">
                                         <div class="products-grid">
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
+                                            @if (top10ProductsHot != null && top10ProductsHot.Any())
+                                            {
+                                                foreach (var item in top10ProductsHot)
+                                                {
+                                                    <div class="item">
+                                                        <div class="item-wrap">
+                                                            <div class="item-image">
+                                                                <a class="product-image no-touch" href="#" title="@item.Product.ProductName">
+                                                                    @if (!(item.Product.ProductImages is null))
+                                                                    {
+                                                                        var rnd = new Random();
 
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
+                                                                        <img class="first_image" src="~/images/product/@item.Product.ProductImages[rnd.Next(item.Product.ProductImages.Count)].Image"
+                                                                                alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                                        
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img class="first_image" src="~/images/product/img_1.jpg"
+                                                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                                    }
+                                                                </a>
+                                                                <div class="item-btn">
+                                                                    <div class="box-inner">
+                                                                        <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                                        <span class="qview">
+                                                                            <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                                               data-placement="left" data-toggle="tooltip"
+                                                                               asp-controller="Product" asp-action="Detail"
+                                                                               asp-route-id="@item.ProductId">
+                                                                                <span>
+                                                                                    Quick
+                                                                                    View
+                                                                                </span>
+                                                                            </a>
                                                                         </span>
-                                                                        <p class="special-price">
-                                                                            <span class="price">$1.459.00</span>
-                                                                        </p>
                                                                     </div>
                                                                 </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
+
+                                                            </div>
+                                                            <div class="pro-info">
+                                                                <div class="pro-inner">
+                                                                    <div class="pro-title product-name">
+                                                                        <a asp-controller="Product" asp-action="Detail"
+                                                                           asp-route-id="@item.ProductId">
+                                                                            @item.Product.ProductName
+                                                                        </a>
                                                                     </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
+                                                                    <div class="pro-content">
+                                                                        <div class="wrap-price">
+                                                                            <div class="price-box" style="min-height: 60px">
+                                                                                @if (item.SalePrice > 0)
+                                                                                {
+                                                                                    <span class="regular-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.Product.SalePrice) VNĐ</span>
+                                                                                    </span>
+                                                                                    <p class="special-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.Product.Price) VNĐ</span>
+                                                                                    </p>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="regular-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.Product.Price) VNĐ</span>
+                                                                                    </span>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <p>Phân loại: @item.Color</p>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
+                                                            <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                                                Chi tiết sản phẩm
+                                                            </a>
                                                         </div>
                                                     </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                        <p class="special-price">
-                                                                            <span class="price">$1.459.00</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                        <p class="special-price">
-                                                                            <span class="price">$1.459.00</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                        <p class="special-price">
-                                                                            <span class="price">$1.459.00</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                        <p class="special-price">
-                                                                            <span class="price">$1.459.00</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
+                                                }
+                                            }
+
                                         </div>
                                     </div>
                                     <div class="navslider">
@@ -265,438 +130,6 @@
                                     </div>
 
                                 </div>
-                            </div>
-                        </div>
-                        <div id="tab2" class="tab-pane fade">
-                            <div class="block vt-slider vt-slider5">
-                                <div class="slider-inner">
-                                    <div class="container-slider">
-                                        <div class="products-grid">
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="navslider">
-                                        <a class="prev" href="#">Prev</a>
-                                        <a class="next" href="#">Next</a>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-                        <div id="tab3" class="tab-pane fade">
-                            <div class="block vt-slider vt-slider6">
-                                <div class="slider-inner">
-                                    <div class="container-slider">
-                                        <div class="products-grid">
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                            <div class="item">
-                                                <div class="item-wrap">
-                                                    <div class="item-image">
-                                                        <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                            <img class="first_image" src="~/images/product/img_1.jpg" alt="Product demo" />
-                                                        </a>
-                                                        <div class="item-btn">
-                                                            <div class="box-inner">
-                                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                                <span class="qview">
-                                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="pro-info">
-                                                        <div class="pro-inner">
-                                                            <div class="pro-title product-name"><a href="detail.html">Ipad Air and iOS7</a></div>
-                                                            <div class="pro-content">
-                                                                <div class="wrap-price">
-                                                                    <div class="price-box">
-                                                                        <span class="regular-price">
-                                                                            <span class="price">$800.00</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="ratings">
-                                                                    <div class="rating-box">
-                                                                        <div class="rating" style="width:80%"></div>
-                                                                    </div>
-                                                                    <span class="amount"><a href="#">1(s)</a></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <a title="Add to cart" class="add-to-cart" href="#">Add to cart</a>
-                                                </div>
-                                                <!--end item wrap -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="navslider">
-                                        <a class="prev" href="#">Prev</a>
-                                        <a class="next" href="#">Next</a>
-                                    </div>
-
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -723,13 +156,15 @@
                                 <div class="item-wrap">
                                     <div class="item-image">
                                         <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                            @if (!(item.ProductImages.FirstOrDefault() is null))
+                                            @if (!(item.ProductImages is null) && !(item.ProductImages.FirstOrDefault() is null))
                                             {
+
+                                                var rdImage = random.Next(item.ProductImages.Count);
                                                 {
-                                                    <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                    <img class="first_image" src="~/images/product/@item.ProductImages[random.Next(rdImage)].Image"
                                                          alt="Product demo" width="228" height="228" style="width: 100%;" />
                                                 }
-                                                image = item.ProductImages.FirstOrDefault().Image;
+                                                image = item.ProductImages[rdImage].Image;
                                             }
                                             else
                                             {

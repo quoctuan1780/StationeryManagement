@@ -230,7 +230,7 @@ namespace FinalProject.Areas.Shipper.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
         {
             if (ModelState.IsValid)
             {
@@ -243,6 +243,10 @@ namespace FinalProject.Areas.Shipper.Controllers
                         if (await _accountService.IsInRoleAsync(user, ROLE_SHIPPER))
                         {
                             await Heplers.SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
+                        }
+                        if(urlBack is not null || !urlBack.Equals(EMPTY))
+                        {
+                            return Redirect(urlBack);
                         }
                         return Redirect("/Shipper/Home/Dashboard");
 

@@ -2,6 +2,7 @@
 using Services.Interfacies;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using X.PagedList;
 using static Common.Constant;
 
 namespace FinalProject.Controllers
@@ -20,7 +21,7 @@ namespace FinalProject.Controllers
             _recommendationService = recommendationService;
             _rateService = rateService;
         }
-        public async Task<IActionResult> Detail(int? id)
+        public async Task<IActionResult> Detail(int? id, int? page = 1)
         {
             if(id is null)
             {
@@ -35,11 +36,13 @@ namespace FinalProject.Controllers
 
             ViewBag.RatingsDetail = await _rateService.GetRatingsDetailAsync(id.Value);
 
-            List<int> listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
+            var listProductDetailId = await _productService.GetProductDetailByProDuctIdAsync(id.Value);
 
-            ViewBag.Suggest = await _recommendationService.GetSuggestedProduct(listProductDetailId);
+            var productSuggests = await _recommendationService.GetSuggestedProduct(listProductDetailId);
 
-            return View();
+            var model = productSuggests.ToPagedList(page.Value, 12);
+
+            return View(model);
         }
 
         public string GetProductSkip(int? skip)

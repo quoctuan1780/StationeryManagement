@@ -52,7 +52,7 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            var result = await _recommendationService.GetRecommandtion(4, 0.81, listId);
+            var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             if(result is null || !result.Any())
@@ -92,13 +92,15 @@ namespace FinalProject.Areas.Admin.Controllers
             return result;
         }
 
+
         [HttpDelete]
         public async Task<int> RejectReceipt(int? id)
         {
-            if(id is null)
+            if (id is null)
             {
                 return ERROR_CODE_NULL;
             }
+
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {

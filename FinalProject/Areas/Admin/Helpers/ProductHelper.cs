@@ -73,6 +73,38 @@ namespace FinalProject.Areas.Admin.Helpers
             
             return productsDetail;
         }
+
+        public static IList<ProductDetail> ConvertModelPrductToProductsDetailForUpdate(ProductViewModel model, int? productId)
+        {
+            if (model.Origins is null || productId is null) return null;
+
+            var productsDetail = new List<ProductDetail>();
+
+            for (int i = 0; i < model.Origins.Count; i++)
+            {
+                productsDetail.Add(new ProductDetail()
+                {
+                    Color = model.Colors[i],
+                    Weight = model.Weights[i],
+                    Origin = model.Origins[i],
+                    Quantity = model.Quantities[i],
+                    ProductId = productId.Value,
+                    Price = model.Prices[i],
+                    SalePrice = model.PriceSales[i]
+                });
+            }
+
+            if (!(model.ProductsDetailId is null))
+            {
+                for (int i = 0; i < model.ProductsDetailId.Count; i++)
+                {
+                    productsDetail[i].ProductDetailId = model.ProductsDetailId[i];
+                }
+            }
+
+            return productsDetail;
+        }
+
         public static IList<SelectListItem> ConvertCategoriesToSelectListItem(IList<Category> categories)
         {
             var categoriesSelectList = new List<SelectListItem>();
@@ -205,6 +237,7 @@ namespace FinalProject.Areas.Admin.Helpers
             var prices = new List<decimal>();
             var color = new List<string>();
             var quantities = new List<int>();
+            var priceSales = new List<decimal>();
 
             if(!(imagesDeleted is null) && !(imagesDeleted.FirstOrDefault() is null))
             {
@@ -231,6 +264,7 @@ namespace FinalProject.Areas.Admin.Helpers
                 productsDetailId.Add(product.ProductDetails[i].ProductDetailId);
                 quantities.Add(product.ProductDetails[i].Quantity);
                 prices.Add(product.ProductDetails[i].Price);
+                priceSales.Add(product.ProductDetails[i].SalePrice);
             }
 
             model.ProductsDetailId = productsDetailId;
@@ -240,6 +274,7 @@ namespace FinalProject.Areas.Admin.Helpers
             model.Colors = color;
             model.Quantities = quantities;
             model.Prices = prices;
+            model.PriceSales = priceSales;
 
             return model;
         }

@@ -187,10 +187,10 @@ namespace FinalProject.Areas.Admin.Controllers
                         {
                             return Redirect(urlBack);
                         }
-                        else
-                        {
-                            return Redirect("/Admin/Home/Dashboard");
-                        }
+                        
+                        
+                        return Redirect("/Admin/Home/Dashboard");
+                        
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;
                         break;

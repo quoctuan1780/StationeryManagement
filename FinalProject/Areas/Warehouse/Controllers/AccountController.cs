@@ -84,7 +84,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
         {
             if (ModelState.IsValid)
             {
@@ -97,6 +97,10 @@ namespace FinalProject.Areas.Warehouse.Controllers
                         if (await _accountService.IsInRoleAsync(user, ROLE_WAREHOUSE_MANAGER))
                         {
                             await Heplers.SecurityManager.SignInAsync(HttpContext, user, ROLE_WAREHOUSE_MANAGER, ROLE_WAREHOUSE_MANAGER);
+                        }
+                        if (urlBack != null && !urlBack.Equals(EMPTY))
+                        {
+                            return Redirect(urlBack);
                         }
                         return Redirect("/Warehouse/Home/Dashboard");
 

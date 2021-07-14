@@ -31,6 +31,8 @@ namespace FinalProject.Controllers
 
             ViewBag.Sales = await _saleService.GetThreeSalesImageAsync();
 
+            ViewBag.Top10ProductsHot = await _productService.GetTop10ProductHotAsync();
+
             return View();
         }
 

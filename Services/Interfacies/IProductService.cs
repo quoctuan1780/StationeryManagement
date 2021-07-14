@@ -21,8 +21,9 @@ namespace Services.Interfacies
 
         Task<IList<string>> GetColorByIdAsync(int productId);
 
-        Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync();
+        Task<List<ProductDetail>> GetProductDetailsRunOutOfStockAsync();
 
+        Task<List<ProductDetail>> GetBestSellerInMonthAsync(DateTime fromDate, DateTime toDate, int quantity);
         Task<string> BestSellerInMonthAsync(DateTime fromDate, DateTime toDdate, int quantity);
 
         Task<int> DeleteProductByIdAsync(int productId);
@@ -35,6 +36,7 @@ namespace Services.Interfacies
         Task<bool> CheckProductIsInAnySalesAsync(IList<int> productIds);
         Task<int> UpdatePriceSaleProductsAsync(IList<int> productIds, decimal discount);
         Task UpdateSalePriceAsync();
+        Task<List<Product>> GetProductForReportExportAsync(List<int> listid);
         Task<IList<Product>> GetProductsSaleAsync();
     }
 }

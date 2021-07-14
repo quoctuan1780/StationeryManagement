@@ -57,6 +57,23 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<List<ProductDetail>> GetColorReportAsync(List<int> listId)
+        {
+            var productDetails = await _context.ProductDetails.ToListAsync();
+            var listProduct = new List<ProductDetail>();
+            foreach(var item in listId)
+            {
+                var detail = productDetails.Where(x => x.ProductDetailId == item).FirstOrDefault();
+                listProduct.Add(detail);
+            }
+            return listProduct;
+        }
+
+        public async Task<List<ProductDetail>> GetListProductDetailAsync()
+        {
+            return await _context.ProductDetails.Include(x => x.Product).ThenInclude(x => x.Category).ToListAsync();
+        }
+
         public async Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId)
         {
             return await _context.ProductDetails.Where(x => x.ProductDetailId == productDetailId).FirstOrDefaultAsync();
@@ -92,6 +109,7 @@ namespace Services.Services
                     result.Origin = item.Origin;
                     result.Quantity = item.Quantity;
                     result.Price = item.Price;
+                    result.SalePrice = item.SalePrice;
                     productsDetailUpdate.Add(result);
                 }
                 else

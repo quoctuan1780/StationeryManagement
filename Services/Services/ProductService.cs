@@ -35,7 +35,6 @@ namespace Services.Services
                     .Include(x => x.Order)
                     .Where(x => x.Order.OrderDate >= fromDate)
                     .Where(x => x.Order.OrderDate <= toDate)
-                    //.Where(x => x.IsDeleted == false)
                     .GroupBy(x => x.ProductDetailId)
                     .OrderByDescending(x => x.Key)
                     .Take(quantity)
@@ -61,6 +60,40 @@ namespace Services.Services
             }
 
             return JsonConvert.SerializeObject(bestSellerList);
+        }
+
+        public async Task<List<ProductDetail>> GetBestSellerInMonthAsync(DateTime fromDate, DateTime toDate, int quantity)
+        {
+            var result = await _context.OrderDetails
+                    .Include(x => x.Order)
+                    .Where(x => x.Order.OrderDate >= fromDate)
+                    .Where(x => x.Order.OrderDate <= toDate)
+                    .GroupBy(x => x.ProductDetailId)
+                    .OrderByDescending(x => x.Key)
+                    .Take(quantity)
+                    .Select(x => x.Key)
+                    .ToListAsync();
+
+            var tolist = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+
+            //var bestSellerList = new List<JObject>();
+
+            //foreach (var item in tolist)
+            //{
+            //    var obj = new JObject
+            //    {
+            //        { "productDetailId", item.ProductDetailId },
+            //        { "productName", item.Product.ProductName },
+            //        { "color", item.Color },
+            //        { "totalQuantity", item.Quantity },
+            //        { "quantityOrdered", item.QuantityOrdered },
+            //        { "RemainingQuantity", item.RemainingQuantity }
+            //    };
+
+            //    bestSellerList.Add(obj);
+            //}
+
+            return tolist;
         }
 
         public async Task<bool> CheckProductIsInAnySalesAsync(IList<int> productIds)
@@ -110,12 +143,17 @@ namespace Services.Services
 
         public async Task<IList<string>> GetColorByIdAsync(int productId)
         {
-            var listDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
+            var productDetails = await _context.ProductDetails.Where(x => x.ProductId == productId).ToListAsync();
             var listColor = new List<string>();
-            foreach (var item in listDetails)
+
+            if (productDetails != null && productDetails.Any())
             {
-                listColor.Add(item.Color);
+                foreach (var item in productDetails)
+                {
+                    listColor.Add(item.Color);
+                }
             }
+
             return listColor;
         }
 
@@ -136,23 +174,41 @@ namespace Services.Services
 
         public async Task<List<int>> GetProductDetailByProDuctIdAsync(int id)
         {
-            var list = await _context.ProductDetails.Where(x => x.ProductId == id).ToListAsync();
-            var listid = new List<int>();
-            foreach (var item in list)
+            var productDetails = await _context.ProductDetails.Where(x => x.ProductId == id).ToListAsync();
+
+            var listId = new List<int>();
+
+            if (productDetails != null && productDetails.Any())
             {
-                listid.Add(item.ProductDetailId);
+                foreach (var item in productDetails)
+                {
+                    listId.Add(item.ProductDetailId);
+                }
             }
-            return listid;
+
+            return listId;
         }
 
-        //check deteted item
-        public async Task<IList<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
+        public async Task<List<ProductDetail>> GetProductDetailsRunOutOfStockAsync()
         {
             var result = await _context.ProductDetails.Include(x => x.Product).Where(x => x.RemainingQuantity < 10).ToListAsync();
-
-            dynamic a = 0;
-
             return result;
+        }
+
+        public async Task<List<Product>> GetProductForReportExportAsync(List<int> listid)
+        {
+            var listProductDetails = await _context.ProductDetails.ToListAsync();
+            var listProducts = await _context.Products.ToListAsync();
+            var listProduct = new List<Product>();
+
+            foreach(var item in listid)
+            {
+                var detail = listProductDetails.Where(x => x.ProductDetailId == item).FirstOrDefault();
+                var product = listProducts.Where(x => x.ProductId == detail.ProductId).FirstOrDefault();
+                listProduct.Add(product);
+            }
+
+            return listProduct;
         }
 
         public async Task<IList<Product>> GetProductsCanApplySaleAsync()
@@ -222,9 +278,7 @@ namespace Services.Services
 
         public async Task<IList<Product>> GetProductsSaleAsync()
         {
-            var result = await _context.Products.Include(x => x.ProductImages).Include(x => x.Category)
-                        .Where(x => x.SalePrice > 0)
-                        .ToListAsync();
+            var result = await _context.Products.Include(x => x.ProductImages).Include(x => x.Category).Include(x => x.RatingDetails).ThenInclude(x => x.Rating).Where(x => x.SalePrice > 0).ToListAsync();
 
             return result;
         }
@@ -252,7 +306,7 @@ namespace Services.Services
                 return null;
             }
 
-            var productDetails = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+            var productDetails = await _context.ProductDetails.Include(x => x.Product).ThenInclude(x => x.ProductImages).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
 
             return productDetails;
         }
@@ -280,14 +334,17 @@ namespace Services.Services
                     .Take(quantity)
                     .Select(x => x.Key)
                     .ToListAsync();
+
             var listId = new List<int>();
-            var tolist = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
-            foreach (var item in tolist)
+
+            var productDetails = await _context.ProductDetails.Include(x => x.Product).Where(x => result.Contains(x.ProductDetailId)).ToListAsync();
+
+            foreach (var item in productDetails)
             {
                 listId.Add(item.ProductDetailId);
             }
-            return listId;
 
+            return listId;
         }
 
         public async Task<IList<Product>> SearchByPriceAsync(int price)
@@ -319,7 +376,15 @@ namespace Services.Services
         {
             if (product is null) return null;
 
-            _context.Products.Update(product);
+            var productUpdate = await _context.Products.FindAsync(product.ProductId);
+
+            if (productUpdate is null) return null;
+
+            productUpdate.ProductName = product.ProductName;
+            productUpdate.Description = product.Description;
+            productUpdate.Price = product.Price;
+
+            _context.Products.Update(productUpdate);
 
             await _context.SaveChangesAsync();
 

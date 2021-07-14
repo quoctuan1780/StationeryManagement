@@ -1,7 +1,8 @@
-﻿using Entities.Models;
+﻿using AspNetCore.Reporting;
+using Entities.Models;
 using FinalProject.Areas.Warehouse.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -23,29 +24,39 @@ namespace FinalProject.Areas.Warehouse.Controllers
     {
         private readonly IReceiptService _receiptService;
         private readonly IAccountService _accountService;
-        private readonly UserManager<User> _userManager;
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IProductDetailService _productDetailService;
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IWorkflowHistoryService _workflowHistoryService;
         private readonly INotificationService _notificationService;
+        private readonly IAprioriBackground _aprioriBackground;
 
-        public HomeController(IProductService productService, IReceiptService receiptService, IAccountService accountService, UserManager<User> userManager, IOrderService orderService, IHubContext<SignalServer> hubContext,
-            IWorkflowHistoryService workflowHistoryService, INotificationService notificationService)
+        public HomeController(IProductService productService, IReceiptService receiptService, IAccountService accountService, IOrderService orderService, IHubContext<SignalServer> hubContext,
+            IWorkflowHistoryService workflowHistoryService, INotificationService notificationService, IWebHostEnvironment webHostEnvironment, IProductDetailService productDetailService, IAprioriBackground aprioriBackground)
         {
             _receiptService = receiptService;
             _accountService = accountService;
-            _userManager = userManager;
             _productService = productService;
             _orderService = orderService;
+            _webHostEnvironment = webHostEnvironment;
+            _productDetailService = productDetailService;
             _hubContext = hubContext;
             _workflowHistoryService = workflowHistoryService;
             _notificationService = notificationService;
+
+            _aprioriBackground = aprioriBackground;
         }
 
         public IActionResult Dashboard()
         {
             return View();
+        }
+
+        public async Task Test()
+        {
+            await _aprioriBackground.RecommandationBackground();
         }
 
         public async Task<IActionResult> UpdateReceipt(int id)
@@ -95,6 +106,26 @@ namespace FinalProject.Areas.Warehouse.Controllers
             ViewBag.Receipts = await _receiptService.GetReceiptsAsync();
 
             return View();
+        }
+        public async Task<IActionResult> PrintReceipt(int id)
+        {
+            string mintype = "";
+            int extension = 1;
+            var path = $"{_webHostEnvironment.WebRootPath}\\Report\\Report2.rdlc";
+            var Receipt = await _receiptService.GetReceiptAsync(id);
+            var listIdProduct = new List<int>();
+            foreach (var item in Receipt.ImportWarehouseDetails)
+            {
+                listIdProduct.Add(item.ProductDetailId);
+            }
+            var products = _productService.GetProductForReportExportAsync(listIdProduct);
+            var details = _productDetailService.GetColorReportAsync(listIdProduct);
+            var localReport = new LocalReport(path);
+            localReport.AddDataSource("DataSet1", details);
+            localReport.AddDataSource("DataSet2", Receipt);
+            localReport.AddDataSource("DataSet3", products);
+            var result = localReport.Execute(RenderType.Pdf, extension, null, mintype);
+            return File(result.MainStream, "application/pdf");
         }
 
         public async Task<IActionResult> ViewListRequestReceipt()

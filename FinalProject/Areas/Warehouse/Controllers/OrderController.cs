@@ -45,6 +45,24 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
+        [HttpPut]
+        public async Task<int> PrepareOrder(int? OrderId, int? ProductId)
+        {
+            if(OrderId is null || ProductId is null)
+            {
+                return ERROR_CODE_NULL;
+            }
+
+            var result = await _orderService.PrepareOrder(OrderId.Value, ProductId.Value);
+
+            if(result > 0)
+            {
+                return CODE_SUCCESS;
+            }
+
+            return ERROR_CODE_SYSTEM;
+        }
+
         public async Task<IActionResult> OrderWaitExportWarehouse(string customer = EMPTY, string orderDate = EMPTY)
         {
             ViewBag.Customers = await _accountService.GetAllCustomersAsync();
