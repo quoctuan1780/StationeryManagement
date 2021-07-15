@@ -133,7 +133,7 @@
                                         <div class="aside"><img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" class="img-sm border"></div>
                                     }
                                     <figcaption class="info align-self-center">
-                                        <p class="title">@item.ProductDetail.Product.ProductName </p> <span class="text-muted">@item.Price VNĐ</span>
+                                        <p class="title"><a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductDetail.ProductId">@item.ProductDetail.Product.ProductName</a> </p> <span class="text-muted">@item.Price VNĐ</span>
                                     </figcaption>
                                 </figure>
                             </li>
@@ -147,10 +147,5 @@
 </div>
 
 @section Scripts{ 
-    <script>
-        $(document).ready(function () {
-            $('#left-nav').remove();
-            $('#banner').remove();
-        });
-    </script>
+    <script src="~/customer/remove-nav.js"></script>
 }

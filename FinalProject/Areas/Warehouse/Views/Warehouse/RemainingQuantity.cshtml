@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Sản phẩm tồn kho";
+    Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
+
+    var ListProduct = ViewBag.ListProduct as IList<Entities.Models.ProductDetail>;
+}
+<h1 class="h3 mb-2 text-gray-800">Sản phẩm tồn kho</h1>
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <form asp-action="RemainingQuantity" asp-controller="Warehouse" asp-area="Warehouse" method="post" id="form">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Loại sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Số lượng trong kho</th>
+                            <th>Số lượng còn lại</th>
+                            <th>Số lượng cần đặt</th>
+                            <th>Chọn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ListProduct != null)
+                        {
+                            @foreach (var item in ListProduct)
+                            {
+                                <tr>
+                                    <td>@item.ProductDetailId</td>
+                                    <td>@item.Product.ProductName</td>
+                                    <td>@item.Product.Category.CategoryName</td>
+                                    <td>@item.Color</td>
+                                    <td>@item.Quantity</td>
+
+                                    <td>@item.RemainingQuantity</td>
+                                    <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" /></td>
+                                    <td><input type="checkbox" name="selected" value="@item.ProductDetailId" /></td>
+                                </tr>
+                            }
+                        }
+
+
+                    </tbody>
+                </table>
+            </form>
+            <input type="button" value="Áp dụng khuyến mãi" class="btn btn-success" onclick="submit()" />
+
+        </div>
+    </div>
+</div>

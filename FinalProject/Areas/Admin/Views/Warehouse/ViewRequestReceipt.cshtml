@@ -1,9 +1,9 @@
-﻿@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
-@model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
-@using static Common.Constant;
+﻿@using static Common.Constant;
 @{
     ViewData["Title"] = "Phiếu yêu cầu nhập kho";
+
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
     var request = ViewBag.Request as Entities.Models.ReceiptRequest;
 }
 
@@ -24,7 +24,7 @@
         </div>
         <div class="form-group">
             <label>Ngày tạo: </label>
-            <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate" readonly />
+            <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate.ToShortDateString()" readonly />
 
         </div>
 
@@ -43,21 +43,18 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Mã chi tiết sản phẩm</th>
                             <th>Tên sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Trạng thái</th>
+                            <th>Số lượng nhập</th>
+                            <th>Giá nhập</th>
                         </tr>
                     </thead>
                     <tbody>
-
                         @foreach (var item in request.ReceiptRequestDetails)
                         {
                             <tr>
-                                <td>@item.ProductDetailId</td>
                                 <td>@item.ProductDetail.Product.ProductName</td>
                                 <td>@item.Quantity</td>
-                                <td>@item.Status</td>
+                                <td>@item.Price</td>
                             </tr>
                         }
                     </tbody>
@@ -68,8 +65,8 @@
         @if (request.Status == RECEIPT_STATUS_WAITING || request.Status == "Chờ xác nhận")
         {
             <div style="padding-top: .5rem">
-                <a asp-action="RejectReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@request.ReceiptRequestId" class="btn btn-danger">Từ chối</a>
-                <a asp-action="ApproveReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@request.ReceiptRequestId" class="btn btn-success">Duyệt</a>
+                <a onclick="rejectReceipt(@request.ReceiptRequestId)" class="btn btn-danger" style="color: #FFF">Từ chối</a>
+                <a onclick="approvedReceipt(@request.ReceiptRequestId)" class="btn btn-success" style="color: #FFF">Duyệt</a>
             </div>
         }
     }
@@ -79,6 +76,59 @@
     }
 </div>
 @section Scripts{
-    
+    <script src="~/js/notify/notify-helper.js"></script>
+    <script>
+        function rejectReceipt(id) {
+            if (id === '') {
+                showErrorSystem();
+                return undefined;
+            }
+            $.ajax({
+                url: '/Admin/Warehouse/RejectReceipt',
+                method: 'DELETE',
+                async: true,
+                data: { id: id },
+                success: function (data) {
+                    switch (data) {
+                        case 1:
+                            window.location.href = '/Admin/Warehouse/ListReceiptRequest';
+                            break;
+                        default:
+                            showErrorSystem();
+                            break;
+                    }
+                },
+                error: function (code, err) {
+                    showErrorSystem();
+                }
+            })
+        }
+
+        function approvedReceipt(id) {
+            if (id === '') {
+                showErrorSystem();
+                return undefined;
+            }
+            $.ajax({
+                url: '/Admin/Warehouse/ApproveReceipt',
+                method: 'PUT',
+                async: true,
+                data: { id: id },
+                success: function (data) {
+                    switch (data) {
+                        case 1:
+                            window.location.href = '/Admin/Warehouse/ListReceiptRequest';
+                            break;
+                        default:
+                            showErrorSystem();
+                            break;
+                    }
+                },
+                error: function (code, err) {
+                    showErrorSystem();
+                }
+            })
+        }
+    </script>
 }
 

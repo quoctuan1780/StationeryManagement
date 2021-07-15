@@ -6,6 +6,8 @@ using Services.Interfacies;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Services.Services
 {
@@ -28,7 +30,7 @@ namespace Services.Services
 
         public async Task<IList<Notification>> GetTenNotificationsAsync(string role, string userId)
         {
-            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role) && x.UserId.Equals(userId)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
+            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role) || x.UserId.Equals(userId)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
         }
 
         public async Task<NotificationType> GetNotifycationByNameAsync(string name)
@@ -85,7 +87,8 @@ namespace Services.Services
         {
             return await _context.Notifications
                 .Include(x => x.NotificationType)
-                .Where(x => x.RoleSeen.Equals(role) && x.UserId.Equals(userId)).ToListAsync();
+                .Where(x => x.RoleSeen.Equals(role) && x.UserId.Equals(userId))
+                .OrderByDescending(x => x.CreatedDate).ToListAsync();
         }
 
         public async Task<int> AddNotificationAsync(IList<Notification> notifications)
@@ -93,6 +96,41 @@ namespace Services.Services
             await _context.Notifications.AddRangeAsync(notifications);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetNotificationsSkipAsync(string role, string userId, int skip)
+        {
+            var result = await _context.Notifications
+                .Include(x => x.NotificationType)
+                .Where(x => x.RoleSeen.Equals(role) && x.UserId.Equals(userId))
+                .OrderByDescending(x => x.CreatedDate)
+                .Skip(skip)
+                .Take(10).ToListAsync();
+
+            var json = new List<JObject>();
+
+            if(result != null)
+            {
+                foreach(var item in result)
+                {
+                    json.Add(new JObject
+                    {
+                        { "Type", item.NotificationType.NotificationTypeName },
+                        { "Id", item.NotificationId },
+                        { "Link", item.Link },
+                        { "Content", item.Content },
+                        { "CreatedDate", item.CreatedDate.ToShortDateString() },
+                        { "Status", item.Status }
+                    });
+                }
+            }
+
+            return JsonConvert.SerializeObject(json);
+        }
+
+        public async Task<IList<Notification>> GetTenNotificationsAsync(string role)
+        {
+            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
         }
     }
 }

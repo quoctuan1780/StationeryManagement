@@ -1,5 +1,9 @@
 ﻿@using System.Web
-@inject Microsoft.AspNetCore.Identity.UserManager<Entities.Models.User> userManager
+@using static Common.RoleConstant
+@inject Services.Interfacies.IAccountService accountService
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@model PagedList<Entities.Models.Product>
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -11,17 +15,15 @@
 
     string image = null;
 
-    decimal? price = null;
+    var isLogin = User.IsInRole(ROLE_CUSTOMER);
 
-    var isLogin = User.IsInRole("Customer");
+    var isRoleAdmin = User.IsInRole(ROLE_ADMIN);
 
-    var user = await userManager.GetUserAsync(User);
+    var user = await accountService.GetUserAsync(User);
 
     var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
 
     var skip = 10;
-    var suggest = ViewBag.Suggest as IList<Entities.Models.Product>;
-
 }
 @section Styles{
     <style>
@@ -55,58 +57,58 @@
             padding-right: 15%;
         }
 
-        .blog-comment ul {
-            list-style-type: none;
-            padding: 0;
-        }
+            .blog-comment ul {
+                list-style-type: none;
+                padding: 0;
+            }
 
-        .blog-comment img {
-            opacity: 1;
-            filter: Alpha(opacity=100);
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            -o-border-radius: 4px;
-            border-radius: 4px;
-        }
+            .blog-comment img {
+                opacity: 1;
+                filter: Alpha(opacity=100);
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                -o-border-radius: 4px;
+                border-radius: 4px;
+            }
 
-        .blog-comment img.avatar {
-            position: relative;
-            float: left;
-            margin-left: 0;
-            margin-top: 0;
-            width: 65px;
-            height: 65px;
-        }
+                .blog-comment img.avatar {
+                    position: relative;
+                    float: left;
+                    margin-left: 0;
+                    margin-top: 0;
+                    width: 65px;
+                    height: 65px;
+                }
 
-        .blog-comment .post-comments {
-            border: 1px solid #eee;
-            margin-bottom: 20px;
-            margin-left: 85px;
-            margin-right: 0px;
-            padding: 10px 20px;
-            position: relative;
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            -o-border-radius: 4px;
-            border-radius: 4px;
-            background: #fff;
-            color: #6b6e80;
-            position: relative;
-        }
+            .blog-comment .post-comments {
+                border: 1px solid #eee;
+                margin-bottom: 20px;
+                margin-left: 85px;
+                margin-right: 0px;
+                padding: 10px 20px;
+                position: relative;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                -o-border-radius: 4px;
+                border-radius: 4px;
+                background: #fff;
+                color: #6b6e80;
+                position: relative;
+            }
 
-        .blog-comment .meta {
-            font-size: 13px;
-            color: #aaaaaa;
-            padding-bottom: 8px;
-            margin-bottom: 10px !important;
-            border-bottom: 1px solid #eee;
-        }
+            .blog-comment .meta {
+                font-size: 13px;
+                color: #aaaaaa;
+                padding-bottom: 8px;
+                margin-bottom: 10px !important;
+                border-bottom: 1px solid #eee;
+            }
 
-        .blog-comment ul.comments ul {
-            list-style-type: none;
-            padding: 0;
-            margin-left: 85px;
-        }
+            .blog-comment ul.comments ul {
+                list-style-type: none;
+                padding: 0;
+                margin-left: 85px;
+            }
 
         .blog-comment-form {
             padding-left: 15%;
@@ -114,13 +116,13 @@
             padding-top: 40px;
         }
 
-        .blog-comment h3,
-        .blog-comment-form h3 {
-            margin-bottom: 40px;
-            font-size: 26px;
-            line-height: 30px;
-            font-weight: 800;
-        }
+            .blog-comment h3,
+            .blog-comment-form h3 {
+                margin-bottom: 40px;
+                font-size: 26px;
+                line-height: 30px;
+                font-weight: 800;
+            }
     </style>
 }
 
@@ -206,7 +208,7 @@
                                 </ul>
                                 <p>
                                     <h3 class="mr-1">
-                                        Giá bán:
+                                        Giá:
                                         @if (product.SalePrice > 0)
                                         {
                                             <strong style="color: #ee4d2d" class="price"> @String.Format("{0:n0}", product.SalePrice) VNĐ</strong>
@@ -230,24 +232,29 @@
                                                         <strong>Đã chọn: <span id="type-choose"></span></strong>
                                                     </th>
                                                     <td>
+                                                        <input type="hidden" id="price-product-detail" value="0" />
                                                         @foreach (var item in product.ProductDetails)
                                                         {
                                                             if (item.RemainingQuantity > 0)
                                                             {
-                                                                <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
-                                                                        onclick="setSizeQuantity(@item.RemainingQuantity, @item.ProductDetailId, '@item.Color', '@item.Origin')">
-                                                                    @item.Color
-                                                                </button>
-
-                                                                productDetailId = item.ProductDetailId;
-                                                                if (product.SalePrice > 0)
+                                                                if (item.SalePrice > 0)
                                                                 {
-                                                                    price = product.SalePrice;
+                                                                    <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
+                                                                            onclick="setSizeQuantity(@item.RemainingQuantity, @item.ProductDetailId, '@item.Color', '@item.Origin', @item.SalePrice)">
+                                                                        @item.Color
+                                                                    </button>
                                                                 }
                                                                 else
                                                                 {
-                                                                    price = product.Price;
+
+                                                                    <button type="button" class="btn btn-default btn-outline-warning" value="@item.ProductDetailId"
+                                                                            onclick="setSizeQuantity(@item.RemainingQuantity, @item.ProductDetailId, '@item.Color', '@item.Origin', @item.Price)">
+                                                                        @item.Color
+                                                                    </button>
                                                                 }
+
+                                                                productDetailId = item.ProductDetailId;
+
                                                             }
                                                             else
                                                             {
@@ -257,7 +264,6 @@
 
                                                                 productDetailId = item.ProductDetailId;
 
-                                                                price = product.Price;
                                                             }
                                                         }
                                                     </td>
@@ -273,6 +279,14 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <th class="pl-0 w-25" scope="row"><strong>Giá theo loại: </strong></th>
+                                                    <td>
+                                                        <div id="product-detail-price" style="padding-left: 2px; display: inline-block;">
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             }
                                         </tbody>
                                     </table>
@@ -285,7 +299,7 @@
                                             -
                                         </button>
                                         <input type="text" id="Quantity" name="Quantity" min="1" value="1"
-                                                class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
+                                               class="input-quantity" onblur="checkValue()" onchange="setQuantity()">
                                         <button class="btn btn-danger" style="height: 30px" type="button" onclick="ascending()">
                                             +
                                         </button>
@@ -298,11 +312,11 @@
                             </div>
                         </div>
                     </form>
-                    <div class="col-lg-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-main">
                         <div class="col-lg-4"></div>
                         <div class="col-lg-8">
                             <button type="button" class="btn btn-cart btn-md mr-1 mb-2 btn-danger"
-                                    onclick="submit(@price, '@image', '@product.ProductName', '@isLogin')">
+                                    onclick="submit('@image', '@product.ProductName', '@isLogin')">
                                 <i class="icon-shopping-cart" style="padding-right: 1rem;"></i>Thêm vào giỏ hàng
                             </button>
                         </div>
@@ -438,7 +452,7 @@
                                                                         <p class="meta">
                                                                             @comments[i].CreateDate.Date.ToLongDateString() <a href="#">@comments[i].User.FullName </a>
                                                                             Nói :
-                                                                            @if (isLogin)
+                                                                            @if (isLogin || isRoleAdmin)
                                                                             {
                                                                                 <i class="pull-right">
                                                                                     <span style="cursor: pointer;" onclick="addInput(this, @comments[i].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
@@ -484,7 +498,7 @@
                                                                                     <p class="meta">
                                                                                         @commentReplies[j].CreateDate.Date.ToLongDateString() <a href="#">@commentReplies[j].User.FullName </a>
                                                                                         Nói :
-                                                                                        @if (isLogin)
+                                                                                        @if (isLogin || isRoleAdmin)
                                                                                         {
                                                                                             <i class="pull-right">
                                                                                                 <span style="cursor: pointer;" onclick="addReplyChildrentInput(this, @comments[i].CommentId, @product.ProductId, '@user.Email', '@user.Id', '@user.FullName', '@user.Image')">
@@ -538,6 +552,26 @@
                                                         </div>
                                                     </div>
                                                 }
+                                                else if (isRoleAdmin)
+                                                {
+                                                    string imageLink = "avatar.png";
+
+                                                    if (!(user.Image is null))
+                                                    {
+                                                        imageLink = user.Email + "/" + user.Image;
+                                                    }
+
+                                                    <div class="comment">
+                                                        <div class="comment-block">
+                                                            <img src="~/images/user/@imageLink" class="avatar" alt="">
+                                                            <div class="post-comments">
+                                                                <textarea id="comment-content" contenteditable="true" class="form-control"
+                                                                          placeholder="Viết bình luận"></textarea>
+                                                                <button type="button" onclick="addOwnerComment('@user.Image', '@user.Id', '@isRoleAdmin', '@user.Email', '@user.FullName', @product.ProductId)" class="btn btn-success" style="margin-top: 5px;">Gửi</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -566,7 +600,7 @@
                                                                         <img src="~/images/user/avatar.png" class="avatar" alt="">
                                                                     }
                                                                     <div class="post-comments">
-                                                                        @{ 
+                                                                        @{
                                                                             var rating = Math.Ceiling((double)ratingsDetail[i].Rating.RatingNumber / 5 * 100);
                                                                         }
                                                                         <p class="meta">
@@ -605,74 +639,197 @@
         </div>
     </div>
 
-    <div>
-        <div class="block vt-slider vt-slider7">
-            <div class="slider-inner">
-                <div class="container-slider">
-                    <div class="products-grid">
-                        @foreach (var item in suggest)
-                        {
-                            <div class="item">
-                                <div class="item-wrap">
-                                    <div class="item-image">
-                                        <a class="product-image no-touch" href="#" title="@item.ProductName">
-                                            @if (item.ProductImages != null)
-                                            {
-                                                <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault()" alt="Product demo" />
-                                            }
-
-                                        </a>
-                                        <div class="item-btn">
-                                            <div class="box-inner">
-                                                <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                <span class="qview">
-                                                    <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <div class="pro-info">
-                                        <div class="pro-inner">
-                                            <div class="pro-title product-name"><a href="detail.html">@item.ProductName</a></div>
-                                            <div class="pro-content">
-                                                <div class="wrap-price">
-                                                    <div class="price-box">
-                                                        <span class="regular-price">
-                                                            <span class="price">@item.Price</span>
+    <h2>Sản phẩm tương tự</h2>
+    @if (Model != null && Model.Any())
+    {
+        @*<div>
+                <div class="block vt-slider vt-slider7">
+                    <div class="slider-inner">
+                        <div class="container-slider">
+                            <div class="products-grid">
+                                @foreach (var item in suggest)
+                                {
+                                    <div class="item">
+                                        <div class="item-wrap">
+                                            <div class="item-image">
+                                                <a class="product-image no-touch" href="#" title="@item.ProductName">
+                                                    @if (item.ProductImages != null && item.ProductImages.Any())
+                                                    {
+                                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault()" alt="@item.ProductName" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <img class="first_image" src="~/images/product/img_1.jpg" alt="@item.ProductName" />
+                                                    }
+                                                </a>
+                                                <div class="item-btn">
+                                                    <div class="box-inner">
+                                                        <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
+                                                        <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
+                                                        <span class="qview">
+                                                            <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
                                                         </span>
-                                                        <p class="special-price">
-                                                            <span class="price">Sale Price</span>
-                                                        </p>
                                                     </div>
                                                 </div>
-                                                <div class="ratings">
-                                                    <div class="rating-box">
-                                                        <div class="rating" style="width:80%"></div>
+
+                                            </div>
+                                            <div class="pro-info">
+                                                <div class="pro-inner">
+                                                    <div class="pro-title product-name"><a href="#">@item.ProductName</a></div>
+                                                    <div class="pro-content">
+                                                        <div class="wrap-price">
+                                                            <div class="price-box">
+                                                                <span class="regular-price">
+                                                                    <span class="price">@item.Price</span>
+                                                                </span>
+                                                                <p class="special-price">
+                                                                    <span class="price">Sale Price</span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ratings">
+                                                            <div class="rating-box">
+                                                                <div class="rating" style="width:80%"></div>
+                                                            </div>
+                                                            <span class="amount"><a href="#">1(s)</a></span>
+                                                        </div>
                                                     </div>
-                                                    <span class="amount"><a href="#">1(s)</a></span>
                                                 </div>
                                             </div>
+                                            <a title="Add to cart" class="add-to-cart" href="#">Thêm vào giỏ</a>
                                         </div>
                                     </div>
-                                    <a title="Add to cart" class="add-to-cart" href="#">Thêm vào giỏ</a>
-                                </div>
+                                }
                             </div>
-                        }
+                        </div>
+                        <div class="navslider">
+                            <a class="prev" href="#">Prev</a>
+                            <a class="next" href="#">Next</a>
+                        </div>
+
                     </div>
                 </div>
-                <div class="navslider">
-                    <a class="prev" href="#">Prev</a>
-                    <a class="next" href="#">Next</a>
-                </div>
+            </div>*@
+        foreach (var item in Model)
+        {
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-9">
+                <div class="products-grid">
+                    <div class="item">
+                        <div class="item-wrap">
+                            <div class="item-image">
+                                <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                    @if (!(item.ProductImages.FirstOrDefault() is null))
+                                    {
+                                        {
+                                            <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                 alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                        }
+                                        image = item.ProductImages.FirstOrDefault().Image;
+                                    }
+                                    else
+                                    {
+                                        <img class="first_image" src="~/images/product/img_1.jpg"
+                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                    }
+                                </a>
+                                <div class="item-btn">
+                                    <div class="box-inner">
+                                        <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                        <span class="qview">
+                                            <a class="vt_quickview_handler" data-original-title="Quick View"
+                                               data-placement="left" data-toggle="tooltip"
+                                               asp-controller="Product" asp-action="Detail"
+                                               asp-route-id="@item.ProductId">
+                                                <span>
+                                                    Quick
+                                                    View
+                                                </span>
+                                            </a>
+                                        </span>
+                                    </div>
+                                </div>
 
+                            </div>
+                            <div class="pro-info">
+                                <div class="pro-inner">
+                                    <div class="pro-title product-name">
+                                        <a asp-controller="Product" asp-action="Detail"
+                                           asp-route-id="@item.ProductId">
+                                            @item.ProductName
+                                        </a>
+                                    </div>
+                                    <div class="pro-content">
+                                        <div class="wrap-price">
+                                            <div class="price-box" style="min-height: 60px">
+                                                @if (item.SalePrice > 0)
+                                                {
+                                                    <span class="regular-price">
+                                                        <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
+                                                    </span>
+                                                    <p class="special-price">
+                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                    </p>
+                                                }
+                                                else
+                                                {
+                                                    <span class="regular-price">
+                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div style="height: 110px">
+                                            @if (item.RatingDetails != null && item.RatingDetails.Any())
+                                            {
+                                                var rating = from rd in item.RatingDetails
+                                                             group rd by rd.RatingId into g
+                                                             select new
+                                                             {
+                                                                 RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
+                                                                 UserRating = g.Count()
+                                                             };
+
+                                                var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
+                                                <span>Đánh giá</span>
+                                                <div class="ratings" style="margin-bottom: .5rem;">
+                                                    <div class="rating-box">
+                                                        <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <p>Chưa có đánh giá</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                Chi tiết sản phẩm
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
+        }
+        <div style="text-align: center">
+            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Detail", new { id = product.ProductId, page }),
+                new X.PagedList.Web.Common.PagedListRenderOptions
+                {
+                    DisplayItemSliceAndTotal = false,
+                    ContainerDivClasses = new[] { "navigation" },
+                    LiElementClasses = new[] { "page-item" },
+                    PageClasses = new[] { "page-link" },
+                })
         </div>
-    </div>
+    }
 </div>
 @section Scripts{
-    <script src="~/js/notify/notify-helper.js"></script>
-    <script src="~/js/product-detail/product-detail.js"></script>
-    <script src="~/js/product-detail/comment.js"></script>
+    <script type="text/javascript" src="~/customer/cart/quantity-in-cart.js"></script>
+    <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
+    <script type="text/javascript" src="~/customer/product-detail/product-detail-validation.js"></script>
+    <script type="text/javascript" src="~/customer/product-detail/product-detail.js"></script>
+    <script type="text/javascript" src="~/customer/product-detail/comment.js"></script>
 }

@@ -11,6 +11,7 @@
     long total = 0;
 
     bool checkUserRole = false;
+    bool checkUserRoleAdmin = false;
 
     int? countNotifications = null;
 
@@ -19,6 +20,8 @@
     {
         user = await _accountService.GetUserAsync(User);
         checkUserRole = await _accountService.IsInRoleAsync(user, "Customer");
+        checkUserRoleAdmin = await _accountService.IsInRoleAsync(user, "Admin");
+        await _accountService.IsInRoleAsync(user, "Admin");
         if (checkUserRole)
         {
             userId = _userManager.GetUserId(User);
@@ -104,6 +107,34 @@
                                                             </a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="Logout">
+                                                                <i class="glyphicon glyphicon-log-out"></i> Đăng xuất
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else if (User.Identity.IsAuthenticated && checkUserRoleAdmin)
+                                                {
+                                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <div style="display: flex; flex-direction: row; justify-content: center; padding: 5px">
+                                                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" style="margin: auto; padding-right: 5px; font-size: medium;">@user.FullName</span>
+                                                            @if (user.Image != null)
+                                                            {
+                                                                <img style="border-radius: 50%" src="~/images/user/@user.Email/@user.Image" width="50" height="50">
+                                                            }
+                                                            else
+                                                            {
+                                                                <img style="border-radius: 50%" src="~/images/user/avatar.png" width="50" height="50">
+                                                            }
+                                                        </div>
+                                                    </a>
+
+                                                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                                        <div style="display: flex; flex-direction: column; align-content: center; padding: 5px">
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Home" asp-action="Dashboard" asp-area="Admin">
+                                                                <i class="glyphicon glyphicon-log-out"></i> Trở về trang quản trị
+                                                            </a>
+                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="Logout" asp-area="Admin">
                                                                 <i class="glyphicon glyphicon-log-out"></i> Đăng xuất
                                                             </a>
                                                         </div>
@@ -222,29 +253,5 @@
 <a href="/Product/Detail?Id="></a>
 @section Scripts
 {
-<script>
-    function Search() {
-        var input = $('#txtSearch').val();
-       $.ajax({
-            url: '/Search/SearchAjax',
-            method: 'GET',
-            async: true,
-            data: { text: input },
-            success: function (data) {
-                var listProduct = JSON.parse(data);
-                var str = '';
-                for (let item of listProduct) {
-                    str += '<div class="flex-row">'+
-                       ' <img src="./images/"' + item.ProductImage+  'width="50px" height="80px">'+
-                           ' <div class="flex-column">'+
-                        ' <span onclick="' + 'window.location="' + '/Product/Detail?Id=' + item.ProductId + '" class="name">'+ item.ProductName+'</span>' +
-                               '<span>' + item.Price + '</span>'+
-                           ' </div></div>'
-                }
-                $('#Rule').html(str);
-                alert(data);
-            }
-        })
-    }
-</script>
+    <script src="~/customer/search/search-heaser.js"></script>
 }

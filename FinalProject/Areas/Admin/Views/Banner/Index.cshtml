@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Quản lý banner";
+    ViewData["Title"] = "Quản lý quảng cáo";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var banners = ViewBag.Banners as IList<Entities.Models.Banner>;
 }
@@ -7,6 +7,10 @@
 <div class="container-fluid">
 
     <h1 class="h3 mb-2 text-gray-800">Thông tin quảng cáo</h1>
+    @if(TempData["MessageSuccess"] != null) 
+    {
+        <div class="alert alert-success">@TempData["MessageSuccess"]</div>
+    }
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
@@ -24,7 +28,6 @@
                             <th>Hình ảnh</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
-                            <th>Đường dẫn</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
@@ -39,7 +42,6 @@
                                     <td><img src="~/images/banner/@item.Image" width="100" height="100" alt="Alternate Text" /></td>
                                     <td>@item.StartDate.ToShortDateString()</td>
                                     <td>@item.EndDate.ToShortDateString()</td>
-                                    <td>@item.Url</td>
                                     <td>
                                         <a onclick="deleteBanner(this, @item.BannerId)" style="cursor: pointer; color: #4e73df">Xóa</a>
                                         <a asp-action="EditBanner" asp-controller="Banner"
@@ -56,56 +58,5 @@
 </div>
 @section Scripts{ 
     <script src="~/js/notify/notify-helper.js"></script>
-    <script>
-        function deleteBanner(e, bannerId) {
-            if (bannerId === '') {
-                showError('Không tồn tại loại quảng cáo này');
-            }
-            else {
-                Swal.fire({
-                    title: 'Xóa quảng cáo!',
-                    text: "Bạn có muốn xóa quảng cáo này ?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: `Xóa`,
-                    cancelButtonText: `Hủy`,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var loading = verticalTextColor();
-                        loading;
-                        $.ajax({
-                            url: '/Admin/Banner/DeleteBanner',
-                            method: 'DELETE',
-                            async: true,
-                            data: { bannerId: bannerId },
-                            success: function (data) {
-                                loadingOut(loading, 0);
-
-                                switch (data) {
-                                    case -4:
-                                        showError('Quảng cáo không tồn tại');
-                                        break;
-
-                                    case 1:
-                                        showSuccess('Xóa quảng cáo thành công');
-                                        $(e).closest('tr').remove();
-                                        break;
-
-                                    case -99:
-                                        showErrorSystem();
-                                        break;
-                                }
-                            },
-                            error: function (code, err) {
-                                loadingOut(loading, 0);
-                                showErrorSystem();
-                            }
-                        });
-                    }
-                });
-            }
-        }
-    </script>
+    <script src="~/admin/js/banner/banner-index.js"></script>
 }

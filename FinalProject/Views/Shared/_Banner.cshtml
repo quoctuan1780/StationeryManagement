@@ -19,6 +19,14 @@
                             <li class="@className" data-transition="random"><img src="~/images/banner/@item.Image" alt="Banner" /></li>
                         }
                     }
+                    else
+                    {
+                        int num = rnd.Next(1, 5);
+
+                        string className = "slide" + num.ToString();
+
+                        <li class="@className" data-transition="random"><img src="~/images/banner/banner-default.jpg" alt="Banner" /></li>
+                    }
                 </ul>
             </div>
         </div>

@@ -12,9 +12,11 @@ namespace Services.Interfacies
         Task<int> DeleteStatusAsync(int notificationId);
         Task<Notification> AddNotificationAsync(Notification notification);
         Task<IList<Notification>> GetTenNotificationsAsync(string role, string userId);
+        Task<IList<Notification>> GetTenNotificationsAsync(string role);
         Task<IList<Notification>> GetNotificationsAsync(string role);
         Task<int> CountNotificationsAsync(string role);
         Task<int> CountNotificationsAsync(string role, string userId);
         Task<IList<Notification>> GetNotificationsAsync(string role, string userId);
+        Task<string> GetNotificationsSkipAsync(string role, string userId, int skip);
     }
 }

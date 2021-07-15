@@ -97,6 +97,7 @@
                                     <th>Số lượng</th>
                                     <th>Đơn giá</th>
                                     <th>Thành tiền</th>
+                                    <th>Chức năng</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -126,6 +127,16 @@
                                                 }
                                                 @total
                                             </td>
+                                                @if(item.Status != STATUS_PREPARED_GOODS)
+                                                {
+                                                    <td>
+                                                        <a class="btn btn-success btn-sm" onclick="prepareOrder(@order.OrderId, @item.ProductDetailId)">Chuẩn bị xong</a>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td><div class="alert alert-success">Đã chuẩn bị xong</div></td>
+                                                }
                                         </tr>
                                     }
                                 }
@@ -141,13 +152,17 @@
             <div class="rounded scroll">
                 @if (order.Status.Equals(STATUS_PREPARING_GOODS) && User.IsInRole(ROLE_WAREHOUSE_MANAGER))
                 {
-                    <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã chuẩn bị tất cả hàng</button>   
+                    if (order.OrderDetails.All(x => x.Status.Equals(STATUS_PREPARING_GOODS)) || order.OrderDetails.All(x => x.Status.Equals(STATUS_PREPARED_GOODS)))
+                    {
+                        <button class="btn btn-success btn-sm" onclick="warehouseManagementConfirm(@order.OrderId)">Xác nhận đã chuẩn bị tất cả hàng</button>  
+                    }
                 }
+
             </div>
         </div>
     </div>
 </div>
 @section Scripts{
     <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
-    <script type="text/javascript" src="~/js/warehouse/order/order-detail.js"></script>
+    <script type="text/javascript" src="~/warehouse/order/order-detail.js"></script>
 }

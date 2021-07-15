@@ -4,7 +4,6 @@ using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -58,6 +57,23 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<List<ProductDetail>> GetColorReportAsync(List<int> listId)
+        {
+            var productDetails = await _context.ProductDetails.ToListAsync();
+            var listProduct = new List<ProductDetail>();
+            foreach(var item in listId)
+            {
+                var detail = productDetails.Where(x => x.ProductDetailId == item).FirstOrDefault();
+                listProduct.Add(detail);
+            }
+            return listProduct;
+        }
+
+        public async Task<List<ProductDetail>> GetListProductDetailAsync()
+        {
+            return await _context.ProductDetails.Include(x => x.Product).ThenInclude(x => x.Category).ToListAsync();
+        }
+
         public async Task<ProductDetail> GetProductDetailByIdAsync(int productDetailId)
         {
             return await _context.ProductDetails.Where(x => x.ProductDetailId == productDetailId).FirstOrDefaultAsync();
@@ -81,7 +97,7 @@ namespace Services.Services
 
             var productsDetail = _context.ProductDetails.Where(x => x.ProductId == productDetails.FirstOrDefault().ProductId);
 
-            foreach(var item in productDetails)
+            foreach (var item in productDetails)
             {
                 var result = await productsDetail
                     .Where(x => x.ProductDetailId == item.ProductDetailId).FirstOrDefaultAsync();
@@ -92,6 +108,8 @@ namespace Services.Services
                     result.Weight = item.Weight;
                     result.Origin = item.Origin;
                     result.Quantity = item.Quantity;
+                    result.Price = item.Price;
+                    result.SalePrice = item.SalePrice;
                     productsDetailUpdate.Add(result);
                 }
                 else
@@ -102,13 +120,32 @@ namespace Services.Services
                         Weight = item.Weight,
                         Origin = item.Origin,
                         Quantity = item.Quantity,
+                        Price = item.Price,
                         ProductId = item.ProductId
-                });
+                    });
                 }
-                
+
             }
 
             _context.ProductDetails.UpdateRange(productsDetailUpdate);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateSalePriceProductDetailsAsync(IList<int> productIds, decimal discount)
+        {
+            if (productIds != null && productIds.Any())
+            {
+                var productDetails = _context.ProductDetails.Include(x => x.Product)
+                                    .Where(x => productIds.Contains(x.Product.ProductId));
+
+                foreach(var item in productDetails)
+                {
+                    item.SalePrice = item.Price - item.Price * discount / 100;
+                }
+
+                _context.ProductDetails.UpdateRange(productDetails);
+            }
 
             return await _context.SaveChangesAsync();
         }

@@ -1,12 +1,9 @@
-﻿@{
+﻿@model FinalProject.Areas.Warehouse.ViewModels.ReceiptRequestViewModel
+@{
     ViewData["Title"] = "Tạo phiếu yêu cầu nhập hàng";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
 
-    var ProductOutOfStock = ViewBag.ProductOutOfStock as IList<Entities.Models.ProductDetail>;
-    var BestSeller = ViewBag.BestSeller as string;
-    var Recommandation = ViewBag.Recommandation as IList<Entities.Models.ProductDetail>;
-
-    var bestSellerConvert = Newtonsoft.Json.JsonConvert.DeserializeObject<IList<Newtonsoft.Json.Linq.JObject>>(BestSeller);
+    var ListProduct = ViewBag.ListProduct as IList<Entities.Models.ProductDetail>;
 }
 
 <div class="container-fluid">
@@ -19,7 +16,8 @@
         <div class="card-body">
             <div class="table-responsive">
                 <form asp-action="AutoCreateReceiptRequest" asp-controller="Recommandation" asp-area="Warehouse" method="post" id="form">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    @Html.AntiForgeryToken()
+                    <table class="table table-bordered" id="auto-create-receipt-request" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th>Mã sản phẩm</th>
@@ -27,73 +25,80 @@
                                 <th>Màu sắc</th>
                                 <th>Số lượng trong kho</th>
                                 <th>Số lượng còn lại</th>
-                                <th>Số lượng cần đặt</th>
+                                <th>Số lượng nhập</th>
+                                <th>Giá nhập</th>
                                 <th>Chọn</th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            @if (ProductOutOfStock is not null)
+                            @if (ListProduct is not null)
                             {
-                                @foreach (var item in ProductOutOfStock)
+                                @foreach (var item in ListProduct)
                                 {
                                     <tr>
-                                        <td>@item.ProductDetailId</td>
-                                        <td>@item.Product.ProductName</td>
-                                        <td>@item.Color</td>
-                                        <td>@item.Quantity</td>
-
-                                        <td>@item.RemainingQuantity</td>
-                                        <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" /></td>
-                                        <td><input type="checkbox" name="selected" value="@item.ProductDetailId" /></td>
-                                    </tr>
-                                }
-                            }
-                            @if (bestSellerConvert is not null)
-                            {
-                                @foreach (var item in bestSellerConvert)
-                                {
-                                    {
-                                        var productDetailId = item.Value<int>("productDetailId");
-                                        var productName = item.Value<string>("productName");
-                                        var color = item.Value<string>("color");
-                                        var totalQuantity = item.Value<int>("totalQuantity");
-                                        var quantityOrdered = item.Value<int>("quantityOrdered");
-                                        var RemainingQuantity = item.Value<int>("RemainingQuantity");
-                                    
-                                        <tr>
-                                            <td>@productDetailId</td>
-                                            <td>@productName</td>
-                                            <td>@color</td>
-                                            <td>@totalQuantity</td>
-                                            <td>@RemainingQuantity</td>
-                                            <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
-                                            <td><input type="checkbox" name="selected" value="@productDetailId" /></td>
-                                        </tr>
-                                    }
-                                }
-                            }
-                            @if (Recommandation is not null)
-                            {
-                                @foreach (var item in Recommandation)
-                                {
-                                    <tr>
-                                        <td>@item.ProductDetailId</td>
+                                        <td>
+                                            <input type="hidden" name="ProductDetailId" value="@item.ProductDetailId" />
+                                            @item.ProductDetailId
+                                        </td>
                                         <td>@item.Product.ProductName</td>
                                         <td>@item.Color</td>
                                         <td>@item.Quantity</td>
                                         <td>@item.RemainingQuantity</td>
-                                        <td><input type="number" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="quantity" />
-                                        <td><input type="checkbox" name="selected" value="@item.ProductDetailId" /></td>
+                                        @if (Model != null && Model.ProductDetailId != null)
+                                        {
+                                            if (Model.ProductDetailId.Contains(item.ProductDetailId))
+                                            {
+                                                int index = Model.ProductDetailId.IndexOf(item.ProductDetailId);
+                                                {
+                                                    <td>
+                                                        <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Quantity" value="@Model.Quantity[index]" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Prices" value="@Model.Prices[index]" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="checkbox" class="form-control" name="selected" value="@item.ProductDetailId" checked />
+                                                    </td>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Quantity" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Prices" />
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" class="form-control" name="selected" value="@item.ProductDetailId" />
+                                                </td>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Quantity" />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control" min="0" onkeypress='return event.charCode > 46 && event.charCode < 58' name="Prices" />
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" class="form-control" name="selected" value="@item.ProductDetailId" />
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             }
-
                         </tbody>
                     </table>
+                    <input type="hidden" name="productDetalIdMultiPage" value="" id="product-detail-multy-page"/>
+                    <input type="hidden" name="priceMultiPage" value="" id="price-detail-multy-page"/>
+                    <input type="hidden" name="quantityMultiPage" value="" id="quantity-detail-multy-page"/>
                 </form>
+                <div class="col-lg-12">
                     <input type="button" value="Tạo phiếu" class="btn btn-success" onclick="submit()" />
-
+                </div>
             </div>
         </div>
     </div>
@@ -106,51 +111,74 @@
             $('#buy-together').DataTable();
         });
 
+        var table = $('#auto-create-receipt-request').DataTable();
+
+
+        var productDetailIds = [];
+        var quantities = [];
+        var prices = [];
+
         function submit() {
-            var countErrorValidate = 0;
-            var Quantities = document.getElementsByName('quantity');
-            var Selected = document.getElementsByName('selected');
-            var count = Selected.length;
+
+            table.search('').draw();
+
             $('.field-validation-valid').remove();
-            for (var i = 0; i < Quantities.length; i++) {
-                if ((Quantities[i].value === '' || Quantities[i] === 0) && Selected[i].checked) {
-                    var node = Quantities[i];
-                    var text = '<span class="field-validation-valid text-danger validate-product-detail">' +
-                        'Số lượng không hợp lệ</span>';
-                    countErrorValidate++;
-                    $(node).parent().append(text);
-                }
-                if ((Quantities[i].value !== '' || Quantities[i] !== 0) && Selected[i].checked) {
-                    count--;
-                }
 
+            productDetailIds = [];
+            quantities = [];
+            prices = [];
+
+            var rows = table.rows({ 'search': 'applied' }).nodes();
+            var countError = 0;
+            var countChoose = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                if ($('input[type="checkbox"]', rows[i]).is(":checked")) {
+                    countChoose++;
+                    if ($('input[name="Quantity"]', rows[i]).val() === '' || $('input[name="Quantity"]', rows[i]).val() === '0') {
+                        $($('input[name="Quantity"]', rows[i])).closest('td').append('<span class="field-validation-valid text-danger validate-product-detail">' +
+                            'Số lượng không hợp lệ</span>');
+
+                        countError++;
+                    }
+
+                    if ($('input[name="Prices"]', rows[i]).val() === '') {
+                        $($('input[name="Prices"]', rows[i])).closest('td').append('<span class="field-validation-valid text-danger validate-product-detail">' +
+                            'Giá nhập không hợp lệ</span>');
+                        countError++
+                    }
+                }
             }
 
-            if (countErrorValidate > 0 || Quantities.length === count) {
-                if (Quantities.length === count) {
-                    Swal.fire({
-                        title: 'Thông báo',
-                        text: "Không có sản phẩm nào được chọn! ",
-                        icon: 'info',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: `Ok`,
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Thông báo',
-                        text: "Số lượng không được để trống! ",
-                        icon: 'info',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: `Ok`,
-                    });
-                }
-
-            } else {
-                $('#form').submit();
+            if (countError > 0) {
+                return undefined;
             }
+
+            if (countChoose === 0) {
+                Swal.fire({
+                    title: 'Thông báo',
+                    text: "Không có sản phẩm nào được chọn! ",
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: `Ok`,
+                });
+                return undefined;
+            }
+
+            for (let i = 0; i < rows.length; i++) {
+                if ($('input[type="checkbox"]', rows[i]).is(":checked")) {
+                    productDetailIds.push($('input[type="checkbox"]', rows[i]).val());
+                    quantities.push($('input[name="Quantity"]', rows[i]).val());
+                    prices.push($('input[name="Prices"]', rows[i]).val());
+                }
+            }
+
+            $('#product-detail-multy-page').val(productDetailIds);
+            $('#price-detail-multy-page').val(prices);
+            $('#quantity-detail-multy-page').val(quantities);
+
+            $('#form').submit();
         }
-
-
 
         function ShowBestSeller() {
 

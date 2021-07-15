@@ -52,7 +52,7 @@ namespace FinalProject.Areas.Admin.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            var result = await _recommendationService.GetRecommandtion(4, 0.81, listId);
+            var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             if(result is null || !result.Any())
@@ -92,13 +92,15 @@ namespace FinalProject.Areas.Admin.Controllers
             return result;
         }
 
-               
-        public async Task<IActionResult> RejectReceipt(int? id)
+
+        [HttpDelete]
+        public async Task<int> RejectReceipt(int? id)
         {
-            if(id is null)
+            if (id is null)
             {
-                return PartialView(ERROR_404_PAGE_ADMIN);
+                return ERROR_CODE_NULL;
             }
+
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
@@ -149,23 +151,25 @@ namespace FinalProject.Areas.Admin.Controllers
 
                     transaction.Complete();
 
-                    TempData["MessageSuccess"] = "Từ chối đơn nhập hàng thành công";
+                    TempData["MessageSuccess"] = "Từ chối đơn yêu cầu nhập hàng thành công";
+
+                    return CODE_SUCCESS;
                 }
             }
             catch
             {
-                TempData["MessageError"] = "Lỗi hệ thống! từ chối đơn nhập hàng không thàng công";
+                
             }
-            
-            return Redirect("/Admin/Warehouse/ListReceiptRequest");
+
+            return ERROR_CODE_SYSTEM;
         }
 
-        
-        public async Task<IActionResult> ApproveReceipt(int? id)
+        [HttpPut]
+        public async Task<int> ApproveReceipt(int? id)
         {
             if (id is null)
             {
-                return PartialView(ERROR_404_PAGE_ADMIN);
+                return ERROR_CODE_NULL;
             }
 
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -219,14 +223,15 @@ namespace FinalProject.Areas.Admin.Controllers
 
                         await _notificationService.AddNotificationAsync(notification);
 
+                        transaction.Complete();
+
+                        TempData["MessageSuccess"] = "Duyệt đơn yêu cầu nhập hàng thành công";
 
                         await _hubContext.Clients.Group(SIGNAL_GROUP_WAREHOUSE).SendAsync(SIGNAL_COUNT_RECEPT_REQUEST_ACCEPT);
 
                         await _hubContext.Clients.User(receiptRequest.UserId).SendAsync(SIGNAL_NOTIFICATION_APPROVED_RECEIPT_REQUEST, link, DateTime.Now.ToShortDateString(), content);
 
-                        transaction.Complete();
-
-                        TempData["MessageSuccess"] = "Duyệt đơn yêu cầu nhập hàng thành công";
+                        return CODE_SUCCESS;
                     }
                 }
                 
@@ -236,7 +241,7 @@ namespace FinalProject.Areas.Admin.Controllers
                 TempData["MessageError"] = "Lỗi hệ thống! duyệt đơn nhập hàng không thàng công";
             }
 
-            return Redirect("/Admin/Warehouse/ListReceiptRequest");
+            return ERROR_CODE_SYSTEM;
         }
       
         public async Task<string> GetColor(int productID)
@@ -250,12 +255,22 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
             return View();
         }
+
+        public async Task<IActionResult> ReceiptRequestWaitApprove()
+        {
+            ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsByStatusAsync(RECEIPT_REQUEST_STATUS_WAITING);
+
+            return View();
+        }
+
         public async Task<IActionResult> ViewRequestReceipt(int? id)
         {
             if(id is null)
             {
                 return PartialView(ERROR_404_PAGE_ADMIN);
             }
+
+            ViewBag.User = await _accountService.GetUserAsync(User);
 
             ViewBag.Request = await _receiptService.GetReceiptRequestAsync(id.Value);
 

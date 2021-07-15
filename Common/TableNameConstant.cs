@@ -29,5 +29,7 @@
         public const string TABLE_COMMENT = "Comment";
         public const string TABLE_WORKFLOW_STATUS = "WorkflowHistory";
         public const string TABLE_FILE_GUIDE = "FileGuide";
+        public const string TABLE_USER_CONNECTION = "UserConnection";
+        public const string TABLE_USER_CONNECTION_DETAIL = "UserConnectionDetail";
     }
 }

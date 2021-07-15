@@ -37,10 +37,19 @@ namespace Services.Services
                 {
                     var productIds = sale.SaleDetails.Select(x => x.ProductId);
 
-                    var products = await _context.Products.Where(x => productIds.Contains(x.ProductId)).ToListAsync();
+                    var products =  _context.Products.Where(x => productIds.Contains(x.ProductId));
 
                     if (products != null && products.Any())
                     {
+                        var productDetails = _context.ProductDetails.Where(x => productIds.Contains(x.ProductId));
+
+                        foreach (var item in productDetails)
+                        {
+                            item.SalePrice = 0;
+                        }
+
+                        _context.ProductDetails.UpdateRange(productDetails);
+
                         foreach (var item in products)
                         {
                             item.SalePrice = 0;

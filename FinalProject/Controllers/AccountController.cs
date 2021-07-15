@@ -72,6 +72,11 @@ namespace FinalProject.Controllers
                         {
                             await SecurityManager.SignInAsync(HttpContext, user, ROLE_CUSTOMER, ROLE_CUSTOMER);
                         }
+
+                        if (await _accountService.IsInRoleAsync(user, ROLE_ADMIN))
+                        {
+                            await SecurityManager.SignInAsync(HttpContext, user, ROLE_ADMIN, ROLE_ADMIN);
+                        }
                         return Redirect(urlBack);
 
                     case CODE_FAIL:

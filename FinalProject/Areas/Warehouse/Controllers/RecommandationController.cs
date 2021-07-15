@@ -1,6 +1,7 @@
 ﻿using static Common.Constant;
 using static Common.RoleConstant;
 using static Common.SignalRConstant;
+using static FinalProject.Areas.Warehouse.Helpers.ReceiptRequestHelper;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using FinalProject.Areas.Warehouse.ViewModels;
 
 namespace FinalProject.Areas.Warehouse.Controllers
 {
@@ -59,7 +61,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<string> GetRecommandation()
         {
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            var result = await _recommendationService.GetRecommandtion(4, 0.81,listId);
+            var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
 
             if(result is null || !result.Any())
@@ -81,7 +83,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
                 recommandation.Add(obj);
             }
-
+            recommandation = recommandation.Distinct().ToList();
             return JsonConvert.SerializeObject(recommandation);
         }
 
@@ -101,26 +103,34 @@ namespace FinalProject.Areas.Warehouse.Controllers
         }
         public async Task<IActionResult> AutoCreateReceiptRequest()
         {
-            ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
-            ViewBag.BestSeller = await _productService.BestSellerInMonthAsync(FromDate, ToDate, Quantity);
-            var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
-            ViewBag.Recommandation = await _recommendationService.GetRecommandtion(4, 0.81,listId);
-           
+            ViewBag.ListProduct = await _recommendationService.GetListProductDetailForCreateRRAsync(FromDate, ToDate, Quantity);
             
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> AutoCreateReceiptRequest(IList<int> selected, IList<int> quantity)
+        [ValidateAntiForgeryToken]
+        //public async Task<IActionResult> AutoCreateReceiptRequest(IList<int> selected, IList<int> quantity)
+        public async Task<IActionResult> AutoCreateReceiptRequest(ReceiptRequestViewModel model, string productDetalIdMultiPage, string priceMultiPage, string quantityMultiPage)
         {
+
+            var productDetalIds = ConvertStringToListInt(productDetalIdMultiPage);
+            var prices = ConvertStringToListDecimal(priceMultiPage);
+            var quantities = ConvertStringToListInt(quantityMultiPage);
+
+            model.ProductDetailId = productDetalIds;
+            model.Prices = prices;
+            model.Quantity = quantities;
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
             try
             {
                 var user = await _userManager.GetUserAsync(User);
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 var receiptRequest = new ReceiptRequest()
                 {
                     CreateDate = DateTime.Now,
-                    UserId = _userManager.GetUserId(User),
+                    UserId = user.Id,
                     Status = RECEIPT_REQUEST_STATUS_WAITING
                 };
 
@@ -144,17 +154,19 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
                     var listReceiptsDetail = new List<ReceiptRequestDetail>();
 
-                    for (int i = 0; i < quantity.Count; i++)
+                    for (int i = 0; i < productDetalIds.Count; i++)
                     {
                         var detail = new ReceiptRequestDetail()
                         {
                             ReceiptRequestId = receiptRequest.ReceiptRequestId,
-                            ProductDetailId = selected[i],
-                            Quantity = quantity[i],
+                            ProductDetailId = productDetalIds[i],
+                            Quantity = quantities[i],
+                            Price = prices[i],
                             Status = RECEIPT_STATUS_WAITING
                         };
                         listReceiptsDetail.Add(detail);
                     }
+
                     if (await _receiptService.AddReceiptRequestDetailAsync(listReceiptsDetail) > 0)
                     {
                         var link = Url.ActionLink("ViewRequestReceipt", "Warehouse",
@@ -206,7 +218,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
                 ViewBag.Message = "Không thể thêm phiếu yêu cầu nhập hàng!";
             }
 
-            return View();
+
+
+            return View(model);
         }
     }
 }

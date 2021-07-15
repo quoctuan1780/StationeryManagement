@@ -7,6 +7,18 @@
 <div class="container-fluid">
 
     <h1 align="center">Phiếu nhập kho</h1>
+    @if (@ViewBag.MessageSuccess != null)
+    {
+        <div class="alert alert-success">
+            @ViewBag.MessageSuccess
+        </div>
+    }
+    @if (@ViewBag.MessageError != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.MessageError
+        </div>
+    }
     <form method="post" asp-action="UpdateReceipt" asp-controller="Home" asp-area="Warehouse" id="form">
         <input type="hidden" name="id" value="@request.ImportWarehouseId" />
         <div class="row">
@@ -16,7 +28,7 @@
             </div>
             <div class="col-6">
                 <label>Ngày tạo: </label>
-                <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate" readonly />
+                <input type="datetime" class="form-control" name="CreateDate" value="@request.CreateDate.ToShortDateString()" readonly />
 
             </div>
         </div>
@@ -24,7 +36,7 @@
             <div class="col-6">
                 <input type="hidden" name="UserId" value="@request.UserId" readonly />
                 <label>Người tạo: </label>
-                <input type="text" name="name" class="form-control" value="@user.FullName" readonly/>
+                <input type="text" name="name" class="form-control" value="@user.FullName" readonly />
 
             </div>
             <div class="col-6">
@@ -39,17 +51,17 @@
                 <input type="text" class="form-control" name="Status" value="@request.Status" readonly />
             </div>
         </div>
-
+        <br />
         <h3>Chi tiết nhập hàng</h3>
 
         @if (request.ImportWarehouseDetails.Count > 0)
         {
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <div class="table-responsive wrapper">
+                <table class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Mã chi tiết sản phẩm</th>
                             <th>Tên sản phẩm</th>
+                            <th>Giá nhập</th>
                             <th>Số lượng</th>
                             <th>Số lượng đã nhập</th>
                             <th>Số lượng nhập thêm</th>
@@ -60,27 +72,32 @@
 
                         @foreach (var item in request.ImportWarehouseDetails)
                         {
-                        <tr>
-                            @if (item.Quantity == item.ActualQuantity)
-                            {
-                                <td>@item.ProductDetailId</td>
-                                <td>@item.ProductDetail.Product.ProductName</td>
-                                <td>@item.Quantity</td>
-                                <td>@item.ActualQuantity</td>
-                                <td>0</td>
-                            }
-                            else
-                            {
-                                <td><input type="text" name="ProductDetailId" class="form-control" value="@item.ProductDetailId" readonly></td>
-                                <td>@item.ProductDetail.Product.ProductName</td>
-                                <td><input type="number" readonly value="@item.Quantity" class="form-control" name="Quantity" /></td>
-                                <td><input type="number" readonly value="@item.ActualQuantity" class="form-control" name="ActualQuantity" /></td>
+                            <tr>
+                                @if (item.Quantity == item.ActualQuantity)
+                                {
+                                    <td>@item.ProductDetail.Product.ProductName</td>
+                                    <td>@item.ImportPrice</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.ActualQuantity</td>
+                                    <td>0</td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <input type="hidden" name="productDetailIds" value="@item.ProductDetailId" />
+                                        @item.ProductDetail.Product.ProductName
+                                    </td>
+                                    <td>@item.ImportPrice</td>
+                                    <td><input type="number" readonly value="@item.Quantity" class="form-control" name="Quantity" /></td>
+                                    <td><input type="number" readonly value="@item.ActualQuantity" class="form-control" name="ActualQuantity" /></td>
+                                    <td>
+                                        <input type="number" name="AddQuantity" class="form-control" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                    </td>
+                                }
                                 <td>
-                                    <input type="number" name="AddQuantity" class="form-control" value="0" min="0" max="@item.Quantity - @item.ActualQuantity" onkeypress='return event.charCode > 46 && event.charCode < 58' />
+                                    @item.Status
                                 </td>
-                            }
-                            <td>@item.Status</td>
-                        </tr>
+                            </tr>
                         }
                     </tbody>
 
@@ -88,6 +105,7 @@
             </div>
         }
     </form>
+    @*<a asp-action="PrintReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@request.ImportWarehouseId" class="btn btn-success">In báo cáo</a>*@
     <input type="button" value="Cập nhật" class="btn btn-primary" onclick="Submit()" />
 </div>
 

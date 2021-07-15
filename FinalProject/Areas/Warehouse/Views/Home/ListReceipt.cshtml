@@ -16,7 +16,6 @@
                             <th>Id</th>
                             <th>Ngày tạo</th>
                             <th>Tổng số sản phẩm</th>
-                            <th>Ngày bắt đầu nhập</th>
                             <th>Trạng thái</th>
                             <th>Hành động</th>
                         </tr>
@@ -29,9 +28,16 @@
                                 <tr>
                                     <td>@item.ReceiptRequestId</td>
 
-                                    <td class="category-name">@item.CreateDate</td>
+                                    <td class="category-name">@item.CreateDate.ToShortDateString()</td>
                                     <td class="category-name">@item.ImportWarehouseDetails.Count</td>
-                                    <td class="category-name">@item.Status</td>
+                                    @if (item.Status.Equals("Hoàn thành"))
+                                    {
+                                        <td class="category-name alert alert-success">@item.Status</td>
+                                    }
+                                    else 
+                                    {
+                                        <td class="category-name alert alert-warning">@item.Status</td>
+                                    }
                                     <td>
 
                                         <a asp-action="UpdateReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@item.ImportWarehouseId" style="cursor: pointer; color: #4e73df">Xem chi tiết</a>

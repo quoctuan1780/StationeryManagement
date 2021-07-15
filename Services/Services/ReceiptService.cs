@@ -43,13 +43,15 @@ namespace Services.Services
                     UserId = request.UserId
 
                 };
+
                 await _context.ImportWarehouses.AddAsync(receipt);
-                var countTotal = 0;
+
+                var sumTotal = 0;
+
                 var result = await _context.SaveChangesAsync();
 
                 if (result > 0)
                 {
-                    var count = request.ReceiptRequestDetails.Count;
 
                     foreach (var item in request.ReceiptRequestDetails)
                     {
@@ -58,21 +60,20 @@ namespace Services.Services
                             ProductDetailId = item.ProductDetailId,
                             Quantity = item.Quantity,
                             ActualQuantity = 0,
-                            Status = "Chờ xử lý",
-                            ImportWarehouseId = receipt.ImportWarehouseId
+                            Status = RECEIPT_STATUS_PROCESSING,
+                            ImportWarehouseId = receipt.ImportWarehouseId,
+                            ImportPrice = item.Price
                         };
-                        countTotal += detail.Quantity;
+                        sumTotal += detail.Quantity;
+
                         await _context.ImportWarehouseDetails.AddAsync(detail);
                     }
 
-                    var check = await _context.SaveChangesAsync();
-                    receipt.Total = countTotal;
+                    receipt.Total = sumTotal;
+
                     _context.Update(receipt);
-                    await _context.SaveChangesAsync();
-                    if (check == count)
-                    {
-                        return count;
-                    }
+
+                    return await _context.SaveChangesAsync();
                 }
             }
             catch 
@@ -85,11 +86,15 @@ namespace Services.Services
         public async Task<bool> AddReceiptDetailAsync(ImportWarehouseDetail importWarehouseDetail)
         {
             await _context.ImportWarehouseDetails.AddAsync(importWarehouseDetail);
+
             var result = await _context.SaveChangesAsync();
+
             if (result > 0)
+            {
                 return true;
-            else
-                return false;
+            }
+            
+            return false;
         }
 
         public async Task<bool> AddReceiptDetailRequestsAsync(IList<ReceiptRequestDetail> receiptRequestDetails)
@@ -98,13 +103,16 @@ namespace Services.Services
             {
                 await _context.ReceiptRequestDetails.AddAsync(item);
             }
+
             int check = await _context.SaveChangesAsync();
 
 
             if (check > 0)
+            {
                 return true;
-            else
-                return false;
+            }
+            
+            return false;
         }
 
         public async Task<bool> AddReceiptRequestAsync(ReceiptRequest receiptRequest)
@@ -129,8 +137,16 @@ namespace Services.Services
 
         public async Task<int> ApproveReceiptRequestAsync(int id)
         {
-            var receipt = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == id).FirstOrDefaultAsync();
-            receipt.Status = RECEIPT_REQUEST_STATUS_APPROVED;
+            var receipt = await _context.ReceiptRequests.FindAsync(id);
+
+            if(receipt != null)
+            {
+                receipt.Status = RECEIPT_REQUEST_STATUS_APPROVED;
+
+                _context.ReceiptRequests.Update(receipt);
+            }
+
+
             return await _context.SaveChangesAsync();
         }
 
@@ -142,8 +158,10 @@ namespace Services.Services
 
         public async Task<int> DeleteReceiptRequestAsync(int requesrID)
         {
-            var rr = await _context.ReceiptRequests.Where(x => x.ReceiptRequestId == requesrID).FirstOrDefaultAsync();
+            var rr = await _context.ReceiptRequests.FindAsync(requesrID);
+
             _context.ReceiptRequests.Remove(rr);
+
             return await _context.SaveChangesAsync();
         }
 
@@ -182,10 +200,14 @@ namespace Services.Services
 
         public async Task<int> RejectReceiptRequestAsync(int id)
         {
-            var result = await _context.ReceiptRequests.FindAsync(id);
-            result.Status = RECEIPT_REQUEST_REJECT;
 
-            _context.ReceiptRequests.Update(result);
+            var result = await _context.ReceiptRequests.FindAsync(id);
+            if (result != null)
+            {
+                result.Status = RECEIPT_REQUEST_REJECT;
+
+                _context.ReceiptRequests.Update(result);
+            }
 
             return await _context.SaveChangesAsync();
         }
@@ -203,45 +225,43 @@ namespace Services.Services
                 (x => x.Status).ToListAsync();
         }
 
-        public async Task<ImportWarehouse> GetReceiptAfterUpdate(int id, List<int> AddQuantity)
+        public async Task<ImportWarehouse> GetReceiptAfterUpdate(int id, List<int> AddQuantity, List<int> productDetailIds)
         {
-            ImportWarehouse importWarehouse = await _context.ImportWarehouses.
+            var importWarehouse = await _context.ImportWarehouses.
                 Where(x => x.ImportWarehouseId == id)
                 .Include(x => x.ImportWarehouseDetails)
                 .ThenInclude(x => x.ProductDetail)
                 .ThenInclude(x => x.Product)
                 .FirstOrDefaultAsync();
 
-            int i = 0, count = 0;
+            int i = 0;
 
-            var products = await _context.ProductDetails.ToListAsync();
             var listChange = new List<ProductDetail>();
              importWarehouse.Status = RECEIPT_STATUS_PROCESSING;
             
-            foreach (var item in importWarehouse.ImportWarehouseDetails)
+            foreach (var item in productDetailIds)
             {
-                if(item.ActualQuantity + AddQuantity[i] <= item.Quantity)
+                var importWarehouseDetail = importWarehouse.ImportWarehouseDetails.FirstOrDefault(x => x.ProductDetailId == item);
+                if (AddQuantity[i] > 0 && importWarehouseDetail.ActualQuantity + AddQuantity[i] <= importWarehouseDetail.Quantity)
                 {
-                    item.ActualQuantity += AddQuantity[i];
+                    importWarehouseDetail.ActualQuantity += AddQuantity[i];
                     var productDetail = new ProductDetail();
-                    productDetail = products.Where(x => x.ProductDetailId == item.ProductDetailId).FirstOrDefault();
+                    productDetail = importWarehouseDetail.ProductDetail;
                     productDetail.Quantity += AddQuantity[i];
                     productDetail.RemainingQuantity += AddQuantity[i];
                     listChange.Add(productDetail);
+
+
+                    if (importWarehouseDetail.ActualQuantity == importWarehouseDetail.Quantity)
+                    {
+                        importWarehouseDetail.Status = RECEIPT_STATUS_COMPLETE;
+                    }
+
+                    _context.ImportWarehouseDetails.Update(importWarehouseDetail);
                 }
-                if(item.Status == RECEIPT_STATUS_WAITING)
-                {
-                    item.Status = RECEIPT_STATUS_PROCESSING;
-                }
-                
-                if(item.ActualQuantity == item.Quantity)
-                {
-                    item.Status = RECEIPT_STATUS_COMPLETE;
-                    count++;
-                }
-                
+                i++;
             }
-            if (count == importWarehouse.ImportWarehouseDetails.Count)
+            if (importWarehouse.ImportWarehouseDetails.All(x => x.Status.Equals(RECEIPT_STATUS_COMPLETE)))
             {
                 importWarehouse.Status = RECEIPT_STATUS_COMPLETE;
             }
@@ -254,6 +274,11 @@ namespace Services.Services
 
             return importWarehouse;
 
+        }
+
+        public async Task<IList<ReceiptRequest>> GetReceiptRequestsByStatusAsync(string status)
+        {
+            return await _context.ReceiptRequests.Include(x => x.User).Include(x => x.ReceiptRequestDetails).Where(x => x.Status.Equals(status)).OrderBy(x => x.CreateDate).ToListAsync();
         }
     }
 }

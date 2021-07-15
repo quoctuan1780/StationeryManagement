@@ -50,7 +50,7 @@ namespace Services.Services
 
             decimal total = 0;
 
-            foreach (CartItem item in carts)
+            foreach (var item in carts)
             {
                 total += Math.Round((item.Price / (decimal)Constant.EXCHANGE_RATE_USD), 2) * item.Quantity;
 

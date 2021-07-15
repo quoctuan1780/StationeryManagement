@@ -35,32 +35,32 @@
                         {
                             @foreach (var item in requests)
                             {
-                        <tr>
-                            <td>@item.ReceiptRequestId</td>
-                            @if (item.UserId != null)
-                            {
-                                <td class="category-name">@item.User.FullName</td>
-                            }
-                    else
-                    {
-                        <td></td>
-                    }
+                                <tr>
+                                    <td>@item.ReceiptRequestId</td>
+                                    @if (item.UserId != null)
+                                    {
+                                        <td class="category-name">@item.User.FullName</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Không có tên</td>
+                                    }
 
-                            <td class="category-name">@item.CreateDate</td>
-                            <td>@item.ReceiptRequestDetails.Count</td>
-                            <td class="status">@item.Status</td>
-                            <td>
+                                    <td class="category-name">@item.CreateDate.ToShortDateString()</td>
+                                    <td>@item.ReceiptRequestDetails.Count</td>
+                                    <td class="status">@item.Status</td>
+                                    <td>
 
-                                <a asp-action="ViewRequestReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId"
-                                   style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
-                                @if (item.Status == RECEIPT_STATUS_WAITING || item.Status == "Chờ xác nhận")
-                                {
-                                    <a asp-action="RejectReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId" style="cursor: pointer; color: #4e73df">Từ chối</a>
-                                    <a asp-action="ApproveReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId" style="cursor: pointer; color: #4e73df">Duyệt</a>
-                                }
+                                        <a asp-action="ViewRequestReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId"
+                                           style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
+                                        @if (item.Status == RECEIPT_STATUS_WAITING || item.Status == "Chờ xác nhận")
+                                        {
+                                            <a onclick="rejectReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Từ chối</a>
+                                            <a onclick="approvedReceipt(@item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Duyệt</a>
+                                        }
 
-                            </td>
-                        </tr>
+                                    </td>
+                                </tr>
                             }
                         }
 
@@ -72,4 +72,5 @@
 </div>
 @section Scripts{
     <script src="~/js/notify/notify-helper.js"></script>
-    }
+    <script src="~/admin/js/receipt-request/list-receipt-request.js"></script>
+}

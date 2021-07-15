@@ -58,7 +58,8 @@ namespace FinalProject.Areas.Admin.Helpers
                     Weight = model.Weights[i],
                     Origin = model.Origins[i],
                     Quantity = model.Quantities[i],
-                    ProductId = productId.Value
+                    ProductId = productId.Value,
+                    Price = model.Prices[i]
                 });
             }
 
@@ -72,6 +73,38 @@ namespace FinalProject.Areas.Admin.Helpers
             
             return productsDetail;
         }
+
+        public static IList<ProductDetail> ConvertModelPrductToProductsDetailForUpdate(ProductViewModel model, int? productId)
+        {
+            if (model.Origins is null || productId is null) return null;
+
+            var productsDetail = new List<ProductDetail>();
+
+            for (int i = 0; i < model.Origins.Count; i++)
+            {
+                productsDetail.Add(new ProductDetail()
+                {
+                    Color = model.Colors[i],
+                    Weight = model.Weights[i],
+                    Origin = model.Origins[i],
+                    Quantity = model.Quantities[i],
+                    ProductId = productId.Value,
+                    Price = model.Prices[i],
+                    SalePrice = model.PriceSales[i]
+                });
+            }
+
+            if (!(model.ProductsDetailId is null))
+            {
+                for (int i = 0; i < model.ProductsDetailId.Count; i++)
+                {
+                    productsDetail[i].ProductDetailId = model.ProductsDetailId[i];
+                }
+            }
+
+            return productsDetail;
+        }
+
         public static IList<SelectListItem> ConvertCategoriesToSelectListItem(IList<Category> categories)
         {
             var categoriesSelectList = new List<SelectListItem>();
@@ -201,11 +234,10 @@ namespace FinalProject.Areas.Admin.Helpers
             var images = new List<string>();
             var origins = new List<string>();
             var weights = new List<double>();
-            var widths = new List<int>();
-            var lengths = new List<int>();
-            var heights = new List<int>();
+            var prices = new List<decimal>();
             var color = new List<string>();
             var quantities = new List<int>();
+            var priceSales = new List<decimal>();
 
             if(!(imagesDeleted is null) && !(imagesDeleted.FirstOrDefault() is null))
             {
@@ -231,6 +263,8 @@ namespace FinalProject.Areas.Admin.Helpers
                 color.Add(product.ProductDetails[i].Color);
                 productsDetailId.Add(product.ProductDetails[i].ProductDetailId);
                 quantities.Add(product.ProductDetails[i].Quantity);
+                prices.Add(product.ProductDetails[i].Price);
+                priceSales.Add(product.ProductDetails[i].SalePrice);
             }
 
             model.ProductsDetailId = productsDetailId;
@@ -239,6 +273,8 @@ namespace FinalProject.Areas.Admin.Helpers
             model.Weights = weights;
             model.Colors = color;
             model.Quantities = quantities;
+            model.Prices = prices;
+            model.PriceSales = priceSales;
 
             return model;
         }

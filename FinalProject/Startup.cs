@@ -3,7 +3,6 @@ using Entities.Data;
 using Entities.Models;
 using Hangfire;
 using Hangfire.SqlServer;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -32,8 +31,8 @@ namespace FinalProject
         public IConfiguration Configuration { get; }
 
         private static IProductService productService;
-
-        private readonly BackgroundWork backgroundWork = new(productService);
+        private static IAprioriBackground aprioriBackground;
+        private readonly BackgroundWork backgroundWork = new(productService, aprioriBackground);
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -84,8 +83,10 @@ namespace FinalProject
             services.AddScoped<IBillService, BillService>();
             services.AddScoped<IBillDetailService, BillDetailService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IAprioriBackground, AprioriBackground>();
+            services.AddScoped<IUserConnectionService, UserConnectionService>();
             #endregion
-            
+
             #region Cookie manually
             services.AddAuthentication(defaultScheme: ROLE_CUSTOMER)
             .AddCookie(ROLE_CUSTOMER, options =>
@@ -154,11 +155,11 @@ namespace FinalProject
             .UseRecommendedSerializerSettings()
             .UseSqlServerStorage(Configuration.GetConnectionString(Constant.CONNECTION_STRING), new SqlServerStorageOptions
             {
-                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                    QueuePollInterval = TimeSpan.Zero,
-                    UseRecommendedIsolationLevel = true,
-                    DisableGlobalLocks = true
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true
             }));
 
             services.AddMemoryCache();
@@ -178,7 +179,7 @@ namespace FinalProject
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -195,6 +196,8 @@ namespace FinalProject
             app.UseHangfireServer();
 
             recurringJobManager.AddOrUpdate("UpdateSalePriceOfProduct", () => backgroundWork.DoTask(), Cron.Daily());
+
+            recurringJobManager.AddOrUpdate("UpdateRecommendation", () => backgroundWork.SaveRecommendation(), Cron.Daily());
 
             #endregion
 

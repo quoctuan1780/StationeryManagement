@@ -8,6 +8,7 @@ namespace Services.Interfacies
     {
         Task<int> AddBannerAsync(Banner banner);
         Task<IList<Banner>> GetBannerAsync();
+        Task<IList<Banner>> GetAllBannerAsync();
         Task<Banner> GetBannerByIdAsync(int bannerId);
         Task<int> UpdateBannerAsync(Banner banner);
         Task<int> DeleteBannerAsync(int bannerId);

@@ -24,5 +24,6 @@ namespace FinalProject.Areas.Warehouse.ViewModels
 
         [Display(Name = DISPLAY_PRODUCT_QUANTITY)]
         public IList<int> Quantity { get; set; }
+        public IList<decimal> Prices { get; set; }
     }
 }

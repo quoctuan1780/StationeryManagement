@@ -205,6 +205,7 @@ namespace Common
         public const string STATUS_CONFIRMED_PAYMENT = "xác nhận đã thanh toán";
         public const string STATUS_WAITING_CONFIRM = "Chờ xác nhận";
         public const string STATUS_PREPARING_GOODS = "Đang chuẩn bị hàng";
+        public const string STATUS_PREPARED_GOODS = "Đã chuẩn bị xong";
         public const string STATUS_WAITING_PICK_GOODS = "Chờ lấy hàng";
         public const string STATUS_WAITING_FOR_DELIVERING = "Chờ giao hàng";
         public const string STATUS_ON_DELIVERY_GOODS = "Đang giao hàng";
@@ -268,6 +269,7 @@ namespace Common
 
         #region Notification Type
         public const string NOTIFICATION_ORDER = "Thông báo đặt hàng";
+        public const string NOTIFICATION_DELIVERY_ORDER = "Thông báo giao hàng";
         public const string NOTIFICATION_REJECT_ORDER = "Thông báo hủy đơn hàng";
         public const string NOTIFICATION_SALE = "Thông báo khuyến mại";
         public const string NOTIFICATION_IMPORT_WAREHOUSE = "Thông báo nhập kho";

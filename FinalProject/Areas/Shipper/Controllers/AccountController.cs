@@ -38,6 +38,7 @@ namespace FinalProject.Areas.Shipper.Controllers
             return View();
         }
 
+
         [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public IActionResult ChangePassword()
         {
@@ -45,17 +46,27 @@ namespace FinalProject.Areas.Shipper.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            var user = await _accountService.GetUserAsync(User);
-            var result = await _accountService.ChangePassword(user, model.CurrentPass, model.NewPass);
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                ViewBag.Success = "Thay đổi mật khẩu thành công!";
-                return View();
+                var user = await _accountService.GetUserAsync(User);
+
+                var result = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    ViewBag.MessageSuccess = "Đổi mật khẩu thành công";
+                }
+                else
+                {
+                    ViewBag.MessageFail = "Mật khẩu cũ không chính xác";
+                }
             }
-            ViewBag.Failed = "Thay đổi mật khẩu không thành công!";
-            return View();
+
+            return View(model);
         }
 
 
@@ -219,7 +230,7 @@ namespace FinalProject.Areas.Shipper.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string urlReturn = EMPTY)
         {
             if (ModelState.IsValid)
             {
@@ -233,7 +244,11 @@ namespace FinalProject.Areas.Shipper.Controllers
                         {
                             await Heplers.SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
                         }
-                        return Redirect("/Shipper/Home/Dashboard");
+                        if(urlReturn is null || urlReturn.Equals(EMPTY))
+                        {
+                            return Redirect("/Shipper/Home/Dashboard");
+                        }
+                            return Redirect(urlReturn);
 
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;

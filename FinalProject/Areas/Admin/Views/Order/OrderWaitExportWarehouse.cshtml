@@ -130,12 +130,5 @@
     </div>
 </div>
 @section Scripts{
-    <script>
-        function filter() {
-            var customer = $('#customer').val();
-            var url = '/Admin/Order/OrderWaitExportWarehouse?customer=' + customer;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script src="~/admin/js/order/order-wait-export-warehouse.js"></script>
 }

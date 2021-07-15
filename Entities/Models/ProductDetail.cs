@@ -21,6 +21,9 @@ namespace Entities.Models
 
         public int QuantityOrdered { get; set; } = 0;
 
+        public decimal Price { get; set; } = 0;
+        public decimal SalePrice { get; set; } = 0;
+
         public virtual IList<OrderDetail> OrderDetails { get; set; }
 
         public virtual IList<BillDetail> BillDetails { get; set; }

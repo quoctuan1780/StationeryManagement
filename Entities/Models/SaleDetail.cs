@@ -7,6 +7,7 @@ namespace Entities.Models
     [Table(TableNameConstant.TABLE_SALE_PRODUCT)]
     public class SaleDetail
     {
+        public int SaleDetailId { get; set; }
         public int SaleId { get; set; }
         public virtual Sale Sale { get; set; }
 

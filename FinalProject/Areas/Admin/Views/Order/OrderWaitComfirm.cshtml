@@ -208,17 +208,5 @@
 @section Scripts{
     <script type="text/javascript" src="~/js/calendar/mc-calendar.min.js"></script>
     <script type="text/javascript" src="~/js/calendar/calendar-date.js"></script>
-    <script>
-        function filter() {
-            var customer = $('#customer').val();
-            var paymentMethod = $('#paymentmethod').val();
-            var orderDate = document.getElementsByName('orderDate')[0].value;
-
-            var url = '/Admin/Order/OrderWaitComfirm?orderDate=' + orderDate +
-                '&paymentMethod=' + paymentMethod +
-                '&customer=' + customer;
-
-            window.location.href = encodeURI(url);
-        }
-    </script>
+    <script type="text/javascript" src="~/admin/js/order/order-wait-confirm.js"></script>
 }
