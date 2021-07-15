@@ -47,6 +47,8 @@ namespace Entities.Data
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<WorkflowHistory> WorkflowHistories { get; set; }
         public virtual DbSet<FileGuide> FileGuides { get; set; }
+        public virtual DbSet<UserConnection> UserConnections { get; set; }
+        public virtual DbSet<UserConnectionDetail> UserConnectionDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -509,6 +511,29 @@ namespace Entities.Data
                 e.HasIndex(x => x.Id);
                 e.HasIndex(x => x.CreatedBy);
                 e.HasIndex(x => x.ModifiedBy);
+                e.HasQueryFilter(x => x.IsDeleted == false);
+            });
+
+            //Entity User Connection
+            modelBuilder.Entity<UserConnection>(e =>
+            {
+                e.HasKey(x => x.UserConnectionId);
+                e.HasIndex(x => x.UserConnectionId);
+
+                e.HasQueryFilter(x => x.IsDeleted == false);
+            });
+
+            //Entity User connection Detail
+            modelBuilder.Entity<UserConnectionDetail>(e =>
+            {
+                e.HasKey(x => x.UserConnectionDetailId);
+                e.HasIndex(x => x.UserConnectionId);
+                e.HasIndex(x => x.UserConnectionDetailId);
+
+                e.HasOne(x => x.UserConnection)
+                .WithMany(x => x.UserConnectionDetails)
+                .HasForeignKey(x => x.UserConnectionId);
+
                 e.HasQueryFilter(x => x.IsDeleted == false);
             });
         }

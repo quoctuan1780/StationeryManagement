@@ -38,5 +38,6 @@ namespace Services.Interfacies
         Task UpdateSalePriceAsync();
         Task<List<Product>> GetProductForReportExportAsync(List<int> listid);
         Task<IList<Product>> GetProductsSaleAsync();
+        Task<IList<Product>> GetProductSuggestAsync(string connectionId);
     }
 }

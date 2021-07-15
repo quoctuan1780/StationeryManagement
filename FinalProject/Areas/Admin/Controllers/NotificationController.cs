@@ -1,11 +1,10 @@
-﻿using static Common.Constant;
-using static Common.RoleConstant;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
 using Services.Interfacies;
+using System.Threading.Tasks;
 using X.PagedList;
-using NPOI.OpenXmlFormats.Dml;
+using static Common.Constant;
+using static Common.RoleConstant;
 
 namespace FinalProject.Areas.Admin.Controllers
 {
@@ -35,14 +34,14 @@ namespace FinalProject.Areas.Admin.Controllers
         [HttpDelete]
         public async Task<int> DeleteNofity(int? notificationId)
         {
-            if(notificationId is null)
+            if (notificationId is null)
             {
                 return ERROR_CODE_NULL;
             }
 
             var result = await _notificationService.DeleteStatusAsync(notificationId.Value);
 
-            if(result > 0)
+            if (result > 0)
             {
                 return CODE_SUCCESS;
             }
@@ -53,14 +52,14 @@ namespace FinalProject.Areas.Admin.Controllers
         [HttpPut]
         public async Task<int> SeenNotify(int? notificationId)
         {
-            if(notificationId is null)
+            if (notificationId is null)
             {
                 return ERROR_CODE_NULL;
             }
 
             var result = await _notificationService.UpdateStatusAsync(notificationId.Value);
 
-            if(result > 0)
+            if (result > 0)
             {
                 return CODE_SUCCESS;
             }
@@ -70,7 +69,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<string> GetMoreNotification(int? skip)
         {
-            if(skip is null)
+            if (skip is null)
             {
                 return NULL;
             }
@@ -79,7 +78,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
             var json = await _notificationService.GetNotificationsSkipAsync(ROLE_ADMIN, user.Id, skip.Value);
 
-            if(json != "[]")
+            if (json != "[]")
             {
                 return json;
             }

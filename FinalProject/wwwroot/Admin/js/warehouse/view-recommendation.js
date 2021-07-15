@@ -11,7 +11,7 @@ $(document).ready(function () {
         var listProduct = [];
 
         if (fromDate === '' || toDate === '') {
-    showError("Ngày bắt đầu và ngày kết thúc khồng được để trống", "380px");
+    showError("Ngày bắt đầu và ngày kết thúc khồng được để trống", "400px");
             return undefined;
         }
 
@@ -19,7 +19,7 @@ $(document).ready(function () {
         var toDateJs = new Date(toDate);
 
         if (fromDateJs > toDateJs) {
-    showError("Ngày bắt đầu không được lớn hơn ngày kết thúc", "380px");
+            showError("Ngày bắt đầu không được lớn hơn ngày kết thúc", "400px");
             return undefined;
         }
 

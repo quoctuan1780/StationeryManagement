@@ -440,5 +440,19 @@ namespace Services.Services
                 }
             }
         }
+
+        public async Task<IList<Product>> GetProductSuggestAsync(string connectionId)
+        {
+            var productIds = await _context.UserConnections.Include(x => x.UserConnectionDetails).Where(x => x.ClientConnectionId == connectionId).FirstOrDefaultAsync();
+
+            if(productIds != null && productIds.UserConnectionDetails != null)
+            {
+                var products = await _context.Products.Include(x => x.Category).Include(x => x.ProductImages).Include(x => x.RatingDetails).ThenInclude(x => x.Rating).Where(x => productIds.UserConnectionDetails.Select(x => x.ProductViewed).Contains(x.ProductId)).Take(16).ToListAsync();
+
+                return products;
+            }
+
+            return new List<Product>();
+        }
     }
 }

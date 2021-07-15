@@ -2,6 +2,7 @@
     ViewData["Title"] = "Trang chủ";
 
     var products = ViewBag.Products as IList<Entities.Models.Product>;
+    var productsSuggest = ViewBag.ProductsSuggest as IList<Entities.Models.Product>;
     var salesImage = ViewBag.Sales as IList<string>;
     var top10ProductsHot = ViewBag.Top10ProductsHot as IList<Entities.Models.ProductDetail>;
     string image = null;
@@ -17,7 +18,7 @@
                 {
                     foreach (var item in salesImage)
                     {
-                        <a href="javascript:void(0)">
+                        <a asp-action="SaleProduct" asp-controller="Home">
                             <img src="~/images/sale/@item" alt="Khuyến mại" width="320" height="350" />
                         </a>
                     }
@@ -140,6 +141,7 @@
 </div>
 <div class="positive-02">
     <div class="container">
+        <h2><b>Sản phẩm</b></h2>
         <div class="other-pro" id="product-item" style="display: flex; flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
             @if (products is null)
             {
@@ -261,6 +263,115 @@
         <button type="button" class="btn btn-primary btn-lg button" 
                 data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Tải dữ liệu..."
                 onclick="getProducts(this)">Xem thêm...</button>
+    </div>
+</div>
+<div class="position-02">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="other-pro">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#tabsuggest">Gợi ý sản phẩm</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tabsuggest" class="tab-pane fade in active">
+                            <div class="block vt-slider vt-slider7">
+                                <div class="slider-inner">
+                                    <div class="container-slider">
+                                        <div class="products-grid">
+                                            @if (productsSuggest != null && productsSuggest.Any())
+                                            {
+                                                foreach (var item in productsSuggest)
+                                                {
+                                                    <div class="item">
+                                                        <div class="item-wrap">
+                                                            <div class="item-image">
+                                                                <a class="product-image no-touch" href="#" title="@item.ProductName">
+                                                                    @if (!(item.ProductImages is null))
+                                                                    {
+                                                                        var rnd = new Random();
+
+                                                                        <img class="first_image" src="~/images/product/@item.ProductImages[rnd.Next(item.ProductImages.Count)].Image"
+                                                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img class="first_image" src="~/images/product/img_1.jpg"
+                                                                             alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                                                    }
+                                                                </a>
+                                                                <div class="item-btn">
+                                                                    <div class="box-inner">
+                                                                        <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                                                        <span class="qview">
+                                                                            <a class="vt_quickview_handler" data-original-title="Quick View"
+                                                                               data-placement="left" data-toggle="tooltip"
+                                                                               asp-controller="Product" asp-action="Detail"
+                                                                               asp-route-id="@item.ProductId">
+                                                                                <span>
+                                                                                    Quick
+                                                                                    View
+                                                                                </span>
+                                                                            </a>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="pro-info">
+                                                                <div class="pro-inner">
+                                                                    <div class="pro-title product-name">
+                                                                        <a asp-controller="Product" asp-action="Detail"
+                                                                           asp-route-id="@item.ProductId">
+                                                                            @item.ProductName
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="pro-content">
+                                                                        <div class="wrap-price">
+                                                                            <div class="price-box" style="min-height: 60px">
+                                                                                @if (item.SalePrice > 0)
+                                                                                {
+                                                                                    <span class="regular-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
+                                                                                    </span>
+                                                                                    <p class="special-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                                                    </p>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="regular-price">
+                                                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                                                    </span>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                                                                Chi tiết sản phẩm
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+
+                                        </div>
+                                    </div>
+                                    <div class="navslider">
+                                        <a class="prev" href="#">Prev</a>
+                                        <a class="next" href="#">Next</a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @section Scripts{ 

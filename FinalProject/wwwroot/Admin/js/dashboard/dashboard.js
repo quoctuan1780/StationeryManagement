@@ -193,6 +193,7 @@ function loadRevenueCurrentMonthData() {
             });
             var chart = new CanvasJS.Chart("chart-revenue-current-month", {
                 animationEnabled: true,
+                exportEnabled: true,
                 title: {
                     text: "Doanh thu tháng"
                 },

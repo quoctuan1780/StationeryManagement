@@ -25,6 +25,6 @@ namespace FinalProject.Areas.Admin.ViewModels
         public DateTime EndDate { get; set; }
 
         [Display(Name = DISPLAY_BANNER_URL)]
-        public string Url { get; set; }
+        public string Url { get; set; } = "Default";
     }
 }

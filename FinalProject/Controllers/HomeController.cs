@@ -14,19 +14,28 @@ namespace FinalProject.Controllers
         private readonly ISaleService _saleService;
         private readonly IAccountService _accountService;
         private readonly INotificationService _notificationService;
-        public IRecommendationService _recommandationService;
+        private readonly IUserConnectionService _userConnectionService;
+        private readonly IRecommendationService _recommandationService;
 
-        public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService, IAccountService accountService, INotificationService notificationService)
+        public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService, IAccountService accountService, INotificationService notificationService, IUserConnectionService userConnectionService)
         {
             _productService = productService;
             _recommandationService = recommendationService;
             _saleService = saleService;
             _accountService = accountService;
             _notificationService = notificationService;
+            _userConnectionService = userConnectionService;
         }
 
         public async Task<IActionResult> Index()
         {
+            var connectionId = Request.HttpContext.Connection.RemoteIpAddress;
+
+            if(await _userConnectionService.IsExistsConnectionIdAsync(connectionId.ToString()))
+            {
+                ViewBag.ProductsSuggest = await _productService.GetProductSuggestAsync(connectionId.ToString());
+            }
+
             ViewBag.Products = await _productService.GetAllProductsAsync();
 
             ViewBag.Sales = await _saleService.GetThreeSalesImageAsync();

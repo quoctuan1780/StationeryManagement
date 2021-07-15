@@ -230,7 +230,7 @@ namespace FinalProject.Areas.Shipper.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string urlBack)
+        public async Task<IActionResult> Login(LoginViewModel model, string urlReturn = EMPTY)
         {
             if (ModelState.IsValid)
             {
@@ -244,11 +244,11 @@ namespace FinalProject.Areas.Shipper.Controllers
                         {
                             await Heplers.SecurityManager.SignInAsync(HttpContext, user, ROLE_SHIPPER, ROLE_SHIPPER);
                         }
-                        if(urlBack is not null || !urlBack.Equals(EMPTY))
+                        if(urlReturn is null || urlReturn.Equals(EMPTY))
                         {
-                            return Redirect(urlBack);
+                            return Redirect("/Shipper/Home/Dashboard");
                         }
-                        return Redirect("/Shipper/Home/Dashboard");
+                            return Redirect(urlReturn);
 
                     case CODE_FAIL:
                         ViewBag.Message = MESSAGE_ERROR_LOGIN_WRONG;

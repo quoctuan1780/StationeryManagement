@@ -269,6 +269,7 @@ namespace Common
 
         #region Notification Type
         public const string NOTIFICATION_ORDER = "Thông báo đặt hàng";
+        public const string NOTIFICATION_DELIVERY_ORDER = "Thông báo giao hàng";
         public const string NOTIFICATION_REJECT_ORDER = "Thông báo hủy đơn hàng";
         public const string NOTIFICATION_SALE = "Thông báo khuyến mại";
         public const string NOTIFICATION_IMPORT_WAREHOUSE = "Thông báo nhập kho";

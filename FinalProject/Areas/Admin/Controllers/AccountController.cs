@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Services.Interfacies;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using static Common.Constant;
@@ -348,6 +350,92 @@ namespace FinalProject.Areas.Admin.Controllers
                 return CODE_SUCCESS;
             }
             return CODE_FAIL;
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            if (email is null)
+            {
+                ViewBag.Message = "Địa chỉ email không được để trống";
+                return View();
+            }
+
+            var user = await _accountService.GetUserByEmailAsync(email);
+
+            if (user is null)
+            {
+                ViewBag.Message = "Tài khoản không tồn tại trong hệ thống";
+                return View();
+            }
+
+            bool checkRoleWarehouse = await _accountService.IsInRoleAsync(user, ROLE_ADMIN);
+
+            if (!checkRoleWarehouse)
+            {
+                ViewBag.Message = "Tài khoản này không phải tài khoản của người quản kho";
+                return View();
+            }
+
+            var token = await _accountService.GeneratePasswordResetTokenAsync(user);
+            var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var callbackUrl =
+                        Url.ActionLink("ConfirmForgotPassword", CONTROLLER_ACCOUNT,
+                            new { Area = AREA_ADMIN, Email = email, Token = tokenEncoded },
+                            Request.Scheme);
+
+            var subject = "Quên mật khẩu!";
+
+            var body = "<h2>Xin chào bạn: " + email + "</h2>" + "<p>Bạn đã có một yêu cầu khôi phục mật khẩu \n " +
+                "vui lòng nhấn vào link sau để khôi phục mật khẩu của bạn</p>" +
+                "<a href='" + callbackUrl + "'>Nhấn vào đây</a>";
+
+            await _emailSender.SendEmailAsync(email, subject, body);
+            ViewBag.MessageSuccess = "Vui lòng mở email để khôi phục mật khẩu";
+            return View();
+        }
+
+        public IActionResult ConfirmForgotPassword(string email, string token)
+        {
+            var model = new ForgotPasswordViewModel()
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _accountService.GetUserByEmailAsync(model.Email);
+
+                var tokenDecoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+
+                var result = await _accountService.ForgotPasswordAsync(user, tokenDecoded, model.Password);
+
+                if (result.Succeeded)
+                {
+                    TempData[KEY_CONFIRM_EMAIL_SUCCESS] = "Khôi phục mật khẩu thành công";
+
+                    return Redirect("/Admin/Account/Login");
+                }
+
+                ViewBag.Message = "Token đã hết hạn";
+            }
+
+            return View(model);
         }
     }
 }

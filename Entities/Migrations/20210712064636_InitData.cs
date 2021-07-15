@@ -20,7 +20,8 @@ namespace Entities.Migrations
                                     (N'Thông báo xóa'),
                                     (N'Thông báo yêu cầu nhập kho'),
                                     (N'Thông báo từ chối đơn nhập kho'),
-                                    (N'Thông báo hủy đơn hàng');
+                                    (N'Thông báo hủy đơn hàng'),
+                                    (N'Thông báo giao hàng');
                                     
                                     GO
                                     INSERT INTO [dbo].[Rating] VALUES

@@ -12,10 +12,6 @@
     @if (request != null)
     {
         <h1 align="center">Phiếu yêu cầu nhập kho</h1>
-        if(TempData["MessageSuccess"] != null) 
-        {
-            <div class="alert alert-success">@TempData["MessageSuccess"]</div>
-        }
         <div class="form-group">
             <label>Mã phiếu: </label>
             <input type="text" class="form-control" name="ReceiptRequestId" value="@request.ReceiptRequestId" readonly />
@@ -69,8 +65,8 @@
         @if (request.Status == RECEIPT_STATUS_WAITING || request.Status == "Chờ xác nhận")
         {
             <div style="padding-top: .5rem">
-                <a onclick="rejectReceipt(@request.ReceiptRequestId)" class="btn btn-danger">Từ chối</a>
-                <a onclick="approvedReceipt(@request.ReceiptRequestId)" class="btn btn-success">Duyệt</a>
+                <a onclick="rejectReceipt(@request.ReceiptRequestId)" class="btn btn-danger" style="color: #FFF">Từ chối</a>
+                <a onclick="approvedReceipt(@request.ReceiptRequestId)" class="btn btn-success" style="color: #FFF">Duyệt</a>
             </div>
         }
     }
@@ -108,7 +104,7 @@
             })
         }
 
-        function approvedReceipt(el, id) {
+        function approvedReceipt(id) {
             if (id === '') {
                 showErrorSystem();
                 return undefined;
@@ -121,7 +117,7 @@
                 success: function (data) {
                     switch (data) {
                         case 1:
-                            window.location.reload();
+                            window.location.href = '/Admin/Warehouse/ListReceiptRequest';
                             break;
                         default:
                             showErrorSystem();

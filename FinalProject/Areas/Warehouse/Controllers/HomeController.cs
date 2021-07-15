@@ -75,6 +75,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
             if (AddQuantity is null)
             {
+                ViewBag.MessageError = "Lỗi hệ thống, vui lòng thử lại sau";
                 return View();
             }
 
@@ -89,11 +90,14 @@ namespace FinalProject.Areas.Warehouse.Controllers
 
                     ViewBag.Receipt = result;
 
+                    ViewBag.MessageSuccess = "Cập nhật số lượng sản phẩm thành công";
+
                     return View();
                 }
             }
             catch
             {
+                ViewBag.MessageError = "Lỗi hệ thống, vui lòng thử lại sau";
             }
 
             ViewBag.Receipt = await _receiptService.GetReceiptAsync(id);

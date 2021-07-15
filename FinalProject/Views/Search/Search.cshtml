@@ -2,6 +2,8 @@
     ViewData["Title"] = "Kết quả tìm kiếm";
 
     var products = ViewBag.ListProduct as IList<Entities.Models.Product>;
+
+    var random = new Random();
 }
 <div class="breadcrumbs">
     <div class="container">
@@ -27,16 +29,18 @@
                 {
                     foreach (var item in products)
                     {
-                        <div class="col-lg-3">
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-9">
                             <div class="products-grid">
                                 <div class="item">
                                     <div class="item-wrap">
                                         <div class="item-image">
                                             <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                                @if (item.ProductImages != null && item.ProductImages.Any())
+                                                @if (!(item.ProductImages is null) && !(item.ProductImages.FirstOrDefault() is null))
                                                 {
+
+                                                    var rdImage = random.Next(item.ProductImages.Count);
                                                     {
-                                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
+                                                        <img class="first_image" src="~/images/product/@item.ProductImages[random.Next(rdImage)].Image"
                                                              alt="Product demo" width="228" height="228" style="width: 100%;" />
                                                     }
                                                 }
@@ -49,7 +53,6 @@
                                             <div class="item-btn">
                                                 <div class="box-inner">
                                                     <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
-                                                    <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
                                                     <span class="qview">
                                                         <a class="vt_quickview_handler" data-original-title="Quick View"
                                                            data-placement="left" data-toggle="tooltip"
@@ -75,32 +78,49 @@
                                                 </div>
                                                 <div class="pro-content">
                                                     <div class="wrap-price">
-                                                        <div class="price-box">
+                                                        <div class="price-box" style="min-height: 60px">
                                                             @if (item.SalePrice > 0)
                                                             {
                                                                 <span class="regular-price">
-                                                                    <span class="price">@item.SalePrice VNĐ</span>
+                                                                    <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
                                                                 </span>
                                                                 <p class="special-price">
-                                                                    <span class="price">@item.Price VNĐ</span>
+                                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
                                                                 </p>
                                                             }
                                                             else
                                                             {
                                                                 <span class="regular-price">
-                                                                    <span class="price">@item.Price VNĐ</span>
+                                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
                                                                 </span>
                                                             }
                                                         </div>
                                                     </div>
-                                                    <p>Chưa có đánh giá</p>
-                                                    @*<div class="ratings" style="margin-bottom: .5rem;">
-                                                        <div class="rating-box">
+                                                    <div style="height: 110px">
+                                                        @if (item.RatingDetails != null && item.RatingDetails.Any())
+                                                        {
+                                                            var rating = from rd in item.RatingDetails
+                                                                         group rd by rd.RatingId into g
+                                                                         select new
+                                                                         {
+                                                                             RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
+                                                                             UserRating = g.Count()
+                                                                         };
 
-                                                            <div class="rating" style="width:80%">
+                                                            var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
+                                                            <span>Đánh giá</span>
+                                                            <div class="ratings" style="margin-bottom: .5rem;">
+                                                                <div class="rating-box">
+                                                                    <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </div>*@
+                                                        }
+                                                        else
+                                                        {
+                                                            <p>Chưa có đánh giá</p>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -110,9 +130,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>   
                     }
-
             }
             else
             {

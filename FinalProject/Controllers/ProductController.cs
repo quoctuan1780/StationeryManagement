@@ -12,14 +12,16 @@ namespace FinalProject.Controllers
         private readonly IProductService _productService;
         private readonly ICommentService _commentService;
         private readonly IRatingService _rateService;
+        private readonly IUserConnectionService _userConnectionService;
         private readonly IRecommendationService _recommendationService;
 
-        public ProductController(IProductService productService, ICommentService commentService, IRecommendationService recommendationService, IRatingService rateService)
+        public ProductController(IProductService productService, ICommentService commentService, IRecommendationService recommendationService, IRatingService rateService, IUserConnectionService userConnectionService)
         {
             _productService = productService;
             _commentService = commentService;
             _recommendationService = recommendationService;
             _rateService = rateService;
+            _userConnectionService = userConnectionService;
         }
         public async Task<IActionResult> Detail(int? id, int? page = 1)
         {
@@ -27,6 +29,10 @@ namespace FinalProject.Controllers
             {
                 return PartialView(ERROR_404_PAGE);
             }
+
+            var userConnection = Request.HttpContext.Connection.RemoteIpAddress;
+
+            await _userConnectionService.AddUserConnectionAsync(userConnection.ToString(), id.Value);
 
             ViewBag.Product = await _productService.GetProductByIdAsync(id.Value);
 

@@ -1,0 +1,77 @@
+﻿
+@using static Common.Constant;
+@{
+    ViewData["Title"] = "Đơn nhập hàng chờ duyệt";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var requests = ViewBag.ListReceipts as IList<Entities.Models.ReceiptRequest>;
+}
+
+<div class="container-fluid">
+
+    <h1 class="h3 mb-2 text-gray-800">Danh sách phiếu yêu cầu nhập hàng chờ duyệt</h1>
+    @if(TempData["MessageSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["MessageSuccess"]</div>
+    }    
+    @if(TempData["MessageError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["MessageError"]</div>
+    }
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người tạo</th>
+                            <th>Ngày tạo</th>
+                            <th>Tổng số sản phẩm</th>
+                            <th>Trạng thái</th>
+                            <th>Chức năng </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (requests != null)
+                        {
+                            @foreach (var item in requests)
+                            {
+                                <tr>
+                                    <td>@item.ReceiptRequestId</td>
+                                    @if (item.UserId != null)
+                                    {
+                                        <td class="category-name">@item.User.FullName</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Không có tên</td>
+                                    }
+
+                                    <td class="category-name">@item.CreateDate.ToShortDateString()</td>
+                                    <td>@item.ReceiptRequestDetails.Count</td>
+                                    <td class="status">@item.Status</td>
+                                    <td>
+
+                                        <a asp-action="ViewRequestReceipt" asp-controller="Warehouse" asp-area="Admin" asp-route-id="@item.ReceiptRequestId"
+                                           style="cursor: pointer; color: #4e73df">Xem chi tiết</a>
+                                        @if (item.Status == RECEIPT_STATUS_WAITING || item.Status == "Chờ xác nhận")
+                                        {
+                                            <a onclick="rejectReceipt(this, @item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Từ chối</a>
+                                            <a onclick="approvedReceipt(@item.ReceiptRequestId)" style="cursor: pointer; color: #4e73df">Duyệt</a>
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/notify/notify-helper.js"></script>
+    <script src="~/admin/js/receipt-request/list-receipt-request.js"></script>
+}

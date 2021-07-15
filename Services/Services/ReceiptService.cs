@@ -275,5 +275,10 @@ namespace Services.Services
             return importWarehouse;
 
         }
+
+        public async Task<IList<ReceiptRequest>> GetReceiptRequestsByStatusAsync(string status)
+        {
+            return await _context.ReceiptRequests.Include(x => x.User).Include(x => x.ReceiptRequestDetails).Where(x => x.Status.Equals(status)).OrderBy(x => x.CreateDate).ToListAsync();
+        }
     }
 }

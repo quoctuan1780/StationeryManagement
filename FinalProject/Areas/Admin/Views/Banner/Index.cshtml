@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Quản lý banner";
+    ViewData["Title"] = "Quản lý quảng cáo";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var banners = ViewBag.Banners as IList<Entities.Models.Banner>;
 }
@@ -28,7 +28,6 @@
                             <th>Hình ảnh</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
-                            <th>Đường dẫn</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
@@ -43,7 +42,6 @@
                                     <td><img src="~/images/banner/@item.Image" width="100" height="100" alt="Alternate Text" /></td>
                                     <td>@item.StartDate.ToShortDateString()</td>
                                     <td>@item.EndDate.ToShortDateString()</td>
-                                    <td>@item.Url</td>
                                     <td>
                                         <a onclick="deleteBanner(this, @item.BannerId)" style="cursor: pointer; color: #4e73df">Xóa</a>
                                         <a asp-action="EditBanner" asp-controller="Banner"

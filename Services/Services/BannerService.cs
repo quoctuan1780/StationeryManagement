@@ -40,6 +40,11 @@ namespace Services.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<IList<Banner>> GetAllBannerAsync()
+        {
+            return await _context.Banners.ToListAsync();
+        }
+
         public async Task<IList<Banner>> GetBannerAsync()
         {
             return await _context.Banners.Where(x => x.EndDate >= DateTime.Now).ToListAsync();

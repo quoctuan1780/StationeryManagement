@@ -1122,6 +1122,58 @@ namespace Entities.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Entities.Models.UserConnection", b =>
+                {
+                    b.Property<Guid>("UserConnectionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClientConnectionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FirstAccessedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastAccessedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserConnectionId");
+
+                    b.HasIndex("UserConnectionId");
+
+                    b.ToTable("UserConnection");
+                });
+
+            modelBuilder.Entity("Entities.Models.UserConnectionDetail", b =>
+                {
+                    b.Property<Guid>("UserConnectionDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateViewed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ProductViewed")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserConnectionDetailId");
+
+                    b.HasIndex("UserConnectionDetailId");
+
+                    b.HasIndex("UserConnectionId");
+
+                    b.ToTable("UserConnectionDetail");
+                });
+
             modelBuilder.Entity("Entities.Models.Ward", b =>
                 {
                     b.Property<string>("WardCode")
@@ -1656,6 +1708,17 @@ namespace Entities.Migrations
                     b.Navigation("Ward");
                 });
 
+            modelBuilder.Entity("Entities.Models.UserConnectionDetail", b =>
+                {
+                    b.HasOne("Entities.Models.UserConnection", "UserConnection")
+                        .WithMany("UserConnectionDetails")
+                        .HasForeignKey("UserConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserConnection");
+                });
+
             modelBuilder.Entity("Entities.Models.Ward", b =>
                 {
                     b.HasOne("Entities.Models.District", "District")
@@ -1828,6 +1891,11 @@ namespace Entities.Migrations
                     b.Navigation("RatingDetails");
 
                     b.Navigation("ReceiptRequests");
+                });
+
+            modelBuilder.Entity("Entities.Models.UserConnection", b =>
+                {
+                    b.Navigation("UserConnectionDetails");
                 });
 
             modelBuilder.Entity("Entities.Models.Ward", b =>

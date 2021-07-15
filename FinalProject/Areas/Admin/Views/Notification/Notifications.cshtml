@@ -44,7 +44,8 @@
                                                     case NOTIFICATION_ORDER:
 
                                                         <div class="row" style="margin-top: 1rem">
-                                                            <div class="d-flex align-items-center">
+                                                            <div class="col-lg-6">
+                                                                <div class="d-flex align-items-center">
                                                                 <div class="mr-3">
                                                                     <div class="icon-circle bg-primary">
                                                                         <i class="fas fa-file-alt text-white"></i>
@@ -58,10 +59,13 @@
                                                                 </div>
                                                                 @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
                                                                 {
-                                                                    <div>
+                                                                    <div style="padding-left: .5rem">
                                                                         <img src="~/images/background/icon-status.png" width="20" height="20" />
                                                                     </div>
                                                                 }
+                                                            </div>
+                                                            </div>
+                                                            <div class="col-lg-3">
                                                                 <div style="padding-left: 2rem">
                                                                     <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
                                                                 </div>
@@ -71,7 +75,8 @@
 
                                                     case NOTIFICATION_REJECT_ORDER:
                                                         <div class="row" style="margin-top: 1rem">
-                                                            <div class="d-flex align-items-center">
+                                                            <div class="col-lg-6">
+                                                                <div class="d-flex align-items-center">
                                                                 <div class="mr-3">
                                                                     <div class="icon-circle bg-primary">
                                                                         <i class="fas fa-exclamation-triangle text-white"></i>
@@ -85,10 +90,14 @@
                                                                 </div>
                                                                 @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
                                                                 {
-                                                                    <div>
+                                                                    <div style="padding-left: .5rem">
                                                                         <img src="~/images/background/icon-status.png" width="20" height="20" />
                                                                     </div>
                                                                 }
+                                                                
+                                                            </div>
+                                                            </div>
+                                                            <div class="col-lg-3">
                                                                 <div style="padding-left: 2rem">
                                                                     <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
                                                                 </div>
@@ -98,24 +107,28 @@
 
                                                     default:
                                                         <div class="row" style="margin-top: 1rem">
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="mr-3">
-                                                                    <div class="icon-circle bg-primary">
-                                                                        <i class="fas fa-warehouse text-white"></i>
+                                                            <div class="col-lg-6">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="mr-3">
+                                                                        <div class="icon-circle bg-primary">
+                                                                            <i class="fas fa-warehouse text-white"></i>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div>
-                                                                    <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
-                                                                    <a onclick="@onclick" href="@item.Link">
-                                                                        <span class="font-weight-bold">@item.Content</span>
-                                                                    </a>
-                                                                </div>
-                                                                @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
-                                                                {
                                                                     <div>
-                                                                        <img src="~/images/background/icon-status.png" width="20" height="20" />
+                                                                        <div class="small text-gray-500">@item.CreatedDate.ToShortDateString()</div>
+                                                                        <a onclick="@onclick" href="@item.Link">
+                                                                            <span class="font-weight-bold">@item.Content</span>
+                                                                        </a>
                                                                     </div>
-                                                                }
+                                                                    @if (item.Status.Equals(STATUS_NOT_SEEN_NOTIFICATION))
+                                                                    {
+                                                                        <div style="padding-left: .5rem">
+                                                                            <img src="~/images/background/icon-status.png" width="20" height="20" />
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-3">
                                                                 <div style="padding-left: 2rem">
                                                                     <button class="btn btn-danger" onclick="deleteNotify(this, @item.NotificationId)"> - </button>
                                                                 </div>

@@ -67,12 +67,6 @@
             <input type="file" class="form-control-file" accept="image/*" asp-for="Image" onchange="previewImage(event)" id="images-file" />
             <span class="text-danger" asp-validation-for="Image"></span>
         </div>
-
-        <div class="form-group">
-                    <label asp-for="Url"></label>
-                    <input type="text" asp-for="Url" class="form-control" id="start-date"/>
-                    <span class="text-danger" asp-validation-for="Url"></span>
-                </div>
     </form>
 
     <div class="form-group">

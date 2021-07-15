@@ -15,9 +15,8 @@ namespace FinalProject.Controllers
         }
         public async Task<IActionResult> Search(string text)
         {
-            int price = -1;
 
-            int.TryParse(text, out price);
+            _ = int.TryParse(text, out int price);
 
             if (price > 0)
             {
@@ -27,6 +26,7 @@ namespace FinalProject.Controllers
             {
                 ViewBag.ListProduct = await _searchService.SearchByTextAsync(text);
             }
+
             return View();
         }
         public string SearchAjax(string text)

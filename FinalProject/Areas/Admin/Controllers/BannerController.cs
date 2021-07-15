@@ -28,7 +28,7 @@ namespace FinalProject.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.Banners = await _bannerService.GetBannerAsync();
+            ViewBag.Banners = await _bannerService.GetAllBannerAsync();
 
             return View();
         }

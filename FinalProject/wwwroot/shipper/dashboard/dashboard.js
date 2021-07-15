@@ -97,9 +97,12 @@ function loadOrderDeliveringOrDeliveredData() {
                 },
                 data: [{
                     type: "pie",
-                    startAngle: 240,
-                    yValueFormatString: "##0.00\"%\"",
-                    indexLabel: "{label} {y}",
+                    startAngle: 25,
+                    toolTipContent: "<b>{label}</b>: {y}%",
+                    showInLegend: "true",
+                    legendText: "{label}",
+                    indexLabelFontSize: 16,
+                    indexLabel: "{label}  {y}%",
                     dataPoints: json
                 }]
             });

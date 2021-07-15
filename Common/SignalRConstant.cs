@@ -16,6 +16,7 @@
         public const string SIGNAL_NOTIFICATION_NEW_RECEIPT_REQUEST = "newReceiptRequestNotification";
         public const string SIGNAL_NOTIFICATION_APPROVED_RECEIPT_REQUEST = "appvoredReceiptRequestNotification";
         public const string SIGNAL_NOTIFICATION_REJECT_RECEIPT_REQUEST = "rejectReceiptRequestNotification";
+        public const string SIGNAL_NOTIFICATION_NEW_ORDER_DELIVERY = "newOrderDeliveryShipper";
 
         public const string SIGNAL_GROUP_WAREHOUSE = "WarehouseManager";
         public const string SIGNAL_GROUP_SHIPPER = "Shipper";

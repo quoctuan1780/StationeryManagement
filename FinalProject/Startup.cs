@@ -32,7 +32,6 @@ namespace FinalProject
 
         private static IProductService productService;
         private static IAprioriBackground aprioriBackground;
-
         private readonly BackgroundWork backgroundWork = new(productService, aprioriBackground);
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -85,6 +84,7 @@ namespace FinalProject
             services.AddScoped<IBillDetailService, BillDetailService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAprioriBackground, AprioriBackground>();
+            services.AddScoped<IUserConnectionService, UserConnectionService>();
             #endregion
 
             #region Cookie manually

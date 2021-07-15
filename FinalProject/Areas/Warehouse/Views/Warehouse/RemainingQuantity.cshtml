@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Tạo phiếu yêu cầu nhập hàng";
+    ViewData["Title"] = "Sản phẩm tồn kho";
     Layout = "~/Areas/Warehouse/Views/Shared/_Layout.cshtml";
 
     var ListProduct = ViewBag.ListProduct as IList<Entities.Models.ProductDetail>;
 }
-<h1 class="h3 mb-2 text-gray-800">Tạo phiếu yêu cầu nhập hàng</h1>
+<h1 class="h3 mb-2 text-gray-800">Sản phẩm tồn kho</h1>
 <div class="card shadow mb-4">
     <div class="card-body">
         <div class="table-responsive">
@@ -20,11 +20,10 @@
                             <th>Số lượng còn lại</th>
                             <th>Số lượng cần đặt</th>
                             <th>Chọn</th>
-
                         </tr>
                     </thead>
                     <tbody>
-                        @if (ListProduct is not null)
+                        @if (ListProduct != null)
                         {
                             @foreach (var item in ListProduct)
                             {

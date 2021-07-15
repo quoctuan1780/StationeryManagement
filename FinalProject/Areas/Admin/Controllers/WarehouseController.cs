@@ -151,6 +151,8 @@ namespace FinalProject.Areas.Admin.Controllers
 
                     transaction.Complete();
 
+                    TempData["MessageSuccess"] = "Từ chối đơn yêu cầu nhập hàng thành công";
+
                     return CODE_SUCCESS;
                 }
             }
@@ -253,6 +255,14 @@ namespace FinalProject.Areas.Admin.Controllers
             ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsAsync();
             return View();
         }
+
+        public async Task<IActionResult> ReceiptRequestWaitApprove()
+        {
+            ViewBag.ListReceipts = await _receiptService.GetReceiptRequestsByStatusAsync(RECEIPT_REQUEST_STATUS_WAITING);
+
+            return View();
+        }
+
         public async Task<IActionResult> ViewRequestReceipt(int? id)
         {
             if(id is null)

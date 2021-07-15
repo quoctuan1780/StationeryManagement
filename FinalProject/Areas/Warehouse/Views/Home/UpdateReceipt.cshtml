@@ -7,6 +7,18 @@
 <div class="container-fluid">
 
     <h1 align="center">Phiếu nhập kho</h1>
+    @if (@ViewBag.MessageSuccess != null)
+    {
+        <div class="alert alert-success">
+            @ViewBag.MessageSuccess
+        </div>
+    }
+    @if (@ViewBag.MessageError != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.MessageError
+        </div>
+    }
     <form method="post" asp-action="UpdateReceipt" asp-controller="Home" asp-area="Warehouse" id="form">
         <input type="hidden" name="id" value="@request.ImportWarehouseId" />
         <div class="row">
@@ -24,7 +36,7 @@
             <div class="col-6">
                 <input type="hidden" name="UserId" value="@request.UserId" readonly />
                 <label>Người tạo: </label>
-                <input type="text" name="name" class="form-control" value="@user.FullName" readonly/>
+                <input type="text" name="name" class="form-control" value="@user.FullName" readonly />
 
             </div>
             <div class="col-6">
@@ -39,13 +51,13 @@
                 <input type="text" class="form-control" name="Status" value="@request.Status" readonly />
             </div>
         </div>
-
+        <br />
         <h3>Chi tiết nhập hàng</h3>
 
         @if (request.ImportWarehouseDetails.Count > 0)
         {
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <div class="table-responsive wrapper">
+                <table class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Tên sản phẩm</th>
@@ -93,7 +105,7 @@
             </div>
         }
     </form>
-    <a asp-action="PrintReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@request.ImportWarehouseId" class="btn btn-success">In báo cáo</a>
+    @*<a asp-action="PrintReceipt" asp-controller="Home" asp-area="Warehouse" asp-route-id="@request.ImportWarehouseId" class="btn btn-success">In báo cáo</a>*@
     <input type="button" value="Cập nhật" class="btn btn-primary" onclick="Submit()" />
 </div>
 

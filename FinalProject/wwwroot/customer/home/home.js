@@ -69,16 +69,16 @@
                 if (v.SalePrice > 0) {
                     node += `
                                                                 <span class="regular-price">
-                                                                    <span class="price">`+ v.SalePrice + ` VNĐ</span>
+                                                                    <span class="price">`+ v.SalePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ` VNĐ</span>
                                                                 </span>
                                                                 <p class="special-price">
-                                                                    <span class="price">`+ v.Price + ` VNĐ</span>
+                                                                    <span class="price">`+ v.Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ` VNĐ</span>
                                                                 </p>`;
                 }
                 else {
                     node += `
                                                                 <span class="regular-price">
-                                                                    <span class="price">`+ v.Price + ` VNĐ</span>
+                                                                    <span class="price">`+ v.Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ` VNĐ</span>
                                                                 </span>`;
                 }
                 node += `

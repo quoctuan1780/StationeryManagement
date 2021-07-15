@@ -24,5 +24,6 @@ namespace Services.Interfacies
         Task<ReceiptRequest> GetReceiptRequestAsync(int id);
         Task<int> ApproveReceiptRequestAsync(int id);
         Task<int> RejectReceiptRequestAsync(int id);
+        Task<IList<ReceiptRequest>> GetReceiptRequestsByStatusAsync(string status);
     }
 }

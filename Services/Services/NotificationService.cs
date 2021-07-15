@@ -30,7 +30,7 @@ namespace Services.Services
 
         public async Task<IList<Notification>> GetTenNotificationsAsync(string role, string userId)
         {
-            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role) && x.UserId.Equals(userId)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
+            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role) || x.UserId.Equals(userId)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
         }
 
         public async Task<NotificationType> GetNotifycationByNameAsync(string name)
@@ -126,6 +126,11 @@ namespace Services.Services
             }
 
             return JsonConvert.SerializeObject(json);
+        }
+
+        public async Task<IList<Notification>> GetTenNotificationsAsync(string role)
+        {
+            return await _context.Notifications.Include(x => x.User).Include(x => x.NotificationType).Where(x => x.RoleSeen.Equals(role)).OrderByDescending(x => x.CreatedDate).Take(10).ToListAsync();
         }
     }
 }
