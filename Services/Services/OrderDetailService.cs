@@ -34,5 +34,22 @@ namespace Services.Services
 
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<int> AddOrderDetailAsync(Order order, CartItem cartItem)
+        {
+            var orderDetail = new OrderDetail()
+            {
+                OrderId = order.OrderId,
+                Price = cartItem.Price,
+                Quantity = cartItem.Quantity,
+                ProductDetailId = cartItem.ProductDetailId,
+                SalePrice = 0
+            };
+            
+
+            await _context.AddAsync(orderDetail);
+
+            return await _context.SaveChangesAsync();
+        }
     }
 }

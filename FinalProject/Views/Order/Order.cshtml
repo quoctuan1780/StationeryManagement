@@ -54,10 +54,9 @@
                                 <label for="address">Địa chỉ nhận hàng</label>
                                 <select class="selectpicker show-tick form-control" name="DeliveryAddress"
                                         onchange="getDistricts()" id="delivery-address" data-live-search="true">
-                                    <option value="@null">Địa chỉ giao hàng</option>
                                     @if (!(addresses is null))
                                     {
-                                        <option value="@addressString">@addressString</option>
+                                        <option value="@addressString" selected>@addressString</option>
                                         foreach (var item in addresses)
                                         {
                                             <option value="@item.Text">@item.Text</option>
@@ -115,8 +114,8 @@
                         <ul class="list-group mb-3 sticky-top">
                             @foreach (var item in carts)
                             {
-                                totalSale += item.ProductDetail.Product.Price * item.Quantity - item.Price * item.Quantity;
-                                totalOriginal += item.ProductDetail.Product.Price * item.Quantity;
+                                totalSale += item.ProductDetail.Price * item.Quantity - item.Price * item.Quantity;
+                                totalOriginal += item.ProductDetail.Price * item.Quantity;
                                 <li class="list-group-item d-flex lh-condensed">
                                     <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; align-items: center;">
                                         <div class="col-md-4">
@@ -141,11 +140,27 @@
                                         </div>
                                     </div>
                                 </li>
-                            }
+                                }
                             <li class="list-group-item d-flex justify-content-between">
-                                <span>Tổng tiền giá gốc: <strong>@String.Format("{0:n0}", totalOriginal)</strong> (VNĐ)</span><br />
-                                <span>Tổng tiền khuyễn mãi: <strong>@String.Format("{0:n0}", totalSale)</strong> (VNĐ)</span><br />
-                                <span>Tổng tiền: <strong>@String.Format("{0:n0}", total)</strong> (VNĐ)</span>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="pl-0 w-25" scope="col">Giá gốc</th>
+                                                <th class="pl-0 w-25" scope="col">Giá KM</th>
+                                                <th class="pl-0 w-25" scope="col">Tổng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr>
+                                                <td><strong>@String.Format("{0:n0}", totalOriginal)</strong></td>
+                                                <td><strong>@String.Format("{0:n0}", totalSale)</strong></td>
+                                                <td><strong>@String.Format("{0:n0}", total)</strong></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </li>
                         </ul>
                         <a class="btn btn-warning" asp-action="Checkout" asp-controller="Cart" style="width: 100%">Quay lại giỏ hàng</a>

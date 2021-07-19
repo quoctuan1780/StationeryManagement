@@ -25,6 +25,7 @@ namespace FinalProject.Controllers
     [Authorize(Roles = ROLE_CUSTOMER, AuthenticationSchemes = ROLE_CUSTOMER)]
     public class OrderController : Controller
     {
+        private readonly IProductDetailService _productDetailService;
         private readonly IAccountService _accountService;
         private readonly ICartService _cartService;
         private readonly IConfiguration _configuration;
@@ -37,12 +38,15 @@ namespace FinalProject.Controllers
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IWorkflowHistoryService _workflowHistoryService;
         private readonly INotificationService _notificationService;
+        private static string _deliveryAddress = EMPTY;
+        private static CartItem _cart = new();
 
         public OrderController(IAccountService accountService, ICartService cartService, IConfiguration configuration,
             IPayPalService payPalService, IMoMoService moMoService, IOrderDetailService orderDetailService,
             IOrderService orderService, IAddressService addressService, IDeliveryAddressService deliveryAddressService,
-            IHubContext<SignalServer> hubContext, IWorkflowHistoryService workflowHistoryService, INotificationService notificationService)
+            IHubContext<SignalServer> hubContext, IWorkflowHistoryService workflowHistoryService, INotificationService notificationService, IProductDetailService productDetailService)
         {
+            _productDetailService = productDetailService;
             _accountService = accountService;
             _cartService = cartService;
             _configuration = configuration;
@@ -534,6 +538,415 @@ namespace FinalProject.Controllers
 
             return PartialView(ERROR_PAYMENT_PAGE);
         }
+        #endregion
+
+        public async Task<IActionResult> BuyNow(int? productDetailId, int? quantity)
+        {
+            if(productDetailId is null || quantity is null)
+            {
+                return PartialView(ERROR_404_PAGE);
+            }
+
+            var user = await _accountService.GetUserAsync(User);
+
+            #region Viewbag
+            ViewBag.User = user;
+            ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
+                    await _deliveryAddressService.GetDeliveryAddressesAsync(user.Id));
+            ViewBag.Quantity = quantity;
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+            ViewBag.ProductDetail = await _productDetailService.GetProductDetailByIdAsync(productDetailId.Value);
+            #endregion
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BuyNow(OrderViewModel model, int? productDetailId, int? quantity)
+        {
+
+            var user = await _accountService.GetUserAsync(User);
+            var productDetail = await _productDetailService.GetProductDetailByIdAsync(productDetailId.Value);
+
+            #region Viewbag
+            ViewBag.User = user;
+            ViewBag.Addresses = SelectHelper.ConvertDeliveryAddressesToSelectListItems(
+                    await _deliveryAddressService.GetDeliveryAddressesAsync(user.Id));
+            ViewBag.Quantity = quantity;
+            ViewBag.Provinces = await _addressService.GetProvincesAsync();
+            ViewBag.ProductDetail = productDetail;
+            #endregion
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            string deliveryAddressEncoder = HttpUtility.UrlEncode(model.DeliveryAddress);
+            decimal total = productDetail.SalePrice == 0 ? productDetail.Price : productDetail.SalePrice * quantity.Value;
+            _deliveryAddress = deliveryAddressEncoder;
+            var cart = new CartItem()
+            {
+                ProductDetailId = productDetail.ProductDetailId,
+                IsBuyNow = true,
+                Price = productDetail.SalePrice == 0 ? productDetail.Price : productDetail.SalePrice,
+                Quantity = quantity.Value,
+                UserId = user.Id,
+                CreateDate = DateTime.Now,
+                IsStocking = true,
+                ProductDetail = productDetail
+            };
+
+            _cart = cart;
+
+            switch (model.PaymentMethod)
+            {
+                case PAYPAL:
+                    return await PaypalCheckoutBuyNow(deliveryAddressEncoder, productDetail, quantity.Value);
+                case MOMO:
+                    return await MoMoCheckoutBuyNow(total.ToString(G29), user.FullName, user.Email);
+                case COD:
+                    return await CodCheckoutBuyNow(model, user, total, _cart);
+            }
+
+            return View(model);
+        }
+
+        #region Paypal Payment For Buy Now
+        public async Task<IActionResult> PaypalCheckoutBuyNow(string deliveryAddress, ProductDetail productDetail, int quantity)
+        {
+            var user = await _accountService.GetUserAsync(User);
+            var hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+
+            try
+            {
+                var createOrderResponse = await _payPalService.PayPalCreateOrder(deliveryAddress, _cart, user, hostName, true);
+
+                if (createOrderResponse is null)
+                {
+                    return PartialView(ERROR_PAYMENT_PAGE);
+                }
+
+                var createOrderResult = createOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+
+                var link = EMPTY;
+
+                foreach (PayPalCheckoutSdk.Orders.LinkDescription item in createOrderResult.Links)
+                {
+                    if (item.Rel.Equals(PAYPAL_REL_APPROVE))
+                    {
+                        link = item.Href;
+
+                        break;
+                    }
+                }
+
+                return Redirect(link);
+            }
+            catch
+            {
+                return PartialView(ERROR_PAYMENT_PAGE);
+            }
+        }
+
+        public async Task<IActionResult> PayPalSuccessBuyNow(string deliveryAddress, string token, string PayerID)
+        {
+            string captureId = EMPTY;
+
+            PayPalCheckoutSdk.Orders.Order captureOrderResult = null;
+
+            var user = await _accountService.GetUserAsync(User);
+
+            var cart = _cart;
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+
+                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+
+
+                var captureOrderResponse = await _payPalService.PayPalCaptureOrder(token, true);
+
+                if (captureOrderResponse is null)
+                {
+                    throw new Exception();
+                }
+
+                captureOrderResult = captureOrderResponse.Result<PayPalCheckoutSdk.Orders.Order>();
+
+                if (captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault() != null)
+                {
+                    var data = captureOrderResult.PurchaseUnits.FirstOrDefault().Payments.Captures.FirstOrDefault();
+                    captureId = data.Id;
+                }
+
+                var order = await _orderService.AddOrderFromCartsAsync(cart, userInclude, PAYPAL, HttpUtility.UrlDecode(deliveryAddress));
+
+                if (order is null)
+                {
+                    throw new Exception();
+                }
+
+                var workFlowHistory = new WorkflowHistory()
+                {
+                    CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                    NextStatus = STATUS_WAITING_CONFIRM,
+                    CreatedBy = order.UserId,
+                    CreatedDate = DateTime.Now,
+                    FullName = user.FullName,
+                    RecordId = order.OrderId.ToString(),
+                    UserEmail = user.Email,
+                    Type = TYPE_ORDER,
+                    UserRole = ROLE_CUSTOMER
+                };
+
+                await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
+                int result = await _orderDetailService.AddOrderDetailAsync(order, cart);
+
+                if (result < 0)
+                {
+                    throw new Exception();
+                }
+
+                result = await _payPalService
+                        .AddPayPalPaymentAsync(order.OrderId, token, PayerID, captureOrderResult.Links.FirstOrDefault().Href, captureId);
+
+                if (result > 0)
+                {
+                    await _cartService.RemoveCartItemByUserId(user.Id);
+
+                    var link = Url.ActionLink("OrderDetail", "Order",
+                                new { Area = AREA_ADMIN, OrderId = order.OrderId },
+                                Request.Scheme);
+
+                    var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
+
+                    var notifications = new List<Notification>();
+
+                    var admins = await _accountService.GetAllAdminsAsync();
+
+                    var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + order.OrderId;
+
+                    if (admins != null)
+                    {
+                        foreach (var item in admins)
+                        {
+                            var nofification = new Notification()
+                            {
+                                CreatedDate = DateTime.Now,
+                                Link = link,
+                                NotificationTypeId = notificationType.NotificationTypeId,
+                                Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                UserId = item.Id,
+                                RecordId = order.OrderId,
+                                RoleSeen = ROLE_ADMIN,
+                                Content = content
+                            };
+
+                            notifications.Add(nofification);
+                        }
+                    }
+
+                    await _notificationService.AddNotificationAsync(notifications);
+
+                    transaction.Complete();
+
+                    ViewBag.OrderId = order.OrderId;
+
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), content);
+                }
+
+                return View("PayPalSuccess");
+
+            }
+            catch
+            {
+                if (captureOrderResult != null && captureOrderResult.Status.Equals("COMPLETED"))
+                {
+                    decimal total = 0;
+
+                    total += Math.Round((cart.Price / (decimal)EXCHANGE_RATE_USD), 2) * cart.Quantity;
+
+                    await _payPalService.CapturesRefund(captureId, total.ToString().Replace(COMMA, DOT));
+                }
+            }
+
+            return PartialView(ERROR_PAYMENT_PAGE);
+        }
+        #endregion
+
+        #region Momo Payment For Buy Now
+        public async Task<IActionResult> MoMoCheckoutBuyNow(string total, string orderInfo, string email)
+        {
+            string hostName = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            try
+            {
+                string responseFromMomo = await _moMoService.MoMoCheckoutAsync(total, orderInfo, email, hostName);
+
+                JObject jmessage = JObject.Parse(responseFromMomo);
+
+                string redirect = jmessage.GetValue(PAYPAL_URL).ToString();
+
+                return Redirect(redirect);
+            }
+            catch
+            {
+                return PartialView(ERROR_PAYMENT_PAGE);
+            }
+        }
+
+        public async Task<IActionResult> MoMoSuccessBuyNow(string orderId, string payType, string responseTime, string errorCode, string amount, string transId)
+        {
+            if (errorCode.Equals(ZERO))
+            {
+                var user = await _accountService.GetUserAsync(User);
+                var userInclude = await _accountService.GetUserByUserIdAsync(user.Id);
+                var carts = await _cartService.GetCartsByUserIdAsync(user.Id);
+
+                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+                try
+                {
+                    var order = await _orderService.AddOrderFromCartsAsync(carts, userInclude, MOMO, HttpUtility.UrlDecode(_deliveryAddress));
+
+                    if (order is null)
+                    {
+                        throw new Exception();
+                    }
+
+                    var workFlowHistory = new WorkflowHistory()
+                    {
+                        CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                        NextStatus = STATUS_WAITING_CONFIRM,
+                        CreatedBy = order.UserId,
+                        CreatedDate = DateTime.Now,
+                        FullName = user.FullName,
+                        RecordId = order.OrderId.ToString(),
+                        UserEmail = user.Email,
+                        Type = TYPE_ORDER,
+                        UserRole = ROLE_CUSTOMER
+                    };
+
+                    await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
+                    int result = await _orderDetailService.AddOrderDetailAsync(order, carts);
+
+                    if (result < 0)
+                    {
+                        throw new Exception();
+                    }
+                    result = await _moMoService.AddMoMoPaymentAsync(order.OrderId, orderId, payType, responseTime, amount, transId);
+
+                    if (result < 0)
+                    {
+                        throw new Exception();
+                    }
+
+                    await _cartService.RemoveCartItemByUserId(user.Id);
+
+                    var link = Url.ActionLink("OrderDetail", "Order",
+                                new { Area = AREA_ADMIN, OrderId = order.OrderId },
+                                Request.Scheme);
+
+                    var notificationType = await _notificationService.GetNotifycationByNameAsync(NOTIFICATION_ORDER);
+                    var notifications = new List<Notification>();
+                    var admins = await _accountService.GetAllAdminsAsync();
+                    var content = "Khách hàng " + user.FullName + " đã đặt hàng với mã đơn hàng là #" + order.OrderId;
+
+                    if (admins != null)
+                    {
+                        foreach (var item in admins)
+                        {
+                            var nofification = new Notification()
+                            {
+                                CreatedDate = DateTime.Now,
+                                Link = link,
+                                NotificationTypeId = notificationType.NotificationTypeId,
+                                Status = STATUS_NOT_SEEN_NOTIFICATION,
+                                UserId = item.Id,
+                                RecordId = order.OrderId,
+                                RoleSeen = ROLE_ADMIN,
+                                Content = content
+                            };
+
+                            notifications.Add(nofification);
+                        }
+                    }
+
+                    await _notificationService.AddNotificationAsync(notifications);
+
+                    transaction.Complete();
+
+                    ViewBag.OrderId = order.OrderId;
+
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_COUNT_NEW_ORDER);
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_TOP_PRODUCT);
+                    await _hubContext.Clients.Group(SIGNAL_GROUP_ADMIN).SendAsync(SIGNAL_NOTIFICATION_NEW_ORDER_ADMIN, link, DateTime.Now.ToShortDateString(), content);
+
+                    return View("MomoSuccess");
+                }
+                catch
+                {
+                    if (errorCode.Equals(ZERO))
+                    {
+                        await _moMoService.RefundMoneyAsync(orderId, transId, amount);
+                    }
+                }
+            }
+
+            return PartialView(ERROR_PAYMENT_PAGE);
+        }
+        #endregion
+
+        #region Cod Payment For Buy Now
+        public async Task<IActionResult> CodCheckoutBuyNow(OrderViewModel model, User user, decimal? total, CartItem cart)
+        {
+            if (user is null || total is null || cart is null)
+            {
+                return PartialView(ERROR_404_PAGE);
+            }
+
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            var order = await _orderService.AddOrderFromCartsAsync(cart, user, COD, model.DeliveryAddress);
+
+            if (order is null)
+            {
+                return PartialView(ERROR_PAYMENT_PAGE);
+            }
+
+            var workFlowHistory = new WorkflowHistory()
+            {
+                CurrentStatus = STATUS_CONFIRMED_PAYMENT,
+                NextStatus = STATUS_WAITING_CONFIRM,
+                CreatedBy = order.UserId,
+                CreatedDate = DateTime.Now,
+                FullName = user.FullName,
+                RecordId = order.OrderId.ToString(),
+                UserEmail = user.Email,
+                Type = TYPE_ORDER,
+                UserRole = ROLE_CUSTOMER
+            };
+
+            await _workflowHistoryService.AddWorkflowHistoryAsync(workFlowHistory);
+
+            int result = await _orderDetailService.AddOrderDetailAsync(order, cart);
+
+            if (result > 0)
+            {
+                transaction.Complete();
+
+                return RedirectToAction(COD_SUCCESS, new { orderId = order.OrderId });
+            }
+
+            return PartialView(ERROR_PAYMENT_PAGE);
+        }
+
         #endregion
 
         public async Task<int> RejectOrder(int? orderId, string content)

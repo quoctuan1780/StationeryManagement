@@ -25,26 +25,14 @@
                             case Constant.STATUS_WAITING_CONFIRM:
                                 {
                                     <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
-                                }
-                                break;
-                            case Constant.STATUS_PREPARING_GOODS:
-                                {
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
                                 }
                                 break;
-                            case Constant.STATUS_WAITING_PICK_GOODS:
+                            case Constant.STATUS_PREPARING_GOODS:
                                 {
                                     <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
@@ -52,7 +40,16 @@
                                     <div class="step"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
+                                }
+                                break;
+                            case Constant.STATUS_WAITING_PICK_GOODS:
+                                {
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
+                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
+                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
                                 }
                                 break;
                             case Constant.STATUS_ON_DELIVERY_GOODS:
@@ -61,9 +58,8 @@
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
+                                    <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
                                     <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
                                 }
                                 break;
                             case Constant.STATUS_RECEIVED_GOODS:
@@ -73,30 +69,7 @@
                                     <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
-                                }
-                                break;
-                            case Constant.STATUS_WAITING_EVALUATE:
-                                {
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
                                     <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
-                                }
-                                break;
-                            case Constant.STATUS_EVALUATED:
-                                {
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-ticket"></i> </span> <span class="text">Xác nhận đã thanh toán</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Chờ Admin xác nhận</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Đang chuẩn bị hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Chờ Shipper lấy hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đang giao hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Đã nhận hàng</span> </div>
-                                    <div class="step active"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Đánh giá</span> </div>
                                 }
                                 break;
                             case Constant.STATUS_PENDING_ADMIN_CANCED_ORDER:
@@ -133,7 +106,7 @@
                                         <div class="aside"><img src="~/images/product/@item.ProductDetail.Product.ProductImages.FirstOrDefault().Image" class="img-sm border"></div>
                                     }
                                     <figcaption class="info align-self-center">
-                                        <p class="title"><a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductDetail.ProductId">@item.ProductDetail.Product.ProductName</a> </p> <span class="text-muted">@item.Price VNĐ</span>
+                                        <p class="title"><a asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductDetail.ProductId">@item.ProductDetail.Product.ProductName</a> </p> <span class="text-muted">@String.Format("{0:n0}", item.Price) VNĐ</span>
                                     </figcaption>
                                 </figure>
                             </li>

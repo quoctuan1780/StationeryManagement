@@ -104,7 +104,9 @@ namespace Services.Services
 
         public async Task<User> GetUserAsync(ClaimsPrincipal user)
         {
-            return await _userManager.GetUserAsync(user);
+            var result = await _userManager.GetUserAsync(user);
+
+            return await GetUserByUserIdAsync(result.Id);
         }
 
         public async Task<User> GetUserByUserIdAsync(string userId)

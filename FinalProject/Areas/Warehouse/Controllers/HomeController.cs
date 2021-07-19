@@ -54,9 +54,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        public async Task Test()
+        public void Test()
         {
-            await _aprioriBackground.RecommandationBackground();
+            _aprioriBackground.RecommandationBackground();
         }
 
         public async Task<IActionResult> UpdateReceipt(int id)

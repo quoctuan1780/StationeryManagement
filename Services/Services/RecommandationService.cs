@@ -1,4 +1,5 @@
-﻿using Entities.Data;
+﻿using Accord.Math;
+using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interfacies;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Common.Constant;
 
 namespace Services.Services
 {
@@ -49,62 +51,123 @@ namespace Services.Services
 
         public async Task<List<ProductDetail>> GetRecommandtion(List<int> listInput)
         {
-            var listPro = new List<ProductDetail>();
             var rec = await _context.Recommendations.Include(x => x.RecommendationDetails).OrderBy(x => x.CreateDate).FirstOrDefaultAsync();
-            if (rec != null)
+
+            listInput.Sort();
+            var productDetailIds = new List<int>();
+            var arr = listInput.ToArray();
+            var strs = new List<string>();
+            FindSubsets(arr, strs);
+            strs.Remove(EMPTY);
+            var candidate = strs.Distinct().Select(x => x.Remove(x.Length - 1)).ToArray();
+
+            foreach(var item in rec.RecommendationDetails)
             {
+                var itemArr = item.Input.Split(SPACE).ToList();
+                itemArr.Remove(EMPTY);
+                var itemArrInt = itemArr.ConvertAll(x => int.Parse(x));
+                itemArrInt.Sort((a, b) => a.CompareTo(b));
+                var itemStr = string.Join(COMMA, itemArrInt);
 
-                var details = await _context.RecommendationDetails.Where(x => x.RecommendationId == rec.RecommendtionId).ToListAsync();
-
-                var listProductId = new List<string>();
-                List<string> listConvert = listInput.ConvertAll<string>(x => x.ToString());
-                var listRecommendationDetail = new List<RecommendationDetail>();
-
-                foreach (var num in listInput)
+                if (candidate.Any(x => x.Equals(itemStr)))
                 {
-
-                    var RecommendationDetail = new List<RecommendationDetail>();
-                    RecommendationDetail = details.Where(x => listConvert.Contains(x.Input)).ToList();
-                    listRecommendationDetail.AddRange(RecommendationDetail);
-
+                    var output = item.Output.Split(SPACE).ToList();
+                    output.Remove(EMPTY);
+                    productDetailIds.AddRange(output.ConvertAll(x => int.Parse(x)));
                 }
-                foreach (var item in listRecommendationDetail)
-                {
-                    listProductId.Add(item.Output);
-                }
-
-                listPro = _context.ProductDetails.Include(x => x.Product).Where(p => listProductId.Contains(p.ProductDetailId.ToString())).ToList();
-
-
             }
 
-            return listPro;
+            if (productDetailIds.Any())
+            {
+                return await _context.ProductDetails.Include(x => x.Product).Where(x => productDetailIds.Distinct().Contains(x.ProductDetailId)).ToListAsync();
+            }
+
+            return new List<ProductDetail>();
+        }
+
+        private static void FindSubsets(int[] arr, List<string> strs)
+        {
+            int[] sub = new int[arr.Length];
+            Find(arr, sub, 0, strs);
+        }
+
+        private static void Find(int[] arr, int[] sub, int p, List<string> strs)
+        {
+            //if the position variable p has iterated all elements   
+            if (p == arr.Length)
+            {
+                //mechanism to print non zero elements  
+                string s = string.Empty;
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (sub[i] != 0)
+                    {
+                        s += sub[i].ToString() + ",";
+                    }
+                }
+                strs.Add(s);
+            }
+            else
+            {
+                //For not selecting the element  
+                sub[p] = 0;
+                Find(arr, sub, p + 1, strs);
+
+                //For selecting the element  
+                sub[p] = arr[p];
+                Find(arr, sub, p + 1, strs);
+            }
         }
 
         public async Task<List<Product>> GetSuggestedProduct(List<int> listId)
         {
-            var support = await _context.ProductDetails.ToListAsync();
-            int minsupp = (int)Math.Round(support.Count * 0.5);
-            var productDetails = await GetRecommandtion(listId);
-            var productIds = new List<int>();
+            var result = await _context.RecommendationDetails.ToListAsync();
 
-            foreach (var item in productDetails)
+            var productDetailIdsSuggestsStr = new List<string>();
+
+            var productDetailIds = new List<int>();
+
+            foreach (var item in result)
             {
-                productIds.Add(item.ProductId);
+                var itemArr = item.Input.Split(SPACE);
+
+                if(listId.Any(x => itemArr.Contains(x.ToString())))
+                {
+                    productDetailIdsSuggestsStr.AddRange(item.Output.Split(SPACE));
+                }
             }
 
-            productIds = productIds.Distinct().ToList();
-
-            var listSuggested = await _context.Products.Include(x => x.ProductImages).Include(x => x.Category).Include(x => x.RatingDetails).Where(x => productIds.Contains(x.ProductId)).ToListAsync();
-
-            if (listSuggested != null)
+            if (productDetailIdsSuggestsStr.Any())
             {
-                var productDetail = await _context.ProductDetails.Include(x => x.Product).Where(x => x.ProductDetailId == listId[0]).FirstOrDefaultAsync();
-
-                return await _context.Products.Include(x => x.ProductImages).Include(x => x.Category).Include(x => x.RatingDetails).Where(x => x.CategoryId == productDetail.Product.CategoryId).ToListAsync();
+                foreach(var item in productDetailIdsSuggestsStr)
+                {
+                    var output = item.Split(SPACE).Where(x => x != EMPTY).Select(x => Convert.ToInt32(x));
+                    productDetailIds.AddRange(output);
+                }
             }
 
-            return listSuggested;
+            if (productDetailIds.Any())
+            {
+                return await _context.Products
+                    .AsNoTracking()
+                    .Include(x => x.ProductDetails)
+                    .Include(x => x.ProductImages)
+                    .Include(x => x.RatingDetails)
+                    .ThenInclude(x => x.Rating)
+                    .Where(x => x.ProductDetails.Any(x => productDetailIds.Contains(x.ProductDetailId)))
+                    .ToListAsync();
+            }
+
+            var product = await _context.Products.Include(x => x.ProductDetails).Where(x => x.ProductDetails.Select(x => x.ProductDetailId).Contains(listId.FirstOrDefault())).FirstOrDefaultAsync();
+
+            return await _context.Products
+                    .AsNoTracking()
+                    .Include(x => x.ProductDetails)
+                    .Include(x => x.ProductImages)
+                    .Include(x => x.RatingDetails)
+                    .ThenInclude(x => x.Rating)
+                    .Where(x => x.CategoryId == product.CategoryId)
+                    .ToListAsync();
         }
 
     }

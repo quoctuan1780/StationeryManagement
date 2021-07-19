@@ -103,5 +103,11 @@ namespace FinalProject.Controllers
 
             return ERROR_CODE_SYSTEM;
         }
+
+
+        public IActionResult Error()
+        {
+            return View();
+        }
     }
 }

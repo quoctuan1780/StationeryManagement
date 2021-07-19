@@ -8,6 +8,7 @@ namespace Services.Interfacies
     public interface IProductService
     {
         Task<IList<Product>> GetAllProductsAsync();
+        Task<IList<Product>> GetProductsAsync();
         Task<IList<Product>> GetAllProductsAsync(IList<int> productIds);
         Task<Product> AddProductAsync(Product product);
         Task<ProductDetail> GetProductDetailAsync(int id);

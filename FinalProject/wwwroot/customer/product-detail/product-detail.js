@@ -26,6 +26,12 @@ function setSizeQuantity(max, productId, color, origin, price) {
         "min": 1
     });
 
+    $('#price-show').children().remove();
+
+    var node = '<strong style="color: #ee4d2d" class="price">' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + 'VNĐ</strong>';
+
+    $('#price-show').append(node);
+
     $('#price-product-detail').val(price);
 
     $("#Quantity").val(1);
@@ -182,53 +188,31 @@ function submit(image, productName, isLogin) {
     }
 }
 
+function buyBow(isLogin) {
 
-function Rating(isLogin, productId) {
-    if (isLogin === 'False') {
-        showError('Bạn chưa đăng nhập vào hệ thống');
+    if (isLogin !== 'True') {
+        showError("Bạn chưa đăng nhập vào hệ thống");
+        return undefined;
     }
-    else {
-        var rating = $("input[type='radio'][name='ratings']:checked").val();
-        var ratingContent = $('#rating-content').val();
 
-        if (rating === undefined) {
-            showError('Bạn chưa chọn số sao đánh giá');
-        }
-        else if (ratingContent === '') {
-            showError('Bạn chưa nhập nội dung đánh giá');
-        }
-        else {
-            var loading = verticalTextColor();
-            loading;
-            $.ajax({
-                url: '/Rating/AddRating',
-                method: 'POST',
-                async: true,
-                data: { productId: productId, content: ratingContent, ratingId: rating },
-                success: function (data) {
-                    loading.out();
-                    switch (data) {
-                        case -4:
-                            showError('Không thêm được đánh giá này');
-                            break;
-                        case -5:
-                            showError('Bạn đã đánh giá sản phẩm này rồi');
-                            break;
-                        case 1:
-                            showSuccess('Thêm đánh giá thành công');
-                            break;
-                        case -99:
-                            showErrorSystem();
-                            break;
-                    }
-                },
-                error: function (code, err) {
-                    loading.out();
-                    showErrorSystem();
-                }
-            });
-        }
+    if (productIdOrder === -1) {
+        showError('Bạn chưa chọn loại sản phẩm muốn đặt', '380px');
+        return undefined;
     }
+
+    if (productIdOrder === '' || price === '') {
+        showError('Bạn chưa chọn loại sản phẩm muốn đặt', '380px');
+        return undefined;
+    }
+
+    var quantity = $('#Quantity').val();
+
+    if (quantity === '' || quantity === '0') {
+        showError('Bạn chưa nhập số lượng');
+        return undefined;
+    }
+
+    window.location.href = '/Order/BuyNow?productDetailId=' + productIdOrder + "&quantity=" + quantity;
 }
 
 function getMoreRating(productId) {
@@ -290,4 +274,63 @@ function getMoreRating(productId) {
             }
         });
     }
+}
+
+var $inp = $('#rating-input');
+$inp.rating({
+    min: 0,
+    max: 5,
+    step: 1,
+    size: 'lg',
+    showClear: false
+});
+
+function Rating(isLogin, productId) {
+    if (isLogin === 'False') {
+        showError('Bạn chưa đăng nhập vào hệ thống');
+        return undefined;
+    }
+
+    var rating = $("#rating-input").val();
+    var ratingContent = $('#rating-content').val();
+
+    if (rating === undefined || rating === '') {
+        showError('Bạn chưa chọn số sao đánh giá');
+        return undefined;
+    }
+
+    if (ratingContent === '') {
+        showError('Bạn chưa nhập nội dung đánh giá');
+        return undefined;
+    }
+
+    var loading = verticalTextColor();
+    loading;
+    $.ajax({
+        url: '/Rating/AddRating',
+        method: 'POST',
+        async: true,
+        data: { productId: productId, content: ratingContent, ratingId: parseInt(rating) },
+        success: function (data) {
+            loading.out();
+            switch (data) {
+                case -4:
+                    showError('Không thêm được đánh giá này');
+                    break;
+                case -5:
+                    showError('Bạn đã đánh giá sản phẩm này rồi');
+                    break;
+                case 1:
+                    showSuccess('Thêm đánh giá thành công');
+                    break;
+                case -99:
+                    showErrorSystem();
+                    break;
+            }
+        },
+        error: function (code, err) {
+            loading.out();
+            showErrorSystem();
+        }
+    });
 }

@@ -76,6 +76,42 @@ namespace Services.Services
             return order;
         }
 
+        public async Task<Order> AddOrderFromCartsAsync(CartItem cartItem, User user, string paymentMethod, string deliveryAddress)
+        {
+            var productDetailId = cartItem.ProductDetailId;
+            var productDetail = await _context.ProductDetails.FindAsync(productDetailId);
+
+            decimal total = 0;
+
+
+            productDetail.QuantityOrdered += cartItem.Quantity;
+            productDetail.RemainingQuantity -= cartItem.Quantity;
+
+            total += cartItem.Quantity * cartItem.Price;
+            
+
+            var province = deliveryAddress.Substring(deliveryAddress.LastIndexOf("-") + 2, deliveryAddress.Length - (deliveryAddress.LastIndexOf("-") + 2));
+
+            var order = new Order()
+            {
+                Address = deliveryAddress,
+                UserId = user.Id,
+                PaymentMethod = paymentMethod,
+                Status = STATUS_WAITING_CONFIRM,
+                OrderDate = DateTime.Now,
+                Total = total,
+                Province = province
+            };
+
+            await _context.Orders.AddAsync(order);
+
+            _context.ProductDetails.Update(productDetail);
+
+            await _context.SaveChangesAsync();
+
+            return order;
+        }
+
         public async Task<int> AdminConfirmOrderAsync(int orderId)
         {
             var order = await _context.Orders.Include(x => x.OrderDetails).Where(x => x.OrderId == orderId).FirstOrDefaultAsync();
@@ -125,7 +161,11 @@ namespace Services.Services
         {
             return await _context.Orders
                 .Include(x => x.MoMoPayment)
-                .Include(x => x.PayPalPayment).Where(x => x.UserId == userId).ToListAsync();
+                .Include(x => x.PayPalPayment)
+                .Include(x => x.OrderDetails)
+                .ThenInclude(x => x.ProductDetail)
+                .ThenInclude(x => x.Product)
+                .Where(x => x.UserId == userId).ToListAsync();
         }
 
         

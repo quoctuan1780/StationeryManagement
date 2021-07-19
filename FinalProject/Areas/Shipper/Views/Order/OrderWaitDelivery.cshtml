@@ -5,7 +5,7 @@
     var orders = ViewBag.Orders as IList<Entities.Models.Order>;
 
     var customers = ViewBag.Customers as IList<Entities.Models.User>;
-    var addresses = ViewBag.Addresses as IList<string>;
+    var addresses = ViewBag.Addresses as IList<Entities.Models.Province>;
 
     var query = Html.ViewContext.HttpContext.Request.Query;
 
@@ -49,20 +49,20 @@
                                             {
                                                 foreach (var item in addresses)
                                                 {
-                                                    <option value="@item">@item</option>
+                                                    <option value="@item.ProvinceName">@item.ProvinceName</option>
                                                 }
                                             }
                                             else
                                             {
                                                 foreach (var item in addresses)
                                                 {
-                                                    if (item.Equals(address))
+                                                    if (item.ProvinceName.Equals(address))
                                                     {
-                                                        <option value="@item" selected>@item</option>
+                                                        <option value="@item.ProvinceName" selected>@item.ProvinceName</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="@item">@item</option>
+                                                        <option value="@item.ProvinceName">@item.ProvinceName</option>
                                                     }
                                                 }
                                             }

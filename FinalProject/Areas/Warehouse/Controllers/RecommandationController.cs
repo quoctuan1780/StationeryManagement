@@ -32,9 +32,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private readonly IAccountService _accountService;
         private readonly INotificationService _notificationService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
-        static DateTime FromDate;
-        static DateTime ToDate;
-        static int Quantity;
+        private static DateTime FromDate;
+        private static DateTime ToDate;
+        private static int Quantity;
 
         public RecommandationController(IProductService productService, IReceiptService receiptService,
             IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, UserManager<User> userManager, IAccountService accountService, INotificationService notificationService, IWorkflowHistoryService workflowHistoryService)
@@ -54,6 +54,10 @@ namespace FinalProject.Areas.Warehouse.Controllers
         }
         public async Task<IActionResult> ViewRecommandation()
         {
+            FromDate = DateTime.MinValue;
+            ToDate = DateTime.MinValue;
+            Quantity = 0;
+
             ViewBag.ProductOutOfStock = await _productService.GetProductDetailsRunOutOfStockAsync();
             return View();
         }

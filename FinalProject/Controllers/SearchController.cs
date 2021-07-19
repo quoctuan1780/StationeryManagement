@@ -29,9 +29,9 @@ namespace FinalProject.Controllers
 
             return View();
         }
-        public string SearchAjax(string text)
+        public async Task<string> SearchAjax(string text)
         {
-            return JsonConvert.SerializeObject(_searchService.SearchAjaxAsync(text));
+            return await _searchService.SearchAjaxAsync(text);
         }
     }
 }

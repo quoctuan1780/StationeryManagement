@@ -13,6 +13,7 @@ namespace Services.Interfacies
         Task<int> UpdateOrderAsync(Order order);
         Task<string> ListPercentDeliveryAsync(); 
         Task<Order> AddOrderFromCartsAsync(IList<CartItem> cartItems, User user, string paymentMethod, string deliveryAddress);
+        Task<Order> AddOrderFromCartsAsync(CartItem cartItem, User user, string paymentMethod, string deliveryAddress);
         Task<Order> GetOrderByIdAsync(int orderId);
         Task<IList<Order>> GetOrdersByUserIdAsync(string userId);
         Task<IList<Order>> GetOrdersAsync();

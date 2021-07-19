@@ -160,7 +160,22 @@ namespace Services.Services
             }
         }
 
+        public async Task<HttpResponse> PayPalCreateOrder(string deliveryAddress, CartItem cart, User user, string host, bool debug = false)
+        {
+            try
+            {
+                var request = new OrdersCreateRequest();
+                request.Headers.Add(Constant.PAYPAL_HEADER_PREFER, Constant.PAYPAL_HEADER_RETURN);
+                request.RequestBody(BuildRequestBody(cart, user, host, deliveryAddress));
+                HttpResponse response = await Client().Execute(request);
 
+                return response;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public async Task<HttpResponse> PayPalCaptureOrder(string OrderId, bool debug = false)
         {
@@ -227,6 +242,104 @@ namespace Services.Services
             var response = await Client().Execute(request);
 
             return response;
+        }
+
+        private static OrderRequest BuildRequestBody(CartItem cart, User user, string host, string deliveryAddress)
+        {
+            var items = new List<Item>();
+
+            decimal total = 0;
+
+            
+            total += Math.Round((cart.Price / (decimal)Constant.EXCHANGE_RATE_USD), 2) * cart.Quantity;
+
+            items.Add(new Item()
+            {
+                Name = cart.ProductDetail.Product.ProductName,
+                Sku = Constant.PAYPAL_SKU,
+                UnitAmount = new Money
+                {
+                    CurrencyCode = Constant.CURRENCY_USE,
+                    Value = Math.Round((cart.Price / (decimal)Constant.EXCHANGE_RATE_USD), 2)
+                            .ToString().Replace(Constant.COMMA, Constant.DOT)
+                },
+                Tax = new Money
+                {
+                    CurrencyCode = Constant.CURRENCY_USE,
+                    Value = Constant.ZERO
+                },
+                Quantity = cart.Quantity.ToString(),
+                Category = Constant.PAYPAL_PHYSICAL_GOODS
+            });
+            
+
+            var orderRequest = new OrderRequest()
+            {
+                CheckoutPaymentIntent = Constant.PAYPAL_CAPTURE,
+
+                ApplicationContext = new ApplicationContext
+                {
+                    CancelUrl = $"{host}/Order/PayPalFail",
+                    ReturnUrl = $"{host}/Order/PayPalSuccessBuyNow?deliveryAddress={deliveryAddress}",
+                },
+                PurchaseUnits = new List<PurchaseUnitRequest>
+                {
+                    new PurchaseUnitRequest{
+
+                        AmountWithBreakdown = new AmountWithBreakdown
+                        {
+                            CurrencyCode = Constant.CURRENCY_USE,
+                            Value = total.ToString().Replace(Constant.COMMA, Constant.DOT),
+                            AmountBreakdown = new AmountBreakdown
+                            {
+                                ItemTotal = new Money
+                                {
+                                    CurrencyCode = Constant.CURRENCY_USE,
+                                    Value = total.ToString()
+                                },
+                                Shipping = new Money
+                                {
+                                    CurrencyCode = Constant.CURRENCY_USE,
+                                    Value = Constant.ZERO
+                                },
+                                Handling = new Money
+                                {
+                                    CurrencyCode = Constant.CURRENCY_USE,
+                                    Value = Constant.ZERO
+                                },
+                                TaxTotal = new Money
+                                {
+                                    CurrencyCode = Constant.CURRENCY_USE,
+                                    Value = Constant.ZERO
+                                },
+                                ShippingDiscount = new Money
+                                {
+                                    CurrencyCode = Constant.CURRENCY_USE,
+                                    Value = Constant.ZERO
+                                }
+                            }
+                        },
+                        Items = items,
+                        ShippingDetail = new ShippingDetail
+                        {
+                            Name = new Name
+                            {
+                                FullName = user.FullName
+                            },
+                            AddressPortable = new AddressPortable
+                            {
+                                AddressLine1 = HttpUtility.UrlDecode(deliveryAddress),
+                                AdminArea2 = Constant.VN_NAME,
+                                AdminArea1 = Constant.VN_CODE,
+                                PostalCode = Constant.ZERO,
+                                CountryCode = Constant.VN_CODE
+                            }
+                        }
+                    }
+                }
+            };
+
+            return orderRequest;
         }
     }
 }

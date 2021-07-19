@@ -16,6 +16,41 @@
     <link rel="stylesheet" type="text/css" href="~/style/css/paypal/paypal.css" />
     <title>@ViewData["Title"]</title>
     <style>
+        #swal2-content{
+            font-size: 18px;
+        }
+        body {
+            font-size: 18px;
+        }
+
+        a{
+            font-size: 18px
+        }
+
+        .btn{
+            font-size: 18px;
+        }
+
+        .hidden-search{
+            display: none;
+        }
+
+        #box-footer .box-footer-middle .block .block-content ul li a, #box-footer .box-footer-middle .block .block-content ul li span{
+            font-size: 16px;
+        }
+
+        #box-footer .box-footer-bottom .box-left ul li a{
+            font-size: 16px;
+        }
+
+        .menu .mega-menu-01 .menu-01 .content-col li a{
+            font-size: 16px;
+        }
+
+        .menu .box-main-menu .main-menu ul li a {
+            font-size: 14px;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -75,9 +110,76 @@
     <script type="text/javascript" src="~/lib/signalr/dist/browser/signalr.js"></script>
     @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
     {
-    <script src="~/customer/init/init-time.js"></script>
-    <script src="~/customer/init/init-signalr.js"></script>
+        <script src="~/customer/init/init-time.js"></script>
+        <script src="~/customer/init/init-signalr.js"></script>
     }
+    <script>
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        function focusSearch() {
+            $("#background-search").removeClass('hidden-search');
+            $('#search-block').removeClass('hidden-search');
+        };
+
+        $('#background-search').on('click', function () {
+            $("#background-search").addClass('hidden-search');
+            $('#search-block').addClass('hidden-search');
+        });
+
+        $('#txtSearch').keyup(delay(function (e) {
+            var input = $(this).val();
+            if (input.trim() === '') {
+                $('#search-content').children().remove();
+                return undefined;
+            }
+
+            $.ajax({
+                url: '/Search/SearchAjax',
+                method: 'GET',
+                async: true,
+                data: { text: input },
+                success: function (data) {
+                    var node = ``;
+                    $('#search-content').children().remove();
+                    if (data === '[]') {
+                        node += `<li style="padding: 10px; text-align: center">
+                                    <p>Không có kết quả nào</p>
+                                </li>`;
+                        $('#search-content').append(node);
+                        return undefined;
+                    }
+                    var listProduct = JSON.parse(data);
+                    $.each(listProduct, function (k, v) {
+                        node += `<li style="padding: 10px">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                    <a href="/Product/Detail/` + v.ProductId + `">` + v.ProductName + `</a>
+                                    <hr />
+                                </li>`;
+                    });
+                    node += `<li style="padding: 10px; text-align: center; ">
+                                <button type="button" onclick="submitSearchAjax()" style="border: none; background: white">Xem thêm</button>
+                            </li>`;
+                    $('#search-content').append(node);
+                },
+                error: function (code, err) {
+                    console.error(err);
+                }
+            })
+        }, 500));
+
+        function submitSearchAjax() {
+            $('#search-ajax').submit();
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

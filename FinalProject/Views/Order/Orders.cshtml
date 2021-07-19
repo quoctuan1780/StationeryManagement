@@ -27,10 +27,12 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Id đơn hàng</th>
+                                    <th>Mã đơn hàng</th>
                                     <th>Ngày đặt</th>
-                                    <th>Địa chỉ giao hàng</th>
-                                    <th>Hình thức thanh toán</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Tổng sản phẩm</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -38,24 +40,30 @@
                                 @foreach (var item in Model)
                                 {
                                     <tr>
-                                        <td>@item.OrderId</td>
+                                        <td><a style="color: dodgerblue" asp-action="OrderInfo" asp-controller="Order" asp-route-orderId="@item.OrderId"> @item.OrderId </a></td>
 
-                                        <td>@item.OrderDate</td>
+                                        <td>@item.OrderDate.ToShortDateString()</td>
                                         <td>
-                                            @item.Address
+                                            @item.OrderDetails.FirstOrDefault().ProductDetail.Product.ProductName
                                         </td>
-                                        <td>@item.PaymentMethod</td>
                                         <td>
-                                            <div style="display: flex;">
-                                                <a class="btn btn-danger" asp-action="OrderInfo" asp-controller="Order" asp-route-orderId="@item.OrderId"> Xem đơn hàng </a>
-                                                @if (!item.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER) && !item.Status.Equals(STATUS_CANCELED))
+                                            @item.OrderDetails.Count
+                                        </td>
+                                        <td>
+                                            @String.Format("{0:n0}", item.Total)
+                                        </td>
+                                        <td>@item.Status</td>
+                                        <td>
+                                            
+                                                
+                                            @if (!item.Status.Equals(STATUS_PENDING_ADMIN_CANCED_ORDER) && !item.Status.Equals(STATUS_CANCELED))
+                                            {
+                                                if (item.Status.Equals(STATUS_WAITING_CONFIRM))
                                                 {
-                                                    if (item.Status.Equals(STATUS_WAITING_CONFIRM))
-                                                    {
-                                                        <button class="btn btn-danger px-2" type="button" onclick="rejectOrder(this, @item.OrderId)"> Hủy đơn hàng </button>
-                                                    }
+                                                    <button class="btn btn-danger px-2" type="button" onclick="rejectOrder(this, @item.OrderId)"> Hủy đơn hàng </button>
                                                 }
-                                            </div>
+                                            }
+                                            
                                         </td>
                                     </tr>
                                 }

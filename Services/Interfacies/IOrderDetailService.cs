@@ -7,5 +7,6 @@ namespace Services.Interfacies
     public interface IOrderDetailService
     {
         Task<int> AddOrderDetailAsync(Order order, IList<CartItem> cartItems);
+        Task<int> AddOrderDetailAsync(Order order, CartItem cartItem);
     }
 }

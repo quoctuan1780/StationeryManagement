@@ -49,14 +49,25 @@
                             <div class="col-xl-2">
                                 <a href="/Home/Index"><img src="~/images/logo/StationeryStore.png" alt="" width="200" height="200" /></a>
                             </div>
-                            <div class="col-xl-4" style="margin-left: auto; margin-right: 5px">
-                                <form asp-action="Search" asp-controller="Search" method="post">
+                            <div class="col-xl-4" style="margin-left: auto; margin-right: 5px; position: relative">
+                                <div class="hidden-search" id="background-search" style="position: fixed;top: 0;width: 100%;right: 0px;background: rgba(255, 255, 255, 0.6);height: 100%;"></div>
+                                <form asp-action="Search" asp-controller="Search" method="post" id="search-ajax">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Search" id="txtSearch" name="text" onchange="Search()" />
+                                        <input type="text" autocomplete="off" class="form-control" placeholder="Search" id="txtSearch" name="text" onfocus="focusSearch()" />
                                         <div class="input-group-btn">
                                             <button class="btn btn-primary" type="submit">
                                                 <span class="glyphicon glyphicon-search"></span>
                                             </button>
+                                        </div>
+                                    </div>
+                                    <div id="search-block" class="shadow bg-white rounded hidden-search" style="background-color: white; width: 100%; position: absolute; box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px">
+                                        <div class="block" style="padding-left: 5px">
+                                            <h5 style="padding: 5px">Kết quả</h5>
+                                            <hr />
+                                            <div style="overflow-y: scroll; max-height: 300px; min-height: 150px">
+                                                <ul id="search-content">
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -96,17 +107,17 @@
 
                                                     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                                                         <div style="display: flex; flex-direction: column; align-content: center; padding: 5px">
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="Information">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-controller="Account" asp-action="Information">
                                                                 <i class="glyphicon glyphicon-user"></i> Thông tin cá nhân
                                                             </a>
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="ChangePassword">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-controller="Account" asp-action="ChangePassword">
                                                                 <i class="glyphicon glyphicon-cog"></i> Đổi mật khẩu
                                                             </a>
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-action="Orders" asp-controller="Order" asp-route-userId="@user.Id">
                                                                 <i class="glyphicon glyphicon-list-alt"></i> Thông tin đơn hàng
                                                             </a>
                                                             <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="Logout">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-controller="Account" asp-action="Logout">
                                                                 <i class="glyphicon glyphicon-log-out"></i> Đăng xuất
                                                             </a>
                                                         </div>
@@ -131,10 +142,10 @@
                                                     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                                                         <div style="display: flex; flex-direction: column; align-content: center; padding: 5px">
                                                             <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Home" asp-action="Dashboard" asp-area="Admin">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-controller="Home" asp-action="Dashboard" asp-area="Admin">
                                                                 <i class="glyphicon glyphicon-log-out"></i> Trở về trang quản trị
                                                             </a>
-                                                            <a class="dropdown-item" style="font-size: 12px" asp-controller="Account" asp-action="Logout" asp-area="Admin">
+                                                            <a class="dropdown-item" style="font-size: 15px" asp-controller="Account" asp-action="Logout" asp-area="Admin">
                                                                 <i class="glyphicon glyphicon-log-out"></i> Đăng xuất
                                                             </a>
                                                         </div>
@@ -142,10 +153,10 @@
                                                 }
                                                 else
                                                 {
-                                                    <a class="top-link-login btn btn-outline-primary" asp-controller="Account" asp-action="Login" asp-route-urlBack="@urlBack">
+                                                    <a class="top-link-login btn btn-outline-primary" style="font-size: 15px" asp-controller="Account" asp-action="Login" asp-route-urlBack="@urlBack">
                                                         <i class="glyphicon glyphicon-log-in"></i> Đăng nhập
                                                     </a>
-                                                    <a class="top-link-login btn btn-outline-primary" asp-controller="Account" asp-action="Register" asp-route-urlBack="@urlBack">
+                                                    <a class="top-link-login btn btn-outline-primary" style="font-size: 15px" asp-controller="Account" asp-action="Register" asp-route-urlBack="@urlBack">
                                                         <i class="glyphicon glyphicon-plus"></i> Tạo tài khoản
                                                     </a>
                                                 }
@@ -251,7 +262,3 @@
     </div>
 </div>
 <a href="/Product/Detail?Id="></a>
-@section Scripts
-{
-    <script src="~/customer/search/search-heaser.js"></script>
-}

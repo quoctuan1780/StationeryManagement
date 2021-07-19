@@ -120,6 +120,9 @@ namespace Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsBuyNow")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsStocking")
                         .HasColumnType("bit");
 

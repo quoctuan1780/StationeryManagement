@@ -20,13 +20,15 @@ namespace FinalProject.Areas.Shipper.Controllers
     [Authorize(Roles = ROLE_SHIPPER, AuthenticationSchemes = ROLE_SHIPPER)]
     public class OrderController : Controller
     {
+        private readonly IAddressService _addressService;
         private readonly IOrderService _orderService;
         private readonly IAccountService _accountService;
         private readonly IWorkflowHistoryService _workflowHistoryService;
         private readonly IHubContext<SignalServer> _hubContext;
 
-        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext)
+        public OrderController(IOrderService orderService, IWorkflowHistoryService workflowHistoryService, IAccountService accountService, IHubContext<SignalServer> hubContext, IAddressService addressService)
         {
+            _addressService = addressService;
             _orderService = orderService;
             _accountService = accountService;
             _workflowHistoryService = workflowHistoryService;
@@ -34,7 +36,7 @@ namespace FinalProject.Areas.Shipper.Controllers
         }
         public async Task<IActionResult> OrderWaitPick(string customer = EMPTY, string orderDate = EMPTY, string address = EMPTY)
         {
-            ViewBag.Addresses = await _orderService.GetAddressinOrdersAsync();
+            ViewBag.Addresses = await _addressService.GetProvincesAsync();
             ViewBag.Customers = await _accountService.GetAllCustomersAsync();
 
             if (customer != EMPTY || orderDate !=  EMPTY || address != EMPTY)
@@ -119,7 +121,7 @@ namespace FinalProject.Areas.Shipper.Controllers
         public async Task<IActionResult> OrderWaitDelivery(string customer = EMPTY, string pickedOrderDate = EMPTY, string address = EMPTY)
         {
             ViewBag.Customers = await _accountService.GetAllCustomersAsync();
-            ViewBag.Addresses = await _orderService.GetAddressinOrdersAsync();
+            ViewBag.Addresses = await _addressService.GetProvincesAsync();
             var user = await _accountService.GetUserAsync(User);
             if (customer != EMPTY || pickedOrderDate != EMPTY || address != EMPTY)
             {

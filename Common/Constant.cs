@@ -9,6 +9,8 @@ namespace Common
 
         public const string EMPTY = "";
 
+        public const string SPACE = " ";
+
         public const string DOUBLE_EMPTY = "  ";
 
         public const string IMAGE_LINK = "wwwroot/images/product/";

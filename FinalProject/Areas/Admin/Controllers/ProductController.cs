@@ -34,7 +34,7 @@ namespace FinalProject.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewBag.Products = await _productService.GetAllProductsAsync();
+            ViewBag.Products = await _productService.GetProductsAsync();
 
             return View();
         }
