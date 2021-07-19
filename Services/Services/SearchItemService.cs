@@ -1,12 +1,11 @@
 ﻿using Entities.Data;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Services.Interfacies;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -20,17 +19,39 @@ namespace Services.Services
             _context = context;
         }
 
-        public Task<IList<Product>> SearchAjaxAsync(string text)
+        public async Task<string> SearchAjaxAsync(string text)
         {
-            int price;
-            if(int.TryParse(text,  out price))
+            var resultJson = new List<JObject>();
+            if (int.TryParse(text, out int price))
             {
-                return SearchByPriceAsync(price);
+                var result = await SearchByPriceAsync(price);
+
+                if (result != null && result.Any())
+                {
+                    foreach (var item in result.Take(10))
+                    {
+                        resultJson.Add(new JObject
+                        {
+                            { "ProductId", item.ProductId },
+                            { "ProductName", item.ProductName }
+                        });
+                    }
+                }
             }
             else
             {
-                return SearchByTextAsync(text);
+                var result = await SearchByTextAsync(text);
+                foreach (var item in result.Take(10))
+                {
+                    resultJson.Add(new JObject
+                        {
+                            { "ProductId", item.ProductId },
+                            { "ProductName", item.ProductName }
+                        });
+                }
             }
+
+            return JsonConvert.SerializeObject(resultJson);
         }
 
         public async Task<IList<Product>> SearchByPriceAsync(int? price)
@@ -41,13 +62,13 @@ namespace Services.Services
 
         public async Task<IList<Product>> SearchByTextAsync(string text)
         {
-            if(text != null)
+            if (text != null)
             {
                 var listByCategory = await _context.Products.Include(x => x.RatingDetails).ThenInclude(x => x.Rating).Include(x => x.Category).Include(x => x.ProductImages).
-                    Where(x => (x.Category.CategoryName.Contains(text) ||  x.ProductName.Contains(text)))
+                    Where(x => (x.Category.CategoryName.Contains(text) || x.ProductName.Contains(text)))
                     .OrderBy(x => x.Price).ToListAsync();
-                
-                
+
+
                 return listByCategory;
 
             }

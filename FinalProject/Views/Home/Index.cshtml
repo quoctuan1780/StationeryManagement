@@ -220,7 +220,7 @@
                                                         }
                                                     </div>
                                                 </div>
-                                                <div style="height: 110px">
+                                                <div style="height: 130px">
                                                     @if (item.RatingDetails != null && item.RatingDetails.Any())
                                                     {
                                                         var rating = from rd in item.RatingDetails
@@ -232,7 +232,7 @@
                                                                      };
 
                                                         var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
-                                                        <span>Đánh giá</span>
+                                                        <span>Đánh giá (@item.RatingDetails.Count)</span>
                                                         <div class="ratings" style="margin-bottom: .5rem;">
                                                             <div class="rating-box">
                                                                 <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">

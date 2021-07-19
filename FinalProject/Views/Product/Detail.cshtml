@@ -19,7 +19,12 @@
 
     var isRoleAdmin = User.IsInRole(ROLE_ADMIN);
 
-    var user = await accountService.GetUserAsync(User);
+    Entities.Models.User user = null;
+
+    if (isLogin || isRoleAdmin)
+    {
+        user = await accountService.GetUserAsync(User);
+    }
 
     var comments = ViewBag.Comments as IList<Entities.Models.Comment>;
 
@@ -123,7 +128,14 @@
                 line-height: 30px;
                 font-weight: 800;
             }
+
+        .rating-container{
+            padding-left: 3rem;
+        }
     </style>
+    <link href="~/customer/rating/css/star-rating.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="~/customer/rating/themes/krajee-fas/theme.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="~/customer/rating/themes/krajee-svg/theme.css" media="all" rel="stylesheet" type="text/css" />
 }
 
 
@@ -207,7 +219,7 @@
                                     </li>
                                 </ul>
                                 <p>
-                                    <h3 class="mr-1">
+                                    <h3 class="mr-1" id="price-show">
                                         Giá:
                                         @if (product.SalePrice > 0)
                                         {
@@ -319,6 +331,11 @@
                                     onclick="submit('@image', '@product.ProductName', '@isLogin')">
                                 <i class="icon-shopping-cart" style="padding-right: 1rem;"></i>Thêm vào giỏ hàng
                             </button>
+
+                            <button type="button" class="btn btn-cart btn-md mr-1 mb-2 btn-danger"
+                                    onclick="buyBow('@isLogin')">
+                                Mua ngay
+                            </button>
                         </div>
                     </div>
 
@@ -328,7 +345,6 @@
                             <li><a data-toggle="tab" href="#menu1">Màu sắc / kích thước</a></li>
                             <li><a data-toggle="tab" href="#menu2">Đánh giá</a></li>
                             <li><a data-toggle="tab" href="#menu3">Bình Luận</a></li>
-                            <li><a data-toggle="tab" href="#menu4">Xem đánh giá khác</a></li>
                         </ul>
 
                         <div class="tab-content">
@@ -355,57 +371,225 @@
                                 </table>
                             </div>
                             <div id="menu2" class="tab-pane fade">
-                                <div class="form-add">
-                                    <h3>Chọn số sao</h3>
-                                    <div class="fieldset">
-                                        <span id="input-message-box"></span>
-                                        <table class="data-table review-summary-table ratings" id="product-review-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>&nbsp;</th>
-                                                    <th>
-                                                        <div class="rating-box">
-                                                            <span class="rating nobr" style="width:20%;"></span>
-                                                        </div>
-                                                    </th>
-                                                    <th>
-                                                        <div class="rating-box">
-                                                            <span class="rating nobr" style="width:40%;"></span>
-                                                        </div>
-                                                    </th>
-                                                    <th>
-                                                        <div class="rating-box">
-                                                            <span class="rating nobr" style="width:60%;"></span>
-                                                        </div>
-                                                    </th>
-                                                    <th>
-                                                        <div class="rating-box">
-                                                            <span class="rating nobr" style="width:80%;"></span>
-                                                        </div>
-                                                    </th>
-                                                    <th>
-                                                        <div class="rating-box">
-                                                            <span class="rating nobr" style="width:100%;"></span>
-                                                        </div>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th>Đánh giá</th>
-                                                    @if (ratings != null)
-                                                    {
-                                                        foreach (var item in ratings)
-                                                        {
-                                                            <td class="value"><label for="Rating"><input type="radio" name="ratings" value="@item.RatingId" class="radio" /></label></td>
-                                                        }
-                                                    }
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                <h3>
+                                    Tổng số đánh giá:
+                                    @{
+                                        var totalRates = ratingsDetail != null ? ratingsDetail.Count : 0;
+                                    }
+                                    @totalRates
+                                </h3>
 
-                                        <br />
+                                <div class="form-add" style="display: flex; flex-direction: row; flex-wrap: wrap;">
+                                    <div class="rating-container theme-krajee-svg rating-lg rating-animate">
+                                        <div class="rating-stars" tabindex="0">
+                                            <span class="empty-stars">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                            <span class="filled-stars"
+                                                  style="width: 100%;">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (ratingsDetail != null)
+                                        {
+                                            <span style="font-size: 18px">
+                                                (@ratingsDetail.Where(x => x.Rating.RatingId == 1).Count())
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size: 18px">
+                                                (0)
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="rating-container theme-krajee-svg rating-lg rating-animate">
+                                        <div class="rating-stars" tabindex="0">
+                                            <span class="empty-stars">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                            <span class="filled-stars"
+                                                  style="width: 100%;">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (ratingsDetail != null)
+                                        {
+                                            <span style="font-size: 18px">
+                                                (@ratingsDetail.Where(x => x.Rating.RatingId == 2).Count())
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size: 18px">
+                                                (0)
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="rating-container theme-krajee-svg rating-lg rating-animate">
+                                        <div class="rating-stars" tabindex="0">
+                                            <span class="empty-stars">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                            <span class="filled-stars"
+                                                  style="width: 100%;">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (ratingsDetail != null)
+                                        {
+                                            <span style="font-size: 18px">
+                                                (@ratingsDetail.Where(x => x.Rating.RatingId == 3).Count())
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size: 18px">
+                                                (0)
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="rating-container theme-krajee-svg rating-lg rating-animate">
+                                        <div class="rating-stars" tabindex="0">
+                                            <span class="empty-stars">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Four Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                            <span class="filled-stars"
+                                                  style="width: 100%;">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Four Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (ratingsDetail != null)
+                                        {
+                                            <span style="font-size: 18px">
+                                                (@ratingsDetail.Where(x => x.Rating.RatingId == 4).Count())
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size: 18px">
+                                                (0)
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="rating-container theme-krajee-svg rating-lg rating-animate">
+                                        <div class="rating-stars" tabindex="0">
+                                            <span class="empty-stars">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Four Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Five Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                            <span class="filled-stars"
+                                                  style="width: 100%;">
+                                                <span class="star" title="One Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Two Star">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Three Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Four Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                                <span class="star" title="Five Stars">
+                                                    <span class="krajee-icon krajee-icon-star"></span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (ratingsDetail != null)
+                                        {
+                                            <span style="font-size: 18px">
+                                                (@ratingsDetail.Where(x => x.Rating.RatingId == 5).Count())
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size: 18px">
+                                                (0)
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <h3>Đánh giá</h3>
+                                @if (isLogin)
+                                {
+                                    <div class="form-add">
                                         <ul class="form-list">
+                                            <li>
+                                                <input id="rating-input" type="text" title="" />
+                                            </li>
                                             <li>
                                                 <label for="review_field" class="required"> Nhập nội dung đánh giá của bạn </label>
                                                 <div class="input-box">
@@ -413,17 +597,72 @@
                                                 </div>
                                             </li>
                                         </ul>
+
+                                        <div class="buttons-set">
+                                            <button type="button" title="Gửi đánh giá" class="button" onclick="Rating('@isLogin', @product.ProductId)"><span>Gửi đánh giá</span></button>
+                                        </div>
                                     </div>
-                                    <div class="buttons-set">
-                                        <button type="button" title="Gửi đánh giá" class="button" onclick="Rating('@isLogin', @product.ProductId)"><span>Gửi đánh giá</span></button>
-                                    </div>
-                                </div>
-                                @if (!isLogin)
+                                }
+                                else
                                 {
                                     <div style="text-align: center">
                                         <h1>Vui lòng đăng nhập để đánh giá sản phẩm</h1>
                                     </div>
                                 }
+                                <hr />
+                                <div class="container bootstrap snippets bootdey">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="blog-comment">
+                                                <h3 class="text-success">Các đánh giá khác</h3>
+                                                <hr />
+                                                <ul class="rating" id="rating">
+                                                    @if (ratingsDetail != null)
+                                                    {
+                                                        for (int i = 0; i < ratingsDetail.Count; i++)
+                                                        {
+                                                            <li class="clearfix">
+                                                                <div class="comment-block">
+                                                                    @if (ratingsDetail[i].User.Image != null)
+                                                                    {
+                                                                        <img src="~/images/user/@ratingsDetail[i].User.Email/@ratingsDetail[i].User.Image" class="avatar" alt="">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img src="~/images/user/avatar.png" class="avatar" alt="">
+                                                                    }
+                                                                    <div class="post-comments">
+                                                                        @{
+                                                                            var rating = Math.Ceiling((double)ratingsDetail[i].Rating.RatingNumber / 5 * 100);
+                                                                        }
+                                                                        <p class="meta">
+                                                                            @ratingsDetail[i].RatingDate.Date.ToShortDateString() <a href="javascript:void(0)">@ratingsDetail[i].User.FullName </a>
+                                                                        </p>
+                                                                        <div class="meta" style="display: inline-block">
+                                                                            <span style="float: left">Đánh giá:</span>
+                                                                            <div class="rating-box"><span class="rating nobr" style="width:@rating%;"></span></div>
+                                                                        </div>
+                                                                        <p>
+                                                                            @ratingsDetail[i].Content
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <div style="display: flex; justify-content: center">
+                                                <input type="hidden" id="skip-product" value="@skip" />
+                                                <button type="button" class="btn btn-primary btn-lg button"
+                                                        data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Tải dữ liệu..."
+                                                        onclick="getMoreRating(@product.ProductId)">
+                                                    Xem thêm...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div id="menu3" class="tab-pane fade">
                                 <div class="container bootstrap snippets bootdey">
@@ -577,61 +816,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="menu4" class="tab-pane fade">
-                                <div class="container bootstrap snippets bootdey">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="blog-comment">
-                                                <h3 class="text-success">Các đánh giá</h3>
-                                                <hr />
-                                                <ul class="rating" id="rating">
-                                                    @if (ratingsDetail != null)
-                                                    {
-                                                        for (int i = 0; i < ratingsDetail.Count; i++)
-                                                        {
-                                                            <li class="clearfix">
-                                                                <div class="comment-block">
-                                                                    @if (ratingsDetail[i].User.Image != null)
-                                                                    {
-                                                                        <img src="~/images/user/@ratingsDetail[i].User.Email/@ratingsDetail[i].User.Image" class="avatar" alt="">
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <img src="~/images/user/avatar.png" class="avatar" alt="">
-                                                                    }
-                                                                    <div class="post-comments">
-                                                                        @{
-                                                                            var rating = Math.Ceiling((double)ratingsDetail[i].Rating.RatingNumber / 5 * 100);
-                                                                        }
-                                                                        <p class="meta">
-                                                                            @ratingsDetail[i].RatingDate.Date.ToShortDateString() <a href="javascript:void(0)">@ratingsDetail[i].User.FullName </a>
-                                                                        </p>
-                                                                        <div class="meta" style="display: inline-block">
-                                                                            <span style="float: left">Đánh giá:</span>
-                                                                            <div class="rating-box"><span class="rating nobr" style="width:@rating%;"></span></div>
-                                                                        </div>
-                                                                        <p>
-                                                                            @ratingsDetail[i].Content
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        }
-                                                    }
-                                                </ul>
-                                            </div>
-                                            <div style="display: flex; justify-content: center">
-                                                <input type="hidden" id="skip-product" value="@skip" />
-                                                <button type="button" class="btn btn-primary btn-lg button"
-                                                        data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Tải dữ liệu..."
-                                                        onclick="getMoreRating(@product.ProductId)">
-                                                    Xem thêm...
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -642,178 +826,112 @@
     <h2>Sản phẩm tương tự</h2>
     @if (Model != null && Model.Any())
     {
-        @*<div>
-                <div class="block vt-slider vt-slider7">
-                    <div class="slider-inner">
-                        <div class="container-slider">
-                            <div class="products-grid">
-                                @foreach (var item in suggest)
+<div class="col-lg-12">
+    @foreach (var item in Model)
+    {
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-9">
+            <div class="products-grid">
+                <div class="item">
+                    <div class="item-wrap">
+                        <div class="item-image">
+                            <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
+                                @if (!(item.ProductImages.FirstOrDefault() is null))
                                 {
-                                    <div class="item">
-                                        <div class="item-wrap">
-                                            <div class="item-image">
-                                                <a class="product-image no-touch" href="#" title="@item.ProductName">
-                                                    @if (item.ProductImages != null && item.ProductImages.Any())
-                                                    {
-                                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault()" alt="@item.ProductName" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <img class="first_image" src="~/images/product/img_1.jpg" alt="@item.ProductName" />
-                                                    }
-                                                </a>
-                                                <div class="item-btn">
-                                                    <div class="box-inner">
-                                                        <a title="Add to wishlist" href="#" class="link-wishlist">&nbsp;</a>
-                                                        <a title="Add to compare" href="#" class="link-compare">&nbsp;</a>
-                                                        <span class="qview">
-                                                            <a class="vt_quickview_handler" data-original-title="Quick View" data-placement="left" data-toggle="tooltip" href="#"><span>Quick View</span></a>
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <div class="pro-info">
-                                                <div class="pro-inner">
-                                                    <div class="pro-title product-name"><a href="#">@item.ProductName</a></div>
-                                                    <div class="pro-content">
-                                                        <div class="wrap-price">
-                                                            <div class="price-box">
-                                                                <span class="regular-price">
-                                                                    <span class="price">@item.Price</span>
-                                                                </span>
-                                                                <p class="special-price">
-                                                                    <span class="price">Sale Price</span>
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="ratings">
-                                                            <div class="rating-box">
-                                                                <div class="rating" style="width:80%"></div>
-                                                            </div>
-                                                            <span class="amount"><a href="#">1(s)</a></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <a title="Add to cart" class="add-to-cart" href="#">Thêm vào giỏ</a>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                        <div class="navslider">
-                            <a class="prev" href="#">Prev</a>
-                            <a class="next" href="#">Next</a>
-                        </div>
-
-                    </div>
-                </div>
-            </div>*@
-        foreach (var item in Model)
-        {
-            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-9">
-                <div class="products-grid">
-                    <div class="item">
-                        <div class="item-wrap">
-                            <div class="item-image">
-                                <a class="product-image no-touch" href="#" title="Ipad Air and iOS7">
-                                    @if (!(item.ProductImages.FirstOrDefault() is null))
                                     {
-                                        {
-                                            <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
-                                                 alt="Product demo" width="228" height="228" style="width: 100%;" />
-                                        }
-                                        image = item.ProductImages.FirstOrDefault().Image;
-                                    }
-                                    else
-                                    {
-                                        <img class="first_image" src="~/images/product/img_1.jpg"
+                                        <img class="first_image" src="~/images/product/@item.ProductImages.FirstOrDefault().Image"
                                              alt="Product demo" width="228" height="228" style="width: 100%;" />
                                     }
-                                </a>
-                                <div class="item-btn">
-                                    <div class="box-inner">
-                                        <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
-                                        <span class="qview">
-                                            <a class="vt_quickview_handler" data-original-title="Quick View"
-                                               data-placement="left" data-toggle="tooltip"
-                                               asp-controller="Product" asp-action="Detail"
-                                               asp-route-id="@item.ProductId">
-                                                <span>
-                                                    Quick
-                                                    View
-                                                </span>
-                                            </a>
-                                        </span>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="pro-info">
-                                <div class="pro-inner">
-                                    <div class="pro-title product-name">
-                                        <a asp-controller="Product" asp-action="Detail"
+                                    image = item.ProductImages.FirstOrDefault().Image;
+                                }
+                                else
+                                {
+                                    <img class="first_image" src="~/images/product/img_1.jpg"
+                                         alt="Product demo" width="228" height="228" style="width: 100%;" />
+                                }
+                            </a>
+                            <div class="item-btn">
+                                <div class="box-inner">
+                                    <a title="Add to wishlist" class="link-wishlist">&nbsp;</a>
+                                    <span class="qview">
+                                        <a class="vt_quickview_handler" data-original-title="Quick View"
+                                           data-placement="left" data-toggle="tooltip"
+                                           asp-controller="Product" asp-action="Detail"
                                            asp-route-id="@item.ProductId">
-                                            @item.ProductName
+                                            <span>
+                                                Quick
+                                                View
+                                            </span>
                                         </a>
-                                    </div>
-                                    <div class="pro-content">
-                                        <div class="wrap-price">
-                                            <div class="price-box" style="min-height: 60px">
-                                                @if (item.SalePrice > 0)
-                                                {
-                                                    <span class="regular-price">
-                                                        <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
-                                                    </span>
-                                                    <p class="special-price">
-                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
-                                                    </p>
-                                                }
-                                                else
-                                                {
-                                                    <span class="regular-price">
-                                                        <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
-                                                    </span>
-                                                }
-                                            </div>
-                                        </div>
-                                        <div style="height: 110px">
-                                            @if (item.RatingDetails != null && item.RatingDetails.Any())
-                                            {
-                                                var rating = from rd in item.RatingDetails
-                                                             group rd by rd.RatingId into g
-                                                             select new
-                                                             {
-                                                                 RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
-                                                                 UserRating = g.Count()
-                                                             };
+                                    </span>
+                                </div>
+                            </div>
 
-                                                var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
-                                                <span>Đánh giá</span>
-                                                <div class="ratings" style="margin-bottom: .5rem;">
-                                                    <div class="rating-box">
-                                                        <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">
-                                                        </div>
-                                                    </div>
-                                                </div>
+                        </div>
+                        <div class="pro-info">
+                            <div class="pro-inner">
+                                <div class="pro-title product-name">
+                                    <a asp-controller="Product" asp-action="Detail"
+                                       asp-route-id="@item.ProductId">
+                                        @item.ProductName
+                                    </a>
+                                </div>
+                                <div class="pro-content">
+                                    <div class="wrap-price">
+                                        <div class="price-box" style="min-height: 60px">
+                                            @if (item.SalePrice > 0)
+                                            {
+                                                <span class="regular-price">
+                                                    <span class="price">@String.Format("{0:n0}", item.SalePrice) VNĐ</span>
+                                                </span>
+                                                <p class="special-price">
+                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                </p>
                                             }
                                             else
                                             {
-                                                <p>Chưa có đánh giá</p>
+                                                <span class="regular-price">
+                                                    <span class="price">@String.Format("{0:n0}", item.Price) VNĐ</span>
+                                                </span>
                                             }
                                         </div>
                                     </div>
+                                    <div style="height: 130px">
+                                        @if (item.RatingDetails != null && item.RatingDetails.Any())
+                                        {
+                                            var rating = from rd in item.RatingDetails
+                                                         group rd by rd.RatingId into g
+                                                         select new
+                                                         {
+                                                             RatingStar = g.Select(x => x.Rating.RatingNumber).FirstOrDefault(),
+                                                             UserRating = g.Count()
+                                                         };
+
+                                            var ratingTotal = (double)rating.Sum(x => x.UserRating * x.RatingStar) / rating.Sum(x => x.UserRating) / 5 * 100;
+                                            <span>Đánh giá (@rating.Count())</span>
+                                            <div class="ratings" style="margin-bottom: .5rem;">
+                                                <div class="rating-box">
+                                                    <div class="rating" style="width:@Math.Ceiling(ratingTotal)%">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p>Chưa có đánh giá</p>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                            <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
-                                Chi tiết sản phẩm
-                            </a>
                         </div>
+                        <a class="add-to-cart" asp-action="Detail" asp-controller="Product" asp-route-id="@item.ProductId">
+                            Chi tiết sản phẩm
+                        </a>
                     </div>
                 </div>
             </div>
-        }
+        </div>
+    }
+</div>
         <div style="text-align: center">
             @Html.PagedListPager((IPagedList)Model, page => Url.Action("Detail", new { id = product.ProductId, page }),
                 new X.PagedList.Web.Common.PagedListRenderOptions
@@ -827,6 +945,9 @@
     }
 </div>
 @section Scripts{
+    <script src="~/customer/rating/js/star-rating.js" type="text/javascript"></script>
+    <script src="~/customer/rating/themes/krajee-fas/theme.js" type="text/javascript"></script>
+    <script src="~/customer/rating/themes/krajee-svg/theme.js" type="text/javascript"></script>
     <script type="text/javascript" src="~/customer/cart/quantity-in-cart.js"></script>
     <script type="text/javascript" src="~/js/notify/notify-helper.js"></script>
     <script type="text/javascript" src="~/customer/product-detail/product-detail-validation.js"></script>

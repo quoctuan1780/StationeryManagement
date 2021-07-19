@@ -96,6 +96,56 @@ namespace Services.Services
             return responseFromMomo;
         }
 
+        public async Task<string> MoMoCheckoutAsync(string total, string orderInfo, string email, string hostName)
+        {
+
+            string endPoint = _configuration[Constant.MOMO_LINK];
+
+            string partnerCode = _configuration[Constant.MOMO_PARTNER_CODE];
+            string accessKey = _configuration[Constant.MOMO_ACCESS_KEY];
+            string serectkey = _configuration[Constant.MOMO_SECRET_KEY];
+            string returnUrl = $"{hostName}/Order/MoMoSuccessBuyNow";
+            string notifyUrl = $"{hostName}/Order/MoMoFail";
+            string amount = total;
+            string orderId = Guid.NewGuid().ToString();
+            string requestId = Guid.NewGuid().ToString();
+            string extraData = email;
+
+            string rawHash = Constant.MOMO_SHA_PARTNER_CODE +
+                partnerCode + Constant.MOMO_SHA_ACCESS_KEY +
+                accessKey + Constant.MOMO_SHA_REQUEST_ID +
+                requestId + Constant.MOMO_SHA_AMOUNT +
+                amount + Constant.MOMO_SHA_ORDER_ID +
+                orderId + Constant.MOMO_SHA_ORDER_INFO +
+                orderInfo + Constant.MOMO_SHA_RETURN_URL +
+                returnUrl + Constant.MOMO_SHA_NOTIFY_URL +
+                notifyUrl + Constant.MOMO_SHA_EXTRA_DATA +
+                extraData;
+
+            //sign signature SHA256
+            string signature = SignSHA256(rawHash, serectkey);
+
+            //build body json request
+            var message = new JObject
+            {
+                { Constant.MOMO_JSON_PARTNER_CODE, partnerCode },
+                { Constant.MOMO_JSON_ACCESS_KEY, accessKey },
+                { Constant.MOMO_JSON_REQUEST_ID, requestId },
+                { Constant.MOMO_JSON_AMOUNT, amount },
+                { Constant.MOMO_JSON_ORDER_ID, orderId },
+                { Constant.MOMO_JSON_ORDER_INFO, orderInfo },
+                { Constant.MOMO_JSON_RETURN_URL, returnUrl },
+                { Constant.MOMO_JSON_NOTIFY_URL, notifyUrl },
+                { Constant.MOMO_JSON_EXTRA_DATA, extraData },
+                { Constant.MOMO_JSON_REQUEST_TYPE, Constant.MOMO_JSON_CAPTURE_MOMO_WALLET },
+                { Constant.MOMO_JSON_SIGNATURE, signature }
+            };
+
+            //Before sign HMAC SHA256 signature
+            string responseFromMomo = await SendPaymentRequestAsync(endPoint, message.ToString());
+
+            return responseFromMomo;
+        }
 
         public async Task<string> SendPaymentRequestAsync(string endpoint, string postJsonString)
         {

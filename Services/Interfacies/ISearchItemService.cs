@@ -1,8 +1,5 @@
 ﻿using Entities.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Interfacies
@@ -11,6 +8,6 @@ namespace Services.Interfacies
     {
         Task<IList<Product>> SearchByPriceAsync(int? price);
         Task<IList<Product>> SearchByTextAsync(string text);
-        Task<IList<Product>> SearchAjaxAsync(string text);
+        Task<string> SearchAjaxAsync(string text);
     }
 }

@@ -12,5 +12,6 @@ namespace Entities.Models
         public decimal Price { get; set; }
         public DateTime CreateDate { get; set; }
         public bool IsStocking { get; set; } = true;
+        public bool IsBuyNow { get; set; } = false;
     }
 }

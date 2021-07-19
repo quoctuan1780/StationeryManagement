@@ -19,6 +19,8 @@ namespace Services.Interfacies
 
         Task<HttpResponse> PayPalCreateOrder(string deliveryAddress, IList<CartItem> carts, User user, string host, bool debug = false);
 
+        Task<HttpResponse> PayPalCreateOrder(string deliveryAddress, CartItem cart, User user, string host, bool debug = false);
+
         Task<HttpResponse> PayPalCaptureOrder(string OrderId, bool debug = false);
 
         Task<int> AddPayPalPaymentAsync(int orderId, string token, string payerID, string link, string captureId);

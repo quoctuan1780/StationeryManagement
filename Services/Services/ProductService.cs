@@ -454,5 +454,15 @@ namespace Services.Services
 
             return new List<Product>();
         }
+
+        public async Task<IList<Product>> GetProductsAsync()
+        {
+            return await _context.Products
+                .Include(x => x.Category)
+                .Include(x => x.ProductImages)
+                .Include(x => x.RatingDetails)
+                .ThenInclude(x => x.Rating)
+                .ToListAsync();
+        }
     }
 }

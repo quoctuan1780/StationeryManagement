@@ -60,4 +60,19 @@
     <Folder Include="wwwroot\js\cart\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\customer\rating\js\star-rating.js" />
+    <None Include="wwwroot\customer\rating\js\star-rating.min.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-fas\theme.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-fas\theme.min.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-fa\theme.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-fa\theme.min.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-gly\theme.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-gly\theme.min.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-svg\theme.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-svg\theme.min.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-uni\theme.js" />
+    <None Include="wwwroot\customer\rating\themes\krajee-uni\theme.min.js" />
+  </ItemGroup>
+
 </Project>
