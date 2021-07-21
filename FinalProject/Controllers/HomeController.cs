@@ -15,9 +15,10 @@ namespace FinalProject.Controllers
         private readonly IAccountService _accountService;
         private readonly INotificationService _notificationService;
         private readonly IUserConnectionService _userConnectionService;
+        private readonly IAprioriBackground _aprioriBackground;
         private readonly IRecommendationService _recommandationService;
 
-        public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService, IAccountService accountService, INotificationService notificationService, IUserConnectionService userConnectionService)
+        public HomeController(IProductService productService, IRecommendationService recommendationService, ISaleService saleService, IAccountService accountService, INotificationService notificationService, IUserConnectionService userConnectionService, IAprioriBackground aprioriBackground)
         {
             _productService = productService;
             _recommandationService = recommendationService;
@@ -25,13 +26,15 @@ namespace FinalProject.Controllers
             _accountService = accountService;
             _notificationService = notificationService;
             _userConnectionService = userConnectionService;
+            _aprioriBackground = aprioriBackground;
         }
 
         public async Task<IActionResult> Index()
         {
             var connectionId = Request.HttpContext.Connection.RemoteIpAddress;
-
-            if(await _userConnectionService.IsExistsConnectionIdAsync(connectionId.ToString()))
+            //await _recommandationService.AddOrderDetail();
+            await _aprioriBackground.RecommandationBackground();
+            if (await _userConnectionService.IsExistsConnectionIdAsync(connectionId.ToString()))
             {
                 ViewBag.ProductsSuggest = await _productService.GetProductSuggestAsync(connectionId.ToString());
             }
@@ -41,6 +44,8 @@ namespace FinalProject.Controllers
             ViewBag.Sales = await _saleService.GetThreeSalesImageAsync();
 
             ViewBag.Top10ProductsHot = await _productService.GetTop10ProductHotAsync();
+
+
 
             return View();
         }

@@ -8,6 +8,6 @@ namespace Services.Interfacies
 {
     public interface IAprioriBackground
     {
-        Task RecommandationBackground();
+        Task RecommandationBackground(DateTime? fromDate = null, DateTime? toDate = null, double minsup = 0.15, double minconf = 0.81);
     }
 }
