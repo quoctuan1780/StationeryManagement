@@ -60,7 +60,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
       shell: powershell
       run: |
-        .\.sonar\scanner\dotnet-sonarscanner begin /o:"quoctuan1780" /k:"quoctuan1780_StationeryManagement" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        .\.sonar\scanner\dotnet-sonarscanner begin /o:"${{ secrets.SONAR_OGANIZATION }}" /k:"${{ secrets.SONAR_PROJECT_ID }}" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
         dotnet build
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
