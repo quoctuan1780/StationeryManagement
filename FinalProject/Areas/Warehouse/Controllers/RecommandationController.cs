@@ -24,6 +24,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
     [Authorize(Roles = ROLE_WAREHOUSE_MANAGER, AuthenticationSchemes = ROLE_WAREHOUSE_MANAGER)]
     public class RecommandationController : Controller
     {
+        private readonly IAprioriBackground _aprioriBackground;
         private readonly IHubContext<SignalServer> _hubContext;
         private readonly IProductService _productService;
         private readonly IReceiptService _receiptService;
@@ -37,8 +38,9 @@ namespace FinalProject.Areas.Warehouse.Controllers
         private static int Quantity;
 
         public RecommandationController(IProductService productService, IReceiptService receiptService,
-            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, UserManager<User> userManager, IAccountService accountService, INotificationService notificationService, IWorkflowHistoryService workflowHistoryService)
+            IRecommendationService recommendationService, IHubContext<SignalServer> hubContext, UserManager<User> userManager, IAccountService accountService, INotificationService notificationService, IWorkflowHistoryService workflowHistoryService, IAprioriBackground aprioriBackground)
         {
+            _aprioriBackground = aprioriBackground;
             _hubContext = hubContext;
             _productService = productService;
             _receiptService = receiptService;
@@ -62,8 +64,21 @@ namespace FinalProject.Areas.Warehouse.Controllers
             return View();
         }
 
-        public async Task<string> GetRecommandation()
+        public async Task<string> GetRecommandation(double? minSupport, double? minConfident)
         {
+
+            if (minSupport != null && minConfident != null)
+            {
+                await _aprioriBackground.RecommandationBackground(FromDate, ToDate, minSupport.Value / 100, minConfident.Value / 100);
+            }
+            else if(minSupport != null)
+            {
+                await _aprioriBackground.RecommandationBackground(FromDate, ToDate, minsup: minSupport.Value / 100);
+            }
+            else if(minConfident != null)
+            {
+                await _aprioriBackground.RecommandationBackground(FromDate, ToDate, minconf: minConfident.Value / 100);
+            }
             var listId = await _productService.ListBestSellerProduct(FromDate, ToDate, Quantity);
             var result = await _recommendationService.GetRecommandtion(listId);
             var recommandation = new List<JObject>();
@@ -108,7 +123,7 @@ namespace FinalProject.Areas.Warehouse.Controllers
         public async Task<IActionResult> AutoCreateReceiptRequest()
         {
             ViewBag.ListProduct = await _recommendationService.GetListProductDetailForCreateRRAsync(FromDate, ToDate, Quantity);
-            
+
             return View();
         }
 

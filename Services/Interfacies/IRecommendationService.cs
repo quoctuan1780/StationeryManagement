@@ -12,5 +12,7 @@ namespace Services.Interfacies
         public Task<List<ProductDetail>> GetListProductDetailForCreateRRAsync(DateTime fromDate, DateTime toDate, int quantity);
 
         public Task<List<Product>> GetSuggestedProduct(List<int> listId);
+
+        Task<int> AddOrderDetail();
     }
 }

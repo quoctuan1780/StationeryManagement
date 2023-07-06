@@ -19,12 +19,33 @@ namespace Services.Services
             _context = shopDbContext;
         }
 
-        public async Task RecommandationBackground()
+        public async Task RecommandationBackground(DateTime? fromDate = null, DateTime? toDate = null, double minsup = 0.65, double minconf = 0.81)
         {
-            var orders = _context.Orders.ToList();
-            int minsupp = (int)Math.Round(orders.Count * 0.3);
-            string[][] dataset = PrepareData();
-            AssociationRule<string>[] results = Rule(dataset, minsupp, 0.81);
+            var orders = new List<Order>();
+            if (fromDate != null)
+            {
+                if (toDate != null)
+                {
+                    orders = await _context.Orders.Include(x => x.OrderDetails).ThenInclude(x => x.ProductDetail)
+                       .Where(x => x.OrderDate >= fromDate && x.OrderDate <= toDate)
+                               .OrderBy(x => x.OrderId).ToListAsync();
+                }
+                else
+                {
+                    orders = await _context.Orders.Include(x => x.OrderDetails).ThenInclude(x => x.ProductDetail)
+                        .Where(x => x.OrderDate >= fromDate && x.OrderDate <= DateTime.Now)
+                                .OrderBy(x => x.OrderId).ToListAsync();
+                }
+            }
+            else
+            {
+                orders = await _context.Orders.Include(x => x.OrderDetails).ThenInclude(x => x.ProductDetail)
+                                .Where(x => x.OrderDate.Month == DateTime.Today.Month &&
+                                x.OrderDate.Year == DateTime.Today.Year).OrderBy(x => x.OrderId).ToListAsync();
+            }
+            int minsupp = (int)Math.Round(minsup * orders.Count);
+            string[][] dataset = PrepareData(orders);
+            AssociationRule<string>[] results = Rule(dataset, minsupp, minconf);
             var listProducts = new List<ProductDetail>();
 
             if (results == null)
@@ -40,20 +61,20 @@ namespace Services.Services
 
             listProductDetailids = listProductDetailids.Distinct().ToList();
 
-            listProducts = _context.ProductDetails.Include(x => x.Product).Where(x => listProductDetailids.Contains(x.ProductDetailId.ToString())).ToList();
+            listProducts = await _context.ProductDetails.Include(x => x.Product).Where(x => listProductDetailids.Contains(x.ProductDetailId.ToString())).ToListAsync();
 
             if (listProducts.Any())
             {
-                AddRecommandationAsync(results);
+                await AddRecommandationAsync(results);
             }
         }
 
 
-        private int AddRecommandationAsync(AssociationRule<string>[] rules)
+        private async Task<int> AddRecommandationAsync(AssociationRule<string>[] rules)
         {
             using var transaction = new TransactionScope();
-            try
-            {
+            //try
+            //{
                 _context.RecommendationDetails.RemoveRange();
                 _context.Recommendations.RemoveRange();
 
@@ -64,13 +85,13 @@ namespace Services.Services
 
                 _context.Recommendations.Add(ReccomdHeader);
 
-                var resultAdd = _context.SaveChanges();
+                var resultAdd = await _context.SaveChangesAsync();
 
                 if (resultAdd < 0)
                 {
                     return 0;
                 }
-                
+
                 var listRecommandLine = new List<RecommendationDetail>();
 
                 foreach (var item in rules)
@@ -100,25 +121,25 @@ namespace Services.Services
 
                 _context.AddRange(listRecommandLine);
 
-                int count = _context.SaveChanges();
+                int count = await _context.SaveChangesAsync();
 
                 if (count > 0)
                 {
                     transaction.Complete();
                     return count;
                 }
-                
-            }
-            catch
-            {
-            }
+
+            //}
+            //catch
+            //{
+               
+            //}
 
             return 0;
         }
 
-        private string[][] PrepareData()
+        private string[][] PrepareData(List<Order> listOrder)
         {
-            var listOrder =  _context.Orders.Include(x => x.OrderDetails).ThenInclude(x => x.ProductDetail).OrderBy(x => x.OrderId).ToList();
 
             int currentOrderId = listOrder.FirstOrDefault().OrderId;
             var dataset = new List<string[]>();
@@ -130,7 +151,7 @@ namespace Services.Services
                 return null;
             }
 
-            
+
             dataset.Clear();
             foreach (var item in listOrder)
             {
@@ -144,7 +165,7 @@ namespace Services.Services
                 }
                 dataset.Add(list.ToArray());
                 list.Clear();
-            
+
             }
 
             return dataset.ToArray();

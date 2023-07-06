@@ -170,5 +170,41 @@ namespace Services.Services
                     .ToListAsync();
         }
 
+        public async Task<int> AddOrderDetail()
+        {
+            var orders =  await _context.Orders.Include(x => x.OrderDetails).ToListAsync();
+            var listProduct = await _context.ProductDetails.ToListAsync();
+            var listProductId = new List<int>();
+            foreach(var item in listProduct)
+            {
+                listProductId.Add(item.ProductDetailId);
+            }
+            Random random = new Random();
+            foreach(var item in orders)
+            {
+                for(int i = 0; i < 5;  i++ )
+                {
+                    int a = random.Next(listProductId.Count);
+                    if(item.OrderDetails.Where(x => x.ProductDetailId == listProductId[a]).FirstOrDefault() == null)
+                    {
+                        var detail = new OrderDetail()
+                        {
+                            OrderId = item.OrderId,
+                            ProductDetailId = listProductId[a],
+                            Quantity = 1,
+                            Price = listProduct.Where(x => x.ProductDetailId == listProductId[a]).FirstOrDefault().Price,
+                            Status = Common.Constant.STATUS_RECEIVED_GOODS
+
+                        };
+                        _context.OrderDetails.Add(detail);
+                    }
+                    
+                }
+            }
+            await _context.SaveChangesAsync();
+
+
+            return 0;
+        }
     }
 }
