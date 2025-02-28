@@ -33,7 +33,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          dotnet sonarscanner begin /k:"quoctuan1780-1" /o:"quoctuan1780-1" /d:sonar.host.url="$env:SONAR_HOST_URL" /d:sonar.login="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          dotnet sonarscanner begin /k:"quoctuan1780-1_statornery" /o:"quoctuan1780-1" /d:sonar.host.url="$env:SONAR_HOST_URL" /d:sonar.login="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: 🛠️ Build project
         run: dotnet build --no-restore --configuration Release
