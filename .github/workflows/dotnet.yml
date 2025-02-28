@@ -17,11 +17,8 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔧 Install OpenSSL 1.1
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update
-          sudo apt-get install -y libssl1.1
+      - name: 🔧 Install OpenSSL
+        run: sudo apt-get update && sudo apt-get install -y libssl1.1
 
       - name: 🔧 Setup .NET Core 5
         uses: actions/setup-dotnet@v4
