@@ -25,14 +25,21 @@ jobs:
       - name: 📦 Restore dependencies
         run: dotnet restore
 
+      - name: 🚀 Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: 📊 Start SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          dotnet sonarscanner begin /k:"quoctuan1780-1" /d:sonar.host.url="$env:SONAR_HOST_URL" /d:sonar.login="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
       - name: 🛠️ Build project
         run: dotnet build --no-restore --configuration Release
 
       - name: 🧪 Run tests
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx
-
-      - name: 🚀 Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
 
       - name: 🔧 Ensure .sonarqube directory exists
         run: mkdir -p .sonarqube/conf
@@ -42,7 +49,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          dotnet sonarscanner begin /k:"quoctuan1780-1" /d:sonar.host.url="$env:SONAR_HOST_URL" /d:sonar.login="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-          dotnet build --no-restore --configuration Release
-          dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx
           dotnet sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
